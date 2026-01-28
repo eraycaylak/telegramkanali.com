@@ -21,21 +21,27 @@ export default function ChannelCard({ channel }: ChannelCardProps) {
         setLoading(true);
 
         try {
-            const { data, error } = await supabase.functions.invoke('vote', {
-                body: { channel_id: channel.id, vote_type: type }
-            });
+            // Optimistic update
+            const oldScore = score;
+            const oldVote = userVote;
+            setScore(s => s + type); // Immediately update UI
+            setUserVote(type);
 
-            if (error) throw error;
+            // Using Server Action instead of Edge Function
+            const { voteChannel } = await import('@/app/actions/vote');
+            const res = await voteChannel(channel.id, type);
 
-            if (data.error) {
-                alert(data.error);
-            } else {
-                setScore(data.newScore);
-                setUserVote(type);
+            if (res.error) {
+                // Revert if error
+                setScore(oldScore);
+                setUserVote(oldVote);
+                alert(res.error);
+            } else if (res.success && res.newScore !== undefined) {
+                setScore(res.newScore);
             }
         } catch (err) {
             console.error('Vote error:', err);
-            alert('Oy verirken bir hata oluştu veya daha önce oy kullandınız.');
+            alert('Oy verirken hata oluştu.');
         } finally {
             setLoading(false);
         }
@@ -87,7 +93,7 @@ export default function ChannelCard({ channel }: ChannelCardProps) {
                                 ))}
                             </div>
                             <h3 className="font-bold text-gray-900 text-lg group-hover:text-blue-600 transition-colors">
-                                <Link href={`/kanallar/${channel.slug}`}>
+                                <Link href={`/${channel.slug}`}>
                                     <span className="absolute inset-0 z-10" />
                                     {channel.name}
                                 </Link>
@@ -115,7 +121,7 @@ export default function ChannelCard({ channel }: ChannelCardProps) {
             {/* Footer Actions */}
             <div className="mt-auto px-5 pb-5 pt-0 relative z-20 pl-16">
                 <Link
-                    href={`/kanallar/${channel.slug}`}
+                    href={`/${channel.slug}`}
                     className="flex w-full items-center justify-center rounded-lg bg-green-600 py-2.5 text-center text-sm font-bold text-white shadow-sm transition-colors hover:bg-green-700"
                 >
                     İNCELE

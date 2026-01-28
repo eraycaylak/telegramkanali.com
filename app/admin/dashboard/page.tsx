@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus, Trash2, Edit, Search, LogOut, ExternalLink } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
-import { deleteChannel, addChannel } from '@/app/actions/admin';
+import { deleteChannel, addChannel, updateChannel, scrapeTelegramInfo } from '@/app/actions/admin';
 import { Channel, Category } from '@/lib/types';
 
 export default function AdminDashboard() {
@@ -23,6 +23,8 @@ export default function AdminDashboard() {
         category_id: '',
         image: ''
     });
+    const [editingId, setEditingId] = useState<string | null>(null);
+    const [scraping, setScraping] = useState(false);
 
     // Protect Route
     useEffect(() => {
@@ -50,23 +52,59 @@ export default function AdminDashboard() {
         if (confirm('Bu kanalı silmek istediğinize emin misiniz?')) {
             const res = await deleteChannel(id);
             if (res.success) {
-                fetchData(); // Refresh list
+                fetchData();
             } else {
                 alert('Hata: ' + res.error);
             }
         }
     };
 
-    const handleAddSubmit = async (e: React.FormEvent) => {
+    const handleEdit = (channel: Channel) => {
+        setFormData({
+            name: channel.name,
+            description: channel.description || '',
+            join_link: channel.join_link,
+            category_id: channel.category_id || '',
+            image: channel.image || ''
+        });
+        setEditingId(channel.id);
+        setIsModalOpen(true);
+    };
+
+    const handleScrape = async () => {
+        if (!formData.join_link) return alert('Lütfen önce linki girin.');
+        setScraping(true);
+        const res = await scrapeTelegramInfo(formData.join_link);
+        if (res.error) {
+            alert(res.error);
+        } else {
+            setFormData(prev => ({
+                ...prev,
+                name: res.title || prev.name,
+                description: res.description || prev.description,
+                image: res.image || prev.image
+            }));
+        }
+        setScraping(false);
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         const data = new FormData();
         Object.entries(formData).forEach(([key, value]) => data.append(key, value));
 
-        const res = await addChannel(data);
+        let res;
+        if (editingId) {
+            res = await updateChannel(editingId, data);
+        } else {
+            res = await addChannel(data);
+        }
+
         if (res.success) {
-            alert('Kanal eklendi!');
+            alert(editingId ? 'Kanal güncellendi!' : 'Kanal eklendi!');
             setIsModalOpen(false);
             setFormData({ name: '', description: '', join_link: '', category_id: '', image: '' });
+            setEditingId(null);
             fetchData();
         } else {
             alert('Hata: ' + res.error);
@@ -126,7 +164,9 @@ export default function AdminDashboard() {
                                         </td>
                                         <td className="p-4 text-center font-bold text-gray-700">{channel.score || 0}</td>
                                         <td className="p-4 text-right flex items-center justify-end gap-2">
-                                            <button className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition" title="Düzenle">
+                                            <button
+                                                onClick={() => handleEdit(channel)}
+                                                className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition" title="Düzenle">
                                                 <Edit size={18} />
                                             </button>
                                             <button
@@ -145,12 +185,28 @@ export default function AdminDashboard() {
                 </div>
             </div>
 
-            {/* Add Modal */}
+            {/* Modal */}
             {isModalOpen && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm p-4">
                     <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6 animate-in fade-in zoom-in duration-200">
-                        <h2 className="text-xl font-bold mb-4">Yeni Kanal Ekle</h2>
-                        <form onSubmit={handleAddSubmit} className="space-y-4">
+                        <h2 className="text-xl font-bold mb-4">{editingId ? 'Kanalı Düzenle' : 'Yeni Kanal Ekle'}</h2>
+                        <form onSubmit={handleSubmit} className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Katılma Linki (t.me/...)</label>
+                                <div className="flex gap-2">
+                                    <input required className="w-full border rounded-lg p-2" value={formData.join_link} onChange={e => setFormData({ ...formData, join_link: e.target.value })} />
+                                    <button
+                                        type="button"
+                                        onClick={handleScrape}
+                                        disabled={scraping}
+                                        className="bg-purple-100 text-purple-700 px-3 py-2 rounded-lg text-sm font-medium hover:bg-purple-200 disabled:opacity-50 whitespace-nowrap"
+                                    >
+                                        {scraping ? 'Çekiliyor...' : 'Otomatik Çek'}
+                                    </button>
+                                </div>
+                                <p className="text-xs text-gray-500 mt-1">Önce linki yapıştırıp "Otomatik Çek" diyebilirsiniz.</p>
+                            </div>
+
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Kanal Adı</label>
                                 <input required className="w-full border rounded-lg p-2" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} />
@@ -167,17 +223,16 @@ export default function AdminDashboard() {
                                 </select>
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Katılma Linki (t.me/...)</label>
-                                <input required className="w-full border rounded-lg p-2" value={formData.join_link} onChange={e => setFormData({ ...formData, join_link: e.target.value })} />
-                            </div>
-                            <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Görsel URL (Logo Linki)</label>
-                                <input className="w-full border rounded-lg p-2" placeholder="https://..." value={formData.image} onChange={e => setFormData({ ...formData, image: e.target.value })} />
+                                <div className="flex gap-2">
+                                    <input className="w-full border rounded-lg p-2" placeholder="https://..." value={formData.image} onChange={e => setFormData({ ...formData, image: e.target.value })} />
+                                    {formData.image && <img src={formData.image} alt="Önizleme" className="w-10 h-10 rounded-lg object-cover border" />}
+                                </div>
                             </div>
 
                             <div className="flex justify-end gap-3 mt-6">
-                                <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">İptal</button>
-                                <button type="submit" className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Kaydet</button>
+                                <button type="button" onClick={() => { setIsModalOpen(false); setEditingId(null); setFormData({ name: '', description: '', join_link: '', category_id: '', image: '' }); }} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">İptal</button>
+                                <button type="submit" className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">{editingId ? 'Güncelle' : 'Kaydet'}</button>
                             </div>
                         </form>
                     </div>

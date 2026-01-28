@@ -114,3 +114,61 @@ export async function addCategory(formData: FormData) {
         return { error: 'Failed to add category' };
     }
 }
+
+export async function updateChannel(id: string, formData: FormData) {
+    if (!id) return { error: 'ID required' };
+
+    const name = formData.get('name') as string;
+    const description = formData.get('description') as string;
+    const join_link = formData.get('join_link') as string;
+    const category_id = formData.get('category_id') as string;
+    const image = formData.get('image') as string;
+    // Don't change slug on edit to preserve SEO, or handle carefully. For now, keep it.
+
+    try {
+        const { error } = await adminClient
+            .from('channels')
+            .update({
+                name,
+                description,
+                join_link,
+                category_id,
+                image: image || '/images/logo.png',
+            })
+            .eq('id', id);
+
+        if (error) throw error;
+
+        revalidatePath('/');
+        revalidatePath('/admin/dashboard');
+        return { success: true };
+    } catch (error) {
+        console.error('Update error:', error);
+        return { error: 'Failed to update channel' };
+    }
+}
+
+export async function scrapeTelegramInfo(url: string) {
+    if (!url.includes('t.me/')) return { error: 'Geçersiz Telegram linki' };
+
+    try {
+        // Use t.me/s/channelname for preview which is SSR'd
+        const previewUrl = url.replace('t.me/', 't.me/s/');
+        const res = await fetch(previewUrl);
+        const html = await res.text();
+
+        // Simple regex scraping (robust enough for Telegram's standard meta tags)
+        const titleMatch = html.match(/<meta property="og:title" content="([^"]*)"/);
+        const descMatch = html.match(/<meta property="og:description" content="([^"]*)"/);
+        const imageMatch = html.match(/<meta property="og:image" content="([^"]*)"/);
+
+        return {
+            title: titleMatch ? titleMatch[1] : '',
+            description: descMatch ? descMatch[1] : '',
+            image: imageMatch ? imageMatch[1] : ''
+        };
+    } catch (error) {
+        console.error('Scrape error:', error);
+        return { error: 'Telegram verisi çekilemedi' };
+    }
+}
