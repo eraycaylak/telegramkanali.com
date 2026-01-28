@@ -8,4 +8,4 @@ Telegram kanalları ve grupları listeleme platformu.
 - Yönetim paneli
 - SEO uyumlu altyapı
 
-Deploy Trigger: 2026-01-29 01:36
+Deploy Info: Manual trigger fix applied.
