@@ -3,6 +3,8 @@ import { ShieldCheck, Zap, Globe } from 'lucide-react';
 import { getCategories, getChannels, getFeaturedChannels } from '@/lib/data';
 import ChannelCard from '@/components/ChannelCard';
 import { Channel } from '@/lib/types';
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export default async function Home() {
   const featuredChannels = await getFeaturedChannels();
