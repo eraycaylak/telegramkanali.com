@@ -34,6 +34,7 @@ export async function addChannel(formData: FormData) {
     const description = formData.get('description') as string;
     const join_link = formData.get('join_link') as string;
     const category_id = formData.get('category_id') as string;
+    const image = formData.get('image') as string;
     const slug = name.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
 
     // Basic validation
@@ -49,7 +50,7 @@ export async function addChannel(formData: FormData) {
                 slug,
                 category_id,
                 stats: { subscribers: '0' },
-                image: '/images/logo.png', // Default image or handle upload later
+                image: image || '/images/logo.png',
                 verified: false,
                 featured: false
             });

@@ -20,7 +20,8 @@ export async function getChannels(): Promise<Channel[]> {
     const { data, error } = await supabase
         .from('channels')
         .select('*, categories(name, slug)')
-        .order('score', { ascending: false });
+        .order('score', { ascending: false })
+        .order('created_at', { ascending: false });
 
     if (error) {
         console.error('Error fetching channels:', error);

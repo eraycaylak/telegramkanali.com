@@ -16,18 +16,7 @@ export default async function Home() {
   // So DB has 4 items.
   // We should client-side duplicate or server-side duplicate to keep the "Massive" look user likes.
 
-  const allChannels: Channel[] = [];
-  if (allChannelsRaw.length > 0) {
-    for (let i = 0; i < 20; i++) {
-      allChannelsRaw.forEach(c => {
-        allChannels.push({
-          ...c,
-          id: `${c.id}-${i}`,
-          name: i > 0 ? `${c.name} ${i + 1}` : c.name
-        });
-      });
-    }
-  }
+  const allChannels = allChannelsRaw;
 
   return (
     <div className="space-y-12">

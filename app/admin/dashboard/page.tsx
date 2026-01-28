@@ -20,7 +20,8 @@ export default function AdminDashboard() {
         name: '',
         description: '',
         join_link: '',
-        category_id: ''
+        category_id: '',
+        image: ''
     });
 
     // Protect Route
@@ -65,7 +66,7 @@ export default function AdminDashboard() {
         if (res.success) {
             alert('Kanal eklendi!');
             setIsModalOpen(false);
-            setFormData({ name: '', description: '', join_link: '', category_id: '' });
+            setFormData({ name: '', description: '', join_link: '', category_id: '', image: '' });
             fetchData();
         } else {
             alert('Hata: ' + res.error);
@@ -168,6 +169,10 @@ export default function AdminDashboard() {
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Katılma Linki (t.me/...)</label>
                                 <input required className="w-full border rounded-lg p-2" value={formData.join_link} onChange={e => setFormData({ ...formData, join_link: e.target.value })} />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Görsel URL (Logo Linki)</label>
+                                <input className="w-full border rounded-lg p-2" placeholder="https://..." value={formData.image} onChange={e => setFormData({ ...formData, image: e.target.value })} />
                             </div>
 
                             <div className="flex justify-end gap-3 mt-6">

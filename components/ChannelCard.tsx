@@ -65,10 +65,18 @@ export default function ChannelCard({ channel }: ChannelCardProps) {
             </div>
 
             <div className="flex flex-1 gap-4 p-5 pl-16"> {/* Added padding-left for sidebar */}
-                {/* Placeholder Logo */}
-                <div className="h-14 w-14 flex-shrink-0 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 font-bold text-2xl border border-blue-100">
-                    {channel.name.charAt(0)}
-                </div>
+                {/* Logo */}
+                {channel.image && channel.image !== '/images/logo.png' ? (
+                    <img
+                        src={channel.image}
+                        alt={channel.name}
+                        className="h-14 w-14 flex-shrink-0 rounded-full object-cover border border-gray-200"
+                    />
+                ) : (
+                    <div className="h-14 w-14 flex-shrink-0 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 font-bold text-2xl border border-blue-100">
+                        {channel.name.charAt(0)}
+                    </div>
+                )}
 
                 <div className="flex flex-col gap-1 w-full relative z-20">
                     <div className="flex items-center justify-between">
