@@ -64,3 +64,52 @@ export async function addChannel(formData: FormData) {
         return { error: 'Failed to add channel' };
     }
 }
+
+export async function deleteCategory(id: string) {
+    if (!id) return { error: 'Category ID required' };
+
+    try {
+        const { error } = await adminClient
+            .from('categories')
+            .delete()
+            .eq('id', id);
+
+        if (error) throw error;
+
+        revalidatePath('/');
+        revalidatePath('/admin/dashboard');
+        return { success: true };
+    } catch (error) {
+        console.error('Delete category error:', error);
+        return { error: 'Failed to delete category' };
+    }
+}
+
+export async function addCategory(formData: FormData) {
+    const name = formData.get('name') as string;
+    const description = formData.get('description') as string;
+    const icon = formData.get('icon') as string; // E.g. Lucide icon name or emoji
+    const slug = name.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
+
+    if (!name) return { error: 'Name is required' };
+
+    try {
+        const { error } = await adminClient
+            .from('categories')
+            .insert({
+                name,
+                description,
+                icon,
+                slug
+            });
+
+        if (error) throw error;
+
+        revalidatePath('/');
+        revalidatePath('/admin/dashboard');
+        return { success: true };
+    } catch (error) {
+        console.error('Add category error:', error);
+        return { error: 'Failed to add category' };
+    }
+}

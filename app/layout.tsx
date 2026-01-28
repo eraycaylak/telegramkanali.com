@@ -39,11 +39,10 @@ export default function RootLayout({
         {/* Google Analytics ID - Buraya kendi ID'nizi yazın örn: G-XXXXXXXXXX */}
         <GoogleAnalytics gaId="G-ZORUNLU_DEGIL_ORNEK" />
 
-        <Header />
-        <main className="flex-1 container mx-auto px-4 md:px-6 py-8">
-          {children}
-        </main>
-        <Footer />
+        {/* Google Analytics ID - Buraya kendi ID'nizi yazın örn: G-XXXXXXXXXX */}
+        <GoogleAnalytics gaId="G-ZORUNLU_DEGIL_ORNEK" />
+
+        {children}
       </body>
     </html>
   );

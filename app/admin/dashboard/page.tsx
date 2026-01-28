@@ -77,27 +77,9 @@ export default function AdminDashboard() {
     );
 
     return (
-        <div className="min-h-screen bg-gray-50 text-gray-900 font-sans">
-            {/* Admin Navbar */}
-            <nav className="bg-white px-6 py-4 shadow-sm border-b border-gray-200 flex justify-between items-center sticky top-0 z-10">
-                <h1 className="text-xl font-bold text-gray-800">Yönetim Paneli</h1>
-                <div className="flex gap-4">
-                    <button
-                        onClick={() => router.push('/')}
-                        className="flex items-center gap-2 text-gray-600 hover:bg-gray-100 px-3 py-2 rounded-lg transition"
-                    >
-                        <ExternalLink size={18} /> Siteye Git
-                    </button>
-                    <button
-                        onClick={() => { localStorage.removeItem('isAdmin'); router.push('/'); }}
-                        className="flex items-center gap-2 text-red-600 hover:bg-red-50 px-3 py-2 rounded-lg transition"
-                    >
-                        <LogOut size={18} /> Çıkış
-                    </button>
-                </div>
-            </nav>
+        <div className="min-h-screen bg-transparent text-gray-900 font-sans">
 
-            <div className="container mx-auto p-6">
+            <div className="container mx-auto">
                 {/* Actions Bar */}
                 <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-8">
                     <div className="relative w-full sm:w-96">
