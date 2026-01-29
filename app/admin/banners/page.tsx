@@ -134,8 +134,8 @@ export default function BannersPage() {
                 <button
                     onClick={() => setActiveTab('homepage')}
                     className={`flex items-center gap-2 px-6 py-3 border-b-2 font-medium transition ${activeTab === 'homepage'
-                            ? 'border-blue-600 text-blue-600'
-                            : 'border-transparent text-gray-500 hover:text-gray-700'
+                        ? 'border-blue-600 text-blue-600'
+                        : 'border-transparent text-gray-500 hover:text-gray-700'
                         }`}
                 >
                     <Layout size={20} />
@@ -144,8 +144,8 @@ export default function BannersPage() {
                 <button
                     onClick={() => setActiveTab('category')}
                     className={`flex items-center gap-2 px-6 py-3 border-b-2 font-medium transition ${activeTab === 'category'
-                            ? 'border-blue-600 text-blue-600'
-                            : 'border-transparent text-gray-500 hover:text-gray-700'
+                        ? 'border-blue-600 text-blue-600'
+                        : 'border-transparent text-gray-500 hover:text-gray-700'
                         }`}
                 >
                     <Layers size={20} />
@@ -268,7 +268,13 @@ export default function BannersPage() {
                                     {editingBanner.image_url && (
                                         <img src={editingBanner.image_url} className="absolute inset-0 w-full h-full object-cover z-0 opacity-50" />
                                     )}
-                                    <div className="z-10 relative">
+                                    <div className="z-10 relative pointer-events-none">
+                                        {/* Badge Preview */}
+                                        {editingBanner.badge_text && (
+                                            <div className={`inline-block transform -skew-x-12 px-2 py-0.5 mb-1 font-black text-xs uppercase shadow-sm ${editingBanner.badge_bg_color || 'bg-red-600'} text-white`}>
+                                                <span className="block transform skew-x-12">{editingBanner.badge_text}</span>
+                                            </div>
+                                        )}
                                         <h3 className="font-bold text-lg text-blue-100 uppercase">{editingBanner.title || 'BAŞLIK'}</h3>
                                         {editingBanner.subtitle && <h2 className="text-2xl font-black italic">{editingBanner.subtitle}</h2>}
                                     </div>

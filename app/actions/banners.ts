@@ -21,6 +21,8 @@ export interface Banner {
     bg_color?: string | null;
     active: boolean;
     display_order: number;
+    badge_text?: string | null;
+    badge_bg_color?: string | null;
 }
 
 export async function getBanners(type?: BannerType, categoryId?: string) {
@@ -51,8 +53,7 @@ export async function saveBanner(banner: Partial<Banner>) {
     const { data, error } = await supabase
         .from('banners')
         .upsert({
-            id: banner.id, // If provided, updates. If not (and removed from object), creates? Supabase upsert needs PK.
-            // Actually better to handle insert vs update if ID is missing/temp
+            id: banner.id,
             type: banner.type || 'homepage',
             category_id: banner.category_id,
             title: banner.title,
@@ -62,7 +63,9 @@ export async function saveBanner(banner: Partial<Banner>) {
             button_text: banner.button_text,
             bg_color: banner.bg_color,
             active: banner.active ?? true,
-            display_order: banner.display_order ?? 0
+            display_order: banner.display_order ?? 0,
+            badge_text: banner.badge_text,
+            badge_bg_color: banner.badge_bg_color
         })
         .select()
         .single();
@@ -75,7 +78,6 @@ export async function saveBanner(banner: Partial<Banner>) {
     revalidatePath('/');
     revalidatePath('/admin/banners');
     if (banner.category_id) {
-        // We'd ideally revalidate the specific category page, but validating all is simpler for now
         revalidatePath('/[slug]', 'page');
     }
 

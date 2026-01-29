@@ -37,11 +37,18 @@ export default async function BannerGrid({ type = 'homepage', categoryId }: Bann
 
                     {/* Content */}
                     <div className="z-10 relative flex-1 min-w-0 pr-4 pointer-events-none">
+                        {/* Skewed Badge (New Feature) */}
+                        {banner.badge_text && (
+                            <div className={`inline-block transform -skew-x-12 px-2 py-0.5 mb-2 font-black text-sm uppercase shadow-sm ${banner.badge_bg_color || 'bg-red-600'} text-white`}>
+                                <span className="block transform skew-x-12">{banner.badge_text}</span>
+                            </div>
+                        )}
+
                         <h3 className="font-bold text-lg text-blue-100 uppercase truncate drop-shadow-md">
                             {banner.title}
                         </h3>
                         {banner.subtitle && (
-                            <h2 className="text-2xl font-black italic truncate drop-shadow-lg">
+                            <h2 className="text-3xl font-black italic truncate drop-shadow-lg leading-tight">
                                 {banner.subtitle}
                             </h2>
                         )}
