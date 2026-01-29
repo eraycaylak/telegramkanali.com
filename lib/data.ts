@@ -31,7 +31,6 @@ export async function getChannels(): Promise<Channel[]> {
     // Map DB fields to Type fields
     return data.map((d: any) => ({
         ...d,
-        category: d.category_id,
         categoryName: d.categories?.name,
     })) as Channel[];
 }
@@ -66,7 +65,7 @@ export async function getChannelBySlug(slug: string): Promise<Channel | null> {
         .single();
 
     if (error || !data) return null;
-    return { ...data, category: data.category_id, categoryName: data.categories?.name } as Channel;
+    return { ...data, categoryName: data.categories?.name } as Channel;
 }
 
 export async function getCategoryBySlug(slug: string): Promise<Category | null> {

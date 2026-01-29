@@ -29,9 +29,9 @@ export default function ChannelPage({ params }: { params: { slug: string } }) {
         notFound();
     }
 
-    const category = categories.find((c) => c.id === channel.category);
+    const category = categories.find((c) => c.id === channel.category_id);
     const relatedChannels = channels
-        .filter((c) => c.category === channel.category && c.id !== channel.id)
+        .filter((c) => c.category_id === channel.category_id && c.id !== channel.id)
         .slice(0, 3);
 
     // JSON-LD Schema
@@ -99,13 +99,13 @@ export default function ChannelPage({ params }: { params: { slug: string } }) {
                                 </span>
                                 <span className="flex items-center gap-1">
                                     <Calendar size={16} />
-                                    {channel.createdAt} tarihinde eklendi
+                                    {channel.created_at} tarihinde eklendi
                                 </span>
                             </div>
                         </div>
 
                         <a
-                            href={channel.joinLink}
+                            href={channel.join_link}
                             target="_blank"
                             rel="nofollow noreferrer"
                             className="flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-6 py-3 text-center font-semibold text-white shadow-md transition-all hover:bg-blue-700 hover:shadow-lg sm:w-auto"
