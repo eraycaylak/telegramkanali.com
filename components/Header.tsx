@@ -21,19 +21,21 @@ export default async function Header() {
             </div>
 
             {/* 2. Main Bar - Dark Gray - Logo & Search */}
-            <div className="bg-[#333333] py-5 shadow-inner">
-                <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-8">
-                    {/* Logo */}
+            <div className="bg-[#333333] py-4 shadow-inner">
+                <div className="container mx-auto px-4 flex items-center gap-4">
+                    {/* Logo Area - 350x80px recommended */}
                     <Link href="/" className="flex items-center flex-shrink-0 hover:opacity-90 transition">
-                        <img
-                            src="/images/logo.png"
-                            alt="Telegram Kanalları"
-                            className="h-14 w-auto object-contain"
-                        />
+                        <div
+                            className="bg-[#444] rounded flex items-center justify-center overflow-hidden"
+                            style={{ width: '350px', height: '80px' }}
+                        >
+                            {/* Logo will be loaded from DB - for now placeholder */}
+                            <span className="text-gray-500 text-sm">Logo Alanı (350x80)</span>
+                        </div>
                     </Link>
 
-                    {/* Search Bar - Center */}
-                    <div className="flex-1 w-full max-w-3xl relative mx-auto">
+                    {/* Search Bar - Takes remaining space */}
+                    <div className="flex-1 relative">
                         <input
                             type="text"
                             placeholder="Aradığınız grubu yazınız..."
@@ -43,9 +45,6 @@ export default async function Header() {
                             <Search size={22} />
                         </button>
                     </div>
-
-                    {/* Spacer to balance logo */}
-                    <div className="hidden md:block w-32"></div>
                 </div>
             </div>
 

@@ -1,30 +1,82 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+import { Upload, X, Image as ImageIcon } from 'lucide-react';
 
 export default function SettingsPage() {
-    const [logoUrl, setLogoUrl] = useState('/images/logo.png');
-    const [logoSize, setLogoSize] = useState(120);
+    const [logoUrl, setLogoUrl] = useState('');
+    const [logoFile, setLogoFile] = useState<File | null>(null);
+    const [logoPreview, setLogoPreview] = useState<string | null>(null);
     const [siteTitle, setSiteTitle] = useState('Telegram Kanalları');
     const [gaId, setGaId] = useState('');
     const [saving, setSaving] = useState(false);
     const [saved, setSaved] = useState(false);
+    const [uploading, setUploading] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
-    const handleSave = () => {
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setLogoFile(file);
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                setLogoPreview(e.target?.result as string);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const removeLogo = () => {
+        setLogoFile(null);
+        setLogoPreview(null);
+        setLogoUrl('');
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
+    };
+
+    const handleSave = async () => {
         setSaving(true);
-        // Save to localStorage for now (in production, save to DB)
-        localStorage.setItem('siteSettings', JSON.stringify({
-            logoUrl,
-            logoSize,
-            siteTitle,
-            gaId
-        }));
 
-        setTimeout(() => {
-            setSaving(false);
+        try {
+            let finalLogoUrl = logoUrl;
+
+            // If we have a file, upload to Supabase Storage
+            if (logoFile) {
+                setUploading(true);
+                const formData = new FormData();
+                formData.append('file', logoFile);
+
+                const { uploadLogo } = await import('@/app/actions/admin');
+                const result = await uploadLogo(formData);
+
+                if (result.error) {
+                    alert('Logo yüklenemedi: ' + result.error);
+                    setSaving(false);
+                    setUploading(false);
+                    return;
+                }
+
+                finalLogoUrl = result.url || '';
+                setLogoUrl(finalLogoUrl);
+                setUploading(false);
+            }
+
+            // Save settings to localStorage (and would save to DB)
+            localStorage.setItem('siteSettings', JSON.stringify({
+                logoUrl: finalLogoUrl,
+                siteTitle,
+                gaId
+            }));
+
             setSaved(true);
             setTimeout(() => setSaved(false), 2000);
-        }, 500);
+        } catch (error) {
+            console.error('Save error:', error);
+            alert('Kaydetme hatası');
+        } finally {
+            setSaving(false);
+        }
     };
 
     return (
@@ -34,49 +86,78 @@ export default function SettingsPage() {
 
                 {/* Logo Section */}
                 <div className="border-b border-gray-100 pb-6">
-                    <h2 className="text-lg font-semibold text-gray-800 mb-4">Site Logosu</h2>
-                    <div className="flex items-start gap-6">
-                        <div className="flex-shrink-0">
-                            <div
-                                className="bg-gray-100 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden"
-                                style={{ width: logoSize, height: logoSize * 0.6 }}
-                            >
-                                {logoUrl ? (
+                    <h2 className="text-lg font-semibold text-gray-800 mb-2">Site Logosu</h2>
+                    <p className="text-sm text-gray-500 mb-4">
+                        Önerilen boyut: <strong>350 x 80 piksel</strong> (PNG veya WebP formatı)
+                    </p>
+
+                    <div className="space-y-4">
+                        {/* Preview Area */}
+                        <div
+                            className="bg-[#333] rounded-lg flex items-center justify-center overflow-hidden relative"
+                            style={{ width: '350px', height: '80px' }}
+                        >
+                            {logoPreview || logoUrl ? (
+                                <>
                                     <img
-                                        src={logoUrl}
+                                        src={logoPreview || logoUrl}
                                         alt="Logo Önizleme"
                                         className="max-w-full max-h-full object-contain"
                                     />
-                                ) : (
-                                    <span className="text-gray-400 text-sm">Logo Yok</span>
-                                )}
-                            </div>
+                                    <button
+                                        onClick={removeLogo}
+                                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                                    >
+                                        <X size={14} />
+                                    </button>
+                                </>
+                            ) : (
+                                <div className="text-gray-500 text-sm flex flex-col items-center">
+                                    <ImageIcon size={24} className="mb-1 opacity-50" />
+                                    <span>350 x 80 px</span>
+                                </div>
+                            )}
                         </div>
-                        <div className="flex-1 space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Logo URL</label>
-                                <input
-                                    type="text"
-                                    className="w-full border rounded-lg p-2.5"
-                                    placeholder="https://... veya /images/logo.png"
-                                    value={logoUrl}
-                                    onChange={(e) => setLogoUrl(e.target.value)}
-                                />
-                                <p className="text-xs text-gray-500 mt-1">Harici bir URL veya /images klasöründen dosya yolu</p>
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Logo Genişliği: {logoSize}px
-                                </label>
-                                <input
-                                    type="range"
-                                    min="80"
-                                    max="200"
-                                    value={logoSize}
-                                    onChange={(e) => setLogoSize(Number(e.target.value))}
-                                    className="w-full"
-                                />
-                            </div>
+
+                        {/* File Upload */}
+                        <div className="flex gap-3">
+                            <input
+                                type="file"
+                                ref={fileInputRef}
+                                accept="image/png,image/jpeg,image/webp"
+                                onChange={handleFileChange}
+                                className="hidden"
+                            />
+                            <button
+                                onClick={() => fileInputRef.current?.click()}
+                                className="flex items-center gap-2 px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition text-gray-600 hover:text-blue-600"
+                            >
+                                <Upload size={18} />
+                                {logoFile ? 'Farklı Dosya Seç' : 'Logo Yükle'}
+                            </button>
+                            {logoFile && (
+                                <span className="text-sm text-green-600 flex items-center">
+                                    ✓ {logoFile.name}
+                                </span>
+                            )}
+                        </div>
+
+                        {/* Or URL Input */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                veya URL ile ekle:
+                            </label>
+                            <input
+                                type="text"
+                                className="w-full border rounded-lg p-2.5 text-sm"
+                                placeholder="https://example.com/logo.png"
+                                value={logoUrl}
+                                onChange={(e) => {
+                                    setLogoUrl(e.target.value);
+                                    setLogoPreview(e.target.value);
+                                    setLogoFile(null);
+                                }}
+                            />
                         </div>
                     </div>
                 </div>
@@ -112,7 +193,7 @@ export default function SettingsPage() {
                                 : 'bg-blue-600 text-white hover:bg-blue-700'
                         }`}
                 >
-                    {saved ? '✓ Kaydedildi!' : saving ? 'Kaydediliyor...' : 'Kaydet'}
+                    {saved ? '✓ Kaydedildi!' : uploading ? 'Yükleniyor...' : saving ? 'Kaydediliyor...' : 'Kaydet'}
                 </button>
             </div>
         </div>

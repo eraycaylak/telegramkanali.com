@@ -195,3 +195,46 @@ export async function scrapeTelegramInfo(url: string) {
         return { error: 'Telegram verisi çekilemedi' };
     }
 }
+
+// Upload logo to Supabase Storage
+export async function uploadLogo(formData: FormData) {
+    const file = formData.get('file') as File;
+
+    if (!file) {
+        return { error: 'Dosya bulunamadı' };
+    }
+
+    try {
+        const fileName = `logo_${Date.now()}.${file.name.split('.').pop()}`;
+        const buffer = Buffer.from(await file.arrayBuffer());
+
+        // Upload to Supabase Storage
+        const { data, error } = await adminClient.storage
+            .from('assets')
+            .upload(fileName, buffer, {
+                contentType: file.type,
+                upsert: true
+            });
+
+        if (error) {
+            console.error('Upload error:', error);
+
+            // If bucket doesn't exist, try to create it
+            if (error.message?.includes('Bucket not found')) {
+                return { error: 'Storage bucket "assets" bulunamadı. Supabase Dashboard\'dan oluşturun.' };
+            }
+            throw error;
+        }
+
+        // Get public URL
+        const { data: urlData } = adminClient.storage
+            .from('assets')
+            .getPublicUrl(fileName);
+
+        console.log('[UPLOAD] Success:', urlData.publicUrl);
+        return { success: true, url: urlData.publicUrl };
+    } catch (error: any) {
+        console.error('Upload exception:', error);
+        return { error: `Yükleme hatası: ${error?.message || 'Bilinmeyen hata'}` };
+    }
+}
