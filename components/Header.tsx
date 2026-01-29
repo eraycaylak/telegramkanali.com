@@ -44,7 +44,7 @@ export default async function Header() {
             {/* 3. Navigation Bar - Categories - BIGGER TEXT */}
             <div className="bg-black shadow-lg border-t border-[#222]">
                 <div className="container mx-auto px-6">
-                    <nav className="flex flex-wrap items-center gap-x-8 gap-y-4 py-5 text-[14px] font-bold tracking-wider text-gray-400 uppercase">
+                    <nav className="flex flex-wrap items-center gap-x-8 gap-y-4 py-5 text-[14px] font-bold tracking-wider text-white uppercase">
                         {categories.map((cat) => (
                             <Link
                                 key={cat.id}
