@@ -15,8 +15,8 @@ export async function getCategories(): Promise<Category[]> {
 }
 
 // Fetch Channels
-// Fetch Channels
 export async function getChannels(): Promise<Channel[]> {
+    console.log('[DATA] Fetching all channels from Supabase...');
     const { data, error } = await supabase
         .from('channels')
         .select('*, categories(name, slug)')
@@ -24,9 +24,11 @@ export async function getChannels(): Promise<Channel[]> {
         .order('created_at', { ascending: false });
 
     if (error) {
-        console.error('Error fetching channels:', error);
+        console.error('[DATA] Error fetching channels:', error);
         return [];
     }
+
+    console.log('[DATA] Fetched channels count:', data?.length || 0);
 
     // Map DB fields to Type fields
     return data.map((d: any) => ({
