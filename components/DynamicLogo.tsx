@@ -1,37 +1,29 @@
-'use client';
-
-import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ImageIcon } from 'lucide-react';
+import { createClient } from '@supabase/supabase-js';
 
-export default function DynamicLogo() {
-    const [logoUrl, setLogoUrl] = useState<string | null>(null);
-    const [mounted, setMounted] = useState(false);
+// Server component - fetches logo from database
+async function getLogoUrl(): Promise<string | null> {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-    useEffect(() => {
-        setMounted(true);
-        const settings = localStorage.getItem('siteSettings');
-        if (settings) {
-            const parsed = JSON.parse(settings);
-            if (parsed.logoUrl) {
-                setLogoUrl(parsed.logoUrl);
-            }
-        }
-    }, []);
+    if (!supabaseUrl || !supabaseKey) return null;
 
-    if (!mounted) {
-        // Server-side render placeholder
-        return (
-            <Link href="/" className="flex items-center flex-shrink-0 hover:opacity-90 transition">
-                <div
-                    className="bg-[#444] rounded flex items-center justify-center overflow-hidden"
-                    style={{ width: '350px', height: '80px' }}
-                >
-                    <span className="text-gray-500 text-sm">Logo</span>
-                </div>
-            </Link>
-        );
+    try {
+        const supabase = createClient(supabaseUrl, supabaseKey);
+        const { data } = await supabase
+            .from('settings')
+            .select('value')
+            .eq('key', 'logo_url')
+            .single();
+
+        return data?.value || null;
+    } catch {
+        return null;
     }
+}
+
+export default async function DynamicLogo() {
+    const logoUrl = await getLogoUrl();
 
     return (
         <Link href="/" className="flex items-center flex-shrink-0 hover:opacity-90 transition">
@@ -44,10 +36,6 @@ export default function DynamicLogo() {
                         src={logoUrl}
                         alt="Telegram Kanalları"
                         className="max-w-full max-h-full object-contain"
-                        onError={(e) => {
-                            console.log('Logo load error');
-                            (e.target as HTMLImageElement).style.display = 'none';
-                        }}
                     />
                 ) : (
                     <div className="bg-[#444] w-full h-full flex items-center justify-center text-gray-500 text-sm">

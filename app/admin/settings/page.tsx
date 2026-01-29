@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Image as ImageIcon } from 'lucide-react';
+import { Image as ImageIcon, Loader2 } from 'lucide-react';
 
 export default function SettingsPage() {
     const [logoUrl, setLogoUrl] = useState('');
@@ -9,34 +9,59 @@ export default function SettingsPage() {
     const [gaId, setGaId] = useState('');
     const [saving, setSaving] = useState(false);
     const [saved, setSaved] = useState(false);
+    const [loading, setLoading] = useState(true);
 
-    // Load settings on mount
+    // Load settings from database on mount
     useEffect(() => {
-        const savedSettings = localStorage.getItem('siteSettings');
-        if (savedSettings) {
-            const settings = JSON.parse(savedSettings);
-            setLogoUrl(settings.logoUrl || '');
-            setSiteTitle(settings.siteTitle || 'Telegram Kanalları');
-            setGaId(settings.gaId || '');
+        async function loadSettings() {
+            try {
+                const { getAllSettings } = await import('@/app/actions/settings');
+                const settings = await getAllSettings();
+
+                if (settings.logo_url) setLogoUrl(settings.logo_url);
+                if (settings.site_title) setSiteTitle(settings.site_title);
+                if (settings.ga_id) setGaId(settings.ga_id);
+            } catch (error) {
+                console.error('Load settings error:', error);
+            } finally {
+                setLoading(false);
+            }
         }
+        loadSettings();
     }, []);
 
-    const handleSave = () => {
+    const handleSave = async () => {
         setSaving(true);
 
-        // Save to localStorage
-        localStorage.setItem('siteSettings', JSON.stringify({
-            logoUrl,
-            siteTitle,
-            gaId
-        }));
+        try {
+            const { saveAllSettings } = await import('@/app/actions/settings');
+            const result = await saveAllSettings({
+                logo_url: logoUrl,
+                site_title: siteTitle,
+                ga_id: gaId
+            });
 
-        setTimeout(() => {
+            if (result.error) {
+                alert('Kaydetme hatası: ' + result.error);
+            } else {
+                setSaved(true);
+                setTimeout(() => setSaved(false), 2000);
+            }
+        } catch (error) {
+            console.error('Save error:', error);
+            alert('Kaydetme hatası');
+        } finally {
             setSaving(false);
-            setSaved(true);
-            setTimeout(() => setSaved(false), 2000);
-        }, 300);
+        }
     };
+
+    if (loading) {
+        return (
+            <div className="max-w-2xl flex items-center justify-center py-20">
+                <Loader2 className="animate-spin text-blue-600" size={32} />
+            </div>
+        );
+    }
 
     return (
         <div className="max-w-2xl">
@@ -81,7 +106,7 @@ export default function SettingsPage() {
                             <input
                                 type="text"
                                 className="w-full border rounded-lg p-2.5 text-sm"
-                                placeholder="https://example.com/logo.png"
+                                placeholder="https://i.imgur.com/xxxxx.png"
                                 value={logoUrl}
                                 onChange={(e) => setLogoUrl(e.target.value)}
                             />
@@ -116,15 +141,20 @@ export default function SettingsPage() {
                 <button
                     onClick={handleSave}
                     disabled={saving}
-                    className={`px-6 py-2.5 rounded-lg font-medium transition-all ${saved
+                    className={`px-6 py-2.5 rounded-lg font-medium transition-all flex items-center gap-2 ${saved
                             ? 'bg-green-600 text-white'
                             : saving
                                 ? 'bg-gray-400 text-white cursor-wait'
                                 : 'bg-blue-600 text-white hover:bg-blue-700'
                         }`}
                 >
+                    {saving && <Loader2 className="animate-spin" size={16} />}
                     {saved ? '✓ Kaydedildi!' : saving ? 'Kaydediliyor...' : 'Kaydet'}
                 </button>
+
+                <p className="text-xs text-gray-400 mt-4">
+                    * Ayarlar veritabanına kaydedilir ve tüm kullanıcılar tarafından görülür.
+                </p>
             </div>
         </div>
     );
