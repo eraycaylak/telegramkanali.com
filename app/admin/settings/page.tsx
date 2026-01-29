@@ -5,6 +5,27 @@ import { useState } from 'react';
 export default function SettingsPage() {
     const [logoUrl, setLogoUrl] = useState('/images/logo.png');
     const [logoSize, setLogoSize] = useState(120);
+    const [siteTitle, setSiteTitle] = useState('Telegram Kanalları');
+    const [gaId, setGaId] = useState('');
+    const [saving, setSaving] = useState(false);
+    const [saved, setSaved] = useState(false);
+
+    const handleSave = () => {
+        setSaving(true);
+        // Save to localStorage for now (in production, save to DB)
+        localStorage.setItem('siteSettings', JSON.stringify({
+            logoUrl,
+            logoSize,
+            siteTitle,
+            gaId
+        }));
+
+        setTimeout(() => {
+            setSaving(false);
+            setSaved(true);
+            setTimeout(() => setSaved(false), 2000);
+        }, 500);
+    };
 
     return (
         <div className="max-w-2xl">
@@ -63,15 +84,35 @@ export default function SettingsPage() {
                 {/* Site Settings */}
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Site Başlığı</label>
-                    <input type="text" className="w-full border rounded-lg p-2.5" defaultValue="Telegram Kanalları" />
+                    <input
+                        type="text"
+                        className="w-full border rounded-lg p-2.5"
+                        value={siteTitle}
+                        onChange={(e) => setSiteTitle(e.target.value)}
+                    />
                 </div>
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Google Analytics ID</label>
-                    <input type="text" className="w-full border rounded-lg p-2.5" placeholder="G-XXXXXXXX" />
+                    <input
+                        type="text"
+                        className="w-full border rounded-lg p-2.5"
+                        placeholder="G-XXXXXXXX"
+                        value={gaId}
+                        onChange={(e) => setGaId(e.target.value)}
+                    />
                 </div>
 
-                <button className="bg-blue-600 text-white px-6 py-2.5 rounded-lg hover:bg-blue-700 font-medium">
-                    Kaydet
+                <button
+                    onClick={handleSave}
+                    disabled={saving}
+                    className={`px-6 py-2.5 rounded-lg font-medium transition-all ${saved
+                            ? 'bg-green-600 text-white'
+                            : saving
+                                ? 'bg-gray-400 text-white cursor-wait'
+                                : 'bg-blue-600 text-white hover:bg-blue-700'
+                        }`}
+                >
+                    {saved ? '✓ Kaydedildi!' : saving ? 'Kaydediliyor...' : 'Kaydet'}
                 </button>
             </div>
         </div>
