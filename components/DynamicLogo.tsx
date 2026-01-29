@@ -28,14 +28,15 @@ export default async function DynamicLogo() {
     return (
         <Link href="/" className="flex items-center flex-shrink-0 hover:opacity-90 transition">
             <div
-                className="rounded flex items-center justify-center overflow-hidden"
+                className="rounded flex items-center justify-start overflow-hidden"
                 style={{ width: '350px', height: '80px' }}
             >
                 {logoUrl ? (
                     <img
                         src={logoUrl}
                         alt="Telegram Kanalları"
-                        className="max-w-full max-h-full object-contain"
+                        className="h-full w-auto"
+                        style={{ maxWidth: '350px' }}
                     />
                 ) : (
                     <div className="bg-[#444] w-full h-full flex items-center justify-center text-gray-500 text-sm">
