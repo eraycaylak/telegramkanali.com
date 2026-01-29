@@ -2,23 +2,23 @@ export interface Channel {
     id: string;
     name: string;
     slug: string;
-    description: string; // Rich text or long string
-    category: string; // ID of the category
+    description: string;
+    category_id: string; // Foreign Key to categories
+    categoryName?: string; // Mapped field
     subcategories: string[];
-    joinLink: string;
+    join_link: string;
     stats: {
-        subscribers: string; // string to handle "1.2K" formatting or number
+        subscribers: string;
         files?: number;
     };
-    image: string; // URL to logo
+    image: string;
     tags: string[];
     verified: boolean;
     featured: boolean;
     language: string;
-    createdAt: string;
-    rating?: number; // 1-5
+    created_at?: string; // DB timestamp
+    rating?: number;
     score?: number;
-    categoryName?: string;
 }
 
 export interface Category {
