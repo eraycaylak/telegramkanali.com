@@ -20,6 +20,8 @@ export interface Channel {
     rating?: number;
     score?: number;
     member_count?: number; // Fetched from Telegram API
+    seo_description?: string;
+    target_audience?: string;
 }
 
 export interface Category {
@@ -29,4 +31,32 @@ export interface Category {
     description: string;
     subcategories: string[];
     icon: string; // Lucide icon name or emoji
+    seo_intro?: string;
+    seo_title?: string;
+    seo_description?: string;
+}
+
+export interface SeoPage {
+    id: string;
+    slug: string;
+    title: string;
+    meta_description?: string;
+    h1: string;
+    content: {
+        intro?: string;
+        sections?: Array<{
+            heading: string;
+            body: string;
+        }>;
+        faqs?: Array<{
+            question: string;
+            answer: string;
+        }>;
+    };
+    related_categories?: string[];
+    target_keywords?: string[];
+    word_count?: number;
+    published: boolean;
+    created_at?: string;
+    updated_at?: string;
 }

@@ -1,11 +1,31 @@
 import Link from 'next/link';
-import { ShieldCheck, Zap, Globe } from 'lucide-react';
+import { ShieldCheck, Zap, Globe, HelpCircle } from 'lucide-react';
 import { getCategories, getChannels, getFeaturedChannels } from '@/lib/data';
 import ChannelCard from '@/components/ChannelCard';
 import BannerGrid from '@/components/BannerGrid';
+import JsonLd, { generateFAQSchema } from '@/components/JsonLd';
 import { Channel } from '@/lib/types';
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
+
+const faqs = [
+  {
+    question: "Telegram Kanalları nedir?",
+    answer: "Telegram kanalları, yöneticilerin sınırsız sayıda aboneye mesaj, fotoğraf, video ve dosya paylaşabildiği tek yönlü iletişim platformlarıdır. Haber, eğitim, kripto ve indirim gibi birçok kategoride kanal bulunmaktadır."
+  },
+  {
+    question: "Telegram kanallarına nasıl katılabilirim?",
+    answer: "Sitemizde listelenen herhangi bir kanalın 'Kanala Git' butonuna tıklayarak doğrudan Telegram uygulamasında kanala katılabilirsiniz. Telegram hesabınızın olması gerekmektedir."
+  },
+  {
+    question: "Telegram güvenli mi?",
+    answer: "Telegram, uçtan uca şifreleme, gizli sohbetler ve kendini imha eden mesajlar gibi güvenlik özellikleri sunar. Gizlilik odaklı kullanıcılar için popüler bir tercih haline gelmiştir."
+  },
+  {
+    question: "Kendi kanalımı nasıl ekleyebilirim?",
+    answer: "Kanalınızı sitemize eklemek için bizimle iletişime geçebilirsiniz. Reklam ve tanıtım seçenekleri de mevcuttur."
+  }
+];
 
 export default async function Home() {
   const featuredChannels = await getFeaturedChannels();
@@ -150,6 +170,23 @@ export default async function Home() {
           </div>
         </div>
 
+      </section>
+
+      {/* FAQ Section with Schema */}
+      <section className="pt-12 border-t border-gray-100">
+        <JsonLd data={generateFAQSchema(faqs)} />
+        <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+          <HelpCircle className="text-blue-500" />
+          Sık Sorulan Sorular
+        </h2>
+        <div className="grid md:grid-cols-2 gap-6">
+          {faqs.map((faq, index) => (
+            <div key={index} className="bg-gray-50 p-6 rounded-xl border border-gray-100">
+              <h3 className="font-bold text-gray-900 mb-2">{faq.question}</h3>
+              <p className="text-sm text-gray-600 leading-relaxed">{faq.answer}</p>
+            </div>
+          ))}
+        </div>
       </section>
     </div>
   );

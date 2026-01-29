@@ -4,9 +4,12 @@ import ChannelDetail from '@/components/ChannelDetail';
 import BannerGrid from '@/components/BannerGrid';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import JsonLd, { generateBreadcrumbSchema, generateChannelSchema, generateItemListSchema } from '@/components/JsonLd';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
+
+const baseUrl = 'https://telegramkanali.com';
 
 export const revalidate = 60;
 export const dynamic = 'force-dynamic';
@@ -57,12 +60,56 @@ export default async function DynamicPage({ params }: PageProps) {
 
     return (
       <>
+        {/* Category Structured Data */}
+        <JsonLd data={generateItemListSchema(
+          channels.map((ch, i) => ({ name: ch.name, url: `${baseUrl}/${ch.slug}`, position: i + 1 })),
+          `${category.name} Telegram Kanalları`
+        )} />
+        <JsonLd data={generateBreadcrumbSchema([
+          { name: 'Anasayfa', url: baseUrl },
+          { name: category.name, url: `${baseUrl}/${category.slug}` }
+        ])} />
+
         <Header />
         <main className="container mx-auto px-4 py-8 space-y-8">
-          {/* Category Header */}
-          <div className="bg-white border rounded-xl p-8 text-center shadow-sm">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">{category.name}</h1>
-            <p className="text-gray-600 max-w-2xl mx-auto">{category.description}</p>
+          {/* Category Header with SEO Intro */}
+          <div className="bg-gradient-to-br from-gray-50 to-white border rounded-xl p-8 shadow-sm">
+            <div className="text-center mb-6">
+              <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
+                🔥 {category.name} Telegram Kanalları (2026)
+              </h1>
+              <p className="text-gray-600 max-w-2xl mx-auto text-lg">{category.description}</p>
+            </div>
+
+            {/* SEO Intro Section */}
+            {category.seo_intro ? (
+              <div className="mt-6 pt-6 border-t border-gray-100 prose prose-blue max-w-none">
+                <div className="text-gray-700 leading-relaxed" dangerouslySetInnerHTML={{ __html: category.seo_intro }} />
+              </div>
+            ) : (
+              <div className="mt-6 pt-6 border-t border-gray-100">
+                <p className="text-gray-600 leading-relaxed">
+                  {category.name} kategorisinde Türkiye'nin en popüler ve güvenilir Telegram kanallarını keşfedin.
+                  Her kanal editörlerimiz tarafından incelenmiş ve onaylanmıştır. Tek tıkla katılın!
+                </p>
+              </div>
+            )}
+
+            {/* Quick Stats */}
+            <div className="mt-6 flex justify-center gap-6 text-sm">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-blue-600">{channels.length}</div>
+                <div className="text-gray-500">Kanal</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-green-600">✓</div>
+                <div className="text-gray-500">Doğrulanmış</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-purple-600">2026</div>
+                <div className="text-gray-500">Güncel</div>
+              </div>
+            </div>
           </div>
 
           {/* Banner Grid */}
@@ -145,10 +192,18 @@ export default async function DynamicPage({ params }: PageProps) {
 
     return (
       <>
+        {/* Channel Structured Data */}
+        <JsonLd data={generateChannelSchema(channel, baseUrl)} />
+        <JsonLd data={generateBreadcrumbSchema([
+          { name: 'Anasayfa', url: baseUrl },
+          { name: channel.categoryName || 'Kategori', url: `${baseUrl}/${(channel as any).categories?.slug || ''}` },
+          { name: channel.name, url: `${baseUrl}/${channel.slug}` }
+        ])} />
+
         <Header />
         <main className="container mx-auto px-4 py-8 max-w-6xl">
           {/* Breadcrumb */}
-          <nav className="text-sm text-gray-500 mb-6 flex gap-2">
+          <nav className="text-sm text-gray-500 mb-6 flex gap-2" aria-label="Breadcrumb">
             <Link href="/" className="hover:text-blue-600">Anasayfa</Link>
             <span>/</span>
             <Link href={`/${(channel as any).categories?.slug}`} className="hover:text-blue-600">{channel.categoryName}</Link>
