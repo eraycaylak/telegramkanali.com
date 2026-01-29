@@ -2,7 +2,7 @@
 
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { LayoutDashboard, FolderTree, FileText, Users, Settings, LogOut, Menu } from 'lucide-react';
+import { LayoutDashboard, FolderTree, FileText, Users, Settings, LogOut, Menu, Image } from 'lucide-react';
 import { useState } from 'react';
 
 export default function AdminLayout({
@@ -16,10 +16,12 @@ export default function AdminLayout({
     const menuItems = [
         { name: 'Kanal Yönetimi', href: '/admin/dashboard', icon: LayoutDashboard },
         { name: 'Kategoriler', href: '/admin/categories', icon: FolderTree },
+        { name: 'Bannerlar', href: '/admin/banners', icon: Image },
         { name: 'Sayfalar', href: '/admin/pages', icon: FileText },
         { name: 'Kullanıcılar', href: '/admin/users', icon: Users },
         { name: 'Ayarlar', href: '/admin/settings', icon: Settings },
     ];
+
 
     return (
         <div className="min-h-screen bg-gray-100 flex font-sans">
@@ -43,8 +45,8 @@ export default function AdminLayout({
                                 key={item.href}
                                 href={item.href}
                                 className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isActive
-                                        ? 'bg-blue-50 text-blue-600 font-medium'
-                                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                    ? 'bg-blue-50 text-blue-600 font-medium'
+                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                                     }`}
                             >
                                 <Icon size={20} />
