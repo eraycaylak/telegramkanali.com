@@ -16,8 +16,18 @@ async function getLogoUrl(): Promise<string | null> {
             .eq('key', 'logo_url')
             .single();
 
-        return data?.value || null;
-    } catch {
+        if (!data?.value) return null;
+
+        // Handle JSONB - value could be the URL directly or need parsing
+        let url = data.value;
+        if (typeof url === 'string') {
+            // Remove surrounding quotes if present (from JSONB)
+            url = url.replace(/^"|"$/g, '');
+        }
+
+        return url || null;
+    } catch (error) {
+        console.error('[LOGO] Error:', error);
         return null;
     }
 }
@@ -31,14 +41,19 @@ export default async function DynamicLogo() {
                 <img
                     src={logoUrl}
                     alt="Telegram Kanalları"
-                    style={{ height: '80px', width: 'auto', maxWidth: '350px' }}
+                    style={{
+                        height: '100px',
+                        width: 'auto',
+                        maxWidth: '400px',
+                        objectFit: 'contain'
+                    }}
                 />
             ) : (
                 <div
-                    className="bg-[#444] rounded flex items-center justify-center text-gray-500 text-sm"
-                    style={{ width: '350px', height: '80px' }}
+                    className="bg-[#444] rounded-lg flex items-center justify-center text-gray-400 text-lg font-bold"
+                    style={{ width: '300px', height: '100px' }}
                 >
-                    Logo Alanı (350x80)
+                    LOGO
                 </div>
             )}
         </Link>
