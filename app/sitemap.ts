@@ -6,7 +6,7 @@ export const baseUrl = 'https://telegramkanali.com';
 export default function sitemap(): MetadataRoute.Sitemap {
     const channelsUrls = channels.map((channel) => ({
         url: `${baseUrl}/kanallar/${channel.slug}`,
-        lastModified: new Date(channel.createdAt),
+        lastModified: new Date(channel.created_at ?? Date.now()),
         changeFrequency: 'weekly' as const,
         priority: 0.8,
     }));
