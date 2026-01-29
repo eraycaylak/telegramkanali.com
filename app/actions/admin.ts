@@ -162,9 +162,20 @@ export async function scrapeTelegramInfo(url: string) {
         const descMatch = html.match(/<meta property="og:description" content="([^"]*)"/);
         const imageMatch = html.match(/<meta property="og:image" content="([^"]*)"/);
 
+        // Decode HTML entities like &#33; -> !
+        const decodeHtml = (str: string) => {
+            return str
+                .replace(/&#(\d+);/g, (_, num) => String.fromCharCode(parseInt(num, 10)))
+                .replace(/&amp;/g, '&')
+                .replace(/&lt;/g, '<')
+                .replace(/&gt;/g, '>')
+                .replace(/&quot;/g, '"')
+                .replace(/&#39;/g, "'");
+        };
+
         return {
-            title: titleMatch ? titleMatch[1] : '',
-            description: descMatch ? descMatch[1] : '',
+            title: titleMatch ? decodeHtml(titleMatch[1]) : '',
+            description: descMatch ? decodeHtml(descMatch[1]) : '',
             image: imageMatch ? imageMatch[1] : ''
         };
     } catch (error) {

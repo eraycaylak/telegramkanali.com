@@ -120,12 +120,14 @@ export default function ChannelCard({ channel }: ChannelCardProps) {
 
             {/* Footer Actions */}
             <div className="mt-auto px-5 pb-5 pt-0 relative z-20 pl-16">
-                <Link
-                    href={`/${channel.slug}`}
+                <a
+                    href={channel.join_link}
+                    target="_blank"
+                    rel="nofollow noreferrer"
                     className="flex w-full items-center justify-center rounded-lg bg-green-600 py-2.5 text-center text-sm font-bold text-white shadow-sm transition-colors hover:bg-green-700"
                 >
-                    İNCELE
-                </Link>
+                    KANALA GİT
+                </a>
             </div>
         </div>
     );

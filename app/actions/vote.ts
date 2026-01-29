@@ -3,11 +3,17 @@
 import { createClient } from '@supabase/supabase-js';
 import { revalidatePath } from 'next/cache';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-const adminClient = createClient(supabaseUrl, supabaseServiceKey);
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 export async function voteChannel(channelId: string, voteType: 1 | -1) {
+    if (!supabaseUrl || !supabaseServiceKey) {
+        console.error('Missing Supabase env vars');
+        return { error: 'Server configuration error' };
+    }
+
+    const adminClient = createClient(supabaseUrl, supabaseServiceKey);
+
     if (!channelId) return { error: 'Channel ID required' };
 
     try {
