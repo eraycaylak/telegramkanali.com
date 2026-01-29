@@ -125,16 +125,16 @@ export default function ChannelCard({ channel }: ChannelCardProps) {
                 {score} Puan
             </div>
 
-            <div className="flex flex-col md:flex-row flex-1 gap-2 md:gap-4 p-3 md:p-5 md:pl-16 items-center md:items-start text-center md:text-left">
+            <div className="flex flex-col md:flex-row flex-1 gap-3 md:gap-5 p-3 md:p-5 md:pl-16 items-center md:items-start text-center md:text-left">
                 {/* Logo */}
                 {channel.image && channel.image !== '/images/logo.png' ? (
                     <img
                         src={channel.image}
                         alt={channel.name}
-                        className="h-10 w-10 md:h-14 md:w-14 flex-shrink-0 rounded-full object-cover border border-gray-200"
+                        className="h-10 w-10 md:h-20 md:w-20 flex-shrink-0 rounded-full object-cover border border-gray-200 shadow-sm"
                     />
                 ) : (
-                    <div className="h-10 w-10 md:h-14 md:w-14 flex-shrink-0 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 font-bold text-lg md:text-2xl border border-blue-100">
+                    <div className="h-10 w-10 md:h-20 md:w-20 flex-shrink-0 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 font-bold text-lg md:text-3xl border border-blue-100 shadow-sm">
                         {channel.name.charAt(0)}
                     </div>
                 )}
@@ -172,7 +172,7 @@ export default function ChannelCard({ channel }: ChannelCardProps) {
                         </div>
                     </div>
 
-                    <p className="hidden md:block mt-2 text-sm text-gray-600 line-clamp-2 leading-relaxed">
+                    <p className="hidden md:block mt-2 text-sm text-gray-600 line-clamp-2 leading-normal">
                         {channel.description}
                     </p>
                 </div>
