@@ -37,27 +37,26 @@ async function getChannelMemberCount(username: string): Promise<number | null> {
 }
 
 export async function GET(request: NextRequest) {
-    // Auth check temporarily disabled for testing
-    // const authHeader = request.headers.get('authorization');
-    // const expectedKey = process.env.CRON_SECRET || 'update-members-secret-key';
-    // if (authHeader !== `Bearer ${expectedKey}`) {
-    //     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    // }
-
     if (!telegramBotToken) {
-        return NextResponse.json({ error: 'TELEGRAM_BOT_TOKEN not configured' }, { status: 500 });
+        return NextResponse.json({ error: 'TELEGRAM_BOT_TOKEN not configured' }, { status: 200 });
     }
 
     try {
-        const supabase = createClient(supabaseUrl, supabaseServiceKey);
+        const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+            auth: {
+                autoRefreshToken: false,
+                persistSession: false
+            }
+        });
 
         // Get all channels with their usernames
         const { data: channels, error: fetchError } = await supabase
             .from('channels')
-            .select('id, name, link')
+            .select('id, name, join_link')
             .order('created_at', { ascending: false });
 
         if (fetchError) {
+            console.error('Supabase Fetch Error:', fetchError);
             throw fetchError;
         }
 
@@ -65,16 +64,18 @@ export async function GET(request: NextRequest) {
 
         let updated = 0;
         let failed = 0;
+        const results = [];
 
         for (const channel of channels || []) {
             // Extract username from link
-            const username = channel.link
+            const username = channel.join_link
                 ?.replace('https://t.me/', '')
                 ?.replace('http://t.me/', '')
                 ?.replace('@', '');
 
             if (!username) {
                 failed++;
+                results.push({ name: channel.name, status: 'skipped_no_username' });
                 continue;
             }
 
@@ -91,12 +92,14 @@ export async function GET(request: NextRequest) {
 
                 if (!updateError) {
                     updated++;
-                    console.log(`[MEMBER_COUNT] Updated ${channel.name}: ${memberCount}`);
+                    results.push({ name: channel.name, status: 'updated', count: memberCount });
                 } else {
                     failed++;
+                    results.push({ name: channel.name, status: 'failed_db_update', error: updateError });
                 }
             } else {
                 failed++;
+                results.push({ name: channel.name, status: 'failed_telegram_api' });
             }
 
             // Rate limiting - wait 200ms between requests
@@ -107,11 +110,21 @@ export async function GET(request: NextRequest) {
             success: true,
             updated,
             failed,
-            total: channels?.length || 0
+            total: channels?.length || 0,
+            results
         });
 
-    } catch (error) {
+    } catch (error: any) {
         console.error('[MEMBER_COUNT] Error:', error);
-        return NextResponse.json({ error: String(error) }, { status: 500 });
+        return NextResponse.json({
+            success: false,
+            error: error.message || String(error),
+            details: error, // Should serialize if it's a POJO
+            env: {
+                hasBotToken: !!telegramBotToken,
+                hasSupabaseUrl: !!supabaseUrl,
+                hasServiceKey: !!supabaseServiceKey
+            }
+        }, { status: 200 }); // Return 200 to see body in simple curl
     }
 }
