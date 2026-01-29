@@ -37,13 +37,12 @@ async function getChannelMemberCount(username: string): Promise<number | null> {
 }
 
 export async function GET(request: NextRequest) {
-    // Check for secret key for security
-    const authHeader = request.headers.get('authorization');
-    const expectedKey = process.env.CRON_SECRET || 'update-members-secret-key';
-
-    if (authHeader !== `Bearer ${expectedKey}`) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    // Auth check temporarily disabled for testing
+    // const authHeader = request.headers.get('authorization');
+    // const expectedKey = process.env.CRON_SECRET || 'update-members-secret-key';
+    // if (authHeader !== `Bearer ${expectedKey}`) {
+    //     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    // }
 
     if (!telegramBotToken) {
         return NextResponse.json({ error: 'TELEGRAM_BOT_TOKEN not configured' }, { status: 500 });

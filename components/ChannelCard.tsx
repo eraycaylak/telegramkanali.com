@@ -156,9 +156,13 @@ export default function ChannelCard({ channel }: ChannelCardProps) {
 
                     <div className="flex items-center gap-2 text-xs text-gray-500">
                         <span className="bg-gray-100 px-2 py-0.5 rounded-full">{categoryName}</span>
-                        <div className="flex items-center gap-1">
-                            <Users size={12} />
-                            {channel.stats.subscribers}
+                        <div className="flex items-center gap-1 font-medium text-gray-700">
+                            <Users size={14} className="text-blue-500" />
+                            {channel.member_count ? (
+                                new Intl.NumberFormat('en-US', { notation: "compact", maximumFractionDigits: 1 }).format(channel.member_count)
+                            ) : (
+                                channel.stats.subscribers // Fallback to stats if member_count is missing
+                            )}
                         </div>
                     </div>
 

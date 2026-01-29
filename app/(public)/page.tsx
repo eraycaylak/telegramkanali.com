@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { ShieldCheck, Zap, Globe } from 'lucide-react';
 import { getCategories, getChannels, getFeaturedChannels } from '@/lib/data';
 import ChannelCard from '@/components/ChannelCard';
+import BannerGrid from '@/components/BannerGrid';
 import { Channel } from '@/lib/types';
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -28,41 +29,8 @@ export default async function Home() {
         <h2 className="text-gray-500 font-light text-xl tracking-wider">OCAK 2026 - EN İYİ 100 TELEGRAM KANALLARI VE GRUPLARI</h2>
       </div>
 
-      {/* Banner Grid (4-up like reference) */}
-      <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="bg-gradient-to-r from-blue-900 to-blue-800 h-32 rounded-lg flex items-center justify-between px-8 text-white relative overflow-hidden group cursor-pointer shadow-lg hover:shadow-xl transition-all">
-          <div className="z-10">
-            <h3 className="font-bold text-lg text-blue-200">BLOOMBERG TRADING</h3>
-            <h2 className="text-3xl font-black italic">ÜCRETSİZ</h2>
-            <p className="text-xs text-blue-300">RİSK YOK GETİRİ YÜKSEK</p>
-          </div>
-          <button className="bg-blue-500 hover:bg-blue-400 text-white px-4 py-1 rounded-full font-bold text-sm z-10">Gruba Katıl</button>
-        </div>
-
-        <div className="bg-[#111] h-32 rounded-lg flex items-center justify-between px-8 text-white relative overflow-hidden group cursor-pointer shadow-lg hover:shadow-xl transition-all border border-green-900">
-          <div className="z-10 text-center w-full">
-            <h3 className="text-2xl font-bold mb-1">İLK GELEN 50 KİŞİYE</h3>
-            <div className="bg-green-600 text-black font-black text-2xl py-1 transform -skew-x-12">BEDAVA İŞLEM</div>
-          </div>
-        </div>
-
-        <div className="bg-gradient-to-l from-yellow-700 to-yellow-600 h-32 rounded-lg flex items-center justify-between px-8 text-white relative overflow-hidden group cursor-pointer shadow-lg hover:shadow-xl transition-all">
-          <div className="z-10 flex items-center w-full justify-between">
-            <div className="bg-white text-yellow-800 rounded-full h-16 w-16 flex items-center justify-center font-bold border-4 border-yellow-800">Sohbet</div>
-            <div>
-              <h2 className="text-3xl font-black drop-shadow-md">DÜNYA SOHBET</h2>
-              <button className="bg-white text-black font-bold px-6 py-1 mt-2 rounded shadow-lg float-right">KATIL</button>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-gradient-to-r from-cyan-400 to-blue-400 h-32 rounded-lg flex items-center justify-between px-8 text-white relative overflow-hidden group cursor-pointer shadow-lg hover:shadow-xl transition-all">
-          <div className="z-10 text-center w-full">
-            <h3 className="font-bold text-lg drop-shadow">FIRSATLARI KAÇIRMA</h3>
-            <div className="bg-red-600 text-white font-bold inline-block px-2 transform rotate-2 mt-1">HEMEN KATIL</div>
-          </div>
-        </div>
-      </section>
+      {/* Banner Grid (Dynamic from DB) */}
+      <BannerGrid />
 
 
       {/* MASSIVE Channels Grid */}

@@ -19,6 +19,7 @@ export interface Channel {
     created_at?: string; // DB timestamp
     rating?: number;
     score?: number;
+    member_count?: number; // Fetched from Telegram API
 }
 
 export interface Category {
