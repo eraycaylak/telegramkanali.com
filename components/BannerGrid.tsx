@@ -33,10 +33,10 @@ export default async function BannerGrid({ type = 'homepage', categoryId }: Bann
                     )}
 
                     {/* Overlay for readability if image exists */}
-                    {banner.image_url && <div className="absolute inset-0 bg-black/40 z-0" />}
+                    {banner.image_url && <div className="absolute inset-0 bg-black/40 z-0 transition-opacity group-hover:bg-black/50" />}
 
                     {/* Content */}
-                    <div className="z-10 relative flex-1 min-w-0 pr-4">
+                    <div className="z-10 relative flex-1 min-w-0 pr-4 pointer-events-none">
                         <h3 className="font-bold text-lg text-blue-100 uppercase truncate drop-shadow-md">
                             {banner.title}
                         </h3>
@@ -48,9 +48,9 @@ export default async function BannerGrid({ type = 'homepage', categoryId }: Bann
                     </div>
 
                     {/* Button */}
-                    <button className="bg-white text-black px-4 py-1 rounded-full font-bold text-sm z-10 relative shadow-lg whitespace-nowrap hover:bg-gray-100 transition-colors">
+                    <div className="bg-white text-black px-4 py-1 rounded-full font-bold text-sm z-10 relative shadow-lg whitespace-nowrap group-hover:bg-gray-100 transition-colors pointer-events-none">
                         {banner.button_text || 'Katıl'}
-                    </button>
+                    </div>
                 </a>
             ))}
         </section>
