@@ -3,41 +3,91 @@
 import Link from 'next/link';
 import { BadgeCheck, Users, ThumbsUp, ThumbsDown, ArrowUp } from 'lucide-react';
 import { Channel } from '@/lib/types';
-import { useState } from 'react';
-import { supabase } from '@/lib/supabaseClient';
+import { useState, useEffect } from 'react';
 
 interface ChannelCardProps {
     channel: Channel;
 }
 
+// Generate a simple browser fingerprint
+function generateFingerprint(): string {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+        ctx.textBaseline = 'top';
+        ctx.font = '14px Arial';
+        ctx.fillText('fingerprint', 2, 2);
+    }
+    const canvasData = canvas.toDataURL();
+
+    const data = [
+        navigator.userAgent,
+        navigator.language,
+        screen.width + 'x' + screen.height,
+        new Date().getTimezoneOffset(),
+        canvasData.slice(-50) // Last 50 chars of canvas
+    ].join('|');
+
+    // Simple hash
+    let hash = 0;
+    for (let i = 0; i < data.length; i++) {
+        const char = data.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash;
+    }
+    return Math.abs(hash).toString(36);
+}
+
 export default function ChannelCard({ channel }: ChannelCardProps) {
     const categoryName = channel.categoryName || 'Kategori Yok';
     const [score, setScore] = useState(channel.score || 0);
-    const [userVote, setUserVote] = useState<number | null>(null); // 1, -1 or null
+    const [userVote, setUserVote] = useState<number | null>(null);
     const [loading, setLoading] = useState(false);
+    const [fingerprint, setFingerprint] = useState<string>('');
+    const [hasVoted, setHasVoted] = useState(false);
+
+    useEffect(() => {
+        // Generate fingerprint on client side
+        const fp = generateFingerprint();
+        setFingerprint(fp);
+
+        // Check localStorage for existing vote
+        const votedChannels = JSON.parse(localStorage.getItem('votedChannels') || '{}');
+        if (votedChannels[channel.id]) {
+            setHasVoted(true);
+            setUserVote(votedChannels[channel.id]);
+        }
+    }, [channel.id]);
 
     const handleVote = async (type: 1 | -1) => {
-        if (loading) return;
+        if (loading || hasVoted) {
+            if (hasVoted) alert('Bu kanala zaten oy verdiniz!');
+            return;
+        }
         setLoading(true);
 
         try {
-            // Optimistic update
             const oldScore = score;
-            const oldVote = userVote;
-            setScore(s => s + type); // Immediately update UI
+            setScore(s => s + type);
             setUserVote(type);
 
-            // Using Server Action instead of Edge Function
             const { voteChannel } = await import('@/app/actions/vote');
-            const res = await voteChannel(channel.id, type);
+            const res = await voteChannel(channel.id, type, fingerprint);
 
             if (res.error) {
-                // Revert if error
                 setScore(oldScore);
-                setUserVote(oldVote);
+                setUserVote(null);
+                if (res.alreadyVoted) {
+                    setHasVoted(true);
+                }
                 alert(res.error);
             } else if (res.success && res.newScore !== undefined) {
                 setScore(res.newScore);
+                setHasVoted(true);
+                // Save to localStorage as backup
+                const votedChannels = JSON.parse(localStorage.getItem('votedChannels') || '{}');
+                votedChannels[channel.id] = type;
+                localStorage.setItem('votedChannels', JSON.stringify(votedChannels));
             }
         } catch (err) {
             console.error('Vote error:', err);

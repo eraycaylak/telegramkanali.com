@@ -89,29 +89,41 @@ export async function deleteCategory(id: string) {
 export async function addCategory(formData: FormData) {
     const name = formData.get('name') as string;
     const description = formData.get('description') as string;
-    const icon = formData.get('icon') as string; // E.g. Lucide icon name or emoji
+    const icon = formData.get('icon') as string;
     const slug = name.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
+    const id = slug; // Use slug as ID for text primary key
 
-    if (!name) return { error: 'Name is required' };
+    console.log('[CATEGORY] Adding category:', { id, name, slug, description, icon });
+
+    if (!name) {
+        console.error('[CATEGORY] Name is required');
+        return { error: 'Name is required' };
+    }
 
     try {
-        const { error } = await adminClient
+        const { data, error } = await adminClient
             .from('categories')
             .insert({
+                id,
                 name,
                 description,
                 icon,
                 slug
-            });
+            })
+            .select();
 
-        if (error) throw error;
+        if (error) {
+            console.error('[CATEGORY] Insert error:', JSON.stringify(error, null, 2));
+            throw error;
+        }
 
+        console.log('[CATEGORY] Success:', data);
         revalidatePath('/');
-        revalidatePath('/admin/dashboard');
+        revalidatePath('/admin/categories');
         return { success: true };
-    } catch (error) {
-        console.error('Add category error:', error);
-        return { error: 'Failed to add category' };
+    } catch (error: any) {
+        console.error('[CATEGORY] Exception:', error?.message || error);
+        return { error: `Kategori eklenemedi: ${error?.message || 'Bilinmeyen hata'}` };
     }
 }
 
