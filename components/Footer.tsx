@@ -49,10 +49,11 @@ export default function Footer() {
                     <div>
                         <h3 className="mb-4 text-sm font-semibold text-gray-900">Telegram Rehberleri</h3>
                         <ul className="space-y-2 text-sm text-gray-600">
+                            <li><Link href="/rehber/telegram-kanallari-rehberi" className="hover:text-blue-600 font-medium">📚 Telegram Kanalları Rehberi</Link></li>
+                            <li><Link href="/rehber/telegram-kanallari-nedir" className="hover:text-blue-600">Telegram Kanalları Nedir?</Link></li>
                             <li><Link href="/rehber/en-iyi-telegram-kanallari" className="hover:text-blue-600">En İyi Telegram Kanalları</Link></li>
-                            <li><Link href="/rehber/telegram-kanal-listesi" className="hover:text-blue-600">Telegram Kanal Listesi</Link></li>
+                            <li><Link href="/rehber/telegram-kripto-kanallari" className="hover:text-blue-600">Kripto Telegram Kanalları</Link></li>
                             <li><Link href="/rehber/ucretsiz-telegram-kanallari" className="hover:text-blue-600">Ücretsiz Telegram Kanalları</Link></li>
-                            <li><Link href="/rehber/telegram-gruplari" className="hover:text-blue-600">Telegram Grupları</Link></li>
                             <li><Link href="/rehber/turk-telegram-kanallari" className="hover:text-blue-600">Türk Telegram Kanalları</Link></li>
                         </ul>
                     </div>
