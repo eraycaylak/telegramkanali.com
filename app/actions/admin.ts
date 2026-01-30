@@ -37,32 +37,47 @@ export async function addChannel(formData: FormData) {
     const image = formData.get('image') as string;
     const slug = name.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
 
+    console.log('[CHANNEL] Adding channel:', { name, slug, join_link, category_id, image, description });
+
     // Basic validation
-    if (!name || !join_link) return { error: 'Name and Join Link are required' };
+    if (!name || !join_link) return { error: 'Ad ve Katılma Linki gereklidir' };
 
     try {
-        const { error } = await adminClient
+        const insertData: any = {
+            name,
+            description,
+            join_link,
+            slug,
+            stats: { subscribers: '0' },
+            image: image || '/images/logo.png',
+            verified: false,
+            featured: false
+        };
+
+        // Eğer category_id boş ise, veritabanına gönderme (NULL olarak bırak)
+        if (category_id && category_id.trim() !== '') {
+            insertData.category_id = category_id;
+        }
+
+        console.log('[CHANNEL] Insert data:', insertData);
+
+        const { data, error } = await adminClient
             .from('channels')
-            .insert({
-                name,
-                description,
-                join_link,
-                slug,
-                category_id,
-                stats: { subscribers: '0' },
-                image: image || '/images/logo.png',
-                verified: false,
-                featured: false
-            });
+            .insert(insertData)
+            .select();
 
-        if (error) throw error;
+        if (error) {
+            console.error('[CHANNEL] Insert error:', JSON.stringify(error, null, 2));
+            throw error;
+        }
 
+        console.log('[CHANNEL] Success:', data);
         revalidatePath('/');
         revalidatePath('/admin/dashboard');
         return { success: true };
-    } catch (error) {
-        console.error('Add error:', error);
-        return { error: 'Failed to add channel' };
+    } catch (error: any) {
+        console.error('[CHANNEL] Exception:', error?.message || error);
+        return { error: `Kanal eklenemedi: ${error?.message || 'Bilinmeyen hata'}` };
     }
 }
 
