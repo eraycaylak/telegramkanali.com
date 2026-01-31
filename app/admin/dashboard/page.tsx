@@ -26,6 +26,7 @@ export default function AdminDashboard() {
     const [editingId, setEditingId] = useState<string | null>(null);
     const [scraping, setScraping] = useState(false);
     const [syncing, setSyncing] = useState(false);
+    const [lastEditedId, setLastEditedId] = useState<string | null>(null);
 
     // Protect Route
     useEffect(() => {
@@ -69,6 +70,7 @@ export default function AdminDashboard() {
             image: channel.image || ''
         });
         setEditingId(channel.id);
+        setLastEditedId(channel.id);
         setIsModalOpen(true);
     };
 
@@ -179,8 +181,27 @@ export default function AdminDashboard() {
                                 <tr><td colSpan={4} className="p-8 text-center text-gray-400">Kanal bulunamadı.</td></tr>
                             ) : (
                                 filteredChannels.map(channel => (
-                                    <tr key={channel.id} className="hover:bg-gray-50 transition">
-                                        <td className="p-4 font-medium text-gray-900">{channel.name}</td>
+                                    <tr
+                                        key={channel.id}
+                                        className={`transition border-b border-gray-100 ${editingId === channel.id ? 'bg-blue-50' :
+                                            lastEditedId === channel.id ? 'bg-green-50' :
+                                                'hover:bg-gray-50'
+                                            }`}
+                                    >
+                                        <td className="p-4 font-medium text-gray-900 flex items-center gap-3">
+                                            {channel.image && channel.image !== '/images/logo.png' ? (
+                                                <img
+                                                    src={channel.image}
+                                                    alt=""
+                                                    className="w-10 h-10 rounded-full object-cover border border-gray-200 shadow-sm"
+                                                />
+                                            ) : (
+                                                <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 font-bold border border-gray-200">
+                                                    {channel.name.charAt(0)}
+                                                </div>
+                                            )}
+                                            <span>{channel.name}</span>
+                                        </td>
                                         <td className="p-4 text-gray-500 text-sm">
                                             <span className="bg-blue-50 text-blue-700 px-2 py-1 rounded-md">{channel.categoryName || 'Genel'}</span>
                                         </td>
@@ -188,7 +209,7 @@ export default function AdminDashboard() {
                                         <td className="p-4 text-right flex items-center justify-end gap-2">
                                             <button
                                                 onClick={() => handleEdit(channel)}
-                                                className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition" title="Düzenle">
+                                                className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-100 rounded-lg transition" title="Düzenle">
                                                 <Edit size={18} />
                                             </button>
                                             <button
