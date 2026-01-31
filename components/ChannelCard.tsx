@@ -7,6 +7,7 @@ import { useState, useEffect } from 'react';
 
 interface ChannelCardProps {
     channel: Channel;
+    compact?: boolean;
 }
 
 // Generate a simple browser fingerprint
@@ -38,20 +39,20 @@ function generateFingerprint(): string {
     return Math.abs(hash).toString(36);
 }
 
-export default function ChannelCard({ channel }: ChannelCardProps) {
+export default function ChannelCard({ channel, compact = false }: ChannelCardProps) {
     const categoryName = channel.categoryName || 'Kategori Yok';
     const [score, setScore] = useState(channel.score || 0);
     const [userVote, setUserVote] = useState<number | null>(null);
     const [loading, setLoading] = useState(false);
     const [fingerprint, setFingerprint] = useState<string>('');
     const [hasVoted, setHasVoted] = useState(false);
+    // const compact = ... removed
 
     useEffect(() => {
-        // Generate fingerprint on client side
+        // ... (keep existing useEffect)
         const fp = generateFingerprint();
         setFingerprint(fp);
 
-        // Check localStorage for existing vote
         const votedChannels = JSON.parse(localStorage.getItem('votedChannels') || '{}');
         if (votedChannels[channel.id]) {
             setHasVoted(true);
@@ -60,6 +61,7 @@ export default function ChannelCard({ channel }: ChannelCardProps) {
     }, [channel.id]);
 
     const handleVote = async (type: 1 | -1) => {
+        // ... (keep existing handleVote)
         if (loading || hasVoted) {
             if (hasVoted) alert('Bu kanala zaten oy verdiniz!');
             return;
@@ -84,7 +86,6 @@ export default function ChannelCard({ channel }: ChannelCardProps) {
             } else if (res.success && res.newScore !== undefined) {
                 setScore(res.newScore);
                 setHasVoted(true);
-                // Save to localStorage as backup
                 const votedChannels = JSON.parse(localStorage.getItem('votedChannels') || '{}');
                 votedChannels[channel.id] = type;
                 localStorage.setItem('votedChannels', JSON.stringify(votedChannels));
@@ -97,9 +98,51 @@ export default function ChannelCard({ channel }: ChannelCardProps) {
         }
     };
 
+    // COMPACT MODE (For Popular Channels)
+    if (compact) {
+        return (
+            <div className="group relative flex flex-col rounded-xl border border-gray-100 bg-white p-4 shadow-sm transition-all hover:shadow-md hover:border-blue-200 text-center h-full">
+                <Link href={`/${channel.slug}`} className="absolute inset-0 z-10" />
+
+                <div className="mx-auto mb-3 relative">
+                    {channel.image && channel.image !== '/images/logo.png' ? (
+                        <img
+                            src={channel.image}
+                            alt={channel.name}
+                            className="h-16 w-16 rounded-full object-cover border border-gray-100 shadow-sm group-hover:scale-105 transition-transform"
+                        />
+                    ) : (
+                        <div className="h-16 w-16 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 font-bold text-2xl border border-blue-100">
+                            {channel.name.charAt(0)}
+                        </div>
+                    )}
+                    <div className="absolute -bottom-1 -right-1 bg-yellow-100 text-yellow-700 text-[10px] font-bold px-1.5 py-0.5 rounded-full border border-yellow-200 flex items-center gap-0.5">
+                        <span>★</span> {score}
+                    </div>
+                </div>
+
+                <h3 className="font-bold text-gray-900 text-sm mb-1 truncate px-1 group-hover:text-blue-600 transition-colors">
+                    {channel.name}
+                </h3>
+
+                <p className="text-xs text-gray-500 mb-3 truncate px-2">
+                    {categoryName}
+                </p>
+
+                <div className="mt-auto">
+                    <button className="w-full bg-blue-50 text-blue-600 text-xs font-bold py-1.5 rounded-lg group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                        İNCELE
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    // NORMAL MODE
     return (
         <div className="group relative flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white transition-all hover:border-blue-300 hover:shadow-lg h-full">
-            {/* Voting Sidebar - Hidden on mobile, visible on md+ */}
+            {/* ... (rest of the normal component) */}
+            {/* Voting Sidebar */}
             <div className="hidden md:flex absolute left-0 top-0 bottom-0 w-12 bg-gray-50 flex-col items-center justify-center gap-2 border-r border-gray-100 z-30">
                 <button
                     onClick={() => handleVote(1)}
@@ -120,7 +163,7 @@ export default function ChannelCard({ channel }: ChannelCardProps) {
                 </button>
             </div>
 
-            {/* Mobile Vote Badge (with vote buttons) */}
+            {/* Mobile Vote Badge */}
             <div className="md:hidden absolute top-2 right-2 z-30 bg-white/90 backdrop-blur text-gray-600 text-[10px] font-bold px-2 py-1 rounded-lg border flex items-center gap-1.5 shadow-sm">
                 <button
                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleVote(1); }}
@@ -196,7 +239,6 @@ export default function ChannelCard({ channel }: ChannelCardProps) {
 
             {/* Footer Actions */}
             <div className="mt-auto px-3 pb-3 md:px-5 md:pb-5 pt-0 relative z-20 md:pl-16">
-                {/* SEO Hidden Description */}
                 <span className="sr-only">
                     {channel.name} Telegram kanalı, {categoryName} kategorisinde aktif bir kanaldır. Abone sayısı: {channel.member_count || channel.stats.subscribers}
                 </span>

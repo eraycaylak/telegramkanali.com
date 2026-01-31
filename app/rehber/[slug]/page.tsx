@@ -60,7 +60,7 @@ export default async function SeoLandingPage({ params }: PageProps) {
     }
 
     const categories = await getCategories();
-    const allChannels = await getChannels();
+    const { data: allChannels } = await getChannels();
 
     // Get related channels based on related_categories
     const relatedChannels = page.related_categories

@@ -1,13 +1,15 @@
 import Link from 'next/link';
-import { ShieldCheck, Zap, Globe, HelpCircle } from 'lucide-react';
-import { getCategories, getChannels, getFeaturedChannels } from '@/lib/data';
+import { ShieldCheck, Zap, Globe, HelpCircle, Star, TrendingUp } from 'lucide-react';
+import { getCategories, getChannels, getPopularChannels } from '@/lib/data';
 import ChannelCard from '@/components/ChannelCard';
 import BannerGrid from '@/components/BannerGrid';
+import SearchFilter from '@/components/SearchFilter';
+import Pagination from '@/components/Pagination';
 import JsonLd, { generateFAQSchema } from '@/components/JsonLd';
-import { Channel } from '@/lib/types';
 
 // Cache for 60 seconds - improves performance
 export const revalidate = 60;
+export const dynamic = 'force-dynamic';
 
 const faqs = [
   {
@@ -32,22 +34,31 @@ const faqs = [
   }
 ];
 
-export default async function Home() {
-  const featuredChannels = await getFeaturedChannels();
-  const allChannelsRaw = await getChannels(); // Fetches all for list
-  const categories = await getCategories();
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: { [key: string]: string | string[] | undefined };
+}) {
+  const page = typeof searchParams.page === 'string' ? parseInt(searchParams.page) : 1;
+  const limit = 20; // Items per page
+  const search = typeof searchParams.q === 'string' ? searchParams.q : undefined;
+  const categoryId = typeof searchParams.category === 'string' ? searchParams.category : undefined;
 
-  // Replicate channels to simulate 100+ items for "infinite scroll" feel if needed, 
-  // or just use raw data if we seeded enough. 
-  // We seeded 4 * 25 = 100 items via script? No, we seeded from data.ts which had ~4 items.
-  // The seed script used `channels` array.
-  // So DB has 4 items.
-  // We should client-side duplicate or server-side duplicate to keep the "Massive" look user likes.
+  // Parallel data fetching
+  const [
+    { data: channels, count },
+    categories,
+    popularChannels
+  ] = await Promise.all([
+    getChannels(page, limit, search, categoryId),
+    getCategories(),
+    getPopularChannels(5) // Top 5 logic
+  ]);
 
-  const allChannels = allChannelsRaw;
+  const totalPages = Math.ceil(count / limit);
 
   return (
-    <div className="space-y-12">
+    <div className="space-y-8">
 
       {/* SEO H1-H2 Hierarchy */}
       <div className="text-center border-b border-gray-200 pb-6 pt-6">
@@ -55,24 +66,59 @@ export default async function Home() {
         <h2 className="text-gray-500 font-light text-lg tracking-wider">Güncel ve Aktif Telegram Kanalları - Ocak 2026</h2>
       </div>
 
-      {/* Banner Grid (Dynamic from DB) */}
-      <BannerGrid />
+      {/* Banner Grid (Only show on first page if no search active?) - Keeping it always for now */}
+      {!search && !categoryId && <BannerGrid />}
 
+      {/* POPULAR CHANNELS SECTION (Only on first page & no search) */}
+      {!search && !categoryId && page === 1 && popularChannels.length > 0 && (
+        <section className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-100 relative overflow-hidden">
+          <div className="flex items-center gap-2 mb-4">
+            <TrendingUp className="text-blue-600" />
+            <h3 className="text-xl font-bold text-gray-900">Popüler Kanallar</h3>
+            <span className="text-xs font-semibold bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">Editörün Seçimi</span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+            {popularChannels.map(channel => (
+              <ChannelCard key={`pop-${channel.id}`} channel={channel} compact />
+            ))}
+          </div>
+        </section>
+      )}
 
-      {/* MASSIVE Channels Grid */}
+      {/* FILTER & SEARCH */}
+      <SearchFilter categories={categories} />
+
+      {/* MAIN CHANNELS GRID */}
       <section>
-        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
-          {allChannels.map((channel) => (
-            <ChannelCard key={channel.id} channel={channel} />
-          ))}
-        </div>
-        <div className="mt-8 text-center">
-          <button className="bg-gray-800 text-white px-8 py-3 rounded font-bold hover:bg-gray-700 transition">DAHA FAZLA GÖSTER</button>
-        </div>
+        {channels.length === 0 ? (
+          <div className="text-center py-20 bg-gray-50 rounded-xl">
+            <p className="text-gray-500 text-lg">Aradığınız kriterlere uygun kanal bulunamadı.</p>
+            <Link href="/" className="text-blue-600 font-medium hover:underline mt-2 inline-block">Filtreleri Temizle</Link>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {channels.map((channel, index) => (
+              <div key={channel.id} className="contents">
+                <ChannelCard channel={channel} />
+
+                {/* AD PLACEHOLDER - Insert after 6th item (index 5) */}
+                {index === 5 && (
+                  <div className="col-span-1 sm:col-span-2 lg:col-span-3 bg-gray-100 border-2 border-dashed border-gray-300 rounded-xl p-8 flex flex-col items-center justify-center text-gray-400 my-4">
+                    <span className="font-bold text-lg">REKLAM ALANI</span>
+                    <span className="text-sm">Buraya reklam gelebilir (728x90)</span>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* PAGINATION */}
+        <Pagination currentPage={page} totalPages={totalPages} searchParams={searchParams} />
       </section>
 
       {/* SEO / Blog Content Section (Mimicking the reference visuals) */}
-      <section className="grid gap-12 lg:grid-cols-3 pt-12 border-t border-gray-100">
+      <section className="grid gap-12 lg:grid-cols-3 pt-12 border-t border-gray-100 mt-12">
 
         {/* Main Content Column */}
         <div className="lg:col-span-2 space-y-8 text-gray-700 leading-relaxed">
@@ -145,17 +191,7 @@ export default async function Home() {
                   <Link href={`/${c.slug}`} className="flex items-center justify-between text-gray-600 hover:text-blue-600 hover:pl-2 transition-all">
                     <span>{c.name}</span>
                     <span className="text-xs bg-white px-2 py-1 rounded border border-gray-100 text-gray-400">
-                      {10 + i * 5} kanal
-                    </span>
-                  </Link>
-                </li>
-              ))}
-              {[...Array(5)].map((_, i) => (
-                <li key={i}>
-                  <Link href="#" className="flex items-center justify-between text-gray-600 hover:text-blue-600 hover:pl-2 transition-all">
-                    <span>Örnek Kategori {i + 1}</span>
-                    <span className="text-xs bg-white px-2 py-1 rounded border border-gray-100 text-gray-400">
-                      {Math.floor(Math.random() * 50)} kanal
+                      More
                     </span>
                   </Link>
                 </li>
@@ -201,3 +237,4 @@ export default async function Home() {
     </div>
   );
 }
+

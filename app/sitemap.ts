@@ -5,7 +5,7 @@ export const baseUrl = 'https://telegramkanali.com';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Fetch dynamic data from database
-    const channels = await getChannels();
+    const { data: channels } = await getChannels(1, 1000); // Fetch up to 1000 for sitemap
     const categories = await getCategories();
     const seoPages = await getSeoPages();
 

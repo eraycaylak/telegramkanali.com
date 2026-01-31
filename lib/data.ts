@@ -15,27 +15,68 @@ export async function getCategories(): Promise<Category[]> {
 }
 
 // Fetch Channels
-export async function getChannels(): Promise<Channel[]> {
-    console.log('[DATA] Fetching all channels from Supabase...');
-    const { data, error } = await supabase
+// Fetch Channels with Pagination & Filtering
+export async function getChannels(
+    page: number = 1,
+    limit: number = 20,
+    search?: string,
+    categoryId?: string
+): Promise<{ data: Channel[], count: number }> {
+    const from = (page - 1) * limit;
+    const to = from + limit - 1;
+
+    let query = supabase
         .from('channels')
-        .select('*, categories(name, slug)')
+        .select('*, categories(name, slug)', { count: 'exact' });
+
+    if (search) {
+        query = query.ilike('name', `%${search}%`);
+    }
+
+    if (categoryId && categoryId !== 'all') {
+        query = query.eq('category_id', categoryId);
+    }
+
+    // Default sorting
+    query = query
         .order('score', { ascending: false })
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .range(from, to);
+
+    const { data, error, count } = await query;
 
     if (error) {
         console.error('[DATA] Error fetching channels:', error);
+        return { data: [], count: 0 };
+    }
+
+    const mappedData = data.map((d: any) => ({
+        ...d,
+        categoryName: d.categories?.name,
+    })) as Channel[];
+
+    return { data: mappedData, count: count || 0 };
+}
+
+// Fetch Popular Channels (High Score)
+export async function getPopularChannels(limit: number = 5): Promise<Channel[]> {
+    const { data, error } = await supabase
+        .from('channels')
+        .select('*, categories(name, slug)')
+        .order('score', { ascending: false }) // Highest score first
+        .limit(limit);
+
+    if (error) {
+        console.error('Error fetching popular channels:', error);
         return [];
     }
 
-    console.log('[DATA] Fetched channels count:', data?.length || 0);
-
-    // Map DB fields to Type fields
     return data.map((d: any) => ({
         ...d,
         categoryName: d.categories?.name,
     })) as Channel[];
 }
+
 
 // Helpers
 export async function getFeaturedChannels(): Promise<Channel[]> {
