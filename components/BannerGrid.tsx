@@ -14,14 +14,14 @@ export default async function BannerGrid({ type = 'homepage', categoryId }: Bann
     if (!banners || banners.length === 0) return null;
 
     return (
-        <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <section className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-4">
             {banners.map((banner) => (
                 <a
                     key={banner.id}
                     href={banner.link_url || '#'}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={`rounded-lg flex items-center justify-between px-4 md:px-8 text-white relative overflow-hidden group cursor-pointer shadow-lg hover:shadow-xl transition-all ${!banner.image_url ? `h-24 md:h-32 bg-gradient-to-r ${banner.bg_color}` : ''}`}
+                    className={`rounded-none md:rounded-lg flex items-center justify-between px-4 md:px-8 text-white relative overflow-hidden group cursor-pointer shadow-lg hover:shadow-xl transition-all ${!banner.image_url ? `h-28 md:h-32 bg-gradient-to-r ${banner.bg_color}` : ''}`}
                 >
                     {/* Background Image if exists */}
                     {banner.image_url && (
