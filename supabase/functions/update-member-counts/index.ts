@@ -1,4 +1,5 @@
-// Supabase Edge Function to update Telegram channel member counts
+// Supabase Edge Function to update Telegram channel info
+// Updates: member_count, image (photo), description
 // Runs daily via cron job
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
@@ -8,71 +9,100 @@ const corsHeaders = {
     'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-interface TelegramResponse {
-    ok: boolean
-    result?: {
-        member_count?: number
-        title?: string
-        description?: string
-        photo?: {
-            big_file_id?: string
-        }
-    }
-    description?: string
+interface ChannelInfo {
+    memberCount: number;
+    title: string;
+    description: string;
+    photoUrl: string | null;
 }
 
-async function getChannelInfo(username: string, botToken: string): Promise<{ memberCount: number | null; error?: string }> {
+// Telegram HTML sayfasından bilgi çeker
+async function fetchChannelInfo(username: string): Promise<ChannelInfo | null> {
     try {
-        // Remove @ if present
-        const cleanUsername = username.replace('@', '').replace('https://t.me/', '');
+        const response = await fetch(`https://t.me/${username}`, {
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                'Accept': 'text/html'
+            }
+        });
 
-        const response = await fetch(
-            `https://api.telegram.org/bot${botToken}/getChatMemberCount?chat_id=@${cleanUsername}`
-        );
+        if (!response.ok) return null;
 
-        const data: TelegramResponse = await response.json();
+        const html = await response.text();
 
-        if (data.ok && data.result) {
-            return { memberCount: data.result.member_count || null };
+        // Title
+        const titleMatch = html.match(/<meta property="og:title" content="([^"]+)"/);
+        const title = titleMatch ? decodeEntities(titleMatch[1]) : username;
+
+        // Description
+        const descMatch = html.match(/<meta property="og:description" content="([^"]+)"/);
+        const description = descMatch ? decodeEntities(descMatch[1]) : '';
+
+        // Photo URL
+        const imageMatch = html.match(/<meta property="og:image" content="([^"]+)"/);
+        let photoUrl = imageMatch ? imageMatch[1] : null;
+        if (photoUrl?.includes('telegram-placeholder') || photoUrl?.includes('default')) {
+            photoUrl = null;
         }
 
-        return { memberCount: null, error: data.description || 'Unknown error' };
+        // Member count
+        let memberCount = 0;
+        const memberMatch = html.match(/(\d[\d\s,\.]*(?:K|M)?)\s*(?:members|subscribers|üye|abone)/i);
+        if (memberMatch) {
+            memberCount = parseCount(memberMatch[1]);
+        }
+        // Alternatif
+        if (memberCount === 0) {
+            const extraMatch = html.match(/class="tgme_page_extra">([^<]+)</);
+            if (extraMatch) {
+                memberCount = parseCount(extraMatch[1]);
+            }
+        }
+
+        return { memberCount, title, description, photoUrl };
     } catch (error) {
-        return { memberCount: null, error: String(error) };
+        console.error(`[FETCH] Error for ${username}:`, error);
+        return null;
     }
+}
+
+function decodeEntities(text: string): string {
+    const entities: Record<string, string> = {
+        '&amp;': '&', '&lt;': '<', '&gt;': '>', '&quot;': '"', '&#39;': "'", '&nbsp;': ' '
+    };
+    return text.replace(/&[^;]+;/g, (m) => entities[m] || m);
+}
+
+function parseCount(str: string): number {
+    if (!str) return 0;
+    let clean = str.replace(/[\s,]/g, '');
+    if (clean.includes('K') || clean.includes('k')) {
+        return Math.round(parseFloat(clean.replace(/[Kk]/g, '')) * 1000);
+    }
+    if (clean.includes('M') || clean.includes('m')) {
+        return Math.round(parseFloat(clean.replace(/[Mm]/g, '')) * 1000000);
+    }
+    clean = clean.replace(/\./g, '');
+    return parseInt(clean) || 0;
 }
 
 Deno.serve(async (req) => {
-    // Handle CORS
     if (req.method === 'OPTIONS') {
         return new Response('ok', { headers: corsHeaders });
     }
 
     try {
-        // Get environment variables
         const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
         const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-        const telegramBotToken = Deno.env.get('TELEGRAM_BOT_TOKEN');
 
-        if (!telegramBotToken) {
-            return new Response(
-                JSON.stringify({ error: 'TELEGRAM_BOT_TOKEN not configured' }),
-                { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-            );
-        }
-
-        // Create Supabase client
         const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-        // Get all channels
         const { data: channels, error: fetchError } = await supabase
             .from('channels')
-            .select('id, username, member_count')
+            .select('id, name, join_link, member_count, image, description')
             .order('created_at', { ascending: false });
 
-        if (fetchError) {
-            throw fetchError;
-        }
+        if (fetchError) throw fetchError;
 
         console.log(`[UPDATE] Processing ${channels?.length || 0} channels`);
 
@@ -80,48 +110,66 @@ Deno.serve(async (req) => {
         let failed = 0;
         const results: any[] = [];
 
-        // Process each channel
         for (const channel of channels || []) {
-            if (!channel.username) continue;
+            const username = channel.join_link
+                ?.replace('https://t.me/', '')
+                ?.replace('http://t.me/', '')
+                ?.replace('@', '');
 
-            const { memberCount, error } = await getChannelInfo(channel.username, telegramBotToken);
+            if (!username || username.includes('+') || username.includes('joinchat')) {
+                failed++;
+                results.push({ name: channel.name, status: 'skipped_private' });
+                continue;
+            }
 
-            if (memberCount !== null) {
-                // Update the channel
+            const info = await fetchChannelInfo(username);
+
+            if (info && info.memberCount > 0) {
+                const updateData: any = {
+                    member_count: info.memberCount,
+                    updated_at: new Date().toISOString()
+                };
+
+                // Fotoğraf varsa güncelle
+                if (info.photoUrl) {
+                    updateData.image = info.photoUrl;
+                }
+
+                // Açıklama varsa güncelle
+                if (info.description) {
+                    updateData.description = info.description;
+                }
+
                 const { error: updateError } = await supabase
                     .from('channels')
-                    .update({
-                        member_count: memberCount,
-                        updated_at: new Date().toISOString()
-                    })
+                    .update(updateData)
                     .eq('id', channel.id);
 
                 if (!updateError) {
                     updated++;
-                    results.push({ id: channel.id, username: channel.username, memberCount, status: 'updated' });
+                    results.push({
+                        name: channel.name,
+                        status: 'updated',
+                        members: info.memberCount,
+                        hasPhoto: !!info.photoUrl
+                    });
                 } else {
                     failed++;
-                    results.push({ id: channel.id, username: channel.username, error: updateError.message, status: 'failed' });
+                    results.push({ name: channel.name, status: 'db_error', error: updateError.message });
                 }
             } else {
                 failed++;
-                results.push({ id: channel.id, username: channel.username, error, status: 'api_error' });
+                results.push({ name: channel.name, status: 'fetch_failed' });
             }
 
-            // Rate limiting - wait 100ms between requests
-            await new Promise(resolve => setTimeout(resolve, 100));
+            // Rate limiting
+            await new Promise(resolve => setTimeout(resolve, 200));
         }
 
         console.log(`[UPDATE] Complete: ${updated} updated, ${failed} failed`);
 
         return new Response(
-            JSON.stringify({
-                success: true,
-                updated,
-                failed,
-                total: channels?.length || 0,
-                results
-            }),
+            JSON.stringify({ success: true, updated, failed, total: channels?.length || 0, results }),
             { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
 

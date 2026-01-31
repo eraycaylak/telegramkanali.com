@@ -32,11 +32,10 @@ export default async function BannerGrid({ type = 'homepage', categoryId }: Bann
                         />
                     )}
 
-                    {/* Overlay for readability if image exists */}
+                    {/* Subtle gradient overlay for text readability - keeps image vibrant */}
                     {banner.image_url && (
                         <div
-                            className="absolute inset-0 bg-black z-0 transition-opacity group-hover:opacity-75"
-                            style={{ opacity: (banner.overlay_opacity ?? 40) / 100 }}
+                            className="absolute inset-0 z-0 bg-gradient-to-r from-black/60 via-black/20 to-transparent"
                         />
                     )}
 
@@ -54,16 +53,19 @@ export default async function BannerGrid({ type = 'homepage', categoryId }: Bann
                             </div>
                         )}
 
-                        <h3 className="font-bold text-lg uppercase truncate drop-shadow-md w-full" style={{ color: 'inherit' }}>
+                        <h3
+                            className="font-bold text-lg uppercase truncate w-full"
+                            style={{ color: 'inherit', textShadow: '2px 2px 4px rgba(0,0,0,0.8)' }}
+                        >
                             {banner.title}
                         </h3>
                         {banner.subtitle && (
                             <h2
-                                className={`font-black italic truncate drop-shadow-lg leading-tight w-full ${banner.font_size === 'small' ? 'text-xl' :
+                                className={`font-black italic truncate leading-tight w-full ${banner.font_size === 'small' ? 'text-xl' :
                                     banner.font_size === 'large' ? 'text-4xl' :
                                         banner.font_size === 'xl' ? 'text-5xl' : 'text-3xl'
                                     }`}
-                                style={{ color: 'inherit' }}
+                                style={{ color: 'inherit', textShadow: '2px 2px 6px rgba(0,0,0,0.9)' }}
                             >
                                 {banner.subtitle}
                             </h2>
