@@ -21,7 +21,7 @@ export default async function BannerGrid({ type = 'homepage', categoryId }: Bann
                     href={banner.link_url || '#'}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={`h-32 rounded-lg flex items-center justify-between px-8 text-white relative overflow-hidden group cursor-pointer shadow-lg hover:shadow-xl transition-all ${!banner.image_url ? `bg-gradient-to-r ${banner.bg_color}` : ''}`}
+                    className={`aspect-[6/1] md:h-32 md:aspect-auto rounded-lg flex items-center justify-between px-8 text-white relative overflow-hidden group cursor-pointer shadow-lg hover:shadow-xl transition-all ${!banner.image_url ? `bg-gradient-to-r ${banner.bg_color}` : ''}`}
                 >
                     {/* Background Image if exists */}
                     {banner.image_url && (
