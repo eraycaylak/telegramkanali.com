@@ -1,16 +1,11 @@
 'use server';
 
-import { createClient } from '@supabase/supabase-js';
+import { getAdminClient } from '@/lib/supabaseAdmin';
+import { supabase as publicClient } from '@/lib/supabaseClient';
 import { revalidatePath } from 'next/cache';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-
 // Admin client for writes
-const adminClient = createClient(supabaseUrl, supabaseServiceKey);
-// Public client for reads
-const publicClient = createClient(supabaseUrl, supabaseAnonKey);
+const adminClient = getAdminClient();
 
 export async function getSetting(key: string): Promise<string | null> {
     try {

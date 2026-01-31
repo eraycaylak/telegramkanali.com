@@ -1,15 +1,9 @@
 import Link from 'next/link';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabaseClient';
 
 // Server component - fetches logo from database
 async function getLogoUrl(): Promise<string | null> {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-    if (!supabaseUrl || !supabaseKey) return null;
-
     try {
-        const supabase = createClient(supabaseUrl, supabaseKey);
         const { data } = await supabase
             .from('settings')
             .select('value')
@@ -41,17 +35,11 @@ export default async function DynamicLogo() {
                 <img
                     src={logoUrl}
                     alt="Telegram Kanalları"
-                    style={{
-                        height: '100px',
-                        width: 'auto',
-                        maxWidth: '400px',
-                        objectFit: 'contain'
-                    }}
+                    className="h-10 md:h-[100px] w-auto max-w-[200px] md:max-w-[400px] object-contain"
                 />
             ) : (
                 <div
-                    className="bg-[#444] rounded-lg flex items-center justify-center text-gray-400 text-lg font-bold"
-                    style={{ width: '300px', height: '100px' }}
+                    className="bg-[#444] rounded-lg flex items-center justify-center text-gray-400 text-lg font-bold h-10 w-32 md:h-[100px] md:w-[300px]"
                 >
                     LOGO
                 </div>

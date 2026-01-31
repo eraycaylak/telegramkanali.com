@@ -1,13 +1,10 @@
 'use server';
 
-import { createClient } from '@supabase/supabase-js';
+import { getAdminClient } from '@/lib/supabaseAdmin';
 import { revalidatePath } from 'next/cache';
 
 // Initialize Service Role Client for Admin actions (Bypasses RLS)
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-
-const adminClient = createClient(supabaseUrl, supabaseServiceKey);
+const adminClient = getAdminClient();
 
 export async function deleteChannel(channelId: string) {
     if (!channelId) return { error: 'Channel ID required' };

@@ -1,11 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { getAdminClient } from '@/lib/supabaseAdmin';
 
 // This API route updates member counts for all channels
 // Can be called manually or via cron job service like cron-job.org
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 const telegramBotToken = process.env.TELEGRAM_BOT_TOKEN;
 
 async function getChannelMemberCount(username: string): Promise<number | null> {
@@ -42,12 +40,7 @@ export async function GET(request: NextRequest) {
     }
 
     try {
-        const supabase = createClient(supabaseUrl, supabaseServiceKey, {
-            auth: {
-                autoRefreshToken: false,
-                persistSession: false
-            }
-        });
+        const supabase = getAdminClient();
 
         // Get all channels with their usernames
         const { data: channels, error: fetchError } = await supabase
@@ -122,8 +115,8 @@ export async function GET(request: NextRequest) {
             details: error, // Should serialize if it's a POJO
             env: {
                 hasBotToken: !!telegramBotToken,
-                hasSupabaseUrl: !!supabaseUrl,
-                hasServiceKey: !!supabaseServiceKey
+                // hasSupabaseUrl: !!supabaseUrl,
+                // hasServiceKey: !!supabaseServiceKey
             }
         }, { status: 200 }); // Return 200 to see body in simple curl
     }
