@@ -82,8 +82,21 @@ export default function BannersPage() {
     };
 
     const handleToggleActive = async (banner: Banner) => {
-        await toggleBannerActive(banner.id, banner.active);
-        loadBanners();
+        // Optimistic Update: Hemen UI'ı güncelle
+        const newStatus = !banner.active;
+        const updatedBanners = banners.map(b =>
+            b.id === banner.id ? { ...b, active: newStatus } : b
+        );
+        setBanners(updatedBanners);
+
+        // Server'a isteği gönder
+        const res = await toggleBannerActive(banner.id, banner.active);
+
+        // Hata varsa geri al
+        if (!res.success) {
+            setBanners(banners); // Eski state'e dön
+            alert('Durum değiştirilemedi: ' + res.error);
+        }
     };
 
     const handleAdd = () => {

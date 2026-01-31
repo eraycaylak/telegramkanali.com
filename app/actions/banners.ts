@@ -122,3 +122,23 @@ export async function toggleBannerActive(id: string, currentState: boolean) {
     revalidatePath('/admin/banners');
     return { success: true };
 }
+
+export async function reorderBanners(items: { id: string; display_order: number }[]) {
+    try {
+        const updates = items.map(item =>
+            supabase
+                .from('banners')
+                .update({ display_order: item.display_order })
+                .eq('id', item.id)
+        );
+
+        await Promise.all(updates);
+
+        revalidatePath('/');
+        revalidatePath('/admin/banners');
+        return { success: true };
+    } catch (error: any) {
+        console.error('Reorder error:', error);
+        return { success: false, error: error.message };
+    }
+}

@@ -204,6 +204,9 @@ export default function ChannelCard({ channel }: ChannelCardProps) {
                     href={channel.join_link}
                     target="_blank"
                     rel="nofollow noreferrer"
+                    onClick={() => {
+                        import('@/app/actions/analytics').then(mod => mod.trackChannelClick(channel.id));
+                    }}
                     className="flex w-full items-center justify-center rounded-lg bg-green-600 py-1.5 md:py-2.5 text-center text-xs md:text-sm font-bold text-white shadow-sm transition-colors hover:bg-green-700"
                 >
                     KANALA GİT

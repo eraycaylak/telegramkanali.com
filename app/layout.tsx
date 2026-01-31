@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
+import AnalyticsTracker from "@/components/AnalyticsTracker";
 import JsonLd, { generateWebsiteSchema, generateOrganizationSchema } from "@/components/JsonLd";
 import "./globals.css";
 
@@ -90,6 +91,7 @@ export default function RootLayout({
       >
         {/* Google Analytics */}
         <GoogleAnalytics gaId="G-N9BJQBE7BB" />
+        <AnalyticsTracker />
 
         {children}
       </body>
