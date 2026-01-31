@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, Trash2, Edit, Search, LogOut, ExternalLink } from 'lucide-react';
+import { Plus, Trash2, Edit, Search, LogOut, ExternalLink, RefreshCw } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
-import { deleteChannel, addChannel, updateChannel, scrapeTelegramInfo } from '@/app/actions/admin';
+import { deleteChannel, addChannel, updateChannel, scrapeTelegramInfo, syncAllChannelsFromTelegram } from '@/app/actions/admin';
 import { Channel, Category } from '@/lib/types';
 
 export default function AdminDashboard() {
@@ -25,6 +25,7 @@ export default function AdminDashboard() {
     });
     const [editingId, setEditingId] = useState<string | null>(null);
     const [scraping, setScraping] = useState(false);
+    const [syncing, setSyncing] = useState(false);
 
     // Protect Route
     useEffect(() => {
@@ -131,12 +132,33 @@ export default function AdminDashboard() {
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
                     </div>
-                    <button
-                        onClick={() => setIsModalOpen(true)}
-                        className="flex items-center gap-2 bg-blue-600 text-white px-6 py-2.5 rounded-lg hover:bg-blue-700 transition shadow-lg shadow-blue-200"
-                    >
-                        <Plus size={18} /> Yeni Kanal Ekle
-                    </button>
+                    <div className="flex items-center gap-3">
+                        <button
+                            onClick={async () => {
+                                if (!confirm('Tüm kanalları Telegram\'\'dan güncellemek istediğinize emin misiniz? Bu işlem biraz zaman alabilir.')) return;
+                                setSyncing(true);
+                                const res = await syncAllChannelsFromTelegram();
+                                setSyncing(false);
+                                if (res.error) {
+                                    alert('Hata: ' + res.error);
+                                } else {
+                                    alert(res.message);
+                                    fetchData();
+                                }
+                            }}
+                            disabled={syncing}
+                            className="flex items-center gap-2 bg-green-600 text-white px-4 py-2.5 rounded-lg hover:bg-green-700 transition disabled:opacity-50"
+                        >
+                            <RefreshCw size={18} className={syncing ? 'animate-spin' : ''} />
+                            {syncing ? 'Senkronize Ediliyor...' : 'Telegram Sync'}
+                        </button>
+                        <button
+                            onClick={() => setIsModalOpen(true)}
+                            className="flex items-center gap-2 bg-blue-600 text-white px-6 py-2.5 rounded-lg hover:bg-blue-700 transition shadow-lg shadow-blue-200"
+                        >
+                            <Plus size={18} /> Yeni Kanal Ekle
+                        </button>
+                    </div>
                 </div>
 
                 {/* Channels Table */}

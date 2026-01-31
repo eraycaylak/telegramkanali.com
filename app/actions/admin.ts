@@ -43,13 +43,26 @@ export async function addChannel(formData: FormData) {
     if (!name || !join_link) return { error: 'Ad ve Katılma Linki gereklidir' };
 
     try {
+        // Telegram'dan kanal bilgilerini otomatik çek
+        const { fetchTelegramChannelInfo } = await import('@/lib/telegram');
+        const telegramInfo = await fetchTelegramChannelInfo(join_link);
+
+        console.log('[CHANNEL] Telegram info:', telegramInfo);
+
+        // Verileri hazırla - Telegram'dan gelen bilgileri kullan (varsa)
+        const finalImage = image || telegramInfo?.photo_url || '/images/logo.png';
+        const finalDescription = description || telegramInfo?.description || '';
+        const memberCount = telegramInfo?.member_count || 0;
+        const subscriberStr = memberCount > 0 ? memberCount.toString() : '0';
+
         const insertData: any = {
             name,
-            description,
+            description: finalDescription,
             join_link,
             slug,
-            stats: { subscribers: '0' },
-            image: image || '/images/logo.png',
+            stats: { subscribers: subscriberStr },
+            image: finalImage,
+            member_count: memberCount,
             verified: false,
             featured: false
         };
@@ -74,12 +87,13 @@ export async function addChannel(formData: FormData) {
         console.log('[CHANNEL] Success:', data);
         revalidatePath('/');
         revalidatePath('/admin/dashboard');
-        return { success: true };
+        return { success: true, telegramInfo };
     } catch (error: any) {
         console.error('[CHANNEL] Exception:', error?.message || error);
         return { error: `Kanal eklenemedi: ${error?.message || 'Bilinmeyen hata'}` };
     }
 }
+
 
 export async function deleteCategory(id: string) {
     if (!id) return { error: 'Category ID required' };
@@ -253,3 +267,171 @@ export async function uploadLogo(formData: FormData) {
         return { error: `Yükleme hatası: ${error?.message || 'Bilinmeyen hata'}` };
     }
 }
+
+/**
+ * Tüm kanalları Telegram'dan güncelleyerek fotoğraf ve üye sayısını çeker
+ * Admin panelinden çağrılacak
+ */
+export async function syncAllChannelsFromTelegram() {
+    console.log('[SYNC] Starting bulk channel sync from Telegram...');
+
+    try {
+        // Tüm kanalları çek
+        const { data: channels, error: fetchError } = await adminClient
+            .from('channels')
+            .select('id, name, join_link, image, member_count');
+
+        if (fetchError) throw fetchError;
+        if (!channels || channels.length === 0) {
+            return { success: true, message: 'Güncellenecek kanal bulunamadı', updated: 0, failed: 0 };
+        }
+
+        console.log(`[SYNC] Found ${channels.length} channels to sync`);
+
+        const { fetchTelegramChannelInfo } = await import('@/lib/telegram');
+
+        let updated = 0;
+        let failed = 0;
+        const results: { id: string; name: string; status: string; photo?: string; members?: number }[] = [];
+
+        // Her kanal için Telegram'dan bilgi çek
+        for (const channel of channels) {
+            try {
+                console.log(`[SYNC] Processing: ${channel.name}`);
+
+                const telegramInfo = await fetchTelegramChannelInfo(channel.join_link);
+
+                if (telegramInfo) {
+                    // Güncelleme verisi hazırla
+                    const updateData: any = {};
+
+                    // Fotoğraf güncelle (eğer Telegram'dan geldi ve mevcut boşsa)
+                    if (telegramInfo.photo_url && (!channel.image || channel.image === '/images/logo.png')) {
+                        updateData.image = telegramInfo.photo_url;
+                    }
+
+                    // Üye sayısını güncelle (eğer Telegram'dan geldi)
+                    if (telegramInfo.member_count > 0) {
+                        updateData.member_count = telegramInfo.member_count;
+                        updateData.stats = { subscribers: telegramInfo.member_count.toString() };
+                    }
+
+                    // Eğer güncellenecek bir şey varsa
+                    if (Object.keys(updateData).length > 0) {
+                        const { error: updateError } = await adminClient
+                            .from('channels')
+                            .update(updateData)
+                            .eq('id', channel.id);
+
+                        if (updateError) {
+                            console.error(`[SYNC] Update error for ${channel.name}:`, updateError);
+                            failed++;
+                            results.push({ id: channel.id, name: channel.name, status: 'error' });
+                        } else {
+                            updated++;
+                            results.push({
+                                id: channel.id,
+                                name: channel.name,
+                                status: 'updated',
+                                photo: updateData.image,
+                                members: updateData.member_count
+                            });
+                        }
+                    } else {
+                        results.push({ id: channel.id, name: channel.name, status: 'skipped' });
+                    }
+                } else {
+                    // Telegram'dan bilgi alınamadı (private kanal veya hata)
+                    results.push({ id: channel.id, name: channel.name, status: 'no_info' });
+                }
+
+                // Rate limiting - Telegram'ı spam etmemek için 500ms bekle
+                await new Promise(resolve => setTimeout(resolve, 500));
+
+            } catch (channelError) {
+                console.error(`[SYNC] Error processing ${channel.name}:`, channelError);
+                failed++;
+                results.push({ id: channel.id, name: channel.name, status: 'error' });
+            }
+        }
+
+        console.log(`[SYNC] Complete. Updated: ${updated}, Failed: ${failed}`);
+
+        revalidatePath('/');
+        revalidatePath('/admin/dashboard');
+
+        return {
+            success: true,
+            message: `Senkronizasyon tamamlandı. ${updated} kanal güncellendi, ${failed} hata oluştu.`,
+            updated,
+            failed,
+            total: channels.length,
+            results
+        };
+
+    } catch (error: any) {
+        console.error('[SYNC] Bulk sync error:', error);
+        return { error: `Senkronizasyon hatası: ${error?.message || 'Bilinmeyen hata'}` };
+    }
+}
+
+/**
+ * Tek bir kanalı Telegram'dan günceller
+ */
+export async function syncChannelFromTelegram(channelId: string) {
+    try {
+        // Kanal bilgisini çek
+        const { data: channel, error: fetchError } = await adminClient
+            .from('channels')
+            .select('id, name, join_link')
+            .eq('id', channelId)
+            .single();
+
+        if (fetchError || !channel) {
+            return { error: 'Kanal bulunamadı' };
+        }
+
+        const { fetchTelegramChannelInfo } = await import('@/lib/telegram');
+        const telegramInfo = await fetchTelegramChannelInfo(channel.join_link);
+
+        if (!telegramInfo) {
+            return { error: 'Telegram\'dan bilgi alınamadı (private kanal olabilir)' };
+        }
+
+        // Güncelle
+        const updateData: any = {};
+
+        if (telegramInfo.photo_url) {
+            updateData.image = telegramInfo.photo_url;
+        }
+
+        if (telegramInfo.member_count > 0) {
+            updateData.member_count = telegramInfo.member_count;
+            updateData.stats = { subscribers: telegramInfo.member_count.toString() };
+        }
+
+        if (Object.keys(updateData).length === 0) {
+            return { success: true, message: 'Güncellenecek bilgi bulunamadı' };
+        }
+
+        const { error: updateError } = await adminClient
+            .from('channels')
+            .update(updateData)
+            .eq('id', channelId);
+
+        if (updateError) throw updateError;
+
+        revalidatePath('/');
+        revalidatePath('/admin/dashboard');
+
+        return {
+            success: true,
+            message: 'Kanal güncellendi',
+            data: { ...telegramInfo, ...updateData }
+        };
+
+    } catch (error: any) {
+        return { error: `Güncelleme hatası: ${error?.message || 'Bilinmeyen hata'}` };
+    }
+}
+
