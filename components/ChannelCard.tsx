@@ -120,9 +120,25 @@ export default function ChannelCard({ channel }: ChannelCardProps) {
                 </button>
             </div>
 
-            {/* Mobile Vote Badge (Simple score display) */}
-            <div className="md:hidden absolute top-2 right-2 z-30 bg-gray-100 text-gray-600 text-[10px] font-bold px-1.5 py-0.5 rounded border">
-                {score} Puan
+            {/* Mobile Vote Badge (with vote buttons) */}
+            <div className="md:hidden absolute top-2 right-2 z-30 bg-white/90 backdrop-blur text-gray-600 text-[10px] font-bold px-2 py-1 rounded-lg border flex items-center gap-1.5 shadow-sm">
+                <button
+                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleVote(1); }}
+                    disabled={loading}
+                    className={`p-0.5 ${userVote === 1 ? 'text-green-600' : 'text-gray-400'}`}
+                >
+                    <ThumbsUp size={12} className={userVote === 1 ? 'fill-current' : ''} />
+                </button>
+                <span className={`font-bold ${score > 0 ? 'text-green-600' : score < 0 ? 'text-red-600' : 'text-gray-600'}`}>
+                    {score}
+                </span>
+                <button
+                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleVote(-1); }}
+                    disabled={loading}
+                    className={`p-0.5 ${userVote === -1 ? 'text-red-600' : 'text-gray-400'}`}
+                >
+                    <ThumbsDown size={12} className={userVote === -1 ? 'fill-current' : ''} />
+                </button>
             </div>
 
             <div className="flex flex-col md:flex-row flex-1 gap-3 md:gap-5 p-3 md:p-5 md:pl-16 items-center md:items-start text-center md:text-left">
