@@ -32,45 +32,33 @@ export default async function BannerGrid({ type = 'homepage', categoryId }: Bann
                         />
                     )}
 
-                    {/* Subtle gradient overlay for text readability - keeps image vibrant */}
-                    {banner.image_url && (
+                    {/* No overlay when image exists - clean look */}
+
+                    {/* Content - Hide when image exists for clean look */}
+                    {!banner.image_url && (
                         <div
-                            className="absolute inset-0 z-0 bg-gradient-to-r from-black/60 via-black/20 to-transparent"
-                        />
-                    )}
-
-                    {/* Content */}
-                    <div
-                        className={`z-10 relative flex-1 min-w-0 pr-4 pointer-events-none flex flex-col justify-center h-full ${banner.text_align === 'center' ? 'items-center text-center' :
-                            banner.text_align === 'right' ? 'items-end text-right' : 'items-start text-left'
-                            }`}
-                        style={{ color: banner.text_color || '#FFFFFF' }}
-                    >
-                        {/* Skewed Badge (New Feature) */}
-                        {banner.badge_text && (
-                            <div className={`inline-block transform -skew-x-12 px-2 py-0.5 mb-2 font-black text-sm uppercase shadow-sm ${banner.badge_bg_color || 'bg-red-600'} text-white`}>
-                                <span className="block transform skew-x-12">{banner.badge_text}</span>
-                            </div>
-                        )}
-
-                        <h3
-                            className="font-bold text-lg uppercase truncate w-full"
-                            style={{ color: 'inherit', textShadow: '2px 2px 4px rgba(0,0,0,0.8)' }}
+                            className={`z-10 relative flex-1 min-w-0 pr-4 pointer-events-none flex flex-col justify-center h-full ${banner.text_align === 'center' ? 'items-center text-center' :
+                                banner.text_align === 'right' ? 'items-end text-right' : 'items-start text-left'
+                                }`}
+                            style={{ color: banner.text_color || '#FFFFFF' }}
                         >
-                            {banner.title}
-                        </h3>
-                        {banner.subtitle && (
-                            <h2
-                                className={`font-black italic truncate leading-tight w-full ${banner.font_size === 'small' ? 'text-xl' :
-                                    banner.font_size === 'large' ? 'text-4xl' :
-                                        banner.font_size === 'xl' ? 'text-5xl' : 'text-3xl'
-                                    }`}
-                                style={{ color: 'inherit', textShadow: '2px 2px 6px rgba(0,0,0,0.9)' }}
-                            >
-                                {banner.subtitle}
-                            </h2>
-                        )}
-                    </div>
+                            {/* Skewed Badge */}
+                            {banner.badge_text && (
+                                <div className={`inline-block transform -skew-x-12 px-2 py-0.5 mb-2 font-black text-sm uppercase shadow-sm ${banner.badge_bg_color || 'bg-red-600'} text-white`}>
+                                    <span className="block transform skew-x-12">{banner.badge_text}</span>
+                                </div>
+                            )}
+
+                            <h3 className="font-bold text-lg uppercase truncate w-full drop-shadow-lg">
+                                {banner.title}
+                            </h3>
+                            {banner.subtitle && (
+                                <h2 className={`font-black italic truncate leading-tight w-full drop-shadow-lg ${banner.font_size === 'small' ? 'text-xl' : banner.font_size === 'large' ? 'text-4xl' : banner.font_size === 'xl' ? 'text-5xl' : 'text-3xl'}`}>
+                                    {banner.subtitle}
+                                </h2>
+                            )}
+                        </div>
+                    )}
 
                     {/* Floating Logo (New Feature) */}
                     {banner.floating_logo_url && (
@@ -84,10 +72,12 @@ export default async function BannerGrid({ type = 'homepage', categoryId }: Bann
                         {banner.title} Telegram kanalı{banner.subtitle ? ` - ${banner.subtitle}` : ''} - Aktif ve güncel kanal
                     </span>
 
-                    {/* Button */}
-                    <div className="bg-white text-black px-4 py-1 rounded-full font-bold text-sm z-10 relative shadow-lg whitespace-nowrap group-hover:bg-gray-100 transition-colors pointer-events-none">
-                        {banner.button_text || 'Katıl'}
-                    </div>
+                    {/* Button - Hide when image exists */}
+                    {!banner.image_url && (
+                        <div className="bg-white text-black px-4 py-1 rounded-full font-bold text-sm z-10 relative shadow-lg whitespace-nowrap group-hover:bg-gray-100 transition-colors pointer-events-none">
+                            {banner.button_text || 'Katıl'}
+                        </div>
+                    )}
                 </a>
             ))}
         </section>

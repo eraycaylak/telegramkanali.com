@@ -5,8 +5,9 @@ import ChannelCard from '@/components/ChannelCard';
 import BannerGrid from '@/components/BannerGrid';
 import JsonLd, { generateFAQSchema } from '@/components/JsonLd';
 import { Channel } from '@/lib/types';
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+
+// Cache for 60 seconds - improves performance
+export const revalidate = 60;
 
 const faqs = [
   {
