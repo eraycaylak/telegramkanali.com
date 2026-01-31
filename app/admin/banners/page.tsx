@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, Trash2, GripVertical, Image as ImageIcon, Layout, Layers } from 'lucide-react';
-import { Banner, getBanners, saveBanner, deleteBanner, toggleBannerActive } from '@/app/actions/banners';
+import { Plus, Trash2, GripVertical, Image as ImageIcon, Layout, Layers, ChevronUp, ChevronDown } from 'lucide-react';
+import { Banner, getBanners, saveBanner, deleteBanner, toggleBannerActive, reorderBanners } from '@/app/actions/banners';
 import { getCategories } from '@/lib/data';
 import { Category } from '@/lib/types';
 
@@ -120,6 +120,32 @@ export default function BannersPage() {
         { label: 'Siyah', value: 'bg-[#111]' },
     ];
 
+    const handleMove = async (index: number, direction: 'up' | 'down') => {
+        if (
+            (direction === 'up' && index === 0) ||
+            (direction === 'down' && index === banners.length - 1)
+        ) {
+            return;
+        }
+
+        const newBanners = [...banners];
+        const swapIndex = direction === 'up' ? index - 1 : index + 1;
+
+        // Swap items in local state for instant feedback
+        [newBanners[index], newBanners[swapIndex]] = [newBanners[swapIndex], newBanners[index]];
+
+        // Update display_order property
+        const reordered = newBanners.map((b, idx) => ({ ...b, display_order: idx }));
+
+        setBanners(reordered);
+
+        // Send minimum required data to server
+        const itemsToUpdate = reordered.map(b => ({ id: b.id, display_order: b.display_order }));
+        await reorderBanners(itemsToUpdate);
+    };
+
+    // ...
+
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
@@ -197,11 +223,24 @@ export default function BannersPage() {
                             key={banner.id}
                             className={`bg-white rounded-xl border p-4 flex items-center gap-4 ${!banner.active ? 'opacity-50' : ''}`}
                         >
-                            <div className="text-gray-400">
-                                <GripVertical size={20} />
+                            <div className="flex flex-col gap-1">
+                                <button
+                                    onClick={() => handleMove(index, 'up')}
+                                    disabled={index === 0}
+                                    className="p-1 hover:bg-gray-100 rounded text-gray-400 hover:text-blue-600 disabled:opacity-30"
+                                >
+                                    <ChevronUp size={20} />
+                                </button>
+                                <button
+                                    onClick={() => handleMove(index, 'down')}
+                                    disabled={index === banners.length - 1}
+                                    className="p-1 hover:bg-gray-100 rounded text-gray-400 hover:text-blue-600 disabled:opacity-30"
+                                >
+                                    <ChevronDown size={20} />
+                                </button>
                             </div>
 
-                            <div className="text-gray-500 font-mono text-sm w-8">
+                            <div className="text-gray-500 font-mono text-sm w-6 text-center">
                                 #{index + 1}
                             </div>
 
