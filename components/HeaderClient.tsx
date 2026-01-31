@@ -13,7 +13,6 @@ interface HeaderClientProps {
 export default function HeaderClient({ categories }: HeaderClientProps) {
     const [menuOpen, setMenuOpen] = useState(false);
 
-    // Close menu when clicking outside
     useEffect(() => {
         if (menuOpen) {
             document.body.style.overflow = 'hidden';
@@ -45,25 +44,13 @@ export default function HeaderClient({ categories }: HeaderClientProps) {
                     backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M0 40L40 0H20L0 20M40 40V20L20 40'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
                 }}></div>
 
-                <div className="container mx-auto px-4 md:px-6 flex items-center gap-4 relative z-10">
-                    {/* Mobile Menu Button */}
-                    <button
-                        onClick={() => setMenuOpen(!menuOpen)}
-                        className="md:hidden p-2 text-white z-20 relative"
-                        type="button"
-                    >
-                        {menuOpen ? <X size={28} /> : <Menu size={28} />}
-                    </button>
-
-                    {/* Logo - Centered on Mobile */}
-                    <div className="absolute left-1/2 transform -translate-x-1/2 md:relative md:left-0 md:transform-none">
+                <div className="container mx-auto px-4 md:px-6 flex flex-col md:flex-row items-center gap-4 relative z-10">
+                    {/* Logo - Centered */}
+                    <div className="w-full md:w-auto flex justify-center md:justify-start">
                         <DynamicLogo />
                     </div>
 
-                    {/* Spacer for mobile */}
-                    <div className="flex-1 md:hidden"></div>
-
-                    {/* Search Bar - Hidden on Mobile */}
+                    {/* Search Bar - Desktop */}
                     <div className="hidden md:flex flex-1 relative w-full">
                         <input
                             type="text"
@@ -74,11 +61,6 @@ export default function HeaderClient({ categories }: HeaderClientProps) {
                             <Search size={26} />
                         </button>
                     </div>
-
-                    {/* Mobile Search Icon */}
-                    <button className="md:hidden p-2 text-white z-20 relative" type="button">
-                        <Search size={24} />
-                    </button>
                 </div>
             </div>
 
@@ -100,6 +82,21 @@ export default function HeaderClient({ categories }: HeaderClientProps) {
                         </Link>
                     </nav>
                 </div>
+            </div>
+
+            {/* 4. Mobile Menu Bar - Under Logo */}
+            <div className="md:hidden bg-black py-3 px-4 flex items-center justify-between">
+                <button
+                    onClick={() => setMenuOpen(!menuOpen)}
+                    className="flex items-center gap-2 text-white font-bold text-sm"
+                    type="button"
+                >
+                    <Menu size={22} />
+                    <span>MENÜ</span>
+                </button>
+                <button className="p-2 text-white" type="button">
+                    <Search size={22} />
+                </button>
             </div>
 
             {/* Mobile Slide-in Menu */}

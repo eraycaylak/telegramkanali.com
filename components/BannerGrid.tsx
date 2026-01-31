@@ -21,14 +21,14 @@ export default async function BannerGrid({ type = 'homepage', categoryId }: Bann
                     href={banner.link_url || '#'}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={`rounded-none md:rounded-lg flex items-center justify-between px-4 md:px-8 text-white relative overflow-hidden group cursor-pointer shadow-lg hover:shadow-xl transition-all ${!banner.image_url ? `h-28 md:h-32 bg-gradient-to-r ${banner.bg_color}` : ''}`}
+                    className={`rounded-none md:rounded-lg flex items-center justify-between px-4 md:px-8 text-white relative overflow-hidden group cursor-pointer shadow-lg hover:shadow-xl transition-all h-28 md:h-32 ${!banner.image_url ? `bg-gradient-to-r ${banner.bg_color}` : ''}`}
                 >
                     {/* Background Image if exists */}
                     {banner.image_url && (
                         <img
                             src={banner.image_url}
                             alt={banner.title}
-                            className="w-full h-auto md:absolute md:inset-0 md:w-full md:h-full md:object-cover z-0"
+                            className="absolute inset-0 w-full h-full object-cover z-0"
                         />
                     )}
 
