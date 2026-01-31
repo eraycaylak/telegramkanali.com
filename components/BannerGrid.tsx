@@ -1,4 +1,5 @@
 import { getBanners, BannerType } from '@/app/actions/banners';
+import { Banner } from '@/lib/types';
 
 interface BannerGridProps {
     type?: BannerType;
@@ -6,7 +7,12 @@ interface BannerGridProps {
 }
 
 export default async function BannerGrid({ type = 'homepage', categoryId }: BannerGridProps) {
-    const banners = await getBanners(type, categoryId);
+    let banners: Banner[] = [];
+    try {
+        banners = await getBanners(type, categoryId);
+    } catch (e) {
+        console.error('Banner fetch failed', e);
+    }
 
     if (!banners || banners.length === 0) return null;
 
@@ -30,7 +36,7 @@ export default async function BannerGrid({ type = 'homepage', categoryId }: Bann
                     {banner.image_url && (
                         <img
                             src={banner.image_url}
-                            alt={banner.title}
+                            alt={banner.title || 'Banner'}
                             className="w-full h-full object-contain md:object-cover"
                             style={{ maxHeight: '100%', width: '100%' }}
                         />

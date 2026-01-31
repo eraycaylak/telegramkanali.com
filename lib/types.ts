@@ -60,3 +60,24 @@ export interface SeoPage {
     created_at?: string;
     updated_at?: string;
 }
+
+export interface Banner {
+    id: string;
+    type: string;
+    category_id?: string | null;
+    title: string | null;
+    subtitle?: string | null;
+    image_url?: string | null;
+    link_url?: string | null;
+    bg_color?: string | null;
+    text_color?: string | null;
+    button_text?: string | null;
+    badge_text?: string | null;
+    badge_bg_color?: string | null;
+    floating_logo_url?: string | null;
+    text_align?: string | null;
+    font_size?: string | null;
+    display_order: number;
+    active: boolean;
+    created_at?: string;
+}
