@@ -21,7 +21,8 @@ export default function AdminDashboard() {
         description: '',
         join_link: '',
         category_id: '',
-        image: ''
+        image: '',
+        score: 0
     });
     const [editingId, setEditingId] = useState<string | null>(null);
     const [scraping, setScraping] = useState(false);
@@ -67,7 +68,8 @@ export default function AdminDashboard() {
             description: channel.description || '',
             join_link: channel.join_link,
             category_id: channel.category_id || '',
-            image: channel.image || ''
+            image: channel.image || '',
+            score: channel.score || 0
         });
         setEditingId(channel.id);
         setLastEditedId(channel.id);
@@ -94,7 +96,13 @@ export default function AdminDashboard() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         const data = new FormData();
-        Object.entries(formData).forEach(([key, value]) => data.append(key, value));
+        Object.entries(formData).forEach(([key, value]) => {
+            if (key === 'score') {
+                data.append(key, value.toString());
+            } else {
+                data.append(key, value as string);
+            }
+        });
 
         let res;
         if (editingId) {
@@ -106,7 +114,7 @@ export default function AdminDashboard() {
         if (res.success) {
             alert(editingId ? 'Kanal güncellendi!' : 'Kanal eklendi!');
             setIsModalOpen(false);
-            setFormData({ name: '', description: '', join_link: '', category_id: '', image: '' });
+            setFormData({ name: '', description: '', join_link: '', category_id: '', image: '', score: 0 });
             setEditingId(null);
             fetchData();
         } else {
@@ -114,27 +122,45 @@ export default function AdminDashboard() {
         }
     };
 
-    const filteredChannels = channels.filter(c =>
-        c.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    // Filter Logic
+    const filteredChannels = channels.filter(c => {
+        const matchesSearch = c.name.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesCategory = selectedCategory === 'all' || c.category_id === selectedCategory;
+        return matchesSearch && matchesCategory;
+    });
 
     return (
         <div className="min-h-screen bg-transparent text-gray-900 font-sans">
 
             <div className="container mx-auto">
                 {/* Actions Bar */}
-                <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-8">
-                    <div className="relative w-full sm:w-96">
-                        <Search className="absolute left-3 top-3 text-gray-400" size={18} />
-                        <input
-                            type="text"
-                            placeholder="Kanal ara..."
-                            className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
+                <div className="flex flex-col xl:flex-row justify-between items-center gap-4 mb-8">
+                    {/* Search & Filter Group */}
+                    <div className="flex flex-col sm:flex-row gap-3 w-full xl:w-auto">
+                        <div className="relative w-full sm:w-80">
+                            <Search className="absolute left-3 top-3 text-gray-400" size={18} />
+                            <input
+                                type="text"
+                                placeholder="Kanal ara..."
+                                className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                        </div>
+                        {/* Kategori Filtresi */}
+                        <select
+                            value={selectedCategory}
+                            onChange={(e) => setSelectedCategory(e.target.value)}
+                            className="w-full sm:w-64 px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none bg-white"
+                        >
+                            <option value="all">Tüm Kategoriler</option>
+                            {categories.map(cat => (
+                                <option key={cat.id} value={cat.id}>{cat.name}</option>
+                            ))}
+                        </select>
                     </div>
-                    <div className="flex items-center gap-3">
+
+                    <div className="flex items-center gap-3 w-full xl:w-auto justify-end">
                         <button
                             onClick={async () => {
                                 if (!confirm('Tüm kanalları Telegram\'\'dan güncellemek istediğinize emin misiniz? Bu işlem biraz zaman alabilir.')) return;
@@ -265,6 +291,20 @@ export default function AdminDashboard() {
                                     {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                                 </select>
                             </div>
+
+                            {/* Skor Input */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Skor / Öncelik Puanı</label>
+                                <input
+                                    type="number"
+                                    className="w-full border rounded-lg p-2"
+                                    value={formData.score}
+                                    onChange={e => setFormData({ ...formData, score: parseInt(e.target.value) || 0 })}
+                                    placeholder="0"
+                                />
+                                <p className="text-xs text-gray-500 mt-1">Sıralamada öne çıkarmak için yüksek puan verin.</p>
+                            </div>
+
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Görsel URL (Logo Linki)</label>
                                 <div className="flex gap-2">
@@ -274,7 +314,7 @@ export default function AdminDashboard() {
                             </div>
 
                             <div className="flex justify-end gap-3 mt-6">
-                                <button type="button" onClick={() => { setIsModalOpen(false); setEditingId(null); setFormData({ name: '', description: '', join_link: '', category_id: '', image: '' }); }} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">İptal</button>
+                                <button type="button" onClick={() => { setIsModalOpen(false); setEditingId(null); setFormData({ name: '', description: '', join_link: '', category_id: '', image: '', score: 0 }); }} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">İptal</button>
                                 <button type="submit" className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">{editingId ? 'Güncelle' : 'Kaydet'}</button>
                             </div>
                         </form>

@@ -32,9 +32,10 @@ export async function addChannel(formData: FormData) {
     const join_link = formData.get('join_link') as string;
     const category_id = formData.get('category_id') as string;
     const image = formData.get('image') as string;
+    const score = parseInt(formData.get('score') as string) || 0; // Skor
     const slug = name.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
 
-    console.log('[CHANNEL] Adding channel:', { name, slug, join_link, category_id, image, description });
+    console.log('[CHANNEL] Adding channel:', { name, slug, join_link, category_id, image, description, score });
 
     // Basic validation
     if (!name || !join_link) return { error: 'Ad ve Katılma Linki gereklidir' };
@@ -60,6 +61,7 @@ export async function addChannel(formData: FormData) {
             stats: { subscribers: subscriberStr },
             image: finalImage,
             member_count: memberCount,
+            score, // Skor veritabanına ekleniyor
             verified: false,
             featured: false
         };
@@ -161,6 +163,8 @@ export async function updateChannel(id: string, formData: FormData) {
     const join_link = formData.get('join_link') as string;
     const category_id = formData.get('category_id') as string;
     const image = formData.get('image') as string;
+    const score = parseInt(formData.get('score') as string) || 0; // Skor güncelleme
+
     // Don't change slug on edit to preserve SEO, or handle carefully. For now, keep it.
 
     try {
@@ -171,6 +175,7 @@ export async function updateChannel(id: string, formData: FormData) {
                 description,
                 join_link,
                 category_id,
+                score, // Güncellenen skor
                 image: image || '/images/logo.png',
             })
             .eq('id', id);
