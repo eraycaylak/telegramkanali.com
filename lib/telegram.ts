@@ -1,8 +1,7 @@
-'use server';
-
 /**
  * Telegram API Utilities
  * Kanal bilgilerini Telegram'dan otomatik çeker
+ * NOT: Bu fonksiyonlar sadece server-side'da çalışır (admin.ts içinden çağrılır)
  */
 
 interface TelegramChannelInfo {
@@ -34,9 +33,10 @@ export async function fetchTelegramChannelInfo(joinLink: string): Promise<Telegr
 
         const response = await fetch(widgetUrl, {
             headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                'Accept': 'text/html'
             },
-            next: { revalidate: 3600 } // 1 saat cache
+            cache: 'no-store' // Her seferinde taze veri çek
         });
 
         if (!response.ok) {
