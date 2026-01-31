@@ -2,15 +2,15 @@
 
 import Link from 'next/link';
 import { Search, Menu, X } from 'lucide-react';
-import DynamicLogo from './DynamicLogo';
 import { useState, useEffect } from 'react';
 import { Category } from '@/lib/types';
 
 interface HeaderClientProps {
     categories: Category[];
+    logo: React.ReactNode;
 }
 
-export default function HeaderClient({ categories }: HeaderClientProps) {
+export default function HeaderClient({ categories, logo }: HeaderClientProps) {
     const [menuOpen, setMenuOpen] = useState(false);
 
     useEffect(() => {
@@ -59,7 +59,7 @@ export default function HeaderClient({ categories }: HeaderClientProps) {
                     {/* Logo - Centered on mobile via flex-1 or absolute centering if needed, but flex-1 text-center usually easiest or just justify-center */}
                     {/* Let's keep it simple: Menu (Left) - Logo (Center) - Search (Right) */}
                     <div className="flex-1 flex justify-center md:flex-none md:justify-start">
-                        <DynamicLogo />
+                        {logo}
                     </div>
 
                     {/* Mobile: Search Button (Placeholder for now or modal trigger) */}
