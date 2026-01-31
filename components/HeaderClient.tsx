@@ -45,19 +45,23 @@ export default function HeaderClient({ categories }: HeaderClientProps) {
                     backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M0 40L40 0H20L0 20M40 40V20L20 40'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
                 }}></div>
 
-                <div className="container mx-auto px-4 md:px-6 flex items-center gap-4">
+                <div className="container mx-auto px-4 md:px-6 flex items-center gap-4 relative z-10">
                     {/* Mobile Menu Button */}
                     <button
                         onClick={() => setMenuOpen(!menuOpen)}
-                        className="md:hidden p-2 text-white"
+                        className="md:hidden p-2 text-white z-20 relative"
+                        type="button"
                     >
                         {menuOpen ? <X size={28} /> : <Menu size={28} />}
                     </button>
 
-                    {/* Logo */}
-                    <div className="flex-1 md:flex-none flex justify-center md:justify-start">
+                    {/* Logo - Centered on Mobile */}
+                    <div className="absolute left-1/2 transform -translate-x-1/2 md:relative md:left-0 md:transform-none">
                         <DynamicLogo />
                     </div>
+
+                    {/* Spacer for mobile */}
+                    <div className="flex-1 md:hidden"></div>
 
                     {/* Search Bar - Hidden on Mobile */}
                     <div className="hidden md:flex flex-1 relative w-full">
@@ -72,7 +76,7 @@ export default function HeaderClient({ categories }: HeaderClientProps) {
                     </div>
 
                     {/* Mobile Search Icon */}
-                    <button className="md:hidden p-2 text-white">
+                    <button className="md:hidden p-2 text-white z-20 relative" type="button">
                         <Search size={24} />
                     </button>
                 </div>
