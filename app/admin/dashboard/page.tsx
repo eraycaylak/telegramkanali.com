@@ -12,6 +12,7 @@ export default function AdminDashboard() {
     const [channels, setChannels] = useState<Channel[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
+    const [selectedCategory, setSelectedCategory] = useState('all'); // Eksik state eklendi
     const [loading, setLoading] = useState(true);
 
     // Modal State
