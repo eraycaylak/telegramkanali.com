@@ -293,7 +293,7 @@ export default function BannersPage() {
                                     value={editingBanner.image_url || ''}
                                     onChange={(e) => setEditingBanner({ ...editingBanner, image_url: e.target.value })}
                                 />
-                                <p className="text-xs text-gray-500 mt-1">📐 Önerilen boyut: <strong>800x200px</strong> (4:1 oranı). Fotoğraf eklendiğinde yazı ve buton gizlenir.</p>
+                                <p className="text-xs text-gray-500 mt-1">📐 Önerilen boyut: <strong>800x128px</strong> veya <strong>1600x256px</strong> (6:1 oranı). Fotoğraf eklendiğinde yazı ve buton gizlenir.</p>
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
