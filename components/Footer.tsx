@@ -6,7 +6,7 @@ export default function Footer() {
     return (
         <footer className="w-full border-t border-gray-100 bg-white pt-12 pb-8">
             <div className="container mx-auto px-4 md:px-6">
-                <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
+                <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-5">
 
                     {/* Brand & Description */}
                     <div className="space-y-4">
@@ -42,6 +42,19 @@ export default function Footer() {
                                     </Link>
                                 </li>
                             ))}
+                        </ul>
+                    </div>
+
+                    {/* SEO Rehberleri - YENİ */}
+                    <div>
+                        <h3 className="mb-4 text-sm font-semibold text-gray-900">Telegram Rehberleri</h3>
+                        <ul className="space-y-2 text-sm text-gray-600">
+                            <li><Link href="/rehber/telegram-kanallari-rehberi" className="hover:text-blue-600 font-medium">📚 Telegram Kanalları Rehberi</Link></li>
+                            <li><Link href="/rehber/telegram-kanallari-nedir" className="hover:text-blue-600">Telegram Kanalları Nedir?</Link></li>
+                            <li><Link href="/rehber/en-iyi-telegram-kanallari" className="hover:text-blue-600">En İyi Telegram Kanalları</Link></li>
+                            <li><Link href="/rehber/telegram-kripto-kanallari" className="hover:text-blue-600">Kripto Telegram Kanalları</Link></li>
+                            <li><Link href="/rehber/ucretsiz-telegram-kanallari" className="hover:text-blue-600">Ücretsiz Telegram Kanalları</Link></li>
+                            <li><Link href="/rehber/turk-telegram-kanallari" className="hover:text-blue-600">Türk Telegram Kanalları</Link></li>
                         </ul>
                     </div>
 

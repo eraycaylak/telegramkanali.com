@@ -43,7 +43,7 @@ export default async function BannerGrid({ type = 'homepage', categoryId }: Bann
                     {/* Content */}
                     <div
                         className={`z-10 relative flex-1 min-w-0 pr-4 pointer-events-none flex flex-col justify-center h-full ${banner.text_align === 'center' ? 'items-center text-center' :
-                                banner.text_align === 'right' ? 'items-end text-right' : 'items-start text-left'
+                            banner.text_align === 'right' ? 'items-end text-right' : 'items-start text-left'
                             }`}
                         style={{ color: banner.text_color || '#FFFFFF' }}
                     >
@@ -60,8 +60,8 @@ export default async function BannerGrid({ type = 'homepage', categoryId }: Bann
                         {banner.subtitle && (
                             <h2
                                 className={`font-black italic truncate drop-shadow-lg leading-tight w-full ${banner.font_size === 'small' ? 'text-xl' :
-                                        banner.font_size === 'large' ? 'text-4xl' :
-                                            banner.font_size === 'xl' ? 'text-5xl' : 'text-3xl'
+                                    banner.font_size === 'large' ? 'text-4xl' :
+                                        banner.font_size === 'xl' ? 'text-5xl' : 'text-3xl'
                                     }`}
                                 style={{ color: 'inherit' }}
                             >
@@ -76,6 +76,11 @@ export default async function BannerGrid({ type = 'homepage', categoryId }: Bann
                             <img src={banner.floating_logo_url} alt="" className="w-full h-full object-contain drop-shadow-lg" />
                         </div>
                     )}
+
+                    {/* SEO Hidden Description */}
+                    <span className="sr-only">
+                        {banner.title} Telegram kanalı{banner.subtitle ? ` - ${banner.subtitle}` : ''} - Aktif ve güncel kanal
+                    </span>
 
                     {/* Button */}
                     <div className="bg-white text-black px-4 py-1 rounded-full font-bold text-sm z-10 relative shadow-lg whitespace-nowrap group-hover:bg-gray-100 transition-colors pointer-events-none">

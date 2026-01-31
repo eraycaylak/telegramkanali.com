@@ -180,6 +180,10 @@ export default function ChannelCard({ channel }: ChannelCardProps) {
 
             {/* Footer Actions */}
             <div className="mt-auto px-3 pb-3 md:px-5 md:pb-5 pt-0 relative z-20 md:pl-16">
+                {/* SEO Hidden Description */}
+                <span className="sr-only">
+                    {channel.name} Telegram kanalı, {categoryName} kategorisinde aktif bir kanaldır. Abone sayısı: {channel.member_count || channel.stats.subscribers}
+                </span>
                 <a
                     href={channel.join_link}
                     target="_blank"

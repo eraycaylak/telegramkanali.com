@@ -11,19 +11,23 @@ export const revalidate = 0;
 const faqs = [
   {
     question: "Telegram Kanalları nedir?",
-    answer: "Telegram kanalları, yöneticilerin sınırsız sayıda aboneye mesaj, fotoğraf, video ve dosya paylaşabildiği tek yönlü iletişim platformlarıdır. Haber, eğitim, kripto ve indirim gibi birçok kategoride kanal bulunmaktadır."
+    answer: "Telegram kanalları, yöneticilerin sınırsız sayıda aboneye mesaj, fotoğraf, video ve dosya paylaşabildiği tek yönlü iletişim platformlarıdır. Detaylı liste için en iyi Telegram kanalları sayfamızı inceleyebilirsiniz.",
+    link: { href: "/rehber/en-iyi-telegram-kanallari", text: "en iyi Telegram kanalları" }
   },
   {
     question: "Telegram kanallarına nasıl katılabilirim?",
-    answer: "Sitemizde listelenen herhangi bir kanalın 'Kanala Git' butonuna tıklayarak doğrudan Telegram uygulamasında kanala katılabilirsiniz. Telegram hesabınızın olması gerekmektedir."
+    answer: "Sitemizde listelenen herhangi bir kanalın 'Kanala Git' butonuna tıklayarak doğrudan Telegram uygulamasında kanala katılabilirsiniz. Telegram kanal listemizi inceleyerek size uygun kanalları bulabilirsiniz.",
+    link: { href: "/rehber/telegram-kanal-listesi", text: "Telegram kanal listesi" }
   },
   {
     question: "Telegram güvenli mi?",
-    answer: "Telegram, uçtan uca şifreleme, gizli sohbetler ve kendini imha eden mesajlar gibi güvenlik özellikleri sunar. Gizlilik odaklı kullanıcılar için popüler bir tercih haline gelmiştir."
+    answer: "Telegram, uçtan uca şifreleme, gizli sohbetler ve kendini imha eden mesajlar gibi güvenlik özellikleri sunar. Güvenilir Türk Telegram kanalları için listemize göz atın.",
+    link: { href: "/rehber/turk-telegram-kanallari", text: "Türk Telegram kanalları" }
   },
   {
     question: "Kendi kanalımı nasıl ekleyebilirim?",
-    answer: "Kanalınızı sitemize eklemek için bizimle iletişime geçebilirsiniz. Reklam ve tanıtım seçenekleri de mevcuttur."
+    answer: "Kanalınızı sitemize eklemek için bizimle iletişime geçebilirsiniz. Ücretsiz Telegram kanalları bölümümüzde yer alabilirsiniz.",
+    link: { href: "/rehber/ucretsiz-telegram-kanallari", text: "Ücretsiz Telegram kanalları" }
   }
 ];
 
@@ -44,9 +48,10 @@ export default async function Home() {
   return (
     <div className="space-y-12">
 
-      {/* Title Divider */}
-      <div className="text-center border-b border-gray-200 pb-4 pt-4">
-        <h2 className="text-gray-500 font-light text-xl tracking-wider">OCAK 2026 - EN İYİ 100 TELEGRAM KANALLARI VE GRUPLARI</h2>
+      {/* SEO H1-H2 Hierarchy */}
+      <div className="text-center border-b border-gray-200 pb-6 pt-6">
+        <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">En İyi Telegram Kanalları ve Grupları (2026)</h1>
+        <h2 className="text-gray-500 font-light text-lg tracking-wider">Güncel ve Aktif Telegram Kanalları - Ocak 2026</h2>
       </div>
 
       {/* Banner Grid (Dynamic from DB) */}
@@ -78,8 +83,8 @@ export default async function Home() {
             </h2>
             <p className="mb-4">
               Son zamanlarda ismini çok sık duyduğunuz Telegram sadece ülkemizde değil, dünya genelinde artan bir popülerliğe sahip.
-              Telegram müşteri hizmetleri de pek çok avantajlar sağlayan harika bir mesajlaşma aracı. WhatsApp ve Messenger gibi
-              geçmişe dayalı lider mesajlaşma uygulamalarına göre çok daha hızlı, güvenli ve kolay kullanılması da ilerleyen
+              Telegram müşteri hizmetleri de pek çok avantajlar sağlayan harika bir mesajlaşma aracı. <Link href="/rehber/en-iyi-telegram-kanallari" className="text-blue-600 hover:underline">En iyi Telegram kanalları</Link> listemizde
+              güncel ve aktif kanalları bulabilirsiniz. WhatsApp ve Messenger gibi geçmişe dayalı lider mesajlaşma uygulamalarına göre çok daha hızlı, güvenli ve kolay kullanılması da ilerleyen
               zamanlarda onları zorlayabilecek birtakım teknik özelliklere sahip olmasını sağlıyor.
             </p>
 
@@ -89,8 +94,7 @@ export default async function Home() {
                 <h3 className="font-bold text-gray-900 text-lg mb-2">Telegram Kanalları ile İletişim Eğlencesi</h3>
                 <p className="text-sm">
                   Telegram kanalları üzerinde aylık 200 milyon gibi bir rakamdan bahsediliyor. Özellikle İran, Rusya, İtalya,
-                  ABD ve Türkiye gibi ülkelerde hızlı büyüyen bir kitleye sahip. Telegram bir çok alanda kullanıldığı gibi
-                  KPSS eğitiminde de kullanılıyor.
+                  ABD ve Türkiye gibi ülkelerde hızlı büyüyen bir kitleye sahip. <Link href="/rehber/telegram-gruplari" className="text-blue-600 hover:underline">Telegram grupları</Link> ve kanallarımızı keşfedin.
                 </p>
               </div>
             </div>
@@ -98,8 +102,7 @@ export default async function Home() {
             <h3 className="text-xl font-bold text-gray-900 mb-2">Neden Telegram Kullanmalısınız?</h3>
             <p className="mb-4">
               Geleceğin mesajlaşma uygulaması olmaya aday Telegram'ı neden kullanmalısınız? Telegram gizliliği ön planda tutan bir
-              uygulama olmasından ötürü bu konudaki hassas kişiler için tercih ediliyor. Bulut tabanlı olmasına rağmen herhangi bir
-              saldırıya karşı çok sağlam koşullara sahiptir.
+              uygulama olmasından ötürü bu konudaki hassas kişiler için tercih ediliyor. <Link href="/rehber/ucretsiz-telegram-kanallari" className="text-blue-600 hover:underline">Ücretsiz Telegram kanalları</Link> listemizi inceleyin.
             </p>
           </article>
 
@@ -141,7 +144,7 @@ export default async function Home() {
                   <Link href={`/${c.slug}`} className="flex items-center justify-between text-gray-600 hover:text-blue-600 hover:pl-2 transition-all">
                     <span>{c.name}</span>
                     <span className="text-xs bg-white px-2 py-1 rounded border border-gray-100 text-gray-400">
-                      {10 + i * 5}
+                      {10 + i * 5} kanal
                     </span>
                   </Link>
                 </li>
@@ -151,7 +154,7 @@ export default async function Home() {
                   <Link href="#" className="flex items-center justify-between text-gray-600 hover:text-blue-600 hover:pl-2 transition-all">
                     <span>Örnek Kategori {i + 1}</span>
                     <span className="text-xs bg-white px-2 py-1 rounded border border-gray-100 text-gray-400">
-                      {Math.floor(Math.random() * 50)}
+                      {Math.floor(Math.random() * 50)} kanal
                     </span>
                   </Link>
                 </li>
@@ -183,7 +186,13 @@ export default async function Home() {
           {faqs.map((faq, index) => (
             <div key={index} className="bg-gray-50 p-6 rounded-xl border border-gray-100">
               <h3 className="font-bold text-gray-900 mb-2">{faq.question}</h3>
-              <p className="text-sm text-gray-600 leading-relaxed">{faq.answer}</p>
+              <p className="text-sm text-gray-600 leading-relaxed">
+                {faq.answer.split(faq.link?.text || '').map((part, i, arr) => (
+                  i === arr.length - 1 ? part : (
+                    <span key={i}>{part}<Link href={faq.link?.href || '#'} className="text-blue-600 hover:underline">{faq.link?.text}</Link></span>
+                  )
+                ))}
+              </p>
             </div>
           ))}
         </div>

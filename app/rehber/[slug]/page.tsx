@@ -3,6 +3,7 @@ import { getChannels } from '@/lib/data';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import ChannelCard from '@/components/ChannelCard';
+import TableOfContents from '@/components/TableOfContents';
 import JsonLd, { generateFAQSchema, generateBreadcrumbSchema } from '@/components/JsonLd';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -115,7 +116,7 @@ export default async function SeoLandingPage({ params }: PageProps) {
 
                         {/* Content Sections */}
                         {page.content?.sections?.map((section, index) => (
-                            <section key={index} className="space-y-4">
+                            <section key={index} id={`section-${index}`} className="space-y-4 scroll-mt-4">
                                 <h2 className="text-2xl font-bold text-gray-900">
                                     {section.heading}
                                 </h2>
@@ -126,7 +127,7 @@ export default async function SeoLandingPage({ params }: PageProps) {
                         ))}
 
                         {/* Related Channels */}
-                        <section className="space-y-6">
+                        <section id="related-channels" className="space-y-6 scroll-mt-4">
                             <h2 className="text-2xl font-bold text-gray-900">
                                 📱 Önerilen Telegram Kanalları
                             </h2>
@@ -147,7 +148,7 @@ export default async function SeoLandingPage({ params }: PageProps) {
 
                         {/* FAQ Section */}
                         {faqs.length > 0 && (
-                            <section className="space-y-6 pt-8 border-t border-gray-100">
+                            <section id="faq-section" className="space-y-6 pt-8 border-t border-gray-100 scroll-mt-4">
                                 <h2 className="text-2xl font-bold text-gray-900">
                                     ❓ Sık Sorulan Sorular
                                 </h2>
@@ -170,6 +171,9 @@ export default async function SeoLandingPage({ params }: PageProps) {
 
                     {/* Sidebar */}
                     <aside className="space-y-6">
+                        {/* Table of Contents - Hub sayfalar için */}
+                        <TableOfContents content={page.content} showProgress={true} />
+
                         {/* Related SEO Pages - Internal Linking Boost */}
                         <div className="bg-gradient-to-br from-gray-50 to-white rounded-xl p-6 border border-gray-100">
                             <h3 className="font-bold text-gray-900 mb-4 text-lg">📚 İlgili Rehberler</h3>

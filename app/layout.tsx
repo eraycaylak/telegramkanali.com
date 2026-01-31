@@ -89,7 +89,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col bg-white text-gray-900`}
       >
         {/* Google Analytics */}
-        <GoogleAnalytics gaId="G-ZORUNLU_DEGIL_ORNEK" />
+        <GoogleAnalytics gaId="G-N9BJQBE7BB" />
 
         {children}
       </body>
