@@ -1,9 +1,10 @@
 import Link from 'next/link';
-import { ShieldCheck, Zap, Globe, HelpCircle, TrendingUp, AlertCircle, RefreshCw } from 'lucide-react';
+import { ShieldCheck, Zap, Globe, HelpCircle, AlertCircle, RefreshCw } from 'lucide-react';
 import { getCategories, getChannels, getFeaturedChannels, getPopularChannels } from '@/lib/data';
 import ChannelCard from '@/components/ChannelCard';
 import BannerGrid from '@/components/BannerGrid';
 import SearchFilter from '@/components/SearchFilter';
+import PopularTicker from '@/components/PopularTicker';
 import Pagination from '@/components/Pagination';
 import JsonLd, { generateFAQSchema } from '@/components/JsonLd';
 import { Channel, Category } from '@/lib/types';
@@ -90,39 +91,19 @@ export default async function Home({ searchParams }: HomeProps) {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
+      {/* Popular Ticker (Editor's Picks) */}
+      <PopularTicker channels={popularChannels} />
 
       {/* SEO H1-H2 Hierarchy */}
-      <div className="text-center border-b border-gray-200 pb-6 pt-6">
-        <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">En İyi Telegram Kanalları ve Grupları (2026)</h1>
-        <h2 className="text-gray-500 font-light text-lg tracking-wider">Güncel ve Aktif Telegram Kanalları - Şubat 2026</h2>
+      <div className="text-center pb-2 pt-4">
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-1">Telegram Kanalları ve Grupları (2026)</h1>
+        <p className="text-gray-500 text-sm tracking-wide">Güncel ve Aktif Telegram Kanalları - Şubat 2026</p>
       </div>
 
-      {/* POPULAR CHANNELS (Only show on first page & no filters) */}
-      {popularChannels.length > 0 && (
-        <section className="bg-gradient-to-r from-gray-50 to-white p-6 rounded-2xl border border-gray-100 shadow-sm relative overflow-hidden group">
-          <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-            <TrendingUp size={120} className="text-gray-900" />
-          </div>
-
-          <div className="text-center md:text-left mb-6 relative z-10">
-            <h2 className="text-xl font-bold text-gray-900 flex items-center justify-center md:justify-start gap-2">
-              <TrendingUp className="text-blue-600" />
-              Editörün Seçimi: Popüler Kanallar
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 relative z-10">
-            {popularChannels.map(channel => (
-              <ChannelCard key={channel.id} channel={channel} compact={true} />
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* SEARCH AND FILTER */}
-      <section id="filter-section" className="sticky top-0 z-30 bg-white/80 backdrop-blur-md py-4 border-b border-gray-100 shadow-sm -mx-4 px-4 md:mx-0 md:px-0 md:rounded-xl">
-        <Suspense fallback={<div className="h-16 bg-gray-100 rounded-xl animate-pulse"></div>}>
+      {/* CATEGORY FILTER (Compact) */}
+      <section id="filter-section" className="py-2 border-b border-gray-100 flex justify-center">
+        <Suspense fallback={<div className="h-10 w-full max-w-sm bg-gray-50 rounded-full animate-pulse"></div>}>
           <SearchFilter categories={categories} />
         </Suspense>
       </section>

@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { Search, Menu, X } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Category } from '@/lib/types';
 
 interface HeaderClientProps {
@@ -11,7 +12,42 @@ interface HeaderClientProps {
 }
 
 export default function HeaderClient({ categories, logo }: HeaderClientProps) {
+    const router = useRouter();
+    const searchParams = useSearchParams();
     const [menuOpen, setMenuOpen] = useState(false);
+    const [searchTerm, setSearchTerm] = useState(searchParams.get('q') || '');
+    const [isSearchVisible, setIsSearchVisible] = useState(false); // For mobile toggle
+
+    // Sync searchTerm with URL if it changes externally
+    useEffect(() => {
+        setSearchTerm(searchParams.get('q') || '');
+    }, [searchParams]);
+
+    const handleSearch = (e: React.FormEvent) => {
+        e.preventDefault();
+        updateSearch(searchTerm);
+    };
+
+    const updateSearch = (term: string) => {
+        const params = new URLSearchParams(searchParams.toString());
+        if (term) {
+            params.set('q', term);
+        } else {
+            params.delete('q');
+        }
+        params.delete('page'); // Reset pagination on search
+        router.push(`/?${params.toString()}`);
+    };
+
+    // Debounced search for typing
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            if (searchTerm !== (searchParams.get('q') || '')) {
+                updateSearch(searchTerm);
+            }
+        }, 600);
+        return () => clearTimeout(timer);
+    }, [searchTerm]);
 
     useEffect(() => {
         if (menuOpen) {
@@ -62,23 +98,49 @@ export default function HeaderClient({ categories, logo }: HeaderClientProps) {
                         {logo}
                     </div>
 
-                    {/* Mobile: Search Button (Placeholder for now or modal trigger) */}
-                    <button className="md:hidden p-2 text-white hover:bg-white/10 rounded-lg transition" type="button" aria-label="Arama">
+                    {/* Mobile: Search Toggle Button */}
+                    <button
+                        onClick={() => setIsSearchVisible(!isSearchVisible)}
+                        className="md:hidden p-2 text-white hover:bg-white/10 rounded-lg transition"
+                        type="button"
+                        aria-label="Arama"
+                    >
                         <Search size={24} />
                     </button>
 
                     {/* Desktop: Search Bar */}
-                    <div className="hidden md:flex flex-1 relative w-full ml-8">
+                    <form onSubmit={handleSearch} className="hidden md:flex flex-1 relative w-full ml-8">
                         <input
                             type="text"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
                             placeholder="Aradığınız grubu yazınız..."
                             className="w-full h-14 bg-[#555555] text-gray-100 placeholder-gray-400 rounded-full px-8 pr-14 text-base outline-none focus:bg-[#666] focus:ring-2 focus:ring-gray-400 transition-all shadow-inner"
                         />
-                        <button className="absolute right-5 top-0 h-14 w-10 flex items-center justify-center text-gray-300 hover:text-white transition">
+                        <button type="submit" className="absolute right-5 top-0 h-14 w-10 flex items-center justify-center text-gray-300 hover:text-white transition">
                             <Search size={26} />
                         </button>
-                    </div>
+                    </form>
                 </div>
+
+                {/* Mobile: Search Bar Toggleable */}
+                {isSearchVisible && (
+                    <div className="md:hidden px-4 pb-4 animate-in fade-in slide-in-from-top-2">
+                        <form onSubmit={handleSearch} className="relative">
+                            <input
+                                type="text"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                placeholder="Grup ara..."
+                                className="w-full h-12 bg-[#555555] text-gray-100 placeholder-gray-400 rounded-full px-6 pr-12 text-sm outline-none focus:bg-[#666]"
+                                autoFocus
+                            />
+                            <button type="submit" className="absolute right-4 top-0 h-12 flex items-center text-gray-300">
+                                <Search size={20} />
+                            </button>
+                        </form>
+                    </div>
+                )}
             </div>
 
             {/* 3. Navigation Bar - Desktop */}
