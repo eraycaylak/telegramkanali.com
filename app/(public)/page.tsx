@@ -101,13 +101,6 @@ export default async function Home({ searchParams }: HomeProps) {
         <p className="text-gray-500 text-sm tracking-wide">Güncel ve Aktif Telegram Kanalları - Şubat 2026</p>
       </div>
 
-      {/* CATEGORY FILTER (Compact) */}
-      <section id="filter-section" className="py-2 border-b border-gray-100 flex justify-center">
-        <Suspense fallback={<div className="h-10 w-full max-w-sm bg-gray-50 rounded-full animate-pulse"></div>}>
-          <SearchFilter categories={categories} />
-        </Suspense>
-      </section>
-
       {/* Banner Grid (Dynamic from DB - Only show if no search) */}
       {!search && !categoryId && <BannerGrid />}
 
