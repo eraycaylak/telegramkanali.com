@@ -10,7 +10,17 @@ interface PaginationProps {
 export default function Pagination({ currentPage, totalPages, searchParams }: PaginationProps) {
     // Generate URL for a page
     const getPageUrl = (page: number) => {
-        const params = new URLSearchParams(searchParams);
+        const params = new URLSearchParams();
+
+        // Safely extract existing params from searchParams object
+        if (searchParams) {
+            Object.entries(searchParams).forEach(([key, value]) => {
+                if (value !== undefined) {
+                    params.set(key, String(value));
+                }
+            });
+        }
+
         params.set('page', page.toString());
         return `/?${params.toString()}`;
     };

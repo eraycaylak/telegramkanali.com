@@ -40,7 +40,8 @@ interface HomeProps {
 
 export default async function Home({ searchParams }: HomeProps) {
   // Await searchParams properly (Next 15+)
-  const { q: search, category: categoryId, page: pageParam } = (await searchParams) || {};
+  const resolvedSearchParams = await searchParams;
+  const { q: search, category: categoryId, page: pageParam } = resolvedSearchParams || {};
   const page = pageParam ? parseInt(pageParam as string) : 1;
   const LIMIT = 20;
 
@@ -160,7 +161,7 @@ export default async function Home({ searchParams }: HomeProps) {
 
         {/* Pagination */}
         <div className="mt-12 flex justify-center">
-          <Pagination totalPages={totalPages} currentPage={page} searchParams={searchParams} />
+          <Pagination totalPages={totalPages} currentPage={page} searchParams={resolvedSearchParams} />
         </div>
       </section>
 
