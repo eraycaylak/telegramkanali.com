@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Suspense } from "react";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
 import AnalyticsTracker from "@/components/AnalyticsTracker";
 import JsonLd, { generateWebsiteSchema, generateOrganizationSchema } from "@/components/JsonLd";
@@ -91,7 +92,9 @@ export default function RootLayout({
       >
         {/* Google Analytics */}
         <GoogleAnalytics gaId="G-N9BJQBE7BB" />
-        <AnalyticsTracker />
+        <Suspense fallback={null}>
+          <AnalyticsTracker />
+        </Suspense>
 
         {children}
       </body>
