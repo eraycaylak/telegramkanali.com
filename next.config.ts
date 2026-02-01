@@ -10,6 +10,7 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'res.cloudinary.com' },
       { protocol: 'https', hostname: '*.telegram.org' },
       { protocol: 'https', hostname: 't.me' },
+      { protocol: 'https', hostname: 'cdn4.telesco.pe' },
     ],
   },
 };

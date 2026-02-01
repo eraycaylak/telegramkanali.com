@@ -7,6 +7,7 @@ import SearchFilter from '@/components/SearchFilter';
 import Pagination from '@/components/Pagination';
 import JsonLd, { generateFAQSchema } from '@/components/JsonLd';
 import { Channel, Category } from '@/lib/types';
+import { Suspense } from 'react';
 
 // Cache for 60 seconds - improves performance
 export const revalidate = 60;
@@ -120,7 +121,9 @@ export default async function Home({ searchParams }: HomeProps) {
 
       {/* SEARCH AND FILTER */}
       <section id="filter-section" className="sticky top-0 z-30 bg-white/80 backdrop-blur-md py-4 border-b border-gray-100 shadow-sm -mx-4 px-4 md:mx-0 md:px-0 md:rounded-xl">
-        <SearchFilter categories={categories} />
+        <Suspense fallback={<div className="h-16 bg-gray-100 rounded-xl animate-pulse"></div>}>
+          <SearchFilter categories={categories} />
+        </Suspense>
       </section>
 
       {/* Banner Grid (Dynamic from DB - Only show if no search) */}

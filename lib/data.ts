@@ -59,6 +59,7 @@ export async function getChannels(
 }
 
 // Fetch Popular Channels (High Score)
+// Fetch Popular Channels (High Score)
 export async function getPopularChannels(limit: number = 5): Promise<Channel[]> {
     const { data, error } = await supabase
         .from('channels')
@@ -71,7 +72,7 @@ export async function getPopularChannels(limit: number = 5): Promise<Channel[]> 
         return [];
     }
 
-    return data.map((d: any) => ({
+    return (data || []).map((d: any) => ({
         ...d,
         categoryName: d.categories?.name,
     })) as Channel[];
@@ -86,7 +87,7 @@ export async function getFeaturedChannels(): Promise<Channel[]> {
         .eq('featured', true);
 
     if (error) return [];
-    return data.map((d: any) => ({ ...d, category: d.category_id, categoryName: d.categories?.name })) as Channel[];
+    return (data || []).map((d: any) => ({ ...d, category: d.category_id, categoryName: d.categories?.name })) as Channel[];
 }
 
 export async function getNewChannels(): Promise<Channel[]> {
@@ -97,7 +98,7 @@ export async function getNewChannels(): Promise<Channel[]> {
         .limit(6);
 
     if (error) return [];
-    return data.map((d: any) => ({ ...d, category: d.category_id, categoryName: d.categories?.name })) as Channel[];
+    return (data || []).map((d: any) => ({ ...d, category: d.category_id, categoryName: d.categories?.name })) as Channel[];
 }
 
 export async function getChannelBySlug(slug: string): Promise<Channel | null> {
@@ -129,7 +130,7 @@ export async function getChannelsByCategory(categoryId: string): Promise<Channel
         .eq('category_id', categoryId);
 
     if (error) return [];
-    return data.map((d: any) => ({ ...d, category: d.category_id, categoryName: d.categories?.name })) as Channel[];
+    return (data || []).map((d: any) => ({ ...d, category: d.category_id, categoryName: d.categories?.name })) as Channel[];
 }
 
 // SEO Pages
