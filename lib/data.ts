@@ -11,7 +11,7 @@ export async function getCategories(): Promise<Category[]> {
         console.error('Error fetching categories:', error);
         return [];
     }
-    return data as Category[];
+    return (data || []) as Category[];
 }
 
 // Fetch Channels
