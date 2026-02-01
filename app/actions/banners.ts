@@ -1,9 +1,11 @@
 'use server';
 
 import { getAdminClient } from '@/lib/supabaseAdmin';
+import { supabase as publicSupabase } from '@/lib/supabaseClient';
 import { revalidatePath } from 'next/cache';
 
-const supabase = getAdminClient();
+// Remove top-level client init to prevent module load crashes
+// const supabase = getAdminClient();
 
 export type BannerType = 'homepage' | 'category';
 
@@ -29,7 +31,7 @@ export interface Banner {
 }
 
 export async function getBanners(type?: BannerType, categoryId?: string) {
-    let query = supabase
+    let query = publicSupabase
         .from('banners')
         .select('*')
         .order('display_order', { ascending: true });
@@ -49,11 +51,12 @@ export async function getBanners(type?: BannerType, categoryId?: string) {
         return [];
     }
 
-    return data as Banner[];
+    return (data || []) as Banner[];
 }
 
 export async function saveBanner(banner: Partial<Banner>) {
-    const { data, error } = await supabase
+    const supabaseAdmin = getAdminClient();
+    const { data, error } = await supabaseAdmin
         .from('banners')
         .upsert({
             id: banner.id,
@@ -93,7 +96,8 @@ export async function saveBanner(banner: Partial<Banner>) {
 }
 
 export async function deleteBanner(id: string) {
-    const { error } = await supabase
+    const supabaseAdmin = getAdminClient();
+    const { error } = await supabaseAdmin
         .from('banners')
         .delete()
         .eq('id', id);
@@ -109,7 +113,8 @@ export async function deleteBanner(id: string) {
 }
 
 export async function toggleBannerActive(id: string, currentState: boolean) {
-    const { error } = await supabase
+    const supabaseAdmin = getAdminClient();
+    const { error } = await supabaseAdmin
         .from('banners')
         .update({ active: !currentState })
         .eq('id', id);
@@ -125,8 +130,9 @@ export async function toggleBannerActive(id: string, currentState: boolean) {
 
 export async function reorderBanners(items: { id: string; display_order: number }[]) {
     try {
+        const supabaseAdmin = getAdminClient();
         const updates = items.map(item =>
-            supabase
+            supabaseAdmin
                 .from('banners')
                 .update({ display_order: item.display_order })
                 .eq('id', item.id)
