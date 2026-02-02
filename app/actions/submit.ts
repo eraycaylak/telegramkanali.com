@@ -18,6 +18,9 @@ export async function submitChannel(formData: FormData) {
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/(^-|-$)/g, '') + '-' + Math.random().toString(36).substring(2, 7);
 
+    // Get current user to link ownership
+    const { data: { user } } = await supabase.auth.getUser();
+
     const { error } = await supabase.from('channels').insert({
         name,
         description,
@@ -25,6 +28,7 @@ export async function submitChannel(formData: FormData) {
         category_id,
         contact_info,
         slug,
+        owner_id: user?.id, // Explicitly set owner
         status: 'pending' // Force pending for public submissions
     });
 
