@@ -65,7 +65,7 @@ export async function getPopularChannels(limit: number = 5): Promise<Channel[]> 
     const { data, error } = await supabase
         .from('channels')
         .select('*, categories(name, slug)')
-        .eq('status', 'approved')
+        // .eq('status', 'approved')
         .order('score', { ascending: false }) // Highest score first
         .limit(limit);
 
@@ -97,7 +97,7 @@ export async function getNewChannels(): Promise<Channel[]> {
     const { data, error } = await supabase
         .from('channels')
         .select('*, categories(name, slug)')
-        .eq('status', 'approved')
+        // .eq('status', 'approved')
         .order('created_at', { ascending: false })
         .limit(6);
 
@@ -179,4 +179,3 @@ export async function getAllSeoSlugs(): Promise<string[]> {
 // but we should update them to use functions.
 export const categories: Category[] = [];
 export const channels: Channel[] = [];
-
