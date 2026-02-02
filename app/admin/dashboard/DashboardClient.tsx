@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus, Trash2, Edit, Search, LogOut, ExternalLink, RefreshCw } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
-import { deleteChannel, addChannel, updateChannel, scrapeTelegramInfo, syncAllChannelsFromTelegram } from '@/app/actions/admin';
+import { deleteChannel, addChannel, updateChannel, scrapeTelegramInfo, syncAllChannelsFromTelegram, approveChannel, rejectChannel, syncChannelFromTelegram } from '@/app/actions/admin';
 import { Channel, Category } from '@/lib/types';
 
 export default function DashboardClient() {
@@ -12,7 +12,8 @@ export default function DashboardClient() {
     const [channels, setChannels] = useState<Channel[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
-    const [selectedCategory, setSelectedCategory] = useState('all'); // Eksik state eklendi
+    const [selectedCategory, setSelectedCategory] = useState('all');
+    const [viewStatus, setViewStatus] = useState<'approved' | 'pending' | 'rejected'>('approved');
     const [loading, setLoading] = useState(true);
 
     // Modal State
@@ -127,8 +128,25 @@ export default function DashboardClient() {
     const filteredChannels = channels.filter(c => {
         const matchesSearch = c.name.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesCategory = selectedCategory === 'all' || c.category_id === selectedCategory;
-        return matchesSearch && matchesCategory;
+        const matchesStatus = c.status === viewStatus || (viewStatus === 'approved' && !c.status); // Default to approved
+        return matchesSearch && matchesCategory && matchesStatus;
     });
+
+    const handleApprove = async (id: string) => {
+        if (confirm('Bu kanalı onaylamak istiyor musunuz?')) {
+            const res = await approveChannel(id);
+            if (res.success) fetchData();
+            else alert(res.error);
+        }
+    };
+
+    const handleReject = async (id: string) => {
+        if (confirm('Bu kanalı reddetmek istiyor musunuz?')) {
+            const res = await rejectChannel(id);
+            if (res.success) fetchData();
+            else alert(res.error);
+        }
+    };
 
     return (
         <div className="min-h-screen bg-transparent text-gray-900 font-sans">
@@ -148,17 +166,32 @@ export default function DashboardClient() {
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />
                         </div>
-                        {/* Kategori Filtresi */}
-                        <select
-                            value={selectedCategory}
-                            onChange={(e) => setSelectedCategory(e.target.value)}
-                            className="w-full sm:w-64 px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none bg-white"
-                        >
-                            <option value="all">Tüm Kategoriler</option>
-                            {categories.map(cat => (
-                                <option key={cat.id} value={cat.id}>{cat.name}</option>
-                            ))}
-                        </select>
+                        {/* Status Tabs */}
+                        <div className="flex bg-gray-100 p-1 rounded-xl w-full sm:w-auto">
+                            <button
+                                onClick={() => setViewStatus('approved')}
+                                className={`px-4 py-2 rounded-lg text-sm font-bold transition ${viewStatus === 'approved' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                            >
+                                Yayındakiler
+                            </button>
+                            <button
+                                onClick={() => setViewStatus('pending')}
+                                className={`px-4 py-2 rounded-lg text-sm font-bold transition flex items-center gap-2 ${viewStatus === 'pending' ? 'bg-white text-orange-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                            >
+                                Bekleyenler
+                                {channels.filter(c => c.status === 'pending').length > 0 && (
+                                    <span className="bg-orange-500 text-white text-[10px] px-1.5 py-0.5 rounded-full">
+                                        {channels.filter(c => c.status === 'pending').length}
+                                    </span>
+                                )}
+                            </button>
+                            <button
+                                onClick={() => setViewStatus('rejected')}
+                                className={`px-4 py-2 rounded-lg text-sm font-bold transition ${viewStatus === 'rejected' ? 'bg-white text-red-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                            >
+                                Reddedilenler
+                            </button>
+                        </div>
                     </div>
 
                     <div className="flex items-center gap-3 w-full xl:w-auto justify-end">
@@ -215,25 +248,73 @@ export default function DashboardClient() {
                                                 'hover:bg-gray-50'
                                             }`}
                                     >
-                                        <td className="p-4 font-medium text-gray-900 flex items-center gap-3">
-                                            {channel.image && channel.image !== '/images/logo.png' ? (
-                                                <img
-                                                    src={channel.image}
-                                                    alt=""
-                                                    className="w-10 h-10 rounded-full object-cover border border-gray-200 shadow-sm"
-                                                />
-                                            ) : (
-                                                <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 font-bold border border-gray-200">
-                                                    {channel.name.charAt(0)}
+                                        <td className="p-4 font-medium text-gray-900">
+                                            <div className="flex items-center gap-3">
+                                                {channel.image && channel.image !== '/images/logo.png' ? (
+                                                    <img
+                                                        src={channel.image}
+                                                        alt=""
+                                                        className="w-10 h-10 rounded-full object-cover border border-gray-200 shadow-sm"
+                                                    />
+                                                ) : (
+                                                    <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 font-bold border border-gray-200">
+                                                        {channel.name.charAt(0)}
+                                                    </div>
+                                                )}
+                                                <div className="flex flex-col">
+                                                    <span>{channel.name}</span>
+                                                    {channel.status === 'pending' && channel.contact_info && (
+                                                        <span className="text-[10px] text-gray-400 font-normal">İletişim: {channel.contact_info}</span>
+                                                    )}
                                                 </div>
-                                            )}
-                                            <span>{channel.name}</span>
+                                            </div>
                                         </td>
                                         <td className="p-4 text-gray-500 text-sm">
                                             <span className="bg-blue-50 text-blue-700 px-2 py-1 rounded-md">{channel.categoryName || 'Genel'}</span>
                                         </td>
                                         <td className="p-4 text-center font-bold text-gray-700">{channel.score || 0}</td>
                                         <td className="p-4 text-right flex items-center justify-end gap-2">
+                                            {channel.status === 'pending' && (
+                                                <>
+                                                    <button
+                                                        onClick={() => handleApprove(channel.id)}
+                                                        className="bg-green-50 text-green-600 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-green-600 hover:text-white transition"
+                                                    >
+                                                        Onayla
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleReject(channel.id)}
+                                                        className="bg-red-50 text-red-600 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-red-600 hover:text-white transition"
+                                                    >
+                                                        Reddet
+                                                    </button>
+                                                </>
+                                            )}
+                                            {channel.status === 'rejected' && (
+                                                <button
+                                                    onClick={() => handleApprove(channel.id)}
+                                                    className="bg-blue-50 text-blue-600 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-blue-600 hover:text-white transition"
+                                                >
+                                                    Geri Al
+                                                </button>
+                                            )}
+                                            <button
+                                                onClick={async () => {
+                                                    setSyncing(true);
+                                                    const res = await syncChannelFromTelegram(channel.id);
+                                                    setSyncing(false);
+                                                    if (res.error) alert(res.error);
+                                                    else {
+                                                        alert('Kanal güncellendi!');
+                                                        fetchData();
+                                                    }
+                                                }}
+                                                disabled={syncing}
+                                                className="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition disabled:opacity-50"
+                                                title="Telegram'dan Güncelle"
+                                            >
+                                                <RefreshCw size={18} className={syncing ? 'animate-spin' : ''} />
+                                            </button>
                                             <button
                                                 onClick={() => handleEdit(channel)}
                                                 className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-100 rounded-lg transition" title="Düzenle">

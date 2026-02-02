@@ -47,8 +47,12 @@ export async function addChannel(formData: FormData) {
 
         console.log('[CHANNEL] Telegram info:', telegramInfo);
 
-        // Verileri hazırla - Telegram'dan gelen bilgileri kullan (varsa)
-        const finalImage = image || telegramInfo?.photo_url || '/images/logo.png';
+        // Persist image to our storage
+        const finalImage = await persistTelegramImage(
+            image || telegramInfo?.photo_url || '/images/logo.png',
+            slug
+        );
+
         const finalDescription = description || telegramInfo?.description || '';
         const memberCount = telegramInfo?.member_count || 0;
         const subscriberStr = memberCount > 0 ? memberCount.toString() : '0';
@@ -176,7 +180,7 @@ export async function updateChannel(id: string, formData: FormData) {
                 join_link,
                 category_id,
                 score, // Güncellenen skor
-                image: image || '/images/logo.png',
+                image: await persistTelegramImage(image || '/images/logo.png', id),
             })
             .eq('id', id);
 
@@ -271,6 +275,43 @@ export async function uploadLogo(formData: FormData) {
 }
 
 /**
+ * Downloads a Telegram image and uploads it to our own storage to prevent expiration
+ */
+async function persistTelegramImage(url: string, slug: string): Promise<string> {
+    if (!url || !url.startsWith('http') || url.includes('supabase.co')) return url;
+
+    // Only persist if it's from Telegram or similar CDNs
+    if (!url.includes('telesco.pe') && !url.includes('telegram') && !url.includes('t.me')) return url;
+
+    try {
+        console.log(`[STORAGE] Persisting image: ${url}`);
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('Image fetch failed');
+
+        const buffer = Buffer.from(await res.arrayBuffer());
+        const contentType = res.headers.get('content-type') || 'image/jpeg';
+        const ext = contentType.split('/').pop() || 'jpg';
+        const fileName = `channel_${slug}_${Date.now()}.${ext}`;
+
+        const { error } = await adminClient.storage
+            .from('assets')
+            .upload(fileName, buffer, { contentType, upsert: true });
+
+        if (error) throw error;
+
+        const { data: urlData } = adminClient.storage
+            .from('assets')
+            .getPublicUrl(fileName);
+
+        console.log(`[STORAGE] Persisted to: ${urlData.publicUrl}`);
+        return urlData.publicUrl;
+    } catch (err) {
+        console.error('[STORAGE] Persistence error:', err);
+        return url; // Fallback to original if upload fails
+    }
+}
+
+/**
  * Tüm kanalları Telegram'dan güncelleyerek fotoğraf ve üye sayısını çeker
  * Admin panelinden çağrılacak
  */
@@ -307,9 +348,11 @@ export async function syncAllChannelsFromTelegram() {
                     // Güncelleme verisi hazırla
                     const updateData: any = {};
 
-                    // Fotoğraf güncelle (eğer Telegram'dan geldi ve mevcut boşsa)
-                    if (telegramInfo.photo_url && (!channel.image || channel.image === '/images/logo.png')) {
-                        updateData.image = telegramInfo.photo_url;
+                    // Fotoğraf güncelle (eğer Telegram'dan geldi ve mevcut boşsa veya temp ise)
+                    const isTempImage = channel.image?.includes('telesco.pe') || !channel.image?.includes('supabase.co');
+
+                    if (telegramInfo.photo_url && (!channel.image || channel.image === '/images/logo.png' || isTempImage)) {
+                        updateData.image = await persistTelegramImage(telegramInfo.photo_url, channel.id);
                     }
 
                     // Üye sayısını güncelle (eğer Telegram'dan geldi)
@@ -437,3 +480,42 @@ export async function syncChannelFromTelegram(channelId: string) {
     }
 }
 
+
+export async function approveChannel(id: string) {
+    if (!id) return { error: 'ID required' };
+
+    try {
+        const { error } = await adminClient
+            .from('channels')
+            .update({ status: 'approved' })
+            .eq('id', id);
+
+        if (error) throw error;
+
+        revalidatePath('/');
+        revalidatePath('/admin/dashboard');
+        return { success: true };
+    } catch (error) {
+        console.error('Approve error:', error);
+        return { error: 'Failed to approve channel' };
+    }
+}
+
+export async function rejectChannel(id: string) {
+    if (!id) return { error: 'ID required' };
+
+    try {
+        const { error } = await adminClient
+            .from('channels')
+            .update({ status: 'rejected' })
+            .eq('id', id);
+
+        if (error) throw error;
+
+        revalidatePath('/admin/dashboard');
+        return { success: true };
+    } catch (error) {
+        console.error('Reject error:', error);
+        return { error: 'Failed to reject channel' };
+    }
+}

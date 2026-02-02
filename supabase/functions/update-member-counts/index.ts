@@ -66,6 +66,36 @@ async function fetchChannelInfo(username: string): Promise<ChannelInfo | null> {
     }
 }
 
+async function persistImage(supabase: any, url: string, slug: string): Promise<string> {
+    if (!url || !url.startsWith('http') || url.includes('supabase.co')) return url;
+    if (!url.includes('telesco.pe') && !url.includes('telegram') && !url.includes('t.me')) return url;
+
+    try {
+        const res = await fetch(url);
+        if (!res.ok) return url;
+
+        const blob = await res.blob();
+        const contentType = res.headers.get('content-type') || 'image/jpeg';
+        const ext = contentType.split('/').pop() || 'jpg';
+        const fileName = `channel_${slug}_${Date.now()}.${ext}`;
+
+        const { error } = await supabase.storage
+            .from('assets')
+            .upload(fileName, blob, { contentType, upsert: true });
+
+        if (error) throw error;
+
+        const { data: urlData } = supabase.storage
+            .from('assets')
+            .getPublicUrl(fileName);
+
+        return urlData.publicUrl;
+    } catch (err) {
+        console.error(`[STORAGE] Persistence error for ${slug}:`, err);
+        return url;
+    }
+}
+
 function decodeEntities(text: string): string {
     const entities: Record<string, string> = {
         '&amp;': '&', '&lt;': '<', '&gt;': '>', '&quot;': '"', '&#39;': "'", '&nbsp;': ' '
@@ -131,8 +161,9 @@ Deno.serve(async (req) => {
                 };
 
                 // Fotoğraf varsa güncelle
-                if (info.photoUrl) {
-                    updateData.image = info.photoUrl;
+                const isTempImage = channel.image?.includes('telesco.pe') || !channel.image?.includes('supabase.co');
+                if (info.photoUrl && (info.photoUrl !== channel.image || isTempImage)) {
+                    updateData.image = await persistImage(supabase, info.photoUrl, channel.id);
                 }
 
                 // Açıklama varsa güncelle

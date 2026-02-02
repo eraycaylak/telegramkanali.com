@@ -22,6 +22,8 @@ export interface Channel {
     member_count?: number; // Fetched from Telegram API
     seo_description?: string;
     target_audience?: string;
+    status?: 'pending' | 'approved' | 'rejected';
+    contact_info?: string;
 }
 
 export interface Category {
