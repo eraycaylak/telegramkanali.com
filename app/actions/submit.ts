@@ -13,10 +13,22 @@ export async function submitChannel(formData: FormData) {
         return { error: 'Lütfen zorunlu alanları doldurun.' };
     }
 
+    // Check for existing channel
+    const { data: existing } = await supabase
+        .from('channels')
+        .select('id')
+        .eq('join_link', join_link)
+        .single();
+
+    if (existing) {
+        return { error: 'Bu kanal zaten sistemde mevcut!' };
+    }
+
     // Generate slug from name
+    // Use timestamp to guarantee uniqueness (prevents channels_slug_key error)
     const slug = name.toLowerCase()
         .replace(/[^a-z0-9]+/g, '-')
-        .replace(/(^-|-$)/g, '') + '-' + Math.random().toString(36).substring(2, 7);
+        .replace(/(^-|-$)/g, '') + '-' + Date.now();
 
     // Get current user to link ownership
     const { data: { user } } = await supabase.auth.getUser();
