@@ -138,7 +138,7 @@ function BotSettingsContent() {
                                         <div className="w-8 h-8 rounded-full bg-gray-100 text-gray-900 font-bold flex items-center justify-center shrink-0">1</div>
                                         <div>
                                             <p className="font-bold text-gray-900 mb-1">Botu Kanalınıza Ekleyin</p>
-                                            <p className="text-sm text-gray-500 mb-2">Telegram'da <span className="font-bold text-blue-600">@KanalAnalizBot</span> botunu aratın ve kanalınıza **Yönetici (Admin)** olarak ekleyin.</p>
+                                            <p className="text-sm text-gray-500 mb-2">Telegram'da <span className="font-bold text-blue-600">@tgkanalicom_bot</span> botunu aratın ve kanalınıza **Yönetici (Admin)** olarak ekleyin.</p>
                                             <p className="text-[11px] text-orange-600 font-bold">* Botun "Mesajları Oku" ve "Üyeleri Yönet" yetkisi olması yeterlidir.</p>
                                         </div>
                                     </div>

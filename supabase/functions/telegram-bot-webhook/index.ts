@@ -45,9 +45,19 @@ serve(async (req) => {
         }
 
         // Handle /verify command
-        if (payload.message && payload.message.text?.startsWith('/verify')) {
-            const token = payload.message.text.split(' ')[1];
-            const chat_id = payload.message.chat.id.toString();
+        const msg = payload.message || payload.channel_post || payload.edited_channel_post;
+        console.log("Detected Message Payload:", msg ? "YES" : "NO", msg?.text);
+        if (msg && msg.text?.startsWith('/verify')) {
+            console.log("Found verify command!");
+
+            if (!BOT_TOKEN) {
+                console.error("CRITICAL: TELEGRAM_BOT_TOKEN is missing in environment variables!");
+                return new Response(JSON.stringify({ error: "Server misconfiguration" }), { status: 500 });
+            }
+
+            const token = msg.text.split(' ')[1];
+            const chat_id = msg.chat.id.toString();
+            console.log(`Verifying token: ${token} for chat_id: ${chat_id}`);
 
             const { data: channel, error } = await supabase
                 .from('channels')
@@ -55,9 +65,16 @@ serve(async (req) => {
                 .eq('bot_token', token)
                 .select();
 
+            if (error) {
+                console.error("Supabase Update Error:", error);
+            }
+
+            console.log("Update Result:", channel);
+
             if (channel && channel.length > 0) {
+                console.log("Success! Sending confirmation to Telegram...");
                 // Send success message
-                await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                const tgRes = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -65,15 +82,34 @@ serve(async (req) => {
                         text: `✅ Kanal başarıyla doğrulandı: ${channel[0].name}\nArtık istatistikler kaydedilmeye başlandı.`
                     })
                 });
+                const tgData = await tgRes.json();
+                console.log("Telegram API Response:", tgData);
+
+                // Fetch initial member count immediately
+                try {
+                    const countRes = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getChatMemberCount?chat_id=${chat_id}`);
+                    const countData = await countRes.json();
+                    if (countData.ok && typeof countData.result === 'number') {
+                        await supabase
+                            .from('channels')
+                            .update({ member_count: countData.result })
+                            .eq('id', channel[0].id);
+                        console.log("Initial member count set to:", countData.result);
+                    }
+                } catch (countErr) {
+                    console.error("Failed to fetch initial member count:", countErr);
+                }
             } else {
-                await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                console.log("Failure! Token not found or invalid.");
+                const tgRes = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         chat_id: chat_id,
-                        text: `❌ Geçersiz veya kullanılmış doğrulama kodu.`
+                        text: `❌ Geçersiz veya kullanılmış doğrulama kodu. Lütfen panelden yeni kod oluşturun.`
                     })
                 });
+                console.log("Telegram API Send Result:", await tgRes.json());
             }
         }
 

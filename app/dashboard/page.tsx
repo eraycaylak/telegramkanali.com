@@ -110,26 +110,18 @@ export default function DashboardOverview() {
                 </div>
             )}
 
-            {/* Placeholder for Analytics Chart */}
-            <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm overflow-hidden relative">
+            {/* Analytics Chart Placeholder */}
+            <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm overflow-hidden relative min-h-[300px] flex flex-col">
                 <div className="flex items-center justify-between mb-8">
                     <h3 className="text-lg font-bold text-gray-900">Büyüme Analizi</h3>
-                    <select className="bg-gray-50 border-none text-sm font-semibold rounded-lg px-4 py-2 outline-none">
-                        <option>Son 7 Gün</option>
-                        <option>Son 30 Gün</option>
-                    </select>
                 </div>
-                <div className="h-64 flex items-end justify-between gap-2 px-4">
-                    {[40, 60, 45, 90, 65, 80, 100].map((h, i) => (
-                        <div key={i} className="flex-1 bg-blue-500 rounded-t-lg transition-all hover:bg-blue-600 cursor-pointer group relative" style={{ height: `${h}%` }}>
-                            <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap">
-                                +{h * 12} Üye
-                            </div>
-                        </div>
-                    ))}
-                </div>
-                <div className="mt-6 flex justify-between text-xs font-bold text-gray-400 px-4">
-                    <span>Pzt</span><span>Sal</span><span>Çar</span><span>Per</span><span>Cum</span><span>Cmt</span><span>Paz</span>
+
+                <div className="flex-1 flex flex-col items-center justify-center text-center opacity-60">
+                    <div className="bg-gray-100 p-4 rounded-full mb-4">
+                        <TrendingUp size={32} className="text-gray-400" />
+                    </div>
+                    <p className="font-bold text-gray-900">Henüz Yeterli Veri Yok</p>
+                    <p className="text-sm text-gray-500 max-w-xs mx-auto mt-2">Botunuz yeni kuruldu. İstatistikler toplandıkça burada grafikler oluşacaktır.</p>
                 </div>
             </div>
         </div>
