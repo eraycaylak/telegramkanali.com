@@ -132,7 +132,7 @@ export default function HeaderClient({ categories, logo, user: initialUser }: He
 
                     {/* Desktop Actions */}
                     <div className="hidden md:flex items-center gap-3 ml-4">
-                        <Link href="/kanal-ekle" className="whitespace-nowrap bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-full font-bold text-sm shadow-md hover:shadow-lg transition">
+                        <Link href="/dashboard/kanal-ekle" className="whitespace-nowrap bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-full font-bold text-sm shadow-md hover:shadow-lg transition">
                             + KANAL EKLE
                         </Link>
 
@@ -234,7 +234,7 @@ export default function HeaderClient({ categories, logo, user: initialUser }: He
                                     <LogIn size={18} /> GİRİŞ YAP
                                 </Link>
                             )}
-                            <Link href="/kanal-ekle" onClick={() => setMenuOpen(false)} className="py-2 px-3 border border-gray-600 rounded-lg text-sm font-semibold text-center">
+                            <Link href="/dashboard/kanal-ekle" onClick={() => setMenuOpen(false)} className="py-2 px-3 border border-gray-600 rounded-lg text-sm font-semibold text-center">
                                 + KANAL EKLE
                             </Link>
                             <Link href="/populer" onClick={() => setMenuOpen(false)} className="py-2 px-3 bg-red-600 rounded-lg text-sm font-semibold text-center">

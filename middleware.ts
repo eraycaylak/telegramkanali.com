@@ -56,8 +56,13 @@ export async function middleware(request: NextRequest) {
 
     const { data: { user } } = await supabase.auth.getUser()
 
-    // Protect /dashboard and /kanal-ekle
-    if ((request.nextUrl.pathname.startsWith('/dashboard') || request.nextUrl.pathname.startsWith('/kanal-ekle')) && !user) {
+    // Force redirect standard /kanal-ekle to /dashboard/kanal-ekle
+    if (request.nextUrl.pathname === '/kanal-ekle') {
+        return NextResponse.redirect(new URL('/dashboard/kanal-ekle', request.url))
+    }
+
+    // Protect /dashboard and /dashboard/kanal-ekle
+    if (request.nextUrl.pathname.startsWith('/dashboard') && !user) {
         return NextResponse.redirect(new URL('/login', request.url))
     }
 
