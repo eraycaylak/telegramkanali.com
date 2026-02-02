@@ -63,9 +63,29 @@ export default function LoginPage() {
                     </div>
 
                     {error && (
-                        <div className="bg-red-50 border border-red-100 text-red-700 px-4 py-3 rounded-xl flex items-center gap-3 text-sm animate-in fade-in slide-in-from-top-1">
-                            <AlertCircle size={18} />
-                            <span>{error}</span>
+                        <div className="bg-red-50 border border-red-100 text-red-700 px-4 py-3 rounded-xl flex flex-col gap-2 text-sm animate-in fade-in slide-in-from-top-1">
+                            <div className="flex items-center gap-3">
+                                <AlertCircle size={18} />
+                                <span>{error}</span>
+                            </div>
+                            {error.includes('Email not confirmed') && (
+                                <button
+                                    type="button"
+                                    onClick={async () => {
+                                        const form = document.querySelector('form');
+                                        const email = new FormData(form!).get('email') as string;
+                                        if (!email) return alert('Lütfen email adresinizi girin.');
+
+                                        const { resendVerificationEmail } = await import('@/app/actions/auth');
+                                        const res = await resendVerificationEmail(email);
+                                        if (res.error) alert(res.error);
+                                        else alert('Doğrulama maili tekrar gönderildi!');
+                                    }}
+                                    className="ml-7 text-left text-xs font-bold underline hover:text-red-800"
+                                >
+                                    Doğrulama mailini tekrar gönder
+                                </button>
+                            )}
                         </div>
                     )}
 
