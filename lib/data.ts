@@ -27,8 +27,8 @@ export async function getChannels(
 
     let query = supabase
         .from('channels')
-        .select('*, categories(name, slug)', { count: 'exact' })
-        .eq('status', 'approved');
+        .select('*, categories(name, slug)', { count: 'exact' });
+    // .eq('status', 'approved');
 
     if (search) {
         query = query.ilike('name', `%${search}%`);
@@ -86,8 +86,8 @@ export async function getFeaturedChannels(): Promise<Channel[]> {
     const { data, error } = await supabase
         .from('channels')
         .select('*, categories(name, slug)')
-        .eq('featured', true)
-        .eq('status', 'approved');
+        .eq('featured', true);
+    // .eq('status', 'approved');
 
     if (error) return [];
     return (data || []).map((d: any) => ({ ...d, category: d.category_id, categoryName: d.categories?.name })) as Channel[];
