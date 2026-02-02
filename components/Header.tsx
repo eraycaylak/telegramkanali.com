@@ -1,3 +1,4 @@
+import React from 'react';
 import { getCategories } from '@/lib/data';
 import HeaderClient from './HeaderClient';
 import DynamicLogo from './DynamicLogo';
@@ -13,5 +14,9 @@ export default async function Header() {
         // Fallback to empty array or minimal static list if critical
     }
 
-    return <HeaderClient categories={categories} logo={<DynamicLogo />} />;
+    return (
+        <React.Suspense fallback={<div className="h-16 bg-[#333]"></div>}>
+            <HeaderClient categories={categories} logo={<DynamicLogo />} />
+        </React.Suspense>
+    );
 }
