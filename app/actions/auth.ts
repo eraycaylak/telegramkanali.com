@@ -16,6 +16,7 @@ export async function signUp(formData: FormData) {
             data: {
                 full_name: fullName,
             },
+            emailRedirectTo: 'https://telegramkanali.com',
         },
     });
 
