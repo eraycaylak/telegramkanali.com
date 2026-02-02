@@ -14,7 +14,9 @@ import {
     AlertTriangle
 } from 'lucide-react';
 
-export default function BotSettingsPage() {
+import { Suspense } from 'react';
+
+function BotSettingsContent() {
     const searchParams = useSearchParams();
     const [channels, setChannels] = useState<any[]>([]);
     const [selectedId, setSelectedId] = useState<string | null>(searchParams.get('channel'));
@@ -29,9 +31,15 @@ export default function BotSettingsPage() {
         if (!user) return;
 
         const { data } = await supabase.from('channels').select('*').eq('owner_id', user.id);
-        setChannels(data || []);
-        if (data && data.length > 0 && !selectedId) {
-            setSelectedId(data[0].id);
+        const userChannels = data || [];
+        setChannels(userChannels);
+
+        // If query param exists, verify it belongs to user
+        const queryChannelId = searchParams.get('channel');
+        if (queryChannelId && userChannels.some(c => c.id === queryChannelId)) {
+            setSelectedId(queryChannelId);
+        } else if (userChannels.length > 0 && !selectedId) {
+            setSelectedId(userChannels[0].id);
         }
         setLoading(false);
     }
@@ -72,12 +80,12 @@ export default function BotSettingsPage() {
                                 key={c.id}
                                 onClick={() => setSelectedId(c.id)}
                                 className={`w-full text-left p-4 rounded-2xl border transition-all ${selectedId === c.id
-                                        ? 'bg-blue-600 text-white border-blue-600 shadow-lg shadow-blue-100'
-                                        : 'bg-white text-gray-700 border-gray-100 hover:border-gray-300'
+                                    ? 'bg-blue-600 text-white border-blue-600 shadow-lg shadow-blue-100'
+                                    : 'bg-white text-gray-700 border-gray-100 hover:border-gray-300'
                                     }`}
                             >
                                 <div className="font-bold truncate">{c.name}</div>
-                                <div className={`text-[10px] font-bold uppercase tracking-wider ${selectedId === c.id ? 'text-blue-200' : 'text-gray-400'}`}>
+                                <div className={`text-[10px] font-bold uppercase tracking-wider ${/* selectedId === c.id ? 'text-blue-200' : */ 'text-gray-400'}`}>
                                     {c.bot_enabled ? 'Bot Aktif' : 'Bot Devre Dışı'}
                                 </div>
                             </button>
@@ -185,5 +193,13 @@ export default function BotSettingsPage() {
                 </div>
             </div>
         </div>
+    );
+}
+
+export default function BotSettingsPage() {
+    return (
+        <Suspense fallback={<div className="h-96 flex items-center justify-center text-gray-400">Yükleniyor...</div>}>
+            <BotSettingsContent />
+        </Suspense>
     );
 }

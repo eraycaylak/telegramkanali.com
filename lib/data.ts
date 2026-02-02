@@ -110,7 +110,8 @@ export async function getChannelBySlug(slug: string): Promise<Channel | null> {
         .from('channels')
         .select('*, categories(name, slug)')
         .eq('slug', slug)
-        .eq('status', 'approved')
+        .eq('slug', slug)
+        // .eq('status', 'approved') // Disabled until status migration is applied
         .single();
 
     if (error || !data) return null;
@@ -133,7 +134,8 @@ export async function getChannelsByCategory(categoryId: string): Promise<Channel
         .from('channels')
         .select('*, categories(name, slug)')
         .eq('category_id', categoryId)
-        .eq('status', 'approved');
+        .eq('category_id', categoryId);
+    // .eq('status', 'approved'); // Disabled until status migration is applied
 
     if (error) return [];
     return (data || []).map((d: any) => ({ ...d, category: d.category_id, categoryName: d.categories?.name })) as Channel[];
