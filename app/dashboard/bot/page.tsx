@@ -184,7 +184,7 @@ function BotSettingsContent() {
                             </div>
 
                             <div className="text-center">
-                                <a href="https://t.me/KanalAnalizBot" target="_blank" className="inline-flex items-center gap-2 text-blue-600 font-bold hover:underline">
+                                <a href="https://t.me/tgkanalicom_bot" target="_blank" className="inline-flex items-center gap-2 text-blue-600 font-bold hover:underline">
                                     <MessageSquare size={18} /> Yardıma mı ihtiyacınız var? Destek grubuna katılın
                                 </a>
                             </div>
@@ -205,7 +205,7 @@ function BotSettingsContent() {
                                         <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold shadow-md">1</div>
                                         Botu Ekle
                                     </div>
-                                    <p className="text-gray-600 leading-relaxed">Telegram'da <span className="font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded">@KanalAnalizBot</span>'u bulup kanalınıza yönetici olarak ekleyin.</p>
+                                    <p className="text-gray-600 leading-relaxed">Telegram'da <span className="font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded">@tgkanalicom_bot</span>'u bulup kanalınıza yönetici olarak ekleyin.</p>
                                 </div>
                                 <div className="p-6 bg-gray-50 rounded-2xl space-y-3 hover:bg-gray-100 transition duration-300">
                                     <div className="font-bold text-gray-900 flex items-center gap-3 text-lg">
