@@ -26,13 +26,18 @@ export default function AnalyticsPage() {
     }, [selectedId]);
 
     async function fetchChannels() {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
 
-        const { data } = await supabase.from('channels').select('*').eq('owner_id', user.id);
-        setChannels(data || []);
-        if (data && data.length > 0) setSelectedId(data[0].id);
-        setLoading(false);
+            const { data } = await supabase.from('channels').select('*').eq('owner_id', user.id);
+            setChannels(data || []);
+            if (data && data.length > 0) setSelectedId(data[0].id);
+        } catch (error) {
+            console.error('Error fetching channels for stats:', error);
+        } finally {
+            setLoading(false);
+        }
     }
 
     async function fetchStats() {

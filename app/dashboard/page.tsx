@@ -23,26 +23,31 @@ export default function DashboardOverview() {
 
     useEffect(() => {
         async function fetchStats() {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) return;
+            try {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (!user) return;
 
-            // Fetch profile (balance)
-            const { data: profile } = await supabase.from('profiles').select('balance').eq('id', user.id).single();
+                // Fetch profile (balance)
+                const { data: profile } = await supabase.from('profiles').select('balance').eq('id', user.id).single();
 
-            // Fetch channel count
-            const { count: channelCount } = await supabase.from('channels').select('*', { count: 'exact', head: true }).eq('owner_id', user.id);
+                // Fetch channel count
+                const { count: channelCount } = await supabase.from('channels').select('*', { count: 'exact', head: true }).eq('owner_id', user.id);
 
-            // Total members sum
-            const { data: channels } = await supabase.from('channels').select('member_count').eq('owner_id', user.id);
-            const totalMembers = channels?.reduce((acc, curr) => acc + (curr.member_count || 0), 0) || 0;
+                // Total members sum
+                const { data: channels } = await supabase.from('channels').select('member_count').eq('owner_id', user.id);
+                const totalMembers = channels?.reduce((acc, curr) => acc + (curr.member_count || 0), 0) || 0;
 
-            setStats({
-                channels: channelCount || 0,
-                balance: profile?.balance || 0,
-                totalMembers: totalMembers,
-                activeAds: 0 // Feature to be added
-            });
-            setLoading(false);
+                setStats({
+                    channels: channelCount || 0,
+                    balance: profile?.balance || 0,
+                    totalMembers: totalMembers,
+                    activeAds: 0
+                });
+            } catch (error) {
+                console.error('Dashboard stats fetch error:', error);
+            } finally {
+                setLoading(false);
+            }
         }
 
         fetchStats();

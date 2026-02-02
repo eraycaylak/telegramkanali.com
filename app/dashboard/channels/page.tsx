@@ -23,17 +23,22 @@ export default function MyChannelsPage() {
     }, []);
 
     async function fetchChannels() {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
 
-        const { data } = await supabase
-            .from('channels')
-            .select('*')
-            .eq('owner_id', user.id)
-            .order('created_at', { ascending: false });
+            const { data } = await supabase
+                .from('channels')
+                .select('*')
+                .eq('owner_id', user.id)
+                .order('created_at', { ascending: false });
 
-        setChannels(data || []);
-        setLoading(false);
+            setChannels(data || []);
+        } catch (error) {
+            console.error('Error fetching channels:', error);
+        } finally {
+            setLoading(false);
+        }
     }
 
     const getStatusBadge = (status: string) => {

@@ -27,21 +27,26 @@ function BotSettingsContent() {
     }, []);
 
     async function fetchChannels() {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
 
-        const { data } = await supabase.from('channels').select('*').eq('owner_id', user.id);
-        const userChannels = data || [];
-        setChannels(userChannels);
+            const { data } = await supabase.from('channels').select('*').eq('owner_id', user.id);
+            const userChannels = data || [];
+            setChannels(userChannels);
 
-        // If query param exists, verify it belongs to user
-        const queryChannelId = searchParams.get('channel');
-        if (queryChannelId && userChannels.some(c => c.id === queryChannelId)) {
-            setSelectedId(queryChannelId);
-        } else if (userChannels.length > 0 && !selectedId) {
-            setSelectedId(userChannels[0].id);
+            // If query param exists, verify it belongs to user
+            const queryChannelId = searchParams.get('channel');
+            if (queryChannelId && userChannels.some(c => c.id === queryChannelId)) {
+                setSelectedId(queryChannelId);
+            } else if (userChannels.length > 0 && !selectedId) {
+                setSelectedId(userChannels[0].id);
+            }
+        } catch (error) {
+            console.error('Error fetching channels for bot settings:', error);
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     }
 
     const selectedChannel = channels.find(c => c.id === selectedId);
