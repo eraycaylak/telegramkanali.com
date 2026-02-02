@@ -66,6 +66,43 @@ async function fetchChannelInfo(username: string): Promise<ChannelInfo | null> {
     }
 }
 
+// Bot API'den resmi bilgi çeker
+async function fetchBotInfo(botToken: string, chatId: string): Promise<ChannelInfo | null> {
+    try {
+        // 1. Get Chat Info
+        const chatRes = await fetch(`https://api.telegram.org/bot${botToken}/getChat?chat_id=${chatId}`);
+        const chatData = await chatRes.json();
+        if (!chatData.ok) return null;
+
+        const chat = chatData.result;
+
+        // 2. Get Member Count
+        const countRes = await fetch(`https://api.telegram.org/bot${botToken}/getChatMemberCount?chat_id=${chatId}`);
+        const countData = await countRes.json();
+        const memberCount = countData.ok ? countData.result : 0;
+
+        // 3. Get Photo URL
+        let photoUrl: string | null = null;
+        if (chat.photo?.big_file_id) {
+            const fileRes = await fetch(`https://api.telegram.org/bot${botToken}/getFile?file_id=${chat.photo.big_file_id}`);
+            const fileData = await fileRes.json();
+            if (fileData.ok) {
+                photoUrl = `https://api.telegram.org/file/bot${botToken}/${fileData.result.file_path}`;
+            }
+        }
+
+        return {
+            memberCount,
+            title: chat.title || chat.username || '',
+            description: chat.description || '',
+            photoUrl
+        };
+    } catch (error) {
+        console.error(`[BOT_FETCH] Error for ${chatId}:`, error);
+        return null;
+    }
+}
+
 async function persistImage(supabase: any, url: string, slug: string): Promise<string> {
     if (!url || !url.startsWith('http') || url.includes('supabase.co')) return url;
     if (!url.includes('telesco.pe') && !url.includes('telegram') && !url.includes('t.me')) return url;
@@ -124,12 +161,13 @@ Deno.serve(async (req) => {
     try {
         const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
         const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+        const botToken = Deno.env.get('TELEGRAM_BOT_TOKEN');
 
         const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
         const { data: channels, error: fetchError } = await supabase
             .from('channels')
-            .select('id, name, join_link, member_count, image, description')
+            .select('id, name, join_link, member_count, image, description, bot_enabled, telegram_chat_id')
             .order('created_at', { ascending: false });
 
         if (fetchError) throw fetchError;
@@ -141,18 +179,24 @@ Deno.serve(async (req) => {
         const results: any[] = [];
 
         for (const channel of channels || []) {
+            let info: ChannelInfo | null = null;
+
+            // Eğer bot aktifse ve chat_id varsa Bot API kullan
+            if (botToken && channel.bot_enabled && channel.telegram_chat_id) {
+                console.log(`[UPDATE] Using BOT API for: ${channel.name}`);
+                info = await fetchBotInfo(botToken, channel.telegram_chat_id);
+            }
+
             const username = channel.join_link
                 ?.replace('https://t.me/', '')
                 ?.replace('http://t.me/', '')
                 ?.replace('@', '');
 
-            if (!username || username.includes('+') || username.includes('joinchat')) {
-                failed++;
-                results.push({ name: channel.name, status: 'skipped_private' });
-                continue;
+            // Yoksa veya bot API başarısızsa scraping yap
+            if (!info && username && !username.includes('+') && !username.includes('joinchat')) {
+                console.log(`[UPDATE] Using SCRAPING for: ${channel.name}`);
+                info = await fetchChannelInfo(username);
             }
-
-            const info = await fetchChannelInfo(username);
 
             if (info && info.memberCount > 0) {
                 const updateData: any = {

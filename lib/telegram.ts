@@ -185,3 +185,56 @@ function decodeHTMLEntities(text: string): string {
 
     return text.replace(/&[^;]+;/g, (match) => entities[match] || match);
 }
+
+/**
+ * Telegram Bot API'sini kullanarak resmi verileri çeker
+ * Bot yönetici olduğunda scraping'den çok daha güvenilirdir.
+ */
+export async function fetchChannelInfoViaBot(chatId: string): Promise<TelegramChannelInfo | null> {
+    const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+    if (!BOT_TOKEN) {
+        console.error('[BOT] TELEGRAM_BOT_TOKEN environment variable is missing');
+        return null;
+    }
+
+    try {
+        console.log('[BOT] Fetching official info for chat:', chatId);
+
+        // 1. Get Chat Info (title, description, image file_id)
+        const chatRes = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getChat?chat_id=${chatId}`);
+        const chatData = await chatRes.json();
+
+        if (!chatData.ok) {
+            console.error('[BOT] getChat error:', chatData.description);
+            return null;
+        }
+
+        const chat = chatData.result;
+
+        // 2. Get Member Count
+        const countRes = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getChatMemberCount?chat_id=${chatId}`);
+        const countData = await countRes.json();
+        const member_count = countData.ok ? countData.result : 0;
+
+        // 3. Get Photo URL if exists
+        let photo_url: string | null = null;
+        if (chat.photo?.big_file_id) {
+            const fileRes = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getFile?file_id=${chat.photo.big_file_id}`);
+            const fileData = await fileRes.json();
+            if (fileData.ok) {
+                photo_url = `https://api.telegram.org/file/bot${BOT_TOKEN}/${fileData.result.file_path}`;
+            }
+        }
+
+        return {
+            title: chat.title || chat.username || 'Kanal',
+            description: chat.description || '',
+            photo_url,
+            member_count,
+            username: chat.username || ''
+        };
+    } catch (err) {
+        console.error('[BOT] API Error:', err);
+        return null;
+    }
+}

@@ -5,6 +5,10 @@ import { Search, Menu, X } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Category } from '@/lib/types';
+import { supabase } from '@/lib/supabaseClient';
+import { User } from '@supabase/supabase-js';
+import { LogIn, LayoutDashboard, LogOut, User as UserIcon } from 'lucide-react';
+import { signOut } from '@/app/actions/auth';
 
 interface HeaderClientProps {
     categories: Category[];
@@ -17,11 +21,30 @@ export default function HeaderClient({ categories, logo }: HeaderClientProps) {
     const [menuOpen, setMenuOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState(searchParams.get('q') || '');
     const [isSearchVisible, setIsSearchVisible] = useState(false); // For mobile toggle
+    const [user, setUser] = useState<User | null>(null);
+    const [loading, setLoading] = useState(true);
 
     // Sync searchTerm with URL if it changes externally
     useEffect(() => {
         setSearchTerm(searchParams.get('q') || '');
     }, [searchParams]);
+
+    // Auth state check
+    useEffect(() => {
+        const checkUser = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            setUser(user);
+            setLoading(false);
+        };
+
+        checkUser();
+
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+            setUser(session?.user || null);
+        });
+
+        return () => subscription.unsubscribe();
+    }, []);
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
@@ -62,16 +85,8 @@ export default function HeaderClient({ categories, logo }: HeaderClientProps) {
         <header className="flex flex-col w-full text-white font-sans">
 
             {/* 1. Top Bar - Hidden on Mobile */}
-            <div className="hidden md:block bg-[#4a4a4a] border-b border-[#555]">
-                <div className="container mx-auto px-6 h-12 flex items-center justify-end gap-4 text-[13px] font-bold">
-                    <Link href="/kanal-ekle" className="flex items-center gap-1 border border-gray-300 rounded-full px-5 py-2 hover:bg-gray-600 transition tracking-wide text-gray-100 hover:text-white">
-                        + KANAL EKLE
-                    </Link>
-                    <Link href="/populer" className="bg-[#cc0000] hover:bg-[#aa0000] rounded-full px-5 py-2 transition tracking-wide text-white shadow-lg">
-                        POPÜLER GRUPLAR &gt;
-                    </Link>
-                </div>
-            </div>
+            {/* 1. Top Bar - Removed to simplify UI as requested */}
+
 
             {/* 2. Main Bar - Logo & Search & Mobile Menu */}
             <div className="bg-[#333333] py-3 md:py-6 relative overflow-hidden">
@@ -109,18 +124,42 @@ export default function HeaderClient({ categories, logo }: HeaderClientProps) {
                     </button>
 
                     {/* Desktop: Search Bar */}
-                    <form onSubmit={handleSearch} className="hidden md:flex flex-1 relative w-full ml-8">
+                    <form onSubmit={handleSearch} className="hidden md:flex flex-1 relative w-full lg:max-w-xl ml-8">
                         <input
                             type="text"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             placeholder="Aradığınız grubu yazınız..."
-                            className="w-full h-14 bg-[#555555] text-gray-100 placeholder-gray-400 rounded-full px-8 pr-14 text-base outline-none focus:bg-[#666] focus:ring-2 focus:ring-gray-400 transition-all shadow-inner"
+                            className="w-full h-12 bg-[#555555] text-gray-100 placeholder-gray-400 rounded-full px-6 pr-12 text-sm outline-none focus:bg-[#666] focus:ring-2 focus:ring-gray-400 transition-all shadow-inner"
                         />
-                        <button type="submit" className="absolute right-5 top-0 h-14 w-10 flex items-center justify-center text-gray-300 hover:text-white transition">
-                            <Search size={26} />
+                        <button type="submit" className="absolute right-4 top-0 h-12 flex items-center text-gray-300 hover:text-white transition">
+                            <Search size={22} />
                         </button>
                     </form>
+
+                    {/* Desktop Actions */}
+                    <div className="hidden md:flex items-center gap-3 ml-4">
+                        <Link href="/kanal-ekle" className="whitespace-nowrap bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-full font-bold text-sm shadow-md hover:shadow-lg transition">
+                            + KANAL EKLE
+                        </Link>
+
+                        {!loading && (
+                            user ? (
+                                <>
+                                    <Link href="/dashboard" className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 rounded-full px-5 py-2.5 transition text-white shadow-md font-bold text-sm">
+                                        <LayoutDashboard size={16} /> PANEL
+                                    </Link>
+                                    <button onClick={() => signOut()} className="bg-gray-700 p-2.5 rounded-full text-gray-300 hover:text-white hover:bg-gray-600 transition" title="Çıkış Yap">
+                                        <LogOut size={18} />
+                                    </button>
+                                </>
+                            ) : (
+                                <Link href="/login" className="flex items-center gap-2 bg-white text-gray-800 hover:bg-gray-100 rounded-full px-6 py-2.5 transition shadow-md font-bold text-sm">
+                                    <LogIn size={16} /> GİRİŞ YAP
+                                </Link>
+                            )
+                        )}
+                    </div>
                 </div>
 
                 {/* Mobile: Search Bar Toggleable */}
@@ -188,7 +227,21 @@ export default function HeaderClient({ categories, logo }: HeaderClientProps) {
                                 </Link>
                             ))}
                             <div className="border-t border-gray-700 my-2"></div>
-                            <Link href="/kanal-ekle" onClick={() => setMenuOpen(false)} className="py-2 px-3 bg-blue-600 rounded-lg text-sm font-semibold text-center">
+                            {user ? (
+                                <>
+                                    <Link href="/dashboard" onClick={() => setMenuOpen(false)} className="py-2 px-3 bg-blue-600 rounded-lg text-sm font-semibold flex items-center justify-center gap-2">
+                                        <LayoutDashboard size={18} /> DASHBOARD
+                                    </Link>
+                                    <button onClick={() => { signOut(); setMenuOpen(false); }} className="py-2 px-3 bg-gray-700 rounded-lg text-sm font-semibold flex items-center justify-center gap-2">
+                                        <LogOut size={18} /> ÇIKIŞ YAP
+                                    </button>
+                                </>
+                            ) : (
+                                <Link href="/login" onClick={() => setMenuOpen(false)} className="py-2 px-3 bg-gray-700 rounded-lg text-sm font-semibold flex items-center justify-center gap-2">
+                                    <LogIn size={18} /> GİRİŞ YAP
+                                </Link>
+                            )}
+                            <Link href="/kanal-ekle" onClick={() => setMenuOpen(false)} className="py-2 px-3 border border-gray-600 rounded-lg text-sm font-semibold text-center">
                                 + KANAL EKLE
                             </Link>
                             <Link href="/populer" onClick={() => setMenuOpen(false)} className="py-2 px-3 bg-red-600 rounded-lg text-sm font-semibold text-center">

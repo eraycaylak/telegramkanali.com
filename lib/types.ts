@@ -24,6 +24,10 @@ export interface Channel {
     target_audience?: string;
     status?: 'pending' | 'approved' | 'rejected';
     contact_info?: string;
+    owner_id?: string;
+    bot_token?: string;
+    bot_enabled?: boolean;
+    telegram_chat_id?: string;
 }
 
 export interface Category {

@@ -32,7 +32,8 @@ export async function addChannel(formData: FormData) {
     const join_link = formData.get('join_link') as string;
     const category_id = formData.get('category_id') as string;
     const image = formData.get('image') as string;
-    const score = parseInt(formData.get('score') as string) || 0; // Skor
+    const score = parseInt(formData.get('score') as string) || 0;
+    const owner_id = formData.get('owner_id') as string;
     const slug = name.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
 
     console.log('[CHANNEL] Adding channel:', { name, slug, join_link, category_id, image, description, score });
@@ -65,7 +66,8 @@ export async function addChannel(formData: FormData) {
             stats: { subscribers: subscriberStr },
             image: finalImage,
             member_count: memberCount,
-            score, // Skor veritabanına ekleniyor
+            score,
+            owner_id: owner_id || null,
             verified: false,
             featured: false
         };
@@ -167,7 +169,8 @@ export async function updateChannel(id: string, formData: FormData) {
     const join_link = formData.get('join_link') as string;
     const category_id = formData.get('category_id') as string;
     const image = formData.get('image') as string;
-    const score = parseInt(formData.get('score') as string) || 0; // Skor güncelleme
+    const score = parseInt(formData.get('score') as string) || 0;
+    const owner_id = formData.get('owner_id') as string;
 
     // Don't change slug on edit to preserve SEO, or handle carefully. For now, keep it.
 
@@ -179,7 +182,8 @@ export async function updateChannel(id: string, formData: FormData) {
                 description,
                 join_link,
                 category_id,
-                score, // Güncellenen skor
+                score,
+                owner_id: owner_id || null,
                 image: await persistTelegramImage(image || '/images/logo.png', id),
             })
             .eq('id', id);
@@ -428,7 +432,7 @@ export async function syncChannelFromTelegram(channelId: string) {
         // Kanal bilgisini çek
         const { data: channel, error: fetchError } = await adminClient
             .from('channels')
-            .select('id, name, join_link')
+            .select('id, name, join_link, bot_enabled, telegram_chat_id')
             .eq('id', channelId)
             .single();
 
@@ -436,11 +440,22 @@ export async function syncChannelFromTelegram(channelId: string) {
             return { error: 'Kanal bulunamadı' };
         }
 
-        const { fetchTelegramChannelInfo } = await import('@/lib/telegram');
-        const telegramInfo = await fetchTelegramChannelInfo(channel.join_link);
+        const { fetchTelegramChannelInfo, fetchChannelInfoViaBot } = await import('@/lib/telegram');
+
+        let telegramInfo;
+        if (channel.bot_enabled && channel.telegram_chat_id) {
+            console.log(`[SYNC] Using Bot API for channel: ${channel.name}`);
+            telegramInfo = await fetchChannelInfoViaBot(channel.telegram_chat_id);
+        }
+
+        // Fallback or scraping
+        if (!telegramInfo) {
+            console.log(`[SYNC] Using Scraping for channel: ${channel.name}`);
+            telegramInfo = await fetchTelegramChannelInfo(channel.join_link);
+        }
 
         if (!telegramInfo) {
-            return { error: 'Telegram\'dan bilgi alınamadı (private kanal olabilir)' };
+            return { error: 'Telegram\'dan bilgi alınamadı' };
         }
 
         // Güncelle

@@ -11,6 +11,7 @@ export default function DashboardClient() {
     const router = useRouter();
     const [channels, setChannels] = useState<Channel[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
+    const [profiles, setProfiles] = useState<any[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('all');
     const [viewStatus, setViewStatus] = useState<'approved' | 'pending' | 'rejected'>('approved');
@@ -24,7 +25,8 @@ export default function DashboardClient() {
         join_link: '',
         category_id: '',
         image: '',
-        score: 0
+        score: 0,
+        owner_id: ''
     });
     const [editingId, setEditingId] = useState<string | null>(null);
     const [scraping, setScraping] = useState(false);
@@ -50,6 +52,10 @@ export default function DashboardClient() {
         const { data: catData } = await supabase.from('categories').select('*');
         if (catData) setCategories(catData as Category[]);
 
+        // Fetch Profiles
+        const { data: profData } = await supabase.from('profiles').select('id, email, full_name');
+        if (profData) setProfiles(profData);
+
         setLoading(false);
     }
 
@@ -71,7 +77,8 @@ export default function DashboardClient() {
             join_link: channel.join_link,
             category_id: channel.category_id || '',
             image: channel.image || '',
-            score: channel.score || 0
+            score: channel.score || 0,
+            owner_id: channel.owner_id || ''
         });
         setEditingId(channel.id);
         setLastEditedId(channel.id);
@@ -116,7 +123,7 @@ export default function DashboardClient() {
         if (res.success) {
             alert(editingId ? 'Kanal güncellendi!' : 'Kanal eklendi!');
             setIsModalOpen(false);
-            setFormData({ name: '', description: '', join_link: '', category_id: '', image: '', score: 0 });
+            setFormData({ name: '', description: '', join_link: '', category_id: '', image: '', score: 0, owner_id: '' });
             setEditingId(null);
             fetchData();
         } else {
@@ -395,8 +402,22 @@ export default function DashboardClient() {
                                 </div>
                             </div>
 
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Kanal Sahibi (Üye)</label>
+                                <select
+                                    className="w-full border rounded-lg p-2"
+                                    value={formData.owner_id}
+                                    onChange={e => setFormData({ ...formData, owner_id: e.target.value })}
+                                >
+                                    <option value="">Sahipsiz</option>
+                                    {profiles.map(p => (
+                                        <option key={p.id} value={p.id}>{p.full_name || p.email} ({p.email})</option>
+                                    ))}
+                                </select>
+                            </div>
+
                             <div className="flex justify-end gap-3 mt-6">
-                                <button type="button" onClick={() => { setIsModalOpen(false); setEditingId(null); setFormData({ name: '', description: '', join_link: '', category_id: '', image: '', score: 0 }); }} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">İptal</button>
+                                <button type="button" onClick={() => { setIsModalOpen(false); setEditingId(null); setFormData({ name: '', description: '', join_link: '', category_id: '', image: '', score: 0, owner_id: '' }); }} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">İptal</button>
                                 <button type="submit" className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">{editingId ? 'Güncelle' : 'Kaydet'}</button>
                             </div>
                         </form>
