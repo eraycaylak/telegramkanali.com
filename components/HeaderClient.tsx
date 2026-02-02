@@ -13,7 +13,7 @@ import { signOut } from '@/app/actions/auth';
 interface HeaderClientProps {
     categories: Category[];
     logo: React.ReactNode;
-    user: User | null;
+    user?: User | null;
 }
 
 export default function HeaderClient({ categories, logo, user: initialUser }: HeaderClientProps) {
