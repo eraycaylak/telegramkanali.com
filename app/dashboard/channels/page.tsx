@@ -57,7 +57,7 @@ export default function MyChannelsPage() {
         <div className="space-y-8">
             <div className="flex items-center justify-between">
                 <h2 className="text-2xl font-bold text-gray-900">Kanallarım ({channels.length})</h2>
-                <Link href="/kanal-ekle" className="bg-blue-600 text-white px-5 py-2.5 rounded-xl font-bold hover:bg-blue-700 transition flex items-center gap-2 text-sm shadow-lg shadow-blue-100">
+                <Link href="/dashboard/kanal-ekle" className="bg-blue-600 text-white px-5 py-2.5 rounded-xl font-bold hover:bg-blue-700 transition flex items-center gap-2 text-sm shadow-lg shadow-blue-100">
                     <PlusCircle size={18} /> Yeni Kanal Ekle
                 </Link>
             </div>
@@ -69,7 +69,7 @@ export default function MyChannelsPage() {
                     </div>
                     <h3 className="text-xl font-bold text-gray-900 mb-2">Henüz kanalınız yok</h3>
                     <p className="text-gray-500 mb-8 max-w-sm mx-auto">Sisteme kanalınızı ekleyerek analizlerini takip etmeye başlayın.</p>
-                    <Link href="/kanal-ekle" className="inline-block bg-blue-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-blue-700 transition">
+                    <Link href="/dashboard/kanal-ekle" className="inline-block bg-blue-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-blue-700 transition">
                         Kanalımı Ekle
                     </Link>
                 </div>
