@@ -99,9 +99,9 @@ export default function DashboardOverview() {
                     <p className="text-gray-500 mb-8 max-w-sm mx-auto">
                         Sisteme kanalınızı ekleyerek analizlerini takip edebilir ve reklam verebilirsiniz.
                     </p>
-                    <button className="bg-blue-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-blue-700 transition shadow-lg shadow-blue-200">
+                    <Link href="/kanal-ekle" className="bg-blue-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-blue-700 transition shadow-lg shadow-blue-200 inline-block">
                         Kanalımı Ekle
-                    </button>
+                    </Link>
                 </div>
             )}
 

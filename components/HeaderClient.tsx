@@ -13,32 +13,25 @@ import { signOut } from '@/app/actions/auth';
 interface HeaderClientProps {
     categories: Category[];
     logo: React.ReactNode;
+    user: User | null;
 }
 
-export default function HeaderClient({ categories, logo }: HeaderClientProps) {
+export default function HeaderClient({ categories, logo, user: initialUser }: HeaderClientProps) {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [menuOpen, setMenuOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState(searchParams.get('q') || '');
-    const [isSearchVisible, setIsSearchVisible] = useState(false); // For mobile toggle
-    const [user, setUser] = useState<User | null>(null);
-    const [loading, setLoading] = useState(true);
+    const [isSearchVisible, setIsSearchVisible] = useState(false);
+    const [user, setUser] = useState<User | null>(initialUser);
+    const [loading, setLoading] = useState(false);
 
     // Sync searchTerm with URL if it changes externally
     useEffect(() => {
         setSearchTerm(searchParams.get('q') || '');
     }, [searchParams]);
 
-    // Auth state check
+    // Listen for auth changes
     useEffect(() => {
-        const checkUser = async () => {
-            const { data: { user } } = await supabase.auth.getUser();
-            setUser(user);
-            setLoading(false);
-        };
-
-        checkUser();
-
         const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
             setUser(session?.user || null);
         });
