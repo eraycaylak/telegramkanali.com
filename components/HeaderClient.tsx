@@ -22,7 +22,7 @@ export default function HeaderClient({ categories, logo, user: initialUser }: He
     const [menuOpen, setMenuOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState(searchParams.get('q') || '');
     const [isSearchVisible, setIsSearchVisible] = useState(false);
-    const [user, setUser] = useState<User | null>(initialUser);
+    const [user, setUser] = useState<User | null>(initialUser || null);
     const [loading, setLoading] = useState(false);
 
     // Sync searchTerm with URL if it changes externally
