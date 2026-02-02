@@ -44,19 +44,23 @@ export default function DashboardClient() {
 
     async function fetchData() {
         setLoading(true);
-        // Fetch Channels
-        const { data: chanData } = await supabase.from('channels').select('*, categories(name)').order('created_at', { ascending: false });
-        if (chanData) setChannels(chanData.map((d: any) => ({ ...d, categoryName: d.categories?.name })) as Channel[]);
+        try {
+            // Fetch Channels
+            const { data: chanData } = await supabase.from('channels').select('*, categories(name)').order('created_at', { ascending: false });
+            if (chanData) setChannels(chanData.map((d: any) => ({ ...d, categoryName: d.categories?.name })) as Channel[]);
 
-        // Fetch Categories for dropdown
-        const { data: catData } = await supabase.from('categories').select('*');
-        if (catData) setCategories(catData as Category[]);
+            // Fetch Categories for dropdown
+            const { data: catData } = await supabase.from('categories').select('*');
+            if (catData) setCategories(catData as Category[]);
 
-        // Fetch Profiles
-        const { data: profData } = await supabase.from('profiles').select('id, email, full_name');
-        if (profData) setProfiles(profData);
-
-        setLoading(false);
+            // Fetch Profiles
+            const { data: profData } = await supabase.from('profiles').select('id, email, full_name');
+            if (profData) setProfiles(profData);
+        } catch (error) {
+            console.error('Admin dashboard data fetch error:', error);
+        } finally {
+            setLoading(false);
+        }
     }
 
     const handleDelete = async (id: string) => {

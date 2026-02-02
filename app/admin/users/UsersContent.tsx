@@ -32,13 +32,18 @@ export default function UsersContent() {
     }, []);
 
     async function fetchUsers() {
-        const { data } = await supabase
-            .from('profiles')
-            .select('*')
-            .order('created_at', { ascending: false });
+        try {
+            const { data } = await supabase
+                .from('profiles')
+                .select('*')
+                .order('created_at', { ascending: false });
 
-        setUsers(data || []);
-        setLoading(false);
+            setUsers(data || []);
+        } catch (error) {
+            console.error('Error fetching users:', error);
+        } finally {
+            setLoading(false);
+        }
     }
 
     const filteredUsers = users.filter(u =>
