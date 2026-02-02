@@ -25,10 +25,15 @@ export async function submitChannel(formData: FormData) {
     }
 
     // Generate slug from name
-    // Use timestamp to guarantee uniqueness (prevents channels_slug_key error)
-    const slug = name.toLowerCase()
+    // 1. Convert to simple alphanumeric or fallback to 'channel'
+    // 2. Append timestamp for 100% uniqueness
+    let baseSlug = name.toLowerCase()
         .replace(/[^a-z0-9]+/g, '-')
-        .replace(/(^-|-$)/g, '') + '-' + Date.now();
+        .replace(/(^-|-$)/g, '');
+
+    if (baseSlug.length < 2) baseSlug = 'channel';
+
+    const slug = `${baseSlug}-${Date.now()}`;
 
     // Get current user to link ownership
     const { data: { user } } = await supabase.auth.getUser();
