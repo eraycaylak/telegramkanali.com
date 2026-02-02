@@ -33,7 +33,7 @@ export async function submitChannel(formData: FormData) {
 
     if (baseSlug.length < 2) baseSlug = 'channel';
 
-    const slug = `${baseSlug}-${Date.now()}`;
+    const slug = `${baseSlug}-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
 
     // Get current user to link ownership
     const { data: { user } } = await supabase.auth.getUser();
