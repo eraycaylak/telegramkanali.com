@@ -194,6 +194,9 @@ export default function HeaderClient({ categories, logo, user: initialUser }: He
                         <Link href="/webmaster" className="hover:text-gray-300 transition-colors whitespace-nowrap">
                             WEBMASTER
                         </Link>
+                        <Link href="/reklam" className="hover:text-yellow-400 text-yellow-500 transition-colors whitespace-nowrap font-black">
+                            REKLAM VER
+                        </Link>
                     </nav>
                 </div>
             </div>
@@ -223,6 +226,11 @@ export default function HeaderClient({ categories, logo, user: initialUser }: He
                                 </Link>
                             ))}
                             <div className="border-t border-gray-700 my-2"></div>
+
+                            <Link href="/reklam" onClick={() => setMenuOpen(false)} className="py-2 px-3 bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 rounded-lg text-sm font-bold text-center">
+                                REKLAM VER / İLAN
+                            </Link>
+
                             {user ? (
                                 <>
                                     <Link href="/dashboard" onClick={() => setMenuOpen(false)} className="py-2 px-3 bg-blue-600 rounded-lg text-sm font-semibold flex items-center justify-center gap-2">

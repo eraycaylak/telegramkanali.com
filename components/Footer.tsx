@@ -74,7 +74,8 @@ export default function Footer() {
                         <h3 className="mb-4 text-sm font-semibold text-gray-900">Kurumsal</h3>
                         <ul className="space-y-2 text-sm text-gray-600">
                             <li><Link href="/hakkimizda" className="hover:text-blue-600">Hakkımızda</Link></li>
-                            <li><Link href="/iletisim" className="hover:text-blue-600">İletişim & Reklam</Link></li>
+                            <li><Link href="/reklam" className="hover:text-blue-600 font-bold text-blue-600">Reklam Paketleri</Link></li>
+                            <li><Link href="/iletisim" className="hover:text-blue-600">İletişim</Link></li>
                             <li><Link href="/gizlilik" className="hover:text-blue-600">Gizlilik Politikası</Link></li>
                             <li><Link href="/kullanim-sartlari" className="hover:text-blue-600">Kullanım Şartları</Link></li>
                         </ul>
