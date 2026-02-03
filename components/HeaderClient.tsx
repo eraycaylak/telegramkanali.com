@@ -9,6 +9,7 @@ import { supabase } from '@/lib/supabaseClient';
 import { User } from '@supabase/supabase-js';
 import { LogIn, LayoutDashboard, LogOut, User as UserIcon } from 'lucide-react';
 import { signOut } from '@/app/actions/auth';
+import VisitorCounter from './VisitorCounter';
 
 interface HeaderClientProps {
     categories: Category[];
@@ -130,8 +131,10 @@ export default function HeaderClient({ categories, logo, user: initialUser }: He
                         </button>
                     </form>
 
+
                     {/* Desktop Actions */}
                     <div className="hidden md:flex items-center gap-3 ml-4">
+                        <VisitorCounter />
                         <Link href="/dashboard/kanal-ekle" className="whitespace-nowrap bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-full font-bold text-sm shadow-md hover:shadow-lg transition">
                             + KANAL EKLE
                         </Link>
