@@ -12,12 +12,12 @@ export default function VisitorCounter() {
 
         const interval = setInterval(() => {
             setCount(prev => {
-                const change = Math.floor(Math.random() * 7) - 3; // Random change between -3 and +3
+                const change = Math.floor(Math.random() * 13) - 5; // Random change between -5 and +8
                 // Ensure it doesn't drop too low below the baseline
                 if (prev + change < 550) return prev + 1;
                 return prev + change;
             });
-        }, 5000); // Update every 5 seconds
+        }, 2000); // Update every 2 seconds
 
         return () => clearInterval(interval);
     }, []);
