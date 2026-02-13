@@ -12,21 +12,24 @@ export async function generateStaticParams() {
     }));
 }
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-    const channel = await getChannelBySlug(params.slug);
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+    const { slug } = await params;
+    const channel = await getChannelBySlug(slug);
     if (!channel) return {};
 
     return {
-        title: `${channel.name} Telegram Kanalı Linki - Abone Sayısı`,
-        description: `${channel.name} Telegram kanalına katılın. ${channel.description?.substring(0, 150)}...`,
+        title: `${channel?.name || ''} Telegram Kanalı Linki - Abone Sayısı`,
+        description: `${channel?.name || ''} Telegram kanalına katılın. ${channel?.description?.substring(0, 150)}...`,
     };
 }
 
-export default async function ChannelPage({ params }: { params: { slug: string } }) {
-    const channel = await getChannelBySlug(params.slug);
+export default async function ChannelPage({ params }: { params: Promise<{ slug: string }> }) {
+    const { slug } = await params;
+    const channel = await getChannelBySlug(slug);
 
     if (!channel) {
         notFound();
+        return null;
     }
 
     const categories = await getCategories();
@@ -40,8 +43,8 @@ export default async function ChannelPage({ params }: { params: { slug: string }
     const jsonLd = {
         '@context': 'https://schema.org',
         '@type': 'MobileApplication',
-        name: channel.name,
-        description: channel.description || '',
+        name: channel?.name || '',
+        description: channel?.description || '',
         category: 'Social Networking',
         applicationCategory: 'Social Networking',
         operatingSystem: 'Android, iOS, Windows, Web',
@@ -53,7 +56,7 @@ export default async function ChannelPage({ params }: { params: { slug: string }
         },
         author: {
             '@type': 'Organization',
-            name: channel.name
+            name: channel?.name || ''
         }
     };
 
@@ -72,7 +75,7 @@ export default async function ChannelPage({ params }: { params: { slug: string }
                 <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8">
                     <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
                         <div className="flex h-24 w-24 flex-shrink-0 items-center justify-center rounded-2xl bg-blue-100 text-3xl font-bold text-blue-600">
-                            {channel.name.charAt(0)}
+                            {channel?.name?.charAt(0)}
                         </div>
 
                         <div className="flex-1 space-y-2">
@@ -82,7 +85,7 @@ export default async function ChannelPage({ params }: { params: { slug: string }
                                         {category.name}
                                     </Link>
                                 )}
-                                {channel.verified && (
+                                {channel?.verified && (
                                     <span className="flex items-center gap-1 rounded-full bg-green-50 px-2 py-0.5 text-xs font-medium text-green-700 border border-green-100">
                                         <BadgeCheck size={12} /> Doğrulanmış
                                     </span>
@@ -90,24 +93,24 @@ export default async function ChannelPage({ params }: { params: { slug: string }
                             </div>
 
                             <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
-                                {channel.name}
-                                {channel.verified && <BadgeCheck className="text-blue-500" size={28} />}
+                                {channel?.name}
+                                {channel?.verified && <BadgeCheck className="text-blue-500" size={28} />}
                             </h1>
 
                             <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500">
                                 <span className="flex items-center gap-1">
                                     <Users size={16} />
-                                    {channel.stats?.subscribers || channel.member_count || 0} Abone
+                                    {channel?.stats?.subscribers || channel?.member_count || 0} Abone
                                 </span>
                                 <span className="flex items-center gap-1">
                                     <Calendar size={16} />
-                                    {channel.created_at ? new Date(channel.created_at).toLocaleDateString('tr-TR') : ''} tarihinde eklendi
+                                    {channel?.created_at ? new Date(channel.created_at).toLocaleDateString('tr-TR') : ''} tarihinde eklendi
                                 </span>
                             </div>
                         </div>
 
                         <a
-                            href={channel.join_link}
+                            href={channel?.join_link}
                             target="_blank"
                             rel="nofollow noreferrer"
                             className="flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-6 py-3 text-center font-semibold text-white shadow-md transition-all hover:bg-blue-700 hover:shadow-lg sm:w-auto"
@@ -121,16 +124,16 @@ export default async function ChannelPage({ params }: { params: { slug: string }
                 {/* Detailed Description */}
                 <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8">
                     <h2 className="mb-4 text-xl font-bold text-gray-900 border-b border-gray-100 pb-2">
-                        {channel.name} Hakkında
+                        {channel?.name} Hakkında
                     </h2>
                     <div className="prose prose-blue max-w-none text-gray-600">
                         <p className="whitespace-pre-line leading-7">
-                            {channel.description}
+                            {channel?.description}
                         </p>
 
                         <h3 className="mt-6 mb-2 text-lg font-semibold text-gray-900">Bu Kanalda Neler Var?</h3>
                         <ul className="list-disc pl-5 space-y-1">
-                            {channel.subcategories?.map((sub: string) => (
+                            {channel?.subcategories?.map((sub: string) => (
                                 <li key={sub}>{sub} içerikleri</li>
                             ))}
                             <li>Güncel bildirimler şelalesi</li>
@@ -139,7 +142,7 @@ export default async function ChannelPage({ params }: { params: { slug: string }
                     </div>
 
                     <div className="mt-6 flex flex-wrap gap-2 pt-4 border-t border-gray-100">
-                        {channel.tags?.map((tag: string) => (
+                        {channel?.tags?.map((tag: string) => (
                             <span key={tag} className="flex items-center gap-1 text-xs text-gray-500 bg-gray-50 px-2 py-1 rounded">
                                 <Tag size={10} /> {tag}
                             </span>
