@@ -134,7 +134,8 @@ export async function getChannelsByCategory(categoryId: string): Promise<Channel
         .from('channels')
         .select('*, categories(name, slug)')
         .eq('category_id', categoryId)
-        .eq('category_id', categoryId);
+        .order('score', { ascending: false })
+        .order('created_at', { ascending: false });
     // .eq('status', 'approved'); // Disabled until status migration is applied
 
     if (error) return [];
