@@ -534,3 +534,84 @@ export async function rejectChannel(id: string) {
         return { error: 'Failed to reject channel' };
     }
 }
+
+export async function bulkAddChannels(urls: string[], categoryId: string) {
+    console.log(`[BULK] Starting bulk add for ${urls.length} channels in category ${categoryId}`);
+    const results = [];
+    let successCount = 0;
+    let failCount = 0;
+
+    const { fetchTelegramChannelInfo } = await import('@/lib/telegram');
+
+    for (const url of urls) {
+        try {
+            const cleanUrl = url.trim();
+            if (!cleanUrl) continue;
+
+            console.log(`[BULK] Processing: ${cleanUrl}`);
+
+            // Check if exists
+            const { data: existing } = await adminClient
+                .from('channels')
+                .select('id')
+                .eq('join_link', cleanUrl)
+                .single();
+
+            if (existing) {
+                results.push({ url: cleanUrl, status: 'exists', message: 'Zaten mevcut' });
+                failCount++;
+                continue;
+            }
+
+            const telegramInfo = await fetchTelegramChannelInfo(cleanUrl);
+            
+            if (!telegramInfo) {
+                results.push({ url: cleanUrl, status: 'error', message: 'Telegram bilgisi çekilemedi' });
+                failCount++;
+                continue;
+            }
+
+            const name = telegramInfo.title;
+            const slug = name.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '') + '-' + Math.random().toString(36).substring(2, 7);
+            
+            const finalImage = await persistTelegramImage(
+                telegramInfo.photo_url || '/images/logo.png',
+                slug
+            );
+
+            const insertData: any = {
+                name,
+                description: telegramInfo.description || '',
+                join_link: cleanUrl,
+                slug,
+                stats: { subscribers: telegramInfo.member_count.toString() },
+                image: finalImage,
+                member_count: telegramInfo.member_count,
+                category_id: categoryId,
+                status: 'approved',
+                score: 0,
+                verified: false,
+                featured: false
+            };
+
+            const { error } = await adminClient.from('channels').insert(insertData);
+
+            if (error) throw error;
+
+            successCount++;
+            results.push({ url: cleanUrl, status: 'success', name });
+
+            // Rate limit
+            await new Promise(resolve => setTimeout(resolve, 500));
+        } catch (err: any) {
+            console.error(`[BULK] Error processing ${url}:`, err);
+            results.push({ url, status: 'error', message: err.message || 'Bilinmeyen hata' });
+            failCount++;
+        }
+    }
+
+    revalidatePath('/');
+    revalidatePath('/admin/dashboard');
+
+    return { success: true, successCount, failCount, results };
+}

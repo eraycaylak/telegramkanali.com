@@ -45,6 +45,7 @@ export default function AdminLayout({
 
     const menuItems = [
         { name: 'Kanal Yönetimi', href: '/admin/dashboard', icon: LayoutDashboard },
+        { name: 'Toplu Kanal Ekle', href: '/admin/bulk-add', icon: Send },
         { name: 'Kategoriler', href: '/admin/categories', icon: FolderTree },
         { name: 'Bannerlar', href: '/admin/banners', icon: Image },
         { name: 'Analitik', href: '/admin/analytics', icon: BarChart }, // New Link
