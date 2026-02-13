@@ -4,39 +4,61 @@ import { getChannels, getCategories, getSeoPages } from '@/lib/data';
 export const baseUrl = 'https://telegramkanali.com';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-    // Fetch dynamic data from database
-    const { data: channels } = await getChannels(1, 1000); // Fetch up to 1000 for sitemap
+    // 1. Static Pages
+    const staticPages = [
+        '',
+        '/hakkimizda',
+        '/iletisim',
+        '/gizlilik',
+        '/kullanim-sartlari',
+        '/webmaster',
+        '/blog',
+        '/yeni-eklenenler',
+        '/one-cikanlar',
+        '/reklam',
+        '/kanal-ekle'
+    ].map(route => ({
+        url: `${baseUrl}${route}`,
+        lastModified: new Date(),
+        changeFrequency: 'daily' as const,
+        priority: route === '' ? 1 : 0.7,
+    }));
+
+    // 2. Dynamic Data from database
+    const { data: channels } = await getChannels(1, 2000); // Fetch more for sitemap
     const categories = await getCategories();
     const seoPages = await getSeoPages();
 
-    const channelsUrls = channels.map((channel) => ({
-        url: `${baseUrl}/${channel.slug}`,
-        lastModified: new Date(channel.created_at ?? Date.now()),
-        changeFrequency: 'weekly' as const,
-        priority: 0.8,
-    }));
+    // Regex to filter out suspicious or non-standard slugs if any
+    const isValidSlug = (slug: string) => /^[a-z0-9-]+$/.test(slug) && slug.length > 2 && !slug.startsWith('-');
 
-    const categoriesUrls = categories.map((category) => ({
-        url: `${baseUrl}/${category.slug}`,
-        lastModified: new Date(),
-        changeFrequency: 'daily' as const,
-        priority: 0.9,
-    }));
+    const channelsUrls = channels
+        .filter(c => isValidSlug(c.slug))
+        .map((channel) => ({
+            url: `${baseUrl}/${channel.slug}`,
+            lastModified: new Date(channel.created_at ?? Date.now()),
+            changeFrequency: 'weekly' as const,
+            priority: 0.6,
+        }));
+
+    const categoriesUrls = categories
+        .filter(cat => isValidSlug(cat.slug))
+        .map((category) => ({
+            url: `${baseUrl}/${category.slug}`,
+            lastModified: new Date(),
+            changeFrequency: 'daily' as const,
+            priority: 0.9,
+        }));
 
     const seoPageUrls = seoPages.map((page) => ({
         url: `${baseUrl}/rehber/${page.slug}`,
         lastModified: new Date(page.updated_at ?? page.created_at ?? Date.now()),
         changeFrequency: 'weekly' as const,
-        priority: 0.85,
+        priority: 0.8,
     }));
 
     return [
-        {
-            url: baseUrl,
-            lastModified: new Date(),
-            changeFrequency: 'daily',
-            priority: 1,
-        },
+        ...staticPages,
         ...categoriesUrls,
         ...seoPageUrls,
         ...channelsUrls,

@@ -102,8 +102,12 @@ export function generateItemListSchema(items: Array<{ name: string, url: string,
         "itemListElement": items.map((item) => ({
             "@type": "ListItem",
             "position": item.position,
-            "name": item.name,
-            "url": item.url
+            "item": {
+                "@type": "WebPage",
+                "@id": item.url,
+                "name": item.name,
+                "url": item.url
+            }
         }))
     };
 }

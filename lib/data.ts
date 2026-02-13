@@ -176,7 +176,7 @@ export async function getAllSeoSlugs(): Promise<string[]> {
     return data.map((d: any) => d.slug);
 }
 
-// Export empty arrays as fallback for strict synchronous consumers if any left, 
+// Export empty arrays as fallback for strict synchronous consumers if any left,
 // but we should update them to use functions.
-export const categories: Category[] = [];
-export const channels: Channel[] = [];
+// Removed: export const categories: Category[] = [];
+// Removed: export const channels: Channel[] = [];

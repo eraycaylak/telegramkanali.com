@@ -1,8 +1,10 @@
 import Link from 'next/link';
-import { Send, Github, Twitter } from 'lucide-react';
-import { categories } from '@/lib/data';
+import { Send } from 'lucide-react';
+import { getCategories } from '@/lib/data';
 
-export default function Footer() {
+export default async function Footer() {
+    const categories = await getCategories();
+
     return (
         <footer className="w-full border-t border-gray-100 bg-white pt-12 pb-8">
             <div className="container mx-auto px-4 md:px-6">

@@ -28,8 +28,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const category = await getCategoryBySlug(slug);
   if (category) {
     return {
-      title: `${category.name} Telegram Kanalları - 2024`,
-      description: `${category.name} kategorisindeki en iyi ve popüler Telegram kanallarını keşfedin. Güvenilir ${category.name} grupları ve listeleri.`
+      title: `${category.name} Telegram Kanalları - 2026`,
+      description: `${category.name} kategorisindeki en iyi ve popüler Telegram kanallarını keşfedin. Güvenilir ${category.name} grupları ve listeleri.`,
+      alternates: {
+        canonical: `${baseUrl}/${category.slug}`,
+      }
     };
   }
 
@@ -37,8 +40,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const channel = await getChannelBySlug(slug);
   if (channel) {
     return {
-      title: `${channel.name} Telegram Kanalı - Katıl`,
-      description: `${channel.name} Telegram kanalına katılın. ${channel.description?.slice(0, 150)}... En güncel ${channel.categoryName || 'Telegram'} kanalları.`
+      title: `${channel.name} Telegram Kanalı - Katıl (2026)`,
+      description: `${channel.name} Telegram kanalına katılın. ${channel.description?.slice(0, 150)}... En güncel ${channel.categoryName || 'Telegram'} kanalları.`,
+      alternates: {
+        canonical: `${baseUrl}/${channel.slug}`,
+      }
     };
   }
 
@@ -69,6 +75,28 @@ export default async function DynamicPage({ params }: PageProps) {
           { name: 'Anasayfa', url: baseUrl },
           { name: category.name, url: `${baseUrl}/${category.slug}` }
         ])} />
+        <JsonLd data={{
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": `${category.name} Telegram kanalları güvenli mi?`,
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Sitemizde listelenen kanallar topluluk tarafından paylaşılan kanallardır. Katılmadan önce kanal açıklamalarını ve kullanıcı yorumlarını incelemenizi öneririz."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": `${category.name} kanallarına nasıl katılabilirim?`,
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "İlginizi çeken kanalın detay sayfasındaki 'Kanala Katıl' butonuna tıklayarak Telegram uygulamasında kanala doğrudan giriş yapabilirsiniz."
+              }
+            }
+          ]
+        }} />
 
         <Header />
         <main className="container mx-auto px-4 py-8 space-y-8">
@@ -130,33 +158,57 @@ export default async function DynamicPage({ params }: PageProps) {
 
           {/* SEO Content Section */}
           <section className="grid gap-12 lg:grid-cols-3 pt-12 border-t border-gray-100">
-            <div className="lg:col-span-2 space-y-6 text-gray-700 leading-relaxed">
+            <div className="lg:col-span-2 space-y-8 text-gray-700 leading-relaxed">
               <article className="prose prose-blue max-w-none">
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                  Telegram {category.name}
+                <h2 className="text-3xl font-black text-gray-900 mb-6">
+                  {category.name} Telegram Kanallarına Katılın
                 </h2>
-                <p className="mb-4">
-                  Telegram; yemek, spor, elektronik gibi konularda toplu mesaj yayınlayabilmek ve kullanıcılarına geniş bilgi yelpazesi sunabilmek için kanal ve grup imkanı sunar. {category.name} kategorisindeki Telegram kanalları da yoğun ilgi görmektedir.
+                <p className="mb-4 text-lg">
+                  Her gün milyonlarca insanın kullandığı Telegram; yemek, spor, ekonomi, eğitim ve eğlence gibi onlarca farklı konuda toplu mesaj yayınlayabilmek ve kullanıcılarına geniş bilgi yelpazesi sunabilmek için kanal ve grup imkanı sunar. <strong>{category.name}</strong> kategorisindeki Telegram kanalları da güncelliği ve zengin içeriğiyle yoğun ilgi görmektedir.
                 </p>
                 <p className="mb-4">
-                  Bu kategoride bulunan grup yöneticileri ve kullanıcılar, {category.name.toLowerCase()} hakkında genel veya özel tavsiyeler verir, güncel haberler ve bilgiler anlık olarak paylaşılır.
+                  Popüler <strong>{category.name.toLowerCase()}</strong> toplulukları, kullanıcıların ilgi duydukları alanlarda anlık bildirim almalarını, güncel gelişmeleri takip etmelerini ve benzer ilgi alanlarına sahip binlerce kişiyle aynı paydada buluşmalarını sağlar. Diziniimizde yer alan tüm kanallar, aktiflik ve içerik kalitesi açısından düzenli olarak kontrol edilmektedir.
                 </p>
-                <p className="text-sm text-gray-500 mt-6 p-4 bg-gray-50 rounded-lg border">
-                  <strong>Yasal Uyarı:</strong> Sitemizde bulunan Telegram grubu veya kanalları içerisindeki paylaşımlardan site yönetimimiz mesul değildir. Herhangi bir mağduriyette sorumluluk kabul etmemektedir. Tüm Telegram kanalları ve gruplarına karşı dikkatli olunuz.
+                <div className="bg-blue-50 p-6 rounded-2xl border border-blue-100 my-8">
+                  <h3 className="font-bold text-blue-900 mb-3 uppercase tracking-wider text-sm">Neden Bu Kanalları Takip Etmelisiniz?</h3>
+                  <ul className="grid sm:grid-cols-2 gap-4 text-sm font-medium text-blue-800">
+                    <li className="flex items-center gap-2">🔹 Anlık ve Ücretsiz Bilgi</li>
+                    <li className="flex items-center gap-2">🔹 Güvenilir İçerik Kaynakları</li>
+                    <li className="flex items-center gap-2">🔹 Niş Topluluklara Erişim</li>
+                    <li className="flex items-center gap-2">🔹 Reklamsız ve Temiz Yayınlar</li>
+                  </ul>
+                </div>
+                <p className="mb-4">
+                  Bu kategoride bulunan grup yöneticileri ve kullanıcılar, {category.name.toLowerCase()} hakkında genel veya özel tavsiyeler verir, güncel haberler ve bilgiler anlık olarak paylaşılır. Siz de kendi kanalınızı tanıtmak isterseniz <Link href="/kanal-ekle" className="text-blue-600 hover:underline font-bold">ücretsiz kanal ekle</Link> sayfamızı ziyaret edebilirsiniz.
+                </p>
+                <p className="text-sm text-gray-500 mt-6 p-6 bg-red-50 rounded-xl border border-red-100">
+                  <strong className="text-red-700">Yasal Uyarı:</strong> Sitemizde bulunan Telegram grubu veya kanalları içerisindeki paylaşımlardan site yönetimimiz mesul değildir. Herhangi bir mağduriyette sorumluluk kabul etmemektedir. Tüm Telegram kanalları ve gruplarına karşı dikkatli olunuz ve kişisel bilgilerinizi paylaşmayınız.
                 </p>
               </article>
+
+              {/* Internal Linking Strategy - Recommendation Block */}
+              <div className="border-t pt-8">
+                <h3 className="font-bold text-gray-900 mb-4">İlginizi Çekebilecek Diğer Kategoriler</h3>
+                <div className="flex flex-wrap gap-3">
+                  {allCategories.filter(c => c.id !== category.id).slice(0, 8).map(c => (
+                    <Link key={c.id} href={`/${c.slug}`} className="bg-gray-100 hover:bg-blue-600 hover:text-white px-4 py-2 rounded-full text-sm font-medium transition-colors">
+                      {c.name}
+                    </Link>
+                  ))}
+                </div>
+              </div>
             </div>
 
             {/* Sidebar */}
             <div className="space-y-6">
-              <div className="bg-gray-50 rounded-xl p-6 border border-gray-100">
-                <h3 className="font-bold text-gray-900 mb-4 text-lg">Diğer Kategoriler</h3>
-                <ul className="space-y-2">
+              <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+                <h3 className="font-bold text-gray-900 mb-4 text-lg border-b pb-2">Tüm Kategoriler</h3>
+                <ul className="space-y-1">
                   {allCategories.map((c) => (
                     <li key={c.id}>
                       <Link
                         href={`/${c.slug}`}
-                        className={`block px-3 py-2 rounded-lg transition-all ${c.id === category.id ? 'bg-blue-100 text-blue-700 font-medium' : 'text-gray-600 hover:bg-gray-100 hover:text-blue-600'}`}
+                        className={`block px-3 py-2.5 rounded-xl transition-all text-sm ${c.id === category.id ? 'bg-blue-500 text-white font-bold shadow-lg shadow-blue-500/20' : 'text-gray-600 hover:bg-gray-50 hover:text-blue-600'}`}
                       >
                         {c.name}
                       </Link>
@@ -165,14 +217,14 @@ export default async function DynamicPage({ params }: PageProps) {
                 </ul>
               </div>
 
-              <div className="bg-yellow-50 rounded-xl p-6 border border-yellow-100">
-                <h3 className="font-bold text-yellow-800 mb-2">Reklam & İletişim</h3>
-                <p className="text-sm text-yellow-700 mb-4">
-                  Kanalınızı tanıtmak veya reklam vermek için bizimle iletişime geçin.
+              <div className="bg-gradient-to-br from-yellow-400 to-orange-500 rounded-2xl p-6 text-white shadow-xl shadow-yellow-500/20">
+                <h3 className="font-extrabold mb-2 text-lg">Hızlı Reklam</h3>
+                <p className="text-sm text-yellow-50 mb-6 opacity-90">
+                  Kanalınızı bu kategoride en üst sıraya taşıyarak binlerce yeni abone kazanın.
                 </p>
-                <button className="w-full bg-yellow-400 hover:bg-yellow-500 text-yellow-900 font-bold py-2 rounded transition-colors">
-                  İLETİŞİME GEÇ
-                </button>
+                <Link href="/reklam" className="block w-full bg-white text-orange-600 text-center font-black py-3 rounded-xl hover:bg-yellow-50 transition-colors">
+                  HEMEN BAŞLA
+                </Link>
               </div>
             </div>
           </section>
@@ -189,6 +241,11 @@ export default async function DynamicPage({ params }: PageProps) {
   if (channel) {
     // Fetch related/featured channels for sidebar or bottom
     const featuredChannels = await getFeaturedChannels();
+
+    // Fetch similar channels (same category)
+    const similarChannels = channel.category_id
+      ? (await getChannelsByCategory(channel.category_id)).filter(c => c.id !== channel.id).slice(0, 6)
+      : [];
 
     return (
       <>
@@ -211,7 +268,7 @@ export default async function DynamicPage({ params }: PageProps) {
             <span className="text-gray-900 font-medium">{channel.name}</span>
           </nav>
 
-          <div className="grid lg:grid-cols-3 gap-8">
+          <div className="grid lg:grid-cols-3 gap-8 mb-12">
             {/* Main Content */}
             <div className="lg:col-span-2 space-y-8">
               <ChannelDetail channel={channel} />
@@ -220,14 +277,14 @@ export default async function DynamicPage({ params }: PageProps) {
             {/* Sidebar */}
             <div className="space-y-6">
               <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm sticky top-4">
-                <h3 className="font-bold text-gray-900 mb-4">Öne Çıkan Kanallar</h3>
+                <h3 className="font-bold text-gray-900 mb-4 border-b pb-2">Öne Çıkan Kanallar</h3>
                 <div className="space-y-4">
-                  {featuredChannels.slice(0, 5).map(featured => (
+                  {featuredChannels.slice(0, 6).map(featured => (
                     <Link key={featured.id} href={`/${featured.slug}`} className="flex items-center gap-3 group">
                       {featured.image ? (
-                        <img src={featured.image} alt={featured.name} className="w-10 h-10 rounded-full object-cover border" />
+                        <img src={featured.image} alt={featured.name} className="w-10 h-10 rounded-lg object-cover border" />
                       ) : (
-                        <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold">{featured.name[0]}</div>
+                        <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600 font-bold">{featured.name[0]}</div>
                       )}
                       <div className="flex-1 min-w-0">
                         <h4 className="font-bold text-sm text-gray-900 group-hover:text-blue-600 truncate">{featured.name}</h4>
@@ -237,8 +294,48 @@ export default async function DynamicPage({ params }: PageProps) {
                   ))}
                 </div>
               </div>
+
+              {/* Internal Link Block */}
+              <div className="bg-blue-50 p-6 rounded-xl border border-blue-100">
+                <h3 className="font-bold text-blue-900 mb-3 text-sm">Popüler Kategoriler</h3>
+                <div className="flex flex-wrap gap-2">
+                  <Link href="/rehber/teknoloji" className="text-xs bg-white text-blue-700 px-3 py-1.5 rounded-full border border-blue-200 hover:bg-blue-600 hover:text-white transition-all">Teknoloji</Link>
+                  <Link href="/rehber/kripto" className="text-xs bg-white text-blue-700 px-3 py-1.5 rounded-full border border-blue-200 hover:bg-blue-600 hover:text-white transition-all">Kripto Para</Link>
+                  <Link href="/rehber/egitim" className="text-xs bg-white text-blue-700 px-3 py-1.5 rounded-full border border-blue-200 hover:bg-blue-600 hover:text-white transition-all">Eğitim</Link>
+                </div>
+              </div>
             </div>
           </div>
+
+          {/* Similar Channels Section (Internal Linking Strength) */}
+          {similarChannels.length > 0 && (
+            <section className="mt-16 pt-12 border-t">
+              <div className="flex items-center justify-between mb-8">
+                <h2 className="text-2xl font-black text-gray-900">
+                  🔗 Benzer {channel.categoryName} Kanalları
+                </h2>
+                <Link href={`/${(channel as any).categories?.slug}`} className="text-blue-600 font-bold hover:underline">
+                  Tümünü Gör &rarr;
+                </Link>
+              </div>
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-6">
+                {similarChannels.map(c => (
+                  <ChannelCard key={c.id} channel={c} />
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* User Guide Internal Link */}
+          <section className="mt-16 bg-gray-900 rounded-3xl p-8 md:p-12 text-center text-white">
+            <h2 className="text-3xl font-bold mb-4">Telegram Dünyasını Keşfedin</h2>
+            <p className="text-gray-400 mb-8 max-w-2xl mx-auto">
+              Telegram kanallarını nasıl kullanacağınızı, en iyi botları ve gizlilik ayarlarını öğrenmek için rehberlerimizi ziyaret edin.
+            </p>
+            <Link href="/blog" className="inline-block bg-blue-600 hover:bg-blue-500 px-10 py-4 rounded-2xl font-black transition-all">
+              BLOG & REHBERLER
+            </Link>
+          </section>
         </main>
         <Footer />
       </>
