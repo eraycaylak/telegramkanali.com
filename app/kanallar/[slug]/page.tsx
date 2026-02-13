@@ -1,37 +1,39 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { notFound as notFoundError } from 'next/navigation';
-import { channels, categories } from '@/lib/data';
+import { getChannelBySlug, getChannelsByCategory, getAllChannelSlugs, getCategories } from '@/lib/data';
 import { BadgeCheck, Users, ExternalLink, Calendar, Tag, ShieldCheck } from 'lucide-react';
 import ChannelCard from '@/components/ChannelCard';
 import type { Metadata } from 'next';
 
-export function generateStaticParams() {
-    return channels.map((channel) => ({
-        slug: channel.slug,
+export async function generateStaticParams() {
+    const slugs = await getAllChannelSlugs();
+    return slugs.map((slug) => ({
+        slug: slug,
     }));
 }
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-    const channel = channels.find((c) => c.slug === params.slug);
+    const channel = await getChannelBySlug(params.slug);
     if (!channel) return {};
 
     return {
-        title: `${channel.name} Telegram Kanalı Linki - ${channel.stats.subscribers} Abone`,
-        description: `${channel.name} Telegram kanalına katılın. ${channel.description.substring(0, 150)}...`,
+        title: `${channel.name} Telegram Kanalı Linki - Abone Sayısı`,
+        description: `${channel.name} Telegram kanalına katılın. ${channel.description?.substring(0, 150)}...`,
     };
 }
 
-export default function ChannelPage({ params }: { params: { slug: string } }) {
-    const channel = channels.find((c) => c.slug === params.slug);
+export default async function ChannelPage({ params }: { params: { slug: string } }) {
+    const channel = await getChannelBySlug(params.slug);
 
     if (!channel) {
         notFound();
     }
 
+    const categories = await getCategories();
     const category = categories.find((c) => c.id === channel.category_id);
-    const relatedChannels = channels
-        .filter((c) => c.category_id === channel.category_id && c.id !== channel.id)
+    const relatedChannelsRaw = await getChannelsByCategory(channel.category_id);
+    const relatedChannels = relatedChannelsRaw
+        .filter((c) => c.id !== channel.id)
         .slice(0, 3);
 
     // JSON-LD Schema
@@ -39,7 +41,7 @@ export default function ChannelPage({ params }: { params: { slug: string } }) {
         '@context': 'https://schema.org',
         '@type': 'MobileApplication',
         name: channel.name,
-        description: channel.description,
+        description: channel.description || '',
         category: 'Social Networking',
         applicationCategory: 'Social Networking',
         operatingSystem: 'Android, iOS, Windows, Web',
@@ -95,11 +97,11 @@ export default function ChannelPage({ params }: { params: { slug: string } }) {
                             <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500">
                                 <span className="flex items-center gap-1">
                                     <Users size={16} />
-                                    {channel.stats.subscribers} Abone
+                                    {channel.stats?.subscribers || channel.member_count || 0} Abone
                                 </span>
                                 <span className="flex items-center gap-1">
                                     <Calendar size={16} />
-                                    {channel.created_at} tarihinde eklendi
+                                    {channel.created_at ? new Date(channel.created_at).toLocaleDateString('tr-TR') : ''} tarihinde eklendi
                                 </span>
                             </div>
                         </div>
@@ -128,7 +130,7 @@ export default function ChannelPage({ params }: { params: { slug: string } }) {
 
                         <h3 className="mt-6 mb-2 text-lg font-semibold text-gray-900">Bu Kanalda Neler Var?</h3>
                         <ul className="list-disc pl-5 space-y-1">
-                            {channel.subcategories.map(sub => (
+                            {channel.subcategories?.map((sub: string) => (
                                 <li key={sub}>{sub} içerikleri</li>
                             ))}
                             <li>Güncel bildirimler şelalesi</li>
@@ -137,7 +139,7 @@ export default function ChannelPage({ params }: { params: { slug: string } }) {
                     </div>
 
                     <div className="mt-6 flex flex-wrap gap-2 pt-4 border-t border-gray-100">
-                        {channel.tags.map(tag => (
+                        {channel.tags?.map((tag: string) => (
                             <span key={tag} className="flex items-center gap-1 text-xs text-gray-500 bg-gray-50 px-2 py-1 rounded">
                                 <Tag size={10} /> {tag}
                             </span>

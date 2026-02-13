@@ -40,17 +40,17 @@ export default function AnalyticsClient() {
     const totalVisitors = pageViews.reduce((acc, curr) => acc + curr.total_visitors, 0);
 
     return (
-        <div className="space-y-6">
-            <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+        <div className="space-y-6 md:space-y-8 pb-10">
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 flex items-center justify-center md:justify-start gap-2">
                 <BarChart className="text-blue-600" />
                 Site Analitiği
             </h1>
 
             {/* Overview Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div className="bg-gradient-to-br from-blue-500 to-blue-700 rounded-xl p-6 text-white shadow-lg">
+                <div className="bg-gradient-to-br from-blue-500 to-blue-700 rounded-2xl p-6 text-white shadow-lg shadow-blue-100">
                     <div className="flex items-center gap-4">
-                        <div className="p-3 bg-white/20 rounded-lg">
+                        <div className="p-3 bg-white/20 rounded-xl">
                             <ArrowUpRight size={24} />
                         </div>
                         <div>
@@ -60,9 +60,9 @@ export default function AnalyticsClient() {
                     </div>
                 </div>
 
-                <div className="bg-gradient-to-br from-purple-500 to-purple-700 rounded-xl p-6 text-white shadow-lg">
+                <div className="bg-gradient-to-br from-purple-500 to-purple-700 rounded-2xl p-6 text-white shadow-lg shadow-purple-100">
                     <div className="flex items-center gap-4">
-                        <div className="p-3 bg-white/20 rounded-lg">
+                        <div className="p-3 bg-white/20 rounded-xl">
                             <MousePointer2 size={24} />
                         </div>
                         <div>
@@ -73,43 +73,43 @@ export default function AnalyticsClient() {
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 mt-4 md:mt-8">
                 {/* Popular Pages */}
-                <div className="bg-white p-6 rounded-xl border shadow-sm">
-                    <h2 className="text-lg font-bold mb-4">Popüler Sayfalar (Son 30 Gün)</h2>
-                    <div className="space-y-4">
+                <div className="bg-white p-5 md:p-6 rounded-2xl md:rounded-3xl border border-gray-100 shadow-sm">
+                    <h2 className="text-lg md:text-xl font-bold mb-4 md:mb-6 text-gray-900">Popüler Sayfalar</h2>
+                    <div className="space-y-3">
                         {pageViews.slice(0, 5).map((page, i) => (
-                            <div key={i} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                                <span className="font-mono text-sm text-gray-600 truncate max-w-[200px]">{page.path}</span>
-                                <div className="flex gap-4 text-sm font-semibold">
-                                    <span className="text-blue-600">{page.total_views} view</span>
-                                    <span className="text-purple-600">{page.total_visitors} visitor</span>
+                            <div key={i} className="flex flex-col md:flex-row md:justify-between md:items-center p-4 bg-gray-50 rounded-xl gap-2">
+                                <span className="font-mono text-xs text-gray-600 break-all md:max-w-[200px]">{page.path}</span>
+                                <div className="flex gap-4 text-xs font-bold">
+                                    <span className="text-blue-600 bg-blue-50 px-2 py-1 rounded">{page.total_views} görüntülenme</span>
+                                    <span className="text-purple-600 bg-purple-50 px-2 py-1 rounded">{page.total_visitors} ziyaretçi</span>
                                 </div>
                             </div>
                         ))}
-                        {pageViews.length === 0 && <p className="text-gray-400 text-sm">Veri yok.</p>}
+                        {pageViews.length === 0 && <p className="text-gray-400 text-sm text-center py-4">Veri yok.</p>}
                     </div>
                 </div>
 
                 {/* Popular Channels */}
-                <div className="bg-white p-6 rounded-xl border shadow-sm">
-                    <h2 className="text-lg font-bold mb-4">En Çok Tıklanan Kanallar</h2>
-                    <div className="space-y-4">
+                <div className="bg-white p-5 md:p-6 rounded-2xl md:rounded-3xl border border-gray-100 shadow-sm">
+                    <h2 className="text-lg md:text-xl font-bold mb-4 md:mb-6 text-gray-900">En Çok Tıklanan Kanallar</h2>
+                    <div className="space-y-3">
                         {channelClicks.slice(0, 10).map((stat, i) => (
-                            <div key={i} className="flex items-center gap-4 p-3 hover:bg-gray-50 rounded-lg transition">
-                                <span className="text-lg font-bold text-gray-300 w-6">#{i + 1}</span>
+                            <div key={i} className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-xl transition border border-transparent hover:border-gray-100">
+                                <span className="text-lg font-black text-gray-200 w-8">#{i + 1}</span>
                                 {stat.channel && (
-                                    <img src={stat.channel.image || '/images/logo.png'} className="w-8 h-8 rounded-full object-cover" />
+                                    <img src={stat.channel.image || '/images/logo.png'} className="w-10 h-10 rounded-full object-cover border border-gray-100" />
                                 )}
                                 <div className="flex-1 min-w-0">
-                                    <h4 className="font-semibold text-gray-900 truncate">{stat.channel?.name || 'Bilinmeyen Kanal'}</h4>
+                                    <h4 className="font-bold text-gray-900 truncate text-sm md:text-base">{stat.channel?.name || 'Bilinmeyen Kanal'}</h4>
                                 </div>
-                                <div className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold">
+                                <div className="bg-green-50 text-green-700 px-3 py-1.5 rounded-lg text-[10px] md:text-xs font-black uppercase">
                                     {stat.total_clicks} Tık
                                 </div>
                             </div>
                         ))}
-                        {channelClicks.length === 0 && <p className="text-gray-400 text-sm">Henüz tıklama verisi yok.</p>}
+                        {channelClicks.length === 0 && <p className="text-gray-400 text-sm text-center py-4">Henüz tıklama verisi yok.</p>}
                     </div>
                 </div>
             </div>

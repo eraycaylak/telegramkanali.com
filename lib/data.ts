@@ -176,7 +176,11 @@ export async function getAllSeoSlugs(): Promise<string[]> {
     return data.map((d: any) => d.slug);
 }
 
-// Export empty arrays as fallback for strict synchronous consumers if any left,
-// but we should update them to use functions.
-// Removed: export const categories: Category[] = [];
-// Removed: export const channels: Channel[] = [];
+export async function getAllChannelSlugs(): Promise<string[]> {
+    const { data, error } = await supabase
+        .from('channels')
+        .select('slug');
+
+    if (error) return [];
+    return data.map((d: any) => d.slug);
+}

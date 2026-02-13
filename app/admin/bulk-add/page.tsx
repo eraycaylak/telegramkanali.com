@@ -29,13 +29,13 @@ export default async function BulkAddPage() {
     const categories = await getCategories();
 
     return (
-        <div className="max-w-4xl mx-auto py-8 px-4">
-            <div className="mb-8">
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">Toplu Kanal Ekle</h1>
-                <p className="text-gray-500">Birden fazla kanal linkini alt alta yazarak hızlıca ekleyebilirsiniz.</p>
+        <div className="max-w-4xl mx-auto py-6 md:py-8 px-0 md:px-4">
+            <div className="mb-8 px-4 md:px-0 text-center md:text-left">
+                <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Toplu Kanal Ekle</h1>
+                <p className="text-sm md:text-base text-gray-500">Birden fazla kanal linkini alt alta yazarak hızlıca ekleyebilirsiniz.</p>
             </div>
 
-            <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
+            <div className="bg-white p-5 md:p-8 rounded-none md:rounded-3xl border-y md:border border-gray-100 shadow-sm">
                 <BulkAddClient categories={categories} />
             </div>
         </div>

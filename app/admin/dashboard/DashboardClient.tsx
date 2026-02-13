@@ -234,195 +234,301 @@ export default function DashboardClient() {
                     </div>
                 </div>
 
-                {/* Channels Table */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                    <table className="w-full text-left border-collapse">
-                        <thead>
-                            <tr className="bg-gray-50 border-b border-gray-200 text-gray-500 text-sm uppercas tracking-wider">
-                                <th className="p-4 font-semibold">Kanal Adı</th>
-                                <th className="p-4 font-semibold">Kategori</th>
-                                <th className="p-4 font-semibold text-center">Skor</th>
-                                <th className="p-4 font-semibold text-right">İşlemler</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-100">
-                            {loading ? (
-                                <tr><td colSpan={4} className="p-8 text-center text-gray-400">Yükleniyor...</td></tr>
-                            ) : filteredChannels.length === 0 ? (
-                                <tr><td colSpan={4} className="p-8 text-center text-gray-400">Kanal bulunamadı.</td></tr>
-                            ) : (
-                                filteredChannels.map(channel => (
-                                    <tr
-                                        key={channel.id}
-                                        className={`transition border-b border-gray-100 ${editingId === channel.id ? 'bg-blue-50' :
-                                            lastEditedId === channel.id ? 'bg-green-50' :
-                                                'hover:bg-gray-50'
-                                            }`}
-                                    >
-                                        <td className="p-4 font-medium text-gray-900">
-                                            <div className="flex items-center gap-3">
-                                                {channel.image && channel.image !== '/images/logo.png' ? (
-                                                    <img
-                                                        src={channel.image}
-                                                        alt=""
-                                                        className="w-10 h-10 rounded-full object-cover border border-gray-200 shadow-sm"
-                                                    />
-                                                ) : (
-                                                    <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 font-bold border border-gray-200">
-                                                        {channel.name.charAt(0)}
-                                                    </div>
-                                                )}
-                                                <div className="flex flex-col">
-                                                    <span>{channel.name}</span>
-                                                    {channel.status === 'pending' && channel.contact_info && (
-                                                        <span className="text-[10px] text-gray-400 font-normal">İletişim: {channel.contact_info}</span>
+                {/* Channels List (Table on Desktop, Cards on Mobile) */}
+                <div className="bg-white md:rounded-xl shadow-sm border-y md:border border-gray-200 overflow-hidden">
+                    {/* Desktop Table View */}
+                    <div className="hidden md:block">
+                        <table className="w-full text-left border-collapse">
+                            <thead>
+                                <tr className="bg-gray-50 border-b border-gray-200 text-gray-500 text-sm uppercase tracking-wider">
+                                    <th className="p-4 font-semibold">Kanal Adı</th>
+                                    <th className="p-4 font-semibold">Kategori</th>
+                                    <th className="p-4 font-semibold text-center">Skor</th>
+                                    <th className="p-4 font-semibold text-right">İşlemler</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-100">
+                                {loading ? (
+                                    <tr><td colSpan={4} className="p-8 text-center text-gray-400">Yükleniyor...</td></tr>
+                                ) : filteredChannels.length === 0 ? (
+                                    <tr><td colSpan={4} className="p-8 text-center text-gray-400">Kanal bulunamadı.</td></tr>
+                                ) : (
+                                    filteredChannels.map(channel => (
+                                        <tr
+                                            key={channel.id}
+                                            className={`transition border-b border-gray-100 ${editingId === channel.id ? 'bg-blue-50' :
+                                                lastEditedId === channel.id ? 'bg-green-50' :
+                                                    'hover:bg-gray-50'
+                                                }`}
+                                        >
+                                            <td className="p-4 font-medium text-gray-900">
+                                                <div className="flex items-center gap-3">
+                                                    {channel.image && channel.image !== '/images/logo.png' ? (
+                                                        <img
+                                                            src={channel.image}
+                                                            alt=""
+                                                            className="w-10 h-10 rounded-full object-cover border border-gray-200 shadow-sm"
+                                                        />
+                                                    ) : (
+                                                        <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 font-bold border border-gray-200">
+                                                            {channel.name.charAt(0)}
+                                                        </div>
                                                     )}
+                                                    <div className="flex flex-col">
+                                                        <span>{channel.name}</span>
+                                                        {channel.status === 'pending' && channel.contact_info && (
+                                                            <span className="text-[10px] text-gray-400 font-normal">İletişim: {channel.contact_info}</span>
+                                                        )}
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </td>
-                                        <td className="p-4 text-gray-500 text-sm">
-                                            <span className="bg-blue-50 text-blue-700 px-2 py-1 rounded-md">{channel.categoryName || 'Genel'}</span>
-                                        </td>
-                                        <td className="p-4 text-center font-bold text-gray-700">{channel.score || 0}</td>
-                                        <td className="p-4 text-right flex items-center justify-end gap-2">
-                                            {channel.status === 'pending' && (
-                                                <>
+                                            </td>
+                                            <td className="p-4 text-gray-500 text-sm">
+                                                <span className="bg-blue-50 text-blue-700 px-2 py-1 rounded-md">{channel.categoryName || 'Genel'}</span>
+                                            </td>
+                                            <td className="p-4 text-center font-bold text-gray-700">{channel.score || 0}</td>
+                                            <td className="p-4 text-right flex items-center justify-end gap-2">
+                                                {channel.status === 'pending' && (
+                                                    <>
+                                                        <button
+                                                            onClick={() => handleApprove(channel.id)}
+                                                            className="bg-green-50 text-green-600 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-green-600 hover:text-white transition"
+                                                        >
+                                                            Onayla
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleReject(channel.id)}
+                                                            className="bg-red-50 text-red-600 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-red-600 hover:text-white transition"
+                                                        >
+                                                            Reddet
+                                                        </button>
+                                                    </>
+                                                )}
+                                                {channel.status === 'rejected' && (
                                                     <button
                                                         onClick={() => handleApprove(channel.id)}
-                                                        className="bg-green-50 text-green-600 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-green-600 hover:text-white transition"
+                                                        className="bg-blue-50 text-blue-600 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-blue-600 hover:text-white transition"
                                                     >
-                                                        Onayla
+                                                        Geri Al
                                                     </button>
-                                                    <button
-                                                        onClick={() => handleReject(channel.id)}
-                                                        className="bg-red-50 text-red-600 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-red-600 hover:text-white transition"
-                                                    >
-                                                        Reddet
-                                                    </button>
-                                                </>
-                                            )}
-                                            {channel.status === 'rejected' && (
+                                                )}
                                                 <button
-                                                    onClick={() => handleApprove(channel.id)}
-                                                    className="bg-blue-50 text-blue-600 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-blue-600 hover:text-white transition"
+                                                    onClick={async () => {
+                                                        setSyncing(true);
+                                                        const res = await syncChannelFromTelegram(channel.id);
+                                                        setSyncing(false);
+                                                        if (res.error) alert(res.error);
+                                                        else {
+                                                            alert('Kanal güncellendi!');
+                                                            fetchData();
+                                                        }
+                                                    }}
+                                                    disabled={syncing}
+                                                    className="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition disabled:opacity-50"
+                                                    title="Telegram'dan Güncelle"
                                                 >
-                                                    Geri Al
+                                                    <RefreshCw size={18} className={syncing ? 'animate-spin' : ''} />
                                                 </button>
+                                                <button
+                                                    onClick={() => handleEdit(channel)}
+                                                    className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-100 rounded-lg transition" title="Düzenle">
+                                                    <Edit size={18} />
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDelete(channel.id)}
+                                                    className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
+                                                    title="Sil"
+                                                >
+                                                    <Trash2 size={18} />
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {/* Mobile Card View */}
+                    <div className="md:hidden divide-y divide-gray-100">
+                        {loading ? (
+                            <div className="p-8 text-center text-gray-400">Yükleniyor...</div>
+                        ) : filteredChannels.length === 0 ? (
+                            <div className="p-8 text-center text-gray-400">Kanal bulunamadı.</div>
+                        ) : (
+                            filteredChannels.map(channel => (
+                                <div
+                                    key={channel.id}
+                                    className={`p-4 flex flex-col gap-3 transition ${editingId === channel.id ? 'bg-blue-50' : 'bg-white'}`}
+                                >
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-3">
+                                            {channel.image && channel.image !== '/images/logo.png' ? (
+                                                <img
+                                                    src={channel.image}
+                                                    alt=""
+                                                    className="w-12 h-12 rounded-2xl object-cover border border-gray-100 shadow-sm"
+                                                />
+                                            ) : (
+                                                <div className="w-12 h-12 rounded-2xl bg-gray-100 flex items-center justify-center text-gray-400 font-black border border-gray-200">
+                                                    {channel.name.charAt(0)}
+                                                </div>
                                             )}
+                                            <div className="flex flex-col">
+                                                <span className="font-bold text-gray-900 leading-tight">{channel.name}</span>
+                                                <div className="flex items-center gap-2 mt-0.5">
+                                                    <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">
+                                                        {channel.categoryName || 'Genel'}
+                                                    </span>
+                                                    <span className="text-[10px] font-bold text-gray-400">
+                                                        Skor: {channel.score || 0}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="flex flex-col gap-1">
+                                            {channel.status === 'pending' && (
+                                                <button onClick={() => handleApprove(channel.id)} className="bg-green-600 text-white px-3 py-1 rounded-lg text-[10px] font-black uppercase">Onayla</button>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center justify-between mt-2 pt-3 border-t border-gray-50">
+                                        <div className="flex items-center gap-1">
+                                            <button
+                                                onClick={() => handleEdit(channel)}
+                                                className="p-2.5 text-blue-600 bg-blue-50 rounded-xl transition"
+                                            >
+                                                <Edit size={18} />
+                                            </button>
                                             <button
                                                 onClick={async () => {
                                                     setSyncing(true);
                                                     const res = await syncChannelFromTelegram(channel.id);
                                                     setSyncing(false);
                                                     if (res.error) alert(res.error);
-                                                    else {
-                                                        alert('Kanal güncellendi!');
-                                                        fetchData();
-                                                    }
+                                                    else fetchData();
                                                 }}
-                                                disabled={syncing}
-                                                className="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition disabled:opacity-50"
-                                                title="Telegram'dan Güncelle"
+                                                className="p-2.5 text-green-600 bg-green-50 rounded-xl transition"
                                             >
                                                 <RefreshCw size={18} className={syncing ? 'animate-spin' : ''} />
                                             </button>
-                                            <button
-                                                onClick={() => handleEdit(channel)}
-                                                className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-100 rounded-lg transition" title="Düzenle">
-                                                <Edit size={18} />
-                                            </button>
-                                            <button
-                                                onClick={() => handleDelete(channel.id)}
-                                                className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
-                                                title="Sil"
-                                            >
-                                                <Trash2 size={18} />
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            {channel.status === 'pending' && (
+                                                <button onClick={() => handleReject(channel.id)} className="p-2.5 text-red-600 bg-red-50 rounded-xl">
+                                                    <Trash2 size={18} />
+                                                </button>
+                                            )}
+                                            {channel.status !== 'pending' && (
+                                                <button onClick={() => handleDelete(channel.id)} className="p-2.5 text-gray-400 bg-gray-50 rounded-xl">
+                                                    <Trash2 size={18} />
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                    </div>
                 </div>
             </div>
 
             {/* Modal */}
             {isModalOpen && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm p-4">
-                    <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6 animate-in fade-in zoom-in duration-200">
-                        <h2 className="text-xl font-bold mb-4">{editingId ? 'Kanalı Düzenle' : 'Yeni Kanal Ekle'}</h2>
-                        <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="fixed inset-0 bg-black/60 flex items-end md:items-center justify-center z-50 backdrop-blur-sm p-0 md:p-4">
+                    <div className="bg-white rounded-t-[32px] md:rounded-3xl shadow-2xl w-full max-w-lg p-6 md:p-8 animate-in slide-in-from-bottom md:zoom-in duration-300 max-h-[90vh] overflow-y-auto">
+                        <div className="flex items-center justify-between mb-6">
+                            <h2 className="text-xl md:text-2xl font-black text-gray-900">{editingId ? 'Kanalı Düzenle' : 'Yeni Kanal Ekle'}</h2>
+                            <button onClick={() => { setIsModalOpen(false); setEditingId(null); }} className="md:hidden w-8 h-1.5 bg-gray-200 rounded-full mx-auto absolute top-3 left-1/2 -translate-x-1/2"></button>
+                        </div>
+
+                        <form onSubmit={handleSubmit} className="space-y-5">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Katılma Linki (t.me/...)</label>
-                                <div className="flex gap-2">
-                                    <input required className="w-full border rounded-lg p-2" value={formData.join_link} onChange={e => setFormData({ ...formData, join_link: e.target.value })} />
+                                <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Katılma Linki (t.me/...)</label>
+                                <div className="flex flex-col sm:flex-row gap-2">
+                                    <input
+                                        required
+                                        className="flex-1 border-2 border-gray-100 rounded-2xl p-3 md:p-4 focus:border-blue-500 outline-none transition"
+                                        value={formData.join_link}
+                                        onChange={e => setFormData({ ...formData, join_link: e.target.value })}
+                                    />
                                     <button
                                         type="button"
                                         onClick={handleScrape}
                                         disabled={scraping}
-                                        className="bg-purple-100 text-purple-700 px-3 py-2 rounded-lg text-sm font-medium hover:bg-purple-200 disabled:opacity-50 whitespace-nowrap"
+                                        className="bg-blue-50 text-blue-700 px-6 py-3 rounded-2xl font-bold hover:bg-blue-100 disabled:opacity-50 whitespace-nowrap transition"
                                     >
                                         {scraping ? 'Çekiliyor...' : 'Otomatik Çek'}
                                     </button>
                                 </div>
-                                <p className="text-xs text-gray-500 mt-1">Önce linki yapıştırıp "Otomatik Çek" diyebilirsiniz.</p>
                             </div>
 
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Kanal Adı</label>
-                                <input required className="w-full border rounded-lg p-2" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Açıklama</label>
-                                <textarea className="w-full border rounded-lg p-2" rows={3} value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Kategori</label>
-                                <select className="w-full border rounded-lg p-2" value={formData.category_id} onChange={e => setFormData({ ...formData, category_id: e.target.value })}>
-                                    <option value="">Seçiniz...</option>
-                                    {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                                </select>
-                            </div>
-
-                            {/* Skor Input */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Skor / Öncelik Puanı</label>
-                                <input
-                                    type="number"
-                                    className="w-full border rounded-lg p-2"
-                                    value={formData.score}
-                                    onChange={e => setFormData({ ...formData, score: parseInt(e.target.value) || 0 })}
-                                    placeholder="0"
-                                />
-                                <p className="text-xs text-gray-500 mt-1">Sıralamada öne çıkarmak için yüksek puan verin.</p>
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Görsel URL (Logo Linki)</label>
-                                <div className="flex gap-2">
-                                    <input className="w-full border rounded-lg p-2" placeholder="https://..." value={formData.image} onChange={e => setFormData({ ...formData, image: e.target.value })} />
-                                    {formData.image && <img src={formData.image} alt="Önizleme" className="w-10 h-10 rounded-lg object-cover border" />}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                <div>
+                                    <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Kanal Adı</label>
+                                    <input required className="w-full border-2 border-gray-100 rounded-2xl p-3 md:p-4 focus:border-blue-500 outline-none transition" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Kategori</label>
+                                    <select className="w-full border-2 border-gray-100 rounded-2xl p-3 md:p-4 focus:border-blue-500 outline-none transition bg-white" value={formData.category_id} onChange={e => setFormData({ ...formData, category_id: e.target.value })}>
+                                        <option value="">Seçiniz...</option>
+                                        {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                                    </select>
                                 </div>
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Kanal Sahibi (Üye)</label>
-                                <select
-                                    className="w-full border rounded-lg p-2"
-                                    value={formData.owner_id}
-                                    onChange={e => setFormData({ ...formData, owner_id: e.target.value })}
-                                >
-                                    <option value="">Sahipsiz</option>
-                                    {profiles.map(p => (
-                                        <option key={p.id} value={p.id}>{p.full_name || p.email} ({p.email})</option>
-                                    ))}
-                                </select>
+                                <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Açıklama</label>
+                                <textarea className="w-full border-2 border-gray-100 rounded-2xl p-3 md:p-4 focus:border-blue-500 outline-none transition" rows={3} value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} />
                             </div>
 
-                            <div className="flex justify-end gap-3 mt-6">
-                                <button type="button" onClick={() => { setIsModalOpen(false); setEditingId(null); setFormData({ name: '', description: '', join_link: '', category_id: '', image: '', score: 0, owner_id: '' }); }} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">İptal</button>
-                                <button type="submit" className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">{editingId ? 'Güncelle' : 'Kaydet'}</button>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                <div>
+                                    <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Skor / Öncelik</label>
+                                    <input
+                                        type="number"
+                                        className="w-full border-2 border-gray-100 rounded-2xl p-3 md:p-4 focus:border-blue-500 outline-none transition"
+                                        value={formData.score}
+                                        onChange={e => setFormData({ ...formData, score: parseInt(e.target.value) || 0 })}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Kanal Sahibi</label>
+                                    <select
+                                        className="w-full border-2 border-gray-100 rounded-2xl p-3 md:p-4 focus:border-blue-500 outline-none transition bg-white"
+                                        value={formData.owner_id}
+                                        onChange={e => setFormData({ ...formData, owner_id: e.target.value })}
+                                    >
+                                        <option value="">Sahipsiz</option>
+                                        {profiles.map(p => (
+                                            <option key={p.id} value={p.id}>{p.full_name || p.email}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Görsel URL</label>
+                                <div className="flex gap-3">
+                                    <input className="w-full border-2 border-gray-100 rounded-2xl p-3 md:p-4 focus:border-blue-500 outline-none transition" placeholder="https://..." value={formData.image} onChange={e => setFormData({ ...formData, image: e.target.value })} />
+                                    {formData.image && <img src={formData.image} alt="" className="w-12 h-12 md:w-14 md:h-14 rounded-2xl object-cover border-2 border-gray-100 shadow-sm" />}
+                                </div>
+                            </div>
+
+                            <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 pb-4 md:pb-0">
+                                <button
+                                    type="button"
+                                    onClick={() => { setIsModalOpen(false); setEditingId(null); setFormData({ name: '', description: '', join_link: '', category_id: '', image: '', score: 0, owner_id: '' }); }}
+                                    className="order-2 sm:order-1 px-8 py-4 text-gray-500 font-bold hover:bg-gray-50 rounded-2xl transition"
+                                >
+                                    İptal
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="order-1 sm:order-2 px-10 py-4 bg-blue-600 text-white font-bold rounded-2xl hover:bg-blue-700 shadow-xl shadow-blue-100 transition"
+                                >
+                                    {editingId ? 'Güncelle' : 'Kaydet'}
+                                </button>
                             </div>
                         </form>
                     </div>

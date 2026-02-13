@@ -125,21 +125,21 @@ export default function BulkAddClient({ categories }: Props) {
                     <table className="w-full text-sm text-left">
                         <thead className="bg-gray-50 border-b border-gray-200 text-gray-700 font-bold sticky top-0">
                             <tr>
-                                <th className="px-4 py-3">Link</th>
-                                <th className="px-4 py-3">Durum</th>
+                                <th className="px-3 md:px-4 py-3">Kanal</th>
+                                <th className="px-3 md:px-4 py-3 text-right">Durum</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
                             {[...results].reverse().map((r, i) => (
                                 <tr key={i} className="hover:bg-gray-50">
-                                    <td className="px-4 py-3 truncate max-w-xs">{r.url}</td>
-                                    <td className="px-4 py-3 text-xs">
+                                    <td className="px-3 md:px-4 py-3 truncate max-w-[120px] md:max-w-xs">{r.url}</td>
+                                    <td className="px-3 md:px-4 py-3 text-xs text-right">
                                         {r.status === 'success' ? (
-                                            <span className="text-green-600 font-bold">✓ {r.name}</span>
+                                            <span className="text-green-600 font-bold whitespace-nowrap">✓ {r.name}</span>
                                         ) : r.status === 'exists' ? (
-                                            <span className="text-orange-600 font-bold">⚠ Mevcut</span>
+                                            <span className="text-orange-600 font-bold">Mevcut</span>
                                         ) : (
-                                            <span className="text-red-600 font-bold truncate block">✗ {r.message}</span>
+                                            <span className="text-red-600 font-bold truncate block">✗ Hata</span>
                                         )}
                                     </td>
                                 </tr>

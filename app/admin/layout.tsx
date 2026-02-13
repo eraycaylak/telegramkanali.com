@@ -88,9 +88,9 @@ export default function AdminLayout({
     }
 
     return (
-        <div className="min-h-screen bg-gray-100 flex font-sans">
-            {/* Sidebar */}
-            <aside className={`bg-white border-r border-gray-200 fixed inset-y-0 left-0 z-20 transition-all duration-300 ${isSidebarOpen ? 'w-64' : 'w-20'}`}>
+        <div className="min-h-screen bg-gray-50 flex font-sans select-none">
+            {/* Desktop Sidebar (Hidden on mobile) */}
+            <aside className={`hidden md:flex flex-col bg-white border-r border-gray-200 fixed inset-y-0 left-0 z-20 transition-all duration-300 ${isSidebarOpen ? 'w-64' : 'w-20'}`}>
                 <div className="h-16 flex items-center justify-between px-4 border-b border-gray-200">
                     <Link href="/admin/dashboard" className={`flex items-center gap-2 font-bold text-xl text-blue-600 ${!isSidebarOpen && 'hidden'}`}>
                         <span>Panel</span>
@@ -100,7 +100,7 @@ export default function AdminLayout({
                     </button>
                 </div>
 
-                <nav className="p-4 space-y-2">
+                <nav className="p-4 space-y-2 flex-1 overflow-y-auto">
                     {menuItems.map((item) => {
                         const Icon = item.icon;
                         const isActive = pathname === item.href;
@@ -108,9 +108,9 @@ export default function AdminLayout({
                             <Link
                                 key={item.href}
                                 href={item.href}
-                                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isActive
-                                    ? 'bg-blue-50 text-blue-600 font-medium'
-                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive
+                                    ? 'bg-blue-600 text-white font-bold shadow-lg shadow-blue-200'
+                                    : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
                                     }`}
                             >
                                 <Icon size={20} />
@@ -120,10 +120,10 @@ export default function AdminLayout({
                     })}
                 </nav>
 
-                <div className="absolute bottom-4 left-0 right-0 px-4">
+                <div className="p-4 border-t">
                     <button
                         onClick={() => { localStorage.removeItem('isAdmin'); window.location.href = '/admin'; }}
-                        className="flex items-center gap-3 w-full px-4 py-3 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        className="flex items-center gap-3 w-full px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl transition-colors font-medium"
                     >
                         <LogOut size={20} />
                         <span className={`${!isSidebarOpen && 'hidden'}`}>Çıkış</span>
@@ -131,21 +131,64 @@ export default function AdminLayout({
                 </div>
             </aside>
 
-            {/* Main Content */}
-            <div className={`flex-1 transition-all duration-300 ${isSidebarOpen ? 'ml-64' : 'ml-20'}`}>
-                <header className="h-16 bg-white border-b border-gray-200 sticky top-0 z-10 px-8 flex items-center justify-between">
-                    <h2 className="font-semibold text-gray-800">
-                        {menuItems.find(i => i.href === pathname)?.name || 'Panel'}
-                    </h2>
+            {/* Main Content Area */}
+            <div className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ${isSidebarOpen ? 'md:ml-64' : 'md:ml-20'}`}>
+                {/* Header */}
+                <header className="h-16 bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-30 px-4 md:px-8 flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                        <span className="text-sm text-gray-500">Admin</span>
-                        <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold">A</div>
+                        {/* Mobile Back Button or Title */}
+                        <div className="md:hidden">
+                            <span className="font-bold text-blue-600">Panel</span>
+                        </div>
+                        <h2 className="font-bold text-gray-900 hidden md:block">
+                            {menuItems.find(i => i.href === pathname)?.name || 'Panel'}
+                        </h2>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                        <div className="text-right hidden sm:block">
+                            <p className="text-sm font-bold text-gray-900">Yönetici</p>
+                            <p className="text-[10px] text-gray-500">Çevrimiçi</p>
+                        </div>
+                        <div className="w-10 h-10 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center text-white font-black shadow-lg shadow-blue-200">
+                            A
+                        </div>
                     </div>
                 </header>
 
-                <main className="p-8">
+                <main className="flex-1 p-4 md:p-8 pb-24 md:pb-8">
                     {children}
                 </main>
+
+                {/* Mobile Bottom Navigation (Visible only on mobile) */}
+                <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-lg border-t border-gray-100 flex items-center justify-around px-2 py-3 z-40 pb-safe">
+                    {menuItems.slice(0, 5).map((item) => {
+                        const Icon = item.icon;
+                        const isActive = pathname === item.href;
+                        return (
+                            <Link
+                                key={item.href}
+                                href={item.href}
+                                className={`flex flex-col items-center gap-1 px-3 py-1 rounded-xl transition-all ${isActive
+                                    ? 'text-blue-600 scale-110'
+                                    : 'text-gray-400'
+                                    }`}
+                            >
+                                <Icon size={22} strokeWidth={isActive ? 2.5 : 2} />
+                                <span className="text-[10px] font-bold">{item.name.split(' ')[0]}</span>
+                                {isActive && <div className="w-1 h-1 bg-blue-600 rounded-full"></div>}
+                            </Link>
+                        );
+                    })}
+                    {/* More Menu Trigger */}
+                    <button
+                        onClick={() => { /* Could open a drawer for remaining links */ }}
+                        className="flex flex-col items-center gap-1 px-3 py-1 text-gray-400"
+                    >
+                        <Menu size={22} />
+                        <span className="text-[10px] font-bold">Daha</span>
+                    </button>
+                </nav>
             </div>
         </div>
     );
