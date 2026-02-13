@@ -83,6 +83,29 @@ export default function BulkAddClient({ categories }: Props) {
         );
     }
 
+    const handlePaste = (e: React.ClipboardEvent) => {
+        const pastedText = e.clipboardData.getData('text');
+        if (pastedText) {
+            // If the pasted text doesn't end with a newline, add one
+            const textToAppend = pastedText.endsWith('\n') ? pastedText : pastedText + '\n';
+
+            // Prevent default to manually handle the insertion
+            e.preventDefault();
+
+            const textarea = e.target as HTMLTextAreaElement;
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+
+            const newValue = urls.substring(0, start) + textToAppend + urls.substring(end);
+            setUrls(newValue);
+
+            // Set cursor position after the pasted text (needs a slight delay for React to update)
+            setTimeout(() => {
+                textarea.selectionStart = textarea.selectionEnd = start + textToAppend.length;
+            }, 0);
+        }
+    };
+
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
             <div>
@@ -91,6 +114,7 @@ export default function BulkAddClient({ categories }: Props) {
                     required
                     value={urls}
                     onChange={(e) => setUrls(e.target.value)}
+                    onPaste={handlePaste}
                     placeholder="t.me/kanal1&#10;t.me/kanal2&#10;t.me/kanal3"
                     className="w-full h-64 border border-gray-300 rounded-xl p-4 focus:ring-2 focus:ring-blue-500 outline-none transition font-mono text-sm"
                     disabled={status === 'loading'}
