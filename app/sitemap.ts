@@ -1,5 +1,5 @@
 import { MetadataRoute } from 'next';
-import { getChannels, getCategories, getSeoPages } from '@/lib/data';
+import { getChannels, getCategories, getSeoPages, getAllBlogSlugs } from '@/lib/data';
 
 export const baseUrl = 'https://telegramkanali.com';
 
@@ -57,10 +57,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.8,
     }));
 
+    // Blog posts
+    const blogSlugs = await getAllBlogSlugs();
+    const blogUrls = blogSlugs.map((slug) => ({
+        url: `${baseUrl}/blog/${slug}`,
+        lastModified: new Date(),
+        changeFrequency: 'weekly' as const,
+        priority: 0.7,
+    }));
+
     return [
         ...staticPages,
         ...categoriesUrls,
         ...seoPageUrls,
+        ...blogUrls,
         ...channelsUrls,
     ];
 }

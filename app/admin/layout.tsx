@@ -2,7 +2,7 @@
 
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { LayoutDashboard, FolderTree, FileText, Users, Settings, LogOut, Menu, Image, Shield, BarChart, Send } from 'lucide-react';
+import { LayoutDashboard, FolderTree, FileText, Users, Settings, LogOut, Menu, Image, Shield, BarChart, Send, BookOpen } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 export default function AdminLayout({
@@ -49,6 +49,7 @@ export default function AdminLayout({
         { name: 'Kategoriler', href: '/admin/categories', icon: FolderTree },
         { name: 'Bannerlar', href: '/admin/banners', icon: Image },
         { name: 'Analitik', href: '/admin/analytics', icon: BarChart }, // New Link
+        { name: 'Blog Yönetimi', href: '/admin/blog', icon: BookOpen },
         { name: 'Sayfalar', href: '/admin/pages', icon: FileText },
         { name: 'Kullanıcılar', href: '/admin/users', icon: Users },
         { name: 'Ayarlar', href: '/admin/settings', icon: Settings },

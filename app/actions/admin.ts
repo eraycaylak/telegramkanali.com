@@ -597,3 +597,189 @@ export async function addChannelByUrl(url: string, categoryId: string) {
         return { error: err.message || 'Bilinmeyen hata' };
     }
 }
+
+// ========================
+// BLOG ACTIONS
+// ========================
+
+export async function getAllBlogPostsAdmin() {
+    const { data, error } = await adminClient
+        .from('blog_posts')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+    if (error) {
+        console.error('[ADMIN] Error fetching blog posts:', error);
+        return [];
+    }
+    return data || [];
+}
+
+export async function getBlogPostById(id: string) {
+    const { data, error } = await adminClient
+        .from('blog_posts')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+    if (error || !data) return null;
+    return data;
+}
+
+export async function addBlogPost(formData: FormData) {
+    const title = formData.get('title') as string;
+    const slug = formData.get('slug') as string;
+    const excerpt = formData.get('excerpt') as string;
+    const content = formData.get('content') as string;
+    const cover_image = formData.get('cover_image') as string;
+    const category = formData.get('category') as string;
+    const tagsStr = formData.get('tags') as string;
+    const author = (formData.get('author') as string) || 'Admin';
+    const published = formData.get('published') === 'true';
+    const featured = formData.get('featured') === 'true';
+    const meta_title = formData.get('meta_title') as string;
+    const meta_description = formData.get('meta_description') as string;
+
+    const tags = tagsStr ? tagsStr.split(',').map(t => t.trim()).filter(Boolean) : [];
+
+    // Calculate reading time (~200 words/min)
+    const wordCount = content.split(/\s+/).length;
+    const reading_time = Math.max(1, Math.ceil(wordCount / 200));
+
+    const { data, error } = await adminClient
+        .from('blog_posts')
+        .insert({
+            title,
+            slug,
+            excerpt,
+            content,
+            cover_image: cover_image || null,
+            category: category || null,
+            tags,
+            author,
+            published,
+            featured,
+            reading_time,
+            meta_title: meta_title || title,
+            meta_description: meta_description || excerpt,
+        })
+        .select()
+        .single();
+
+    if (error) {
+        console.error('[ADMIN] Error adding blog post:', error);
+        return { error: error.message };
+    }
+
+    revalidatePath('/blog');
+    revalidatePath('/admin/blog');
+    return { success: true, data };
+}
+
+export async function updateBlogPost(id: string, formData: FormData) {
+    const title = formData.get('title') as string;
+    const slug = formData.get('slug') as string;
+    const excerpt = formData.get('excerpt') as string;
+    const content = formData.get('content') as string;
+    const cover_image = formData.get('cover_image') as string;
+    const category = formData.get('category') as string;
+    const tagsStr = formData.get('tags') as string;
+    const author = (formData.get('author') as string) || 'Admin';
+    const published = formData.get('published') === 'true';
+    const featured = formData.get('featured') === 'true';
+    const meta_title = formData.get('meta_title') as string;
+    const meta_description = formData.get('meta_description') as string;
+
+    const tags = tagsStr ? tagsStr.split(',').map(t => t.trim()).filter(Boolean) : [];
+
+    const wordCount = content.split(/\s+/).length;
+    const reading_time = Math.max(1, Math.ceil(wordCount / 200));
+
+    const { error } = await adminClient
+        .from('blog_posts')
+        .update({
+            title,
+            slug,
+            excerpt,
+            content,
+            cover_image: cover_image || null,
+            category: category || null,
+            tags,
+            author,
+            published,
+            featured,
+            reading_time,
+            meta_title: meta_title || title,
+            meta_description: meta_description || excerpt,
+            updated_at: new Date().toISOString(),
+        })
+        .eq('id', id);
+
+    if (error) {
+        console.error('[ADMIN] Error updating blog post:', error);
+        return { error: error.message };
+    }
+
+    revalidatePath('/blog');
+    revalidatePath(`/blog/${slug}`);
+    revalidatePath('/admin/blog');
+    return { success: true };
+}
+
+export async function deleteBlogPost(id: string) {
+    const { error } = await adminClient
+        .from('blog_posts')
+        .delete()
+        .eq('id', id);
+
+    if (error) {
+        console.error('[ADMIN] Error deleting blog post:', error);
+        return { error: error.message };
+    }
+
+    revalidatePath('/blog');
+    revalidatePath('/admin/blog');
+    return { success: true };
+}
+
+export async function toggleBlogPublish(id: string, published: boolean) {
+    const { error } = await adminClient
+        .from('blog_posts')
+        .update({ published, updated_at: new Date().toISOString() })
+        .eq('id', id);
+
+    if (error) {
+        console.error('[ADMIN] Error toggling blog publish:', error);
+        return { error: error.message };
+    }
+
+    revalidatePath('/blog');
+    revalidatePath('/admin/blog');
+    return { success: true };
+}
+
+export async function uploadBlogImage(formData: FormData) {
+    const file = formData.get('file') as File;
+    if (!file) return { error: 'Dosya bulunamadı' };
+
+    const ext = file.name.split('.').pop();
+    const fileName = `blog/${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`;
+
+    const { data, error } = await adminClient.storage
+        .from('images')
+        .upload(fileName, file, {
+            cacheControl: '31536000',
+            upsert: false,
+        });
+
+    if (error) {
+        console.error('[ADMIN] Error uploading blog image:', error);
+        return { error: error.message };
+    }
+
+    const { data: urlData } = adminClient.storage
+        .from('images')
+        .getPublicUrl(data.path);
+
+    return { success: true, url: urlData.publicUrl };
+}

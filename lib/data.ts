@@ -1,5 +1,5 @@
 import { supabase } from './supabaseClient';
-import { Channel, Category, SeoPage } from './types';
+import { Channel, Category, SeoPage, BlogPost } from './types';
 
 // Fetch Categories
 export async function getCategories(): Promise<Category[]> {
@@ -183,4 +183,101 @@ export async function getAllChannelSlugs(): Promise<string[]> {
 
     if (error) return [];
     return data.map((d: any) => d.slug);
+}
+
+// ========================
+// BLOG FUNCTIONS
+// ========================
+
+export async function getBlogPosts(
+    page: number = 1,
+    limit: number = 12,
+    category?: string,
+    search?: string
+): Promise<{ data: BlogPost[], count: number }> {
+    const from = (page - 1) * limit;
+    const to = from + limit - 1;
+
+    let query = supabase
+        .from('blog_posts')
+        .select('*', { count: 'exact' })
+        .eq('published', true);
+
+    if (category) {
+        query = query.eq('category', category);
+    }
+
+    if (search) {
+        query = query.ilike('title', `%${search}%`);
+    }
+
+    query = query
+        .order('created_at', { ascending: false })
+        .range(from, to);
+
+    const { data, error, count } = await query;
+
+    if (error) {
+        console.error('Error fetching blog posts:', error);
+        return { data: [], count: 0 };
+    }
+
+    return { data: (data || []) as BlogPost[], count: count || 0 };
+}
+
+export async function getBlogPostBySlug(slug: string): Promise<BlogPost | null> {
+    const { data, error } = await supabase
+        .from('blog_posts')
+        .select('*')
+        .eq('slug', slug)
+        .eq('published', true)
+        .single();
+
+    if (error || !data) return null;
+    return data as BlogPost;
+}
+
+export async function getFeaturedBlogPosts(limit: number = 3): Promise<BlogPost[]> {
+    const { data, error } = await supabase
+        .from('blog_posts')
+        .select('*')
+        .eq('published', true)
+        .eq('featured', true)
+        .order('created_at', { ascending: false })
+        .limit(limit);
+
+    if (error) return [];
+    return (data || []) as BlogPost[];
+}
+
+export async function getRecentBlogPosts(limit: number = 6): Promise<BlogPost[]> {
+    const { data, error } = await supabase
+        .from('blog_posts')
+        .select('*')
+        .eq('published', true)
+        .order('created_at', { ascending: false })
+        .limit(limit);
+
+    if (error) return [];
+    return (data || []) as BlogPost[];
+}
+
+export async function getAllBlogSlugs(): Promise<string[]> {
+    const { data, error } = await supabase
+        .from('blog_posts')
+        .select('slug')
+        .eq('published', true);
+
+    if (error) return [];
+    return data.map((d: any) => d.slug);
+}
+
+export async function incrementBlogViewCount(id: string): Promise<void> {
+    await supabase.rpc('increment_blog_view', { post_id: id }).catch(() => {
+        // Fallback: direct update if RPC doesn't exist
+        supabase
+            .from('blog_posts')
+            .update({ view_count: supabase.rpc('increment_blog_view', { post_id: id }) })
+            .eq('id', id);
+    });
 }

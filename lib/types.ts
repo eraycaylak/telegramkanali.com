@@ -87,3 +87,23 @@ export interface Banner {
     active: boolean;
     created_at?: string;
 }
+
+export interface BlogPost {
+    id: string;
+    title: string;
+    slug: string;
+    excerpt?: string;
+    content: string;
+    cover_image?: string;
+    category?: string;
+    tags: string[];
+    author: string;
+    published: boolean;
+    featured: boolean;
+    view_count: number;
+    reading_time?: number;
+    meta_title?: string;
+    meta_description?: string;
+    created_at?: string;
+    updated_at?: string;
+}
