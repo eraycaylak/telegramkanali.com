@@ -29,11 +29,33 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const categories = await getCategories();
     const seoPages = await getSeoPages();
 
-    // Regex to filter out suspicious or non-standard slugs if any
-    const isValidSlug = (slug: string) => /^[a-z0-9-]+$/.test(slug) && slug.length > 2 && !slug.startsWith('-');
+    // Regex to filter out suspicious or non-standard slugs
+    // 1. Must be alphanumeric + hyphens
+    // 2. Must be > 2 chars
+    // 3. Must not start/end with hyphen
+    // 4. Must not contain consecutive hyphens (--)
+    // 5. Must not start with 'telegram-contact-' (junk data)
+    const isValidSlug = (slug: string) => {
+        if (!slug) return false;
+        if (slug.length < 3) return false;
+        if (slug.startsWith('-') || slug.endsWith('-')) return false;
+        if (slug.includes('--')) return false;
+        if (slug.startsWith('telegram-contact-')) return false;
+        if (!/^[a-z0-9-]+$/.test(slug)) return false;
+        return true;
+    };
 
     const channelsUrls = channels
-        .filter(c => isValidSlug(c.slug))
+        .filter(c => {
+            // Filter by slug
+            if (!isValidSlug(c.slug)) return false;
+
+            // Filter by description length (Thin Content Check)
+            // If description is missing or very short, skip it to save crawl budget
+            if (!c.description || c.description.trim().length < 20) return false;
+
+            return true;
+        })
         .map((channel) => ({
             url: `${baseUrl}/${channel.slug}`,
             lastModified: new Date(channel.created_at ?? Date.now()),

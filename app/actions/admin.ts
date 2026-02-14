@@ -93,7 +93,10 @@ export async function addChannel(formData: FormData) {
     const image = formData.get('image') as string;
     const score = parseInt(formData.get('score') as string) || 0;
     const owner_id = formData.get('owner_id') as string;
-    const slug = name.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
+
+    // Use robust slugify
+    const { slugify } = await import('@/lib/utils');
+    const slug = slugify(name);
 
     console.log('[CHANNEL] Adding channel:', { name, slug, join_link, category_id, image, description, score });
 
