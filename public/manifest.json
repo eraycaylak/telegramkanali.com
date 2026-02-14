@@ -1,0 +1,22 @@
+{
+    "name": "Telegram Kanalları",
+    "short_name": "TelegramKanali",
+    "description": "Türkiye'nin en güncel Telegram kanal dizini",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#333333",
+    "orientation": "portrait",
+    "icons": [
+        {
+            "src": "/favicon.ico",
+            "sizes": "48x48",
+            "type": "image/x-icon"
+        },
+        {
+            "src": "/apple-touch-icon.png",
+            "sizes": "180x180",
+            "type": "image/png"
+        }
+    ]
+}

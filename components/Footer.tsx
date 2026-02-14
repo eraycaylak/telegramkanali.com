@@ -6,7 +6,7 @@ export default async function Footer() {
     const categories = await getCategories();
 
     return (
-        <footer className="w-full border-t border-gray-100 bg-white pt-12 pb-8">
+        <footer className="w-full border-t border-gray-100 bg-white pt-12 pb-8 mb-20 md:mb-0">
             <div className="container mx-auto px-4 md:px-6">
                 <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-5">
 

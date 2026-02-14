@@ -76,14 +76,14 @@ export default function HeaderClient({ categories, logo, user: initialUser }: He
     }, [menuOpen]);
 
     return (
-        <header className="flex flex-col w-full text-white font-sans">
+        <header className="flex flex-col w-full text-white font-sans sticky top-0 z-50">
 
             {/* 1. Top Bar - Hidden on Mobile */}
             {/* 1. Top Bar - Removed to simplify UI as requested */}
 
 
             {/* 2. Main Bar - Logo & Search & Mobile Menu */}
-            <div className="bg-[#333333] py-3 md:py-6 relative overflow-hidden">
+            <div className="bg-[#333333]/95 backdrop-blur-lg py-2 md:py-6 relative overflow-hidden">
                 {/* Pattern */}
                 <div className="absolute inset-0 opacity-10 pointer-events-none" style={{
                     backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M0 40L40 0H20L0 20M40 40V20L20 40'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
@@ -91,31 +91,17 @@ export default function HeaderClient({ categories, logo, user: initialUser }: He
 
                 <div className="container mx-auto px-4 md:px-6 flex items-center justify-between md:justify-start gap-4 relative z-10">
 
-                    {/* Mobile: Hamburger Button */}
-                    <button
-                        onClick={() => setMenuOpen(!menuOpen)}
-                        className="md:hidden p-2 text-white hover:bg-white/10 rounded-lg transition"
-                        type="button"
-                        aria-label="Menüyü Aç"
-                    >
-                        <Menu size={28} />
-                    </button>
 
                     {/* Logo - Centered on mobile via flex-1 or absolute centering if needed, but flex-1 text-center usually easiest or just justify-center */}
                     {/* Let's keep it simple: Menu (Left) - Logo (Center) - Search (Right) */}
                     <div className="flex-1 flex justify-center md:flex-none md:justify-start">
-                        {logo}
+                        <div className="scale-90 md:scale-100 origin-center">
+                            {logo}
+                        </div>
                     </div>
 
-                    {/* Mobile: Search Toggle Button */}
-                    <button
-                        onClick={() => setIsSearchVisible(!isSearchVisible)}
-                        className="md:hidden p-2 text-white hover:bg-white/10 rounded-lg transition"
-                        type="button"
-                        aria-label="Arama"
-                    >
-                        <Search size={24} />
-                    </button>
+                    {/* Mobile: Empty spacer to balance layout (buttons moved to bottom nav) */}
+                    <div className="md:hidden w-10" />
 
                     {/* Desktop: Search Bar */}
                     <form onSubmit={handleSearch} className="hidden md:flex flex-1 relative w-full lg:max-w-xl ml-8">
@@ -158,24 +144,7 @@ export default function HeaderClient({ categories, logo, user: initialUser }: He
                     </div>
                 </div>
 
-                {/* Mobile: Search Bar Toggleable */}
-                {isSearchVisible && (
-                    <div className="md:hidden px-4 pb-4 animate-in fade-in slide-in-from-top-2">
-                        <form onSubmit={handleSearch} className="relative">
-                            <input
-                                type="text"
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                placeholder="Grup ara..."
-                                className="w-full h-12 bg-[#555555] text-gray-100 placeholder-gray-400 rounded-full px-6 pr-12 text-sm outline-none focus:bg-[#666]"
-                                autoFocus
-                            />
-                            <button type="submit" className="absolute right-4 top-0 h-12 flex items-center text-gray-300">
-                                <Search size={20} />
-                            </button>
-                        </form>
-                    </div>
-                )}
+                {/* Mobile search moved to MobileBottomNav */}
             </div>
 
             {/* 3. Navigation Bar - Desktop */}
