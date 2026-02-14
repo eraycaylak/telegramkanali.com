@@ -273,11 +273,8 @@ export async function getAllBlogSlugs(): Promise<string[]> {
 }
 
 export async function incrementBlogViewCount(id: string): Promise<void> {
-    await supabase.rpc('increment_blog_view', { post_id: id }).catch(() => {
-        // Fallback: direct update if RPC doesn't exist
-        supabase
-            .from('blog_posts')
-            .update({ view_count: supabase.rpc('increment_blog_view', { post_id: id }) })
-            .eq('id', id);
-    });
+    const { error } = await supabase.rpc('increment_blog_view', { post_id: id });
+    if (error) {
+        console.error('Error incrementing blog view count:', error);
+    }
 }
