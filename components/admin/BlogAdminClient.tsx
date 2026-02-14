@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Plus, Edit2, Trash2, Eye, EyeOff, Search, Star, Clock, BarChart } from 'lucide-react';
 import { deleteBlogPost, toggleBlogPublish } from '@/app/actions/admin';
 import { useRouter } from 'next/navigation';
+import { supabase } from '@/lib/supabaseClient';
 
 interface BlogPost {
     id: string;
@@ -30,6 +31,33 @@ export default function BlogAdminClient({ posts: initialPosts }: BlogAdminClient
     const [search, setSearch] = useState('');
     const [filter, setFilter] = useState<'all' | 'published' | 'draft'>('all');
     const [loading, setLoading] = useState<string | null>(null);
+
+    useEffect(() => {
+        checkPermission();
+    }, []);
+
+    const checkPermission = async () => {
+        const storedUserId = localStorage.getItem('userId');
+        const isAdmin = localStorage.getItem('isAdmin');
+
+        if (isAdmin === 'true' && !storedUserId) return;
+
+        if (storedUserId) {
+            const { data: user } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', storedUserId)
+                .single();
+
+            if (user) {
+                if (user.role === 'admin') return;
+                if (user.role === 'editor' && user.permissions?.manage_blog) return;
+            }
+        }
+
+        alert('Bu sayfaya erişim yetkiniz yok.');
+        window.location.href = '/admin/dashboard';
+    };
 
     const filteredPosts = posts.filter(post => {
         const matchesSearch = post.title.toLowerCase().includes(search.toLowerCase());

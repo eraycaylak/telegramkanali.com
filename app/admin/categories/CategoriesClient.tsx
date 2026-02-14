@@ -13,8 +13,32 @@ export default function CategoriesClient() {
     const [formData, setFormData] = useState({ name: '', description: '', icon: '' });
 
     useEffect(() => {
+        checkPermission();
         fetchCategories();
     }, []);
+
+    const checkPermission = async () => {
+        const storedUserId = localStorage.getItem('userId');
+        const isAdmin = localStorage.getItem('isAdmin');
+
+        if (isAdmin === 'true' && !storedUserId) return;
+
+        if (storedUserId) {
+            const { data: user } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', storedUserId)
+                .single();
+
+            if (user) {
+                if (user.role === 'admin') return;
+                if (user.role === 'editor' && user.permissions?.manage_categories) return;
+            }
+        }
+
+        alert('Bu sayfaya erişim yetkiniz yok.');
+        window.location.href = '/admin/dashboard';
+    };
 
     const fetchCategories = async () => {
         setLoading(true);

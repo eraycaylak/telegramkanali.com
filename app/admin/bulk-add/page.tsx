@@ -26,6 +26,22 @@ export default async function BulkAddPage() {
         redirect('/login');
     }
 
+    // RBAC Check
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+    // Type assertion or check for permissions
+    const permissions = profile?.permissions as any;
+
+    if (profile?.role !== 'admin') {
+        if (profile?.role !== 'editor' || !permissions?.manage_channels) {
+            redirect('/admin/dashboard');
+        }
+    }
+
     const categories = await getCategories();
 
     return (

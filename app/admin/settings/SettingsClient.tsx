@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { supabase } from '@/lib/supabaseClient';
 import { Image as ImageIcon, Loader2 } from 'lucide-react';
 
 export default function SettingsClient() {
@@ -13,22 +14,53 @@ export default function SettingsClient() {
 
     // Load settings from database on mount
     useEffect(() => {
-        async function loadSettings() {
-            try {
-                const { getAllSettings } = await import('@/app/actions/settings');
-                const settings = await getAllSettings();
+        // Permission Check
+        const isAdmin = localStorage.getItem('isAdmin');
+        const userId = localStorage.getItem('userId');
 
-                if (settings.logo_url) setLogoUrl(settings.logo_url);
-                if (settings.site_title) setSiteTitle(settings.site_title);
-                if (settings.ga_id) setGaId(settings.ga_id);
-            } catch (error) {
-                console.error('Load settings error:', error);
-            } finally {
-                setLoading(false);
-            }
+        // Strict Admin Check
+        if (isAdmin !== 'true') {
+            // Second check via profile for security if ignoring localStorage
+            // But for now, let's trust localStorage + profile fetch if needed.
+            // Ideally we fetch profile. 
+            // Let's do the profile fetch pattern as standard.
         }
-        loadSettings();
+
+        async function checkAndLoad() {
+            if (userId) {
+                const { data: user } = await supabase.from('profiles').select('role').eq('id', userId).single();
+                if (user?.role !== 'admin') {
+                    alert('Bu sayfaya erişim yetkiniz yok (Sadece Admin).');
+                    window.location.href = '/admin/dashboard';
+                    return;
+                }
+            } else if (isAdmin !== 'true') {
+                // No user ID and not legacy admin
+                window.location.href = '/admin/dashboard';
+                return;
+            }
+
+            loadSettings();
+        }
+        checkAndLoad();
+
     }, []);
+
+    async function loadSettings() {
+        try {
+            const { getAllSettings } = await import('@/app/actions/settings');
+            const settings = await getAllSettings();
+
+            if (settings.logo_url) setLogoUrl(settings.logo_url);
+            if (settings.site_title) setSiteTitle(settings.site_title);
+            if (settings.ga_id) setGaId(settings.ga_id);
+        } catch (error) {
+            console.error('Load settings error:', error);
+        } finally {
+            setLoading(false);
+        }
+    }
+
 
     const handleSave = async () => {
         setSaving(true);

@@ -107,3 +107,22 @@ export interface BlogPost {
     created_at?: string;
     updated_at?: string;
 }
+export interface UserPermissions {
+    manage_blog: boolean;
+    manage_channels: boolean;
+    manage_categories: boolean;
+    manage_banners: boolean;
+    manage_users: boolean;
+    view_analytics: boolean;
+}
+
+export interface UserProfile {
+    id: string;
+    email: string;
+    full_name?: string;
+    avatar_url?: string;
+    role: 'user' | 'admin' | 'editor';
+    balance: number;
+    permissions?: UserPermissions;
+    created_at: string;
+}

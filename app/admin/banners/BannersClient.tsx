@@ -6,6 +6,8 @@ import { Banner, getBanners, saveBanner, deleteBanner, toggleBannerActive, reord
 import { getCategories } from '@/lib/data';
 import { Category } from '@/lib/types';
 
+import { supabase } from '@/lib/supabaseClient';
+
 export default function BannersClient() {
     const [banners, setBanners] = useState<Banner[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
@@ -19,9 +21,33 @@ export default function BannersClient() {
 
     // Initial data load
     useEffect(() => {
+        checkPermission();
         loadBanners();
         loadCategories();
     }, [activeTab, selectedCategoryId]);
+
+    const checkPermission = async () => {
+        const storedUserId = localStorage.getItem('userId');
+        const isAdmin = localStorage.getItem('isAdmin');
+
+        if (isAdmin === 'true' && !storedUserId) return;
+
+        if (storedUserId) {
+            const { data: user } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', storedUserId)
+                .single();
+
+            if (user) {
+                if (user.role === 'admin') return;
+                if (user.role === 'editor' && user.permissions?.manage_banners) return;
+            }
+        }
+
+        alert('Bu sayfaya erişim yetkiniz yok.');
+        window.location.href = '/admin/dashboard';
+    };
 
     async function loadCategories() {
         const cats = await getCategories();

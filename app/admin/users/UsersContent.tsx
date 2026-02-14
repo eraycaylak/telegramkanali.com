@@ -24,12 +24,45 @@ export default function UsersContent() {
     // Edit Form State
     const [editForm, setEditForm] = useState({
         role: 'user',
-        balance: 0
+        balance: 0,
+        permissions: {
+            manage_blog: false,
+            manage_channels: false,
+            manage_categories: false,
+            manage_banners: false,
+            manage_users: false,
+            view_analytics: false
+        }
     });
 
     useEffect(() => {
+        checkPermission();
         fetchUsers();
     }, []);
+
+    const checkPermission = async () => {
+        const storedUserId = localStorage.getItem('userId');
+        const isAdmin = localStorage.getItem('isAdmin');
+
+        if (isAdmin === 'true' && !storedUserId) return; // Legacy admin
+
+        if (storedUserId) {
+            const { data: user } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', storedUserId)
+                .single();
+
+            if (user) {
+                if (user.role === 'admin') return;
+                if (user.role === 'editor' && user.permissions?.manage_users) return;
+            }
+        }
+
+        // If we get here, no permission
+        alert('Bu sayfaya erişim yetkiniz yok.');
+        window.location.href = '/admin/dashboard';
+    };
 
     async function fetchUsers() {
         try {
@@ -55,9 +88,27 @@ export default function UsersContent() {
         setEditingUser(user);
         setEditForm({
             role: user.role || 'user',
-            balance: user.balance || 0
+            balance: user.balance || 0,
+            permissions: user.permissions || {
+                manage_blog: false,
+                manage_channels: false,
+                manage_categories: false,
+                manage_banners: false,
+                manage_users: false,
+                view_analytics: false
+            }
         });
         setModalOpen(true);
+    };
+
+    const handlePermissionChange = (perm: string) => {
+        setEditForm(prev => ({
+            ...prev,
+            permissions: {
+                ...prev.permissions,
+                [perm]: !prev.permissions[perm as keyof typeof prev.permissions]
+            }
+        }));
     };
 
     const handleSave = async () => {
@@ -66,7 +117,11 @@ export default function UsersContent() {
         try {
             const { error } = await supabase
                 .from('profiles')
-                .update({ role: editForm.role, balance: editForm.balance })
+                .update({
+                    role: editForm.role,
+                    balance: editForm.balance,
+                    permissions: editForm.role === 'editor' ? editForm.permissions : null
+                })
                 .eq('id', editingUser.id);
 
             if (error) throw error;
@@ -138,7 +193,8 @@ export default function UsersContent() {
                                         </div>
                                     </td>
                                     <td className="p-4">
-                                        <div className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase border ${u.role === 'admin' ? 'bg-purple-50 text-purple-600 border-purple-100' : 'bg-gray-50 text-gray-500 border-gray-100'
+                                        <div className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase border ${u.role === 'admin' ? 'bg-purple-50 text-purple-600 border-purple-100' :
+                                            u.role === 'editor' ? 'bg-orange-50 text-orange-600 border-orange-100' : 'bg-gray-50 text-gray-500 border-gray-100'
                                             }`}>
                                             <Shield size={10} />
                                             {u.role}
@@ -165,7 +221,7 @@ export default function UsersContent() {
             {/* Edit Modal */}
             {modalOpen && editingUser && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
+                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200 max-h-[90vh] overflow-y-auto">
                         <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
                             <h3 className="font-bold text-lg">Kullanıcı Düzenle</h3>
                             <button onClick={() => setModalOpen(false)} className="text-gray-400 hover:text-gray-600">
@@ -186,9 +242,63 @@ export default function UsersContent() {
                                     className="w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500"
                                 >
                                     <option value="user">User</option>
+                                    <option value="editor">Editor</option>
                                     <option value="admin">Admin</option>
                                 </select>
                             </div>
+
+                            {editForm.role === 'editor' && (
+                                <div className="bg-orange-50 p-4 rounded-lg border border-orange-100">
+                                    <label className="block text-xs font-bold text-orange-800 uppercase tracking-wider mb-3">Editör Yetkileri</label>
+                                    <div className="space-y-2">
+                                        <label className="flex items-center gap-2 cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={editForm.permissions.manage_blog}
+                                                onChange={() => handlePermissionChange('manage_blog')}
+                                                className="rounded text-blue-600 focus:ring-blue-500"
+                                            />
+                                            <span className="text-sm text-gray-700">Blog Yönetimi (Ekle/Sil/Düzenle)</span>
+                                        </label>
+                                        <label className="flex items-center gap-2 cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={editForm.permissions.manage_channels}
+                                                onChange={() => handlePermissionChange('manage_channels')}
+                                                className="rounded text-blue-600 focus:ring-blue-500"
+                                            />
+                                            <span className="text-sm text-gray-700">Kanal Yönetimi (Onayla/Sil)</span>
+                                        </label>
+                                        <label className="flex items-center gap-2 cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={editForm.permissions.manage_categories}
+                                                onChange={() => handlePermissionChange('manage_categories')}
+                                                className="rounded text-blue-600 focus:ring-blue-500"
+                                            />
+                                            <span className="text-sm text-gray-700">Kategori Yönetimi</span>
+                                        </label>
+                                        <label className="flex items-center gap-2 cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={editForm.permissions.manage_banners}
+                                                onChange={() => handlePermissionChange('manage_banners')}
+                                                className="rounded text-blue-600 focus:ring-blue-500"
+                                            />
+                                            <span className="text-sm text-gray-700">Banner Yönetimi</span>
+                                        </label>
+                                        <label className="flex items-center gap-2 cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={editForm.permissions.view_analytics}
+                                                onChange={() => handlePermissionChange('view_analytics')}
+                                                className="rounded text-blue-600 focus:ring-blue-500"
+                                            />
+                                            <span className="text-sm text-gray-700">Analitik Görüntüleme</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            )}
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Bakiye ($)</label>

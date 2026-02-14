@@ -11,8 +11,32 @@ export default function AnalyticsClient() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        checkPermission();
         loadData();
     }, []);
+
+    const checkPermission = async () => {
+        const storedUserId = localStorage.getItem('userId');
+        const isAdmin = localStorage.getItem('isAdmin');
+
+        if (isAdmin === 'true' && !storedUserId) return;
+
+        if (storedUserId) {
+            const { data: user } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', storedUserId)
+                .single();
+
+            if (user) {
+                if (user.role === 'admin') return;
+                if (user.role === 'editor' && user.permissions?.view_analytics) return;
+            }
+        }
+
+        alert('Bu sayfaya erişim yetkiniz yok.');
+        window.location.href = '/admin/dashboard';
+    };
 
     async function loadData() {
         setLoading(true);

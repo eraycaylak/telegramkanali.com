@@ -30,7 +30,7 @@ export default function AdminLoginClient() {
                 .eq('id', data.user.id)
                 .single();
 
-            if (profile?.role !== 'admin') {
+            if (profile?.role !== 'admin' && profile?.role !== 'editor') {
                 await supabase.auth.signOut();
                 alert('Bu panele erişim yetkiniz yok.');
                 setLoading(false);
@@ -38,7 +38,8 @@ export default function AdminLoginClient() {
             }
 
             // Success
-            localStorage.setItem('isAdmin', 'true'); // Keep for client-side checks if needed, but session is key
+            localStorage.setItem('isAdmin', profile.role === 'admin' ? 'true' : 'false');
+            localStorage.setItem('userId', data.user.id);
             router.push('/admin/dashboard');
             router.refresh();
         } catch (error: any) {

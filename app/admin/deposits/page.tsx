@@ -18,8 +18,32 @@ export default function AdminDepositsPage() {
     const [filter, setFilter] = useState('pending');
 
     useEffect(() => {
+        checkPermission();
         fetchDeposits();
     }, [filter]);
+
+    const checkPermission = async () => {
+        const storedUserId = localStorage.getItem('userId');
+        const isAdmin = localStorage.getItem('isAdmin');
+
+        if (isAdmin === 'true' && !storedUserId) return;
+
+        if (storedUserId) {
+            const { data: user } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', storedUserId)
+                .single();
+
+            if (user) {
+                if (user.role === 'admin') return;
+                if (user.role === 'editor' && user.permissions?.manage_users) return;
+            }
+        }
+
+        alert('Bu sayfaya erişim yetkiniz yok.');
+        window.location.href = '/admin/dashboard';
+    };
 
     async function fetchDeposits() {
         let query = supabase
@@ -133,8 +157,8 @@ export default function AdminDepositsPage() {
                                     </td>
                                     <td className="p-4 text-xs">
                                         <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full font-bold uppercase ${dep.status === 'approved' ? 'bg-green-100 text-green-700' :
-                                                dep.status === 'rejected' ? 'bg-red-100 text-red-700' :
-                                                    'bg-orange-100 text-orange-700'
+                                            dep.status === 'rejected' ? 'bg-red-100 text-red-700' :
+                                                'bg-orange-100 text-orange-700'
                                             }`}>
                                             {dep.status === 'approved' ? <CheckCircle2 size={12} /> : dep.status === 'rejected' ? <XCircle size={12} /> : <Clock size={12} />}
                                             {dep.status}

@@ -4,6 +4,8 @@ import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { LayoutDashboard, FolderTree, FileText, Users, Settings, LogOut, Menu, Image, Shield, BarChart, Send, BookOpen } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { supabase } from '@/lib/supabaseClient';
+import { UserProfile } from '@/lib/types';
 
 export default function AdminLayout({
     children,
@@ -15,6 +17,7 @@ export default function AdminLayout({
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
 
     // Login sayfası kontrolü - login sayfasında auth check yapma
     const isLoginPage = pathname === '/admin' || pathname === '/admin/login';
@@ -28,10 +31,51 @@ export default function AdminLayout({
         }
 
         // Client-side auth check
-        const checkAuth = () => {
+        const checkAuth = async () => {
             const adminStatus = localStorage.getItem('isAdmin');
+            // Check legacy local storage auth (mostly for dev/demo)
+            // Ideally we should check supabase session or fetch profile
+
             if (adminStatus === 'true') {
                 setIsAuthenticated(true);
+
+                // Fetch profile to get permissions (Simulating "logged in user" since we don't have full Auth)
+                // In a real app we'd use supabase.auth.getUser()
+                // For now, let's fetch the first admin/editor profile or handle mock
+                // Since this is a specialized requested feature, we'll try to get the profile if stored, 
+                // OR we just use the local storage 'isAdmin' as a fallback master admin.
+                // 
+                // However, to test "Editor" role, we need a way to know WHICH user is logged in.
+                // Since we don't have a login flow that sets a user ID, we will assume:
+                // If localStorage has 'userId', use it. If not, assume 'admin' role.
+
+                const storedUserId = localStorage.getItem('userId');
+                if (storedUserId) {
+                    const { data } = await supabase
+                        .from('profiles')
+                        .select('*')
+                        .eq('id', storedUserId)
+                        .single();
+
+                    if (data) {
+                        setUserProfile(data);
+                        // If role is user, kick them out
+                        if (data.role === 'user') {
+                            setIsAuthenticated(false);
+                            router.replace('/admin');
+                        }
+                    }
+                } else {
+                    // Fallback for legacy admin login (User 1)
+                    setUserProfile({
+                        id: 'admin',
+                        email: 'admin@admin.com',
+                        role: 'admin',
+                        balance: 0,
+                        created_at: new Date().toISOString()
+                    });
+                }
+
             } else {
                 setIsAuthenticated(false);
                 // Login sayfasına yönlendir
@@ -43,17 +87,31 @@ export default function AdminLayout({
         checkAuth();
     }, [pathname, router, isLoginPage]);
 
-    const menuItems = [
-        { name: 'Kanal Yönetimi', href: '/admin/dashboard', icon: LayoutDashboard },
-        { name: 'Toplu Kanal Ekle', href: '/admin/bulk-add', icon: Send },
-        { name: 'Kategoriler', href: '/admin/categories', icon: FolderTree },
-        { name: 'Bannerlar', href: '/admin/banners', icon: Image },
-        { name: 'Analitik', href: '/admin/analytics', icon: BarChart }, // New Link
-        { name: 'Blog Yönetimi', href: '/admin/blog', icon: BookOpen },
-        { name: 'Sayfalar', href: '/admin/pages', icon: FileText },
-        { name: 'Kullanıcılar', href: '/admin/users', icon: Users },
-        { name: 'Ayarlar', href: '/admin/settings', icon: Settings },
+    // Role-based menu filtering
+    const allMenuItems = [
+        { name: 'Kanal Yönetimi', href: '/admin/dashboard', icon: LayoutDashboard, perm: 'manage_channels' },
+        { name: 'Toplu Kanal Ekle', href: '/admin/bulk-add', icon: Send, perm: 'manage_channels' },
+        { name: 'Kategoriler', href: '/admin/categories', icon: FolderTree, perm: 'manage_categories' },
+        { name: 'Bannerlar', href: '/admin/banners', icon: Image, perm: 'manage_banners' },
+        { name: 'Analitik', href: '/admin/analytics', icon: BarChart, perm: 'view_analytics' },
+        { name: 'Ödemeler', href: '/admin/deposits', icon: Shield, perm: 'manage_users' }, // Re-using Shield or similar
+        { name: 'Blog Yönetimi', href: '/admin/blog', icon: BookOpen, perm: 'manage_blog' },
+        { name: 'Sayfalar', href: '/admin/pages', icon: FileText, perm: 'manage_blog' },
+        { name: 'Kullanıcılar', href: '/admin/users', icon: Users, perm: 'manage_users' },
+        { name: 'Ayarlar', href: '/admin/settings', icon: Settings }, // No perm = Admin only
     ];
+
+    const menuItems = allMenuItems.filter(item => {
+        if (!userProfile) return false;
+        if (userProfile.role === 'admin') return true; // Admin sees everything
+        if (userProfile.role === 'editor' && userProfile.permissions) {
+            // Check if specific permission is granted
+            if (item.perm && userProfile.permissions[item.perm as keyof typeof userProfile.permissions]) {
+                return true;
+            }
+        }
+        return false;
+    });
 
     // Loading durumu
     if (isLoading) {
@@ -102,6 +160,13 @@ export default function AdminLayout({
                 </div>
 
                 <nav className="p-4 space-y-2 flex-1 overflow-y-auto">
+                    <div className="mb-4 px-2">
+                        {userProfile && (
+                            <div className={`text-xs font-bold uppercase tracking-wider text-gray-400 ${!isSidebarOpen && 'hidden'}`}>
+                                {userProfile.role === 'admin' ? 'Yönetici' : 'Editör'} Paneli
+                            </div>
+                        )}
+                    </div>
                     {menuItems.map((item) => {
                         const Icon = item.icon;
                         const isActive = pathname === item.href;
@@ -123,7 +188,11 @@ export default function AdminLayout({
 
                 <div className="p-4 border-t">
                     <button
-                        onClick={() => { localStorage.removeItem('isAdmin'); window.location.href = '/admin'; }}
+                        onClick={() => {
+                            localStorage.removeItem('isAdmin');
+                            localStorage.removeItem('userId'); // Also clear userId
+                            window.location.href = '/admin';
+                        }}
                         className="flex items-center gap-3 w-full px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl transition-colors font-medium"
                     >
                         <LogOut size={20} />
@@ -148,11 +217,11 @@ export default function AdminLayout({
 
                     <div className="flex items-center gap-3">
                         <div className="text-right hidden sm:block">
-                            <p className="text-sm font-bold text-gray-900">Yönetici</p>
-                            <p className="text-[10px] text-gray-500">Çevrimiçi</p>
+                            <p className="text-sm font-bold text-gray-900">{userProfile?.full_name || 'Kullanıcı'}</p>
+                            <p className="text-[10px] text-gray-500 uppercase">{userProfile?.role || 'Üye'}</p>
                         </div>
                         <div className="w-10 h-10 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center text-white font-black shadow-lg shadow-blue-200">
-                            A
+                            {userProfile?.full_name?.charAt(0) || 'U'}
                         </div>
                     </div>
                 </header>
