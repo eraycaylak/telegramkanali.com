@@ -704,10 +704,12 @@ export async function addChannelByUrl(url: string, categoryId: string, userId?: 
 // ========================
 
 export async function getAllBlogPostsAdmin() {
-    const { data, error } = await adminClient
+    const { data, error, count } = await adminClient
         .from('blog_posts')
-        .select('*')
+        .select('*', { count: 'exact' })
         .order('created_at', { ascending: false });
+
+    console.log('[ADMIN] Blog posts count:', count);
 
     if (error) {
         console.error('[ADMIN] Error fetching blog posts:', error);
