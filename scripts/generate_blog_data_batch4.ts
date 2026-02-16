@@ -223,84 +223,21 @@ function generateSlug(title: string) {
 const AUTHOR_NAMES = ["Eray Çaylak", "Admin", "Telegram Uzmanı", "Teknoloji Editörü", "Kripto Analisti", "Sosyal Medya Gurusu", "Haber Masası", "Bot Geliştirici"];
 
 function main() {
-    let sqlContent = `-- Migration: Seed Batch 4 (Additional 300) Blog Posts
+    console.log('Generating Batch 4 blog posts...');
+
+    const TOTAL_POSTS = 300;
+    const CHUNK_SIZE = 50;
+    const TOTAL_CHUNKS = Math.ceil(TOTAL_POSTS / CHUNK_SIZE);
+
+    let postCount = 0;
+
+    for (let chunk = 1; chunk <= TOTAL_CHUNKS; chunk++) {
+        let sqlContent = `-- Migration: Seed Batch 4 (Part ${chunk}/${TOTAL_CHUNKS})
 -- Generated automatically
 -- Date: ${new Date().toISOString()}
 
 -- NO TRUNCATE here, we are appending!
 
-`;
-
-    let postCount = 0;
-    const allPosts: any[] = [];
-    const TOTAL_POSTS = 300; // Requested 300 posts
-
-    while (postCount < TOTAL_POSTS) {
-        const templateIndex = postCount % TEMPLATES.length;
-        const template = TEMPLATES[templateIndex];
-
-        const topicIndex = (Math.floor(postCount / TEMPLATES.length)) % template.topics.length;
-        let topic = template.topics[topicIndex];
-
-        let displayTopic = topic;
-
-        // Variation logic for 300 posts
-        const variation = Math.floor(postCount / 100);
-
-        if (variation === 1) {
-            const suffixes = [" Hakkında Her Şey", " Rehberi 2026", " İncelemesi", " Kullanımı", " Ayarları"];
-            displayTopic = topic + suffixes[postCount % 5];
-        } else if (variation === 2) {
-            const prefixes = ["Detaylı ", "Kapsamlı ", "Hızlı ", "Pratik ", "Yeni "];
-            displayTopic = prefixes[postCount % 5] + topic;
-        }
-
-        const title = `${template.titlePrefix}${displayTopic}`;
-        let slug = generateSlug(title);
-
-        // Ensure uniqueness
-        slug = slug + '-' + Math.random().toString(36).substring(2, 6);
-
-        const content = generateHtmlContent(template, displayTopic);
-        const category = CATEGORIES[postCount % CATEGORIES.length];
-
-        const metaTitle = `${title} | Telegram Uzmanı`;
-        const metaDesc = template.intro.substring(0, 150) + "...";
-
-        const baseTags = ["telegram", "rehber", "2026"];
-        const topicTags = displayTopic.toLowerCase().split(' ').filter(w => w.length > 3);
-        const tags = [...new Set([...baseTags, ...topicTags, category.toLowerCase()])].join(', ');
-
-        const author = AUTHOR_NAMES[postCount % AUTHOR_NAMES.length];
-
-        const readingTime = Math.floor(Math.random() * 10) + 2; // 2-12 mins
-
-        // Random date within last 24 months (2 years) for variety
-        const date = new Date();
-        date.setDate(date.getDate() - Math.floor(Math.random() * 730));
-        const createdAt = date.toISOString();
-
-        const values = `(
-            '${escapeSql(title)}',
-            '${escapeSql(slug)}',
-            '${escapeSql(template.intro)}', 
-            '${escapeSql(content)}',
-            '${escapeSql(category)}',
-            '{${tags.split(', ').map(t => `"${escapeSql(t)}"`).join(',')}}',
-            '${escapeSql(author)}',
-            true, -- published
-            false, -- featured
-            ${readingTime},
-            '${escapeSql(metaTitle)}',
-            '${escapeSql(metaDesc)}',
-            '${createdAt}'
-        )`;
-
-        allPosts.push(values);
-        postCount++;
-    }
-
-    sqlContent += `
 INSERT INTO public.blog_posts (
     title,
     slug,
@@ -316,12 +253,83 @@ INSERT INTO public.blog_posts (
     meta_description,
     created_at
 ) VALUES 
-${allPosts.join(',\n')};
 `;
 
-    const outputPath = path.join(process.cwd(), 'supabase', 'migrations', '20260216200000_seed_blog_posts_batch4.sql');
-    fs.writeFileSync(outputPath, sqlContent, 'utf8');
-    console.log(`Generated migration file at: ${outputPath}`);
+        const chunkPosts: string[] = [];
+        const itemsInThisChunk = Math.min(CHUNK_SIZE, TOTAL_POSTS - postCount);
+
+        for (let i = 0; i < itemsInThisChunk; i++) {
+            const templateIndex = postCount % TEMPLATES.length;
+            const template = TEMPLATES[templateIndex];
+
+            const topicIndex = (Math.floor(postCount / TEMPLATES.length)) % template.topics.length;
+            let topic = template.topics[topicIndex];
+
+            let displayTopic = topic;
+
+            // Variation logic for 300 posts
+            const variation = Math.floor(postCount / 100);
+
+            if (variation === 1) {
+                const suffixes = [" Hakkında Her Şey", " Rehberi 2026", " İncelemesi", " Kullanımı", " Ayarları"];
+                displayTopic = topic + suffixes[postCount % 5];
+            } else if (variation === 2) {
+                const prefixes = ["Detaylı ", "Kapsamlı ", "Hızlı ", "Pratik ", "Yeni "];
+                displayTopic = prefixes[postCount % 5] + topic;
+            }
+
+            const title = `${template.titlePrefix}${displayTopic}`;
+            let slug = generateSlug(title);
+
+            // Ensure uniqueness
+            slug = slug + '-' + Math.random().toString(36).substring(2, 6);
+
+            const content = generateHtmlContent(template, displayTopic);
+            const category = CATEGORIES[postCount % CATEGORIES.length];
+
+            const metaTitle = `${title} | Telegram Uzmanı`;
+            const metaDesc = template.intro.substring(0, 150) + "...";
+
+            const baseTags = ["telegram", "rehber", "2026"];
+            const topicTags = displayTopic.toLowerCase().split(' ').filter(w => w.length > 3);
+            const tags = [...new Set([...baseTags, ...topicTags, category.toLowerCase()])].join(', ');
+
+            const author = AUTHOR_NAMES[postCount % AUTHOR_NAMES.length];
+
+            const readingTime = Math.floor(Math.random() * 10) + 2; // 2-12 mins
+
+            // Random date within last 24 months (2 years) for variety
+            const date = new Date();
+            date.setDate(date.getDate() - Math.floor(Math.random() * 730));
+            const createdAt = date.toISOString();
+
+            const values = `(
+                '${escapeSql(title)}',
+                '${escapeSql(slug)}',
+                '${escapeSql(template.intro)}', 
+                '${escapeSql(content)}',
+                '${escapeSql(category)}',
+                '{${tags.split(', ').map(t => `"${escapeSql(t)}"`).join(',')}}',
+                '${escapeSql(author)}',
+                true, -- published
+                false, -- featured
+                ${readingTime},
+                '${escapeSql(metaTitle)}',
+                '${escapeSql(metaDesc)}',
+                '${createdAt}'
+            )`;
+
+            chunkPosts.push(values);
+            postCount++;
+        }
+
+        sqlContent += chunkPosts.join(',\n') + ';\n';
+
+        const fileName = `20260216200000_seed_blog_posts_batch4_part${chunk}.sql`;
+        const outputPath = path.join(process.cwd(), 'supabase', 'migrations', fileName);
+        fs.writeFileSync(outputPath, sqlContent, 'utf8');
+        console.log(`Generated migration file Part ${chunk}: ${outputPath}`);
+    }
 }
 
 main();
