@@ -79,9 +79,7 @@ export default function ChannelCard({ channel, compact = false }: ChannelCardPro
             if (res.error) {
                 setScore(oldScore);
                 setUserVote(null);
-                if (res.alreadyVoted) {
-                    setHasVoted(true);
-                }
+                // alreadyVoted check removed as we now toggle votes
                 alert(res.error);
             } else if (res.success && res.newScore !== undefined) {
                 setScore(res.newScore);
