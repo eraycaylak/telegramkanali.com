@@ -61,7 +61,10 @@ export default function AnalyticsClient() {
     if (loading) return <div className="p-10 text-center text-gray-500">İstatistikler yükleniyor...</div>;
 
     const totalViews = pageViews.reduce((acc, curr) => acc + curr.total_views, 0);
+    const totalDailyViews = pageViews.reduce((acc, curr) => acc + (curr.daily_views || 0), 0);
+
     const totalVisitors = pageViews.reduce((acc, curr) => acc + curr.total_visitors, 0);
+    const totalDailyVisitors = pageViews.reduce((acc, curr) => acc + (curr.daily_visitors || 0), 0);
 
     return (
         <div className="space-y-6 md:space-y-8 pb-10">
@@ -78,8 +81,11 @@ export default function AnalyticsClient() {
                             <ArrowUpRight size={24} />
                         </div>
                         <div>
-                            <p className="text-blue-100 text-sm font-medium">Toplam Görüntülenme</p>
+                            <p className="text-blue-100 text-sm font-medium">Toplam Görüntülenme (30 Gün)</p>
                             <h3 className="text-3xl font-bold">{totalViews}</h3>
+                            <div className="text-xs text-blue-200 mt-1 bg-white/10 px-2 py-1 rounded inline-block">
+                                Bugün: {totalDailyViews}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -90,8 +96,11 @@ export default function AnalyticsClient() {
                             <MousePointer2 size={24} />
                         </div>
                         <div>
-                            <p className="text-purple-100 text-sm font-medium">Toplam Ziyaretçi (Tahmini)</p>
+                            <p className="text-purple-100 text-sm font-medium">Toplam Ziyaretçi (30 Gün)</p>
                             <h3 className="text-3xl font-bold">{totalVisitors}</h3>
+                            <div className="text-xs text-purple-200 mt-1 bg-white/10 px-2 py-1 rounded inline-block">
+                                Bugün: {totalDailyVisitors}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -102,12 +111,17 @@ export default function AnalyticsClient() {
                 <div className="bg-white p-5 md:p-6 rounded-2xl md:rounded-3xl border border-gray-100 shadow-sm">
                     <h2 className="text-lg md:text-xl font-bold mb-4 md:mb-6 text-gray-900">Popüler Sayfalar</h2>
                     <div className="space-y-3">
-                        {pageViews.slice(0, 5).map((page, i) => (
+                        {pageViews.slice(0, 10).map((page, i) => (
                             <div key={i} className="flex flex-col md:flex-row md:justify-between md:items-center p-4 bg-gray-50 rounded-xl gap-2">
                                 <span className="font-mono text-xs text-gray-600 break-all md:max-w-[200px]">{page.path}</span>
-                                <div className="flex gap-4 text-xs font-bold">
-                                    <span className="text-blue-600 bg-blue-50 px-2 py-1 rounded">{page.total_views} görüntülenme</span>
-                                    <span className="text-purple-600 bg-purple-50 px-2 py-1 rounded">{page.total_visitors} ziyaretçi</span>
+                                <div className="flex flex-col items-end gap-1">
+                                    <div className="flex gap-2 text-xs font-bold">
+                                        <span className="text-blue-600 bg-blue-50 px-2 py-1 rounded">{page.total_views} görüntülenme</span>
+                                        <span className="text-purple-600 bg-purple-50 px-2 py-1 rounded">{page.total_visitors} ziyaretçi</span>
+                                    </div>
+                                    <div className="text-[10px] text-gray-400">
+                                        Bugün: {page.daily_views} görüntülenme
+                                    </div>
                                 </div>
                             </div>
                         ))}
@@ -128,8 +142,13 @@ export default function AnalyticsClient() {
                                 <div className="flex-1 min-w-0">
                                     <h4 className="font-bold text-gray-900 truncate text-sm md:text-base">{stat.channel?.name || 'Bilinmeyen Kanal'}</h4>
                                 </div>
-                                <div className="bg-green-50 text-green-700 px-3 py-1.5 rounded-lg text-[10px] md:text-xs font-black uppercase">
-                                    {stat.total_clicks} Tık
+                                <div className="flex flex-col items-end gap-1">
+                                    <div className="bg-green-50 text-green-700 px-3 py-1.5 rounded-lg text-[10px] md:text-xs font-black uppercase">
+                                        {stat.total_clicks} Tık
+                                    </div>
+                                    <div className="text-[10px] text-gray-400">
+                                        Bugün: {stat.daily_clicks}
+                                    </div>
                                 </div>
                             </div>
                         ))}

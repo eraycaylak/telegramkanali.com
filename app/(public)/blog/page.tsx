@@ -158,18 +158,39 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
             {/* Pagination */}
             {totalPages > 1 && (
                 <div className="flex justify-center gap-2 pb-8">
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-                        <Link
-                            key={p}
-                            href={`/blog?page=${p}${category ? `&category=${category}` : ''}`}
-                            className={`w-10 h-10 flex items-center justify-center rounded-xl text-sm font-bold transition ${p === page
-                                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-200'
-                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                }`}
-                        >
-                            {p}
-                        </Link>
-                    ))}
+                    {(() => {
+                        const maxVisible = 5;
+                        let pages = [];
+
+                        if (totalPages <= maxVisible + 2) {
+                            pages = Array.from({ length: totalPages }, (_, i) => i + 1);
+                        } else {
+                            if (page <= 4) {
+                                pages = [1, 2, 3, 4, 5, '...', totalPages];
+                            } else if (page >= totalPages - 3) {
+                                pages = [1, '...', totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+                            } else {
+                                pages = [1, '...', page - 1, page, page + 1, '...', totalPages];
+                            }
+                        }
+
+                        return pages.map((p, i) => (
+                            p === '...' ? (
+                                <span key={`ellipsis-${i}`} className="w-10 h-10 flex items-center justify-center text-gray-400">...</span>
+                            ) : (
+                                <Link
+                                    key={p}
+                                    href={`/blog?page=${p}${category ? `&category=${category}` : ''}`}
+                                    className={`w-10 h-10 flex items-center justify-center rounded-xl text-sm font-bold transition ${p === page
+                                        ? 'bg-blue-600 text-white shadow-lg shadow-blue-200'
+                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                        }`}
+                                >
+                                    {p}
+                                </Link>
+                            )
+                        ));
+                    })()}
                 </div>
             )}
         </div>

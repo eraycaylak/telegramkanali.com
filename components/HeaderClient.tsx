@@ -76,14 +76,14 @@ export default function HeaderClient({ categories, logo, user: initialUser }: He
     }, [menuOpen]);
 
     return (
-        <header className="flex flex-col w-full text-white font-sans sticky top-0 z-50">
+        <header className="flex flex-col w-full text-white font-sans relative z-50">
 
             {/* 1. Top Bar - Hidden on Mobile */}
             {/* 1. Top Bar - Removed to simplify UI as requested */}
 
 
             {/* 2. Main Bar - Logo & Search & Mobile Menu */}
-            <div className="bg-[#333333]/95 backdrop-blur-lg py-2 md:py-6 relative overflow-hidden">
+            <div className="bg-[#333333]/95 backdrop-blur-lg py-3 md:py-4 relative overflow-hidden">
                 {/* Pattern */}
                 <div className="absolute inset-0 opacity-10 pointer-events-none" style={{
                     backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M0 40L40 0H20L0 20M40 40V20L20 40'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
