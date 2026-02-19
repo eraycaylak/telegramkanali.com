@@ -78,8 +78,8 @@ export default function MobileBottomNav({ categories }: MobileBottomNavProps) {
                                 }
                             }}
                             className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all active:scale-90 ${item.active
-                                    ? 'text-blue-600'
-                                    : 'text-gray-400 hover:text-gray-600'
+                                ? 'text-blue-600'
+                                : 'text-gray-900 hover:text-black'
                                 }`}
                         >
                             <Icon size={22} strokeWidth={item.active ? 2.5 : 1.8} />
