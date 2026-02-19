@@ -90,6 +90,7 @@ export default function AdminLayout({
     // Role-based menu filtering
     const allMenuItems = [
         { name: 'Kanal Yönetimi', href: '/admin/dashboard', icon: LayoutDashboard, perm: 'manage_channels' },
+        { name: 'Reklam Yönetimi', href: '/admin/ads', icon: Zap, perm: 'manage_banners' },
         { name: 'Toplu Kanal Ekle', href: '/admin/bulk-add', icon: Send, perm: 'manage_channels' },
         { name: 'Kategoriler', href: '/admin/categories', icon: FolderTree, perm: 'manage_categories' },
         { name: 'Bannerlar', href: '/admin/banners', icon: Image, perm: 'manage_banners' },
