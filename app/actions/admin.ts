@@ -704,19 +704,36 @@ export async function addChannelByUrl(url: string, categoryId: string, userId?: 
 // ========================
 
 export async function getAllBlogPostsAdmin() {
-    const { data, error, count } = await adminClient
-        .from('blog_posts')
-        .select('*', { count: 'exact' })
-        .order('created_at', { ascending: false })
-        .limit(10000);
+    let allPosts: any[] = [];
+    let hasMore = true;
+    let from = 0;
+    const limit = 1000;
 
-    console.log('[ADMIN] Blog posts count:', count);
+    while (hasMore) {
+        const { data, error } = await adminClient
+            .from('blog_posts')
+            .select('*')
+            .order('created_at', { ascending: false })
+            .range(from, from + limit - 1);
 
-    if (error) {
-        console.error('[ADMIN] Error fetching blog posts:', error);
-        return [];
+        if (error) {
+            console.error('[ADMIN] Error fetching blog posts:', error);
+            break;
+        }
+
+        if (data && data.length > 0) {
+            allPosts = [...allPosts, ...data];
+            from += limit;
+            if (data.length < limit) {
+                hasMore = false;
+            }
+        } else {
+            hasMore = false;
+        }
     }
-    return data || [];
+
+    console.log('[ADMIN] Blog posts count:', allPosts.length);
+    return allPosts;
 }
 
 export async function getBlogPostById(id: string) {
