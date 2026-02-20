@@ -707,7 +707,8 @@ export async function getAllBlogPostsAdmin() {
     const { data, error, count } = await adminClient
         .from('blog_posts')
         .select('*', { count: 'exact' })
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .limit(10000);
 
     console.log('[ADMIN] Blog posts count:', count);
 

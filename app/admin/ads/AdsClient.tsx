@@ -271,7 +271,7 @@ export default function AdsClient() {
                         const Icon = ICONS[pkg.icon as keyof typeof ICONS] || MonitorSmartphone;
                         return (
                             <div key={pkg.id} className={`bg-white p-6 rounded-xl border ${!pkg.is_active ? 'border-red-200 opacity-70' : 'border-gray-200'} shadow-sm hover:shadow-md transition relative group`}>
-                                <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <div className="absolute top-4 right-4 flex gap-2">
                                     <button onClick={() => handleEdit(pkg)} className="p-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100"><Edit size={16} /></button>
                                     <button onClick={() => handleDelete(pkg.id)} className="p-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100"><Trash2 size={16} /></button>
                                 </div>

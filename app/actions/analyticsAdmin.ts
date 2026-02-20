@@ -14,7 +14,8 @@ export async function getAnalyticsSummary() {
             .from('site_analytics')
             .select('path, page_views, visitors, date')
             .gte('date', thirtyDaysAgo) // Last 30 days
-            .order('date', { ascending: false });
+            .order('date', { ascending: false })
+            .limit(100000);
 
         if (pageError) {
             console.error('Analytics Fetch Error (Pages):', pageError);
