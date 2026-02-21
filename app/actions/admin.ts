@@ -932,3 +932,40 @@ export async function uploadBlogImage(formData: FormData) {
 
     return { success: true, url: urlData.publicUrl };
 }
+
+// ========================
+// USER MANAGEMENT ACTIONS
+// ========================
+
+export async function updateUserProfile(userId: string, data: {
+    role: string;
+    balance: number;
+    token_balance: number;
+    permissions: Record<string, boolean> | null;
+}) {
+    if (!userId) return { error: 'Kullanıcı ID gerekli.' };
+
+    try {
+        const { error } = await adminClient
+            .from('profiles')
+            .update({
+                role: data.role,
+                balance: data.balance,
+                token_balance: data.token_balance,
+                permissions: data.role === 'editor' ? data.permissions : null,
+            })
+            .eq('id', userId);
+
+        if (error) {
+            console.error('[ADMIN] updateUserProfile error:', error);
+            return { error: error.message };
+        }
+
+        revalidatePath('/admin/users');
+        return { success: true };
+    } catch (err: any) {
+        console.error('[ADMIN] updateUserProfile exception:', err);
+        return { error: err.message || 'Güncelleme başarısız.' };
+    }
+}
+

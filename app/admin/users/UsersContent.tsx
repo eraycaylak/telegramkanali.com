@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
+import { updateUserProfile } from '@/app/actions/admin';
 import {
     User,
     Mail,
@@ -118,24 +119,21 @@ export default function UsersContent() {
         if (!editingUser) return;
 
         try {
-            const { error } = await supabase
-                .from('profiles')
-                .update({
-                    role: editForm.role,
-                    balance: editForm.balance,
-                    token_balance: editForm.token_balance,
-                    permissions: editForm.role === 'editor' ? editForm.permissions : null
-                })
-                .eq('id', editingUser.id);
+            const result = await updateUserProfile(editingUser.id, {
+                role: editForm.role,
+                balance: editForm.balance,
+                token_balance: editForm.token_balance,
+                permissions: editForm.role === 'editor' ? editForm.permissions : null,
+            });
 
-            if (error) throw error;
+            if (result.error) throw new Error(result.error);
 
             alert('Kullanıcı başarıyla güncellendi.');
             setModalOpen(false);
             fetchUsers();
-        } catch (error) {
+        } catch (error: any) {
             console.error(error);
-            alert('Güncelleme başarısız!');
+            alert('Güncelleme başarısız: ' + (error.message || error));
         }
     };
 
