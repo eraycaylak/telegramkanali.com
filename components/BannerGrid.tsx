@@ -38,9 +38,9 @@ export default async function BannerGrid({ type = 'homepage', categoryId }: Bann
                         <Image
                             src={banner.image_url}
                             alt={banner.title || 'Banner'}
-                            fill
-                            sizes="(max-width: 768px) 100vw, 50vw"
-                            className="object-contain md:object-cover"
+                            width={1200}
+                            height={300}
+                            className="w-full h-auto object-cover"
                         />
                     )}
 
