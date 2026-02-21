@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
+import { setupTelegramWebhook } from '@/app/actions/bot';
 import {
     Settings,
     HelpCircle,
@@ -11,8 +12,11 @@ import {
     MessageSquare,
     ShieldCheck,
     CheckCircle2,
-    AlertTriangle
+    AlertTriangle,
+    BarChart3,
+    Wifi
 } from 'lucide-react';
+import Link from 'next/link';
 
 import { Suspense } from 'react';
 
@@ -31,11 +35,17 @@ function BotSettingsContent() {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) return;
 
-            const { data } = await supabase.from('channels').select('*').eq('owner_id', user.id);
+            // Check admin
+            const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+            const isAdmin = profile?.role === 'admin';
+
+            let query = supabase.from('channels').select('*').order('created_at', { ascending: false });
+            if (!isAdmin) query = query.eq('owner_id', user.id);
+
+            const { data } = await query;
             const userChannels = data || [];
             setChannels(userChannels);
 
-            // If query param exists, verify it belongs to user
             const queryChannelId = searchParams.get('channel');
             if (queryChannelId && userChannels.some(c => c.id === queryChannelId)) {
                 setSelectedId(queryChannelId);
@@ -114,7 +124,7 @@ function BotSettingsContent() {
                                             <AlertTriangle size={32} />
                                         </div>
                                     )}
-                                    <div>
+                                    <div className="flex-1">
                                         <h4 className="text-xl font-bold text-gray-900">
                                             {selectedChannel.bot_enabled ? 'Bot Başarıyla Bağlandı' : 'Bot Henüz Bağlanmadı'}
                                         </h4>
@@ -124,6 +134,12 @@ function BotSettingsContent() {
                                                 : 'Analizleri görmek için botu kanalınıza eklemelisiniz.'}
                                         </p>
                                     </div>
+                                    {selectedChannel.bot_enabled && (
+                                        <Link href={`/dashboard/stats?channel=${selectedChannel.id}`}
+                                            className="bg-green-600 text-white px-4 py-2 rounded-xl font-bold text-sm hover:bg-green-700 transition flex items-center gap-2">
+                                            <BarChart3 size={16} /> İstatistikleri Gör
+                                        </Link>
+                                    )}
                                 </div>
                             </div>
 

@@ -1,132 +1,262 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
+import { getChannelStats } from '@/app/actions/bot';
 import {
+    BarChart3,
     Users,
+    UserPlus,
+    UserMinus,
     TrendingUp,
     TrendingDown,
-    BarChart3,
-    ChevronLeft
+    ArrowLeft,
+    Activity,
+    Clock
 } from 'lucide-react';
 import Link from 'next/link';
+import { Suspense } from 'react';
 
-export default function AnalyticsPage() {
-    const [channels, setChannels] = useState<any[]>([]);
-    const [selectedId, setSelectedId] = useState<string | null>(null);
-    const [stats, setStats] = useState<any[]>([]);
+function StatsContent() {
+    const searchParams = useSearchParams();
+    const channelId = searchParams.get('channel');
+
+    const [channel, setChannel] = useState<any>(null);
+    const [stats, setStats] = useState<any>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetchChannels();
-    }, []);
+        if (channelId) loadStats();
+    }, [channelId]);
 
-    useEffect(() => {
-        if (selectedId) fetchStats();
-    }, [selectedId]);
-
-    async function fetchChannels() {
+    async function loadStats() {
         try {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) return;
+            const { data: ch } = await supabase
+                .from('channels')
+                .select('*')
+                .eq('id', channelId)
+                .single();
+            setChannel(ch);
 
-            const { data } = await supabase.from('channels').select('*').eq('owner_id', user.id);
-            setChannels(data || []);
-            if (data && data.length > 0) setSelectedId(data[0].id);
+            if (ch) {
+                const data = await getChannelStats(channelId!);
+                setStats(data);
+            }
         } catch (error) {
-            console.error('Error fetching channels for stats:', error);
+            console.error('Error loading stats:', error);
         } finally {
             setLoading(false);
         }
     }
 
-    async function fetchStats() {
-        const { data } = await supabase
-            .from('bot_analytics')
-            .select('*')
-            .eq('channel_id', selectedId)
-            .order('date', { ascending: false })
-            .limit(30);
-
-        setStats(data || []);
+    if (!channelId) {
+        return (
+            <div className="text-center py-20">
+                <BarChart3 size={48} className="mx-auto text-gray-300 mb-4" />
+                <h2 className="text-xl font-bold text-gray-900 mb-2">Kanal Seçin</h2>
+                <p className="text-gray-500 mb-6">İstatistikleri görmek için bir kanal seçmelisiniz.</p>
+                <Link href="/dashboard/channels" className="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold">
+                    Kanallarıma Git
+                </Link>
+            </div>
+        );
     }
 
-    const selectedChannel = channels.find(c => c.id === selectedId);
+    if (loading) {
+        return (
+            <div className="space-y-6 animate-pulse">
+                <div className="h-32 bg-gray-100 rounded-2xl"></div>
+                <div className="h-64 bg-gray-100 rounded-2xl"></div>
+            </div>
+        );
+    }
 
-    if (loading) return <div className="animate-pulse space-y-8">
-        <div className="h-10 bg-gray-100 rounded w-48"></div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[1, 2, 3].map(i => <div key={i} className="h-32 bg-gray-100 rounded-2xl"></div>)}
-        </div>
-    </div>;
+    if (!channel) {
+        return <div className="text-center py-20 text-gray-500">Kanal bulunamadı.</div>;
+    }
+
+    const todayStats = stats?.dailyStats?.find(
+        (d: any) => d.date === new Date().toISOString().split('T')[0]
+    );
 
     return (
         <div className="space-y-8">
-            <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold text-gray-900">İstatistikler</h2>
-                <select
-                    className="bg-white border text-sm font-bold rounded-xl px-4 py-2 outline-none"
-                    value={selectedId || ''}
-                    onChange={(e) => setSelectedId(e.target.value)}
-                >
-                    {channels.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                </select>
+            {/* Header */}
+            <div className="flex items-center gap-4">
+                <Link href="/dashboard/channels" className="p-2 bg-gray-100 rounded-xl hover:bg-gray-200 transition">
+                    <ArrowLeft size={20} />
+                </Link>
+                <div className="flex items-center gap-3 flex-1">
+                    {channel.image ? (
+                        <img src={channel.image} alt="" className="w-12 h-12 rounded-xl object-cover" />
+                    ) : (
+                        <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 font-bold text-lg">
+                            {channel.name.charAt(0)}
+                        </div>
+                    )}
+                    <div>
+                        <h2 className="text-xl font-bold text-gray-900">{channel.name}</h2>
+                        <p className="text-sm text-gray-500">
+                            {channel.bot_enabled ? (
+                                <span className="text-green-600 font-bold">● Bot Aktif</span>
+                            ) : (
+                                <span className="text-orange-500 font-bold">● Bot Bağlı Değil</span>
+                            )}
+                        </p>
+                    </div>
+                </div>
+                <Link href={`/dashboard/bot?channel=${channelId}`}
+                    className="bg-gray-100 text-gray-700 px-4 py-2 rounded-xl text-sm font-bold hover:bg-gray-200 transition">
+                    Bot Ayarları
+                </Link>
             </div>
 
-            {!selectedChannel?.bot_enabled ? (
-                <div className="bg-white p-12 rounded-3xl border border-gray-100 shadow-sm text-center">
-                    <div className="bg-blue-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 text-blue-600">
-                        <BarChart3 size={40} />
+            {/* Summary Cards */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
+                    <div className="flex items-center gap-2 mb-2">
+                        <div className="p-2 bg-blue-50 rounded-lg"><Users size={16} className="text-blue-600" /></div>
+                        <span className="text-xs font-bold text-gray-400 uppercase">Toplam Üye</span>
                     </div>
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">Analizler Devre Dışı</h3>
-                    <p className="text-gray-500 mb-8 max-w-sm mx-auto">
-                        Bu kanal için bot analizi henüz aktif değil. Botu ekleyerek giren/çıkan üye takibini başlatabilirsiniz.
-                    </p>
-                    <Link href={`/dashboard/bot?channel=${selectedId}`} className="inline-block bg-blue-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-blue-700 transition">
-                        Botu Kur
-                    </Link>
+                    <div className="text-2xl font-extrabold text-gray-900">{(channel.member_count || 0).toLocaleString()}</div>
                 </div>
-            ) : (
-                <>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 block">TOPLAM ÜYE</span>
-                            <div className="text-3xl font-extrabold text-gray-900">{(selectedChannel.member_count || 0).toLocaleString()}</div>
-                        </div>
-                        <div className="bg-white p-6 rounded-2xl border border-green-50 shadow-sm shadow-green-100/20">
-                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 block text-green-600">SON 7 GÜN GİREN</span>
-                            <div className="text-3xl font-extrabold text-green-700">+{stats.slice(0, 7).reduce((a, b) => a + b.joins, 0)}</div>
-                        </div>
-                        <div className="bg-white p-6 rounded-2xl border border-red-50 shadow-sm shadow-red-100/20">
-                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 block text-red-600">SON 7 GÜN ÇIKAN</span>
-                            <div className="text-3xl font-extrabold text-red-700">-{stats.slice(0, 7).reduce((a, b) => a + b.leaves, 0)}</div>
-                        </div>
-                    </div>
 
-                    <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
-                        <h3 className="text-lg font-bold text-gray-900 mb-8">Günlük Üye Trafiği</h3>
-                        {stats.length === 0 ? (
-                            <div className="py-20 text-center text-gray-400">Veri toplanıyor... (Yarın ilk verileri görebileceksiniz)</div>
-                        ) : (
-                            <div className="space-y-4">
-                                {stats.map(s => (
-                                    <div key={s.date} className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl">
-                                        <div className="font-bold text-gray-700">{new Date(s.date).toLocaleDateString('tr-TR', { day: '2-digit', month: 'long' })}</div>
-                                        <div className="flex items-center gap-8">
-                                            <div className="flex items-center gap-2 text-green-600 font-bold">
-                                                <TrendingUp size={16} /> +{s.joins}
-                                            </div>
-                                            <div className="flex items-center gap-2 text-red-600 font-bold">
-                                                <TrendingDown size={16} /> -{s.leaves}
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
+                <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
+                    <div className="flex items-center gap-2 mb-2">
+                        <div className="p-2 bg-green-50 rounded-lg"><UserPlus size={16} className="text-green-600" /></div>
+                        <span className="text-xs font-bold text-gray-400 uppercase">Bugün Giren</span>
                     </div>
-                </>
-            )}
+                    <div className="text-2xl font-extrabold text-green-600">{todayStats?.joins || 0}</div>
+                </div>
+
+                <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
+                    <div className="flex items-center gap-2 mb-2">
+                        <div className="p-2 bg-red-50 rounded-lg"><UserMinus size={16} className="text-red-600" /></div>
+                        <span className="text-xs font-bold text-gray-400 uppercase">Bugün Çıkan</span>
+                    </div>
+                    <div className="text-2xl font-extrabold text-red-600">{todayStats?.leaves || 0}</div>
+                </div>
+
+                <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
+                    <div className="flex items-center gap-2 mb-2">
+                        <div className="p-2 bg-purple-50 rounded-lg">
+                            {(stats?.netGrowth || 0) >= 0
+                                ? <TrendingUp size={16} className="text-purple-600" />
+                                : <TrendingDown size={16} className="text-purple-600" />
+                            }
+                        </div>
+                        <span className="text-xs font-bold text-gray-400 uppercase">30 Gün Net</span>
+                    </div>
+                    <div className={`text-2xl font-extrabold ${(stats?.netGrowth || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        {(stats?.netGrowth || 0) >= 0 ? '+' : ''}{stats?.netGrowth || 0}
+                    </div>
+                </div>
+            </div>
+
+            {/* Daily Stats */}
+            <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+                <h3 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
+                    <Activity size={20} className="text-blue-600" /> Son 30 Gün
+                </h3>
+                {stats?.dailyStats?.length > 0 ? (
+                    <div className="space-y-2">
+                        <div className="flex items-center gap-4 text-xs font-bold text-gray-400 uppercase mb-3 px-2">
+                            <span className="w-24">Tarih</span>
+                            <span className="flex-1">Giriş / Çıkış</span>
+                            <span className="w-16 text-right">Giren</span>
+                            <span className="w-16 text-right">Çıkan</span>
+                            <span className="w-16 text-right">Net</span>
+                        </div>
+                        {stats.dailyStats.map((day: any) => {
+                            const maxVal = Math.max(
+                                ...stats.dailyStats.map((d: any) => Math.max(d.joins || 0, d.leaves || 0)),
+                                1
+                            );
+                            const joinWidth = ((day.joins || 0) / maxVal) * 100;
+                            const leaveWidth = ((day.leaves || 0) / maxVal) * 100;
+                            const net = (day.joins || 0) - (day.leaves || 0);
+
+                            return (
+                                <div key={day.date} className="flex items-center gap-4 py-2 px-2 hover:bg-gray-50 rounded-lg transition">
+                                    <span className="w-24 text-xs text-gray-500 font-medium">
+                                        {new Date(day.date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' })}
+                                    </span>
+                                    <div className="flex-1 flex gap-1 items-center h-6">
+                                        <div className="bg-green-400 rounded-sm h-4" style={{ width: `${joinWidth}%`, minWidth: day.joins ? '4px' : '0' }}></div>
+                                        <div className="bg-red-400 rounded-sm h-4" style={{ width: `${leaveWidth}%`, minWidth: day.leaves ? '4px' : '0' }}></div>
+                                    </div>
+                                    <span className="w-16 text-right text-sm font-bold text-green-600">+{day.joins || 0}</span>
+                                    <span className="w-16 text-right text-sm font-bold text-red-600">-{day.leaves || 0}</span>
+                                    <span className={`w-16 text-right text-sm font-extrabold ${net >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                        {net >= 0 ? '+' : ''}{net}
+                                    </span>
+                                </div>
+                            );
+                        })}
+                    </div>
+                ) : (
+                    <div className="text-center py-12 text-gray-400">
+                        <BarChart3 size={40} className="mx-auto mb-3" />
+                        <p className="font-bold">Henüz veri yok</p>
+                        <p className="text-sm mt-1">Bot aktif olduktan sonra veriler burada gösterilecek.</p>
+                    </div>
+                )}
+            </div>
+
+            {/* Recent Member Events */}
+            <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+                <h3 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
+                    <Clock size={20} className="text-blue-600" /> Son Üye Hareketleri
+                </h3>
+                {stats?.recentEvents?.length > 0 ? (
+                    <div className="space-y-2">
+                        {stats.recentEvents.map((event: any, i: number) => (
+                            <div key={i} className="flex items-center gap-3 py-2.5 px-3 hover:bg-gray-50 rounded-xl transition">
+                                <div className={`p-1.5 rounded-lg ${event.event_type === 'join' ? 'bg-green-50' : 'bg-red-50'}`}>
+                                    {event.event_type === 'join'
+                                        ? <UserPlus size={14} className="text-green-600" />
+                                        : <UserMinus size={14} className="text-red-600" />
+                                    }
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <span className="font-bold text-gray-900 text-sm">
+                                        {event.username ? `@${event.username}` : event.first_name || 'Bilinmeyen'}
+                                    </span>
+                                    {event.first_name && event.username && (
+                                        <span className="text-gray-400 text-xs ml-2">{event.first_name} {event.last_name || ''}</span>
+                                    )}
+                                </div>
+                                <span className={`text-[10px] font-bold uppercase px-2 py-1 rounded-full ${event.event_type === 'join'
+                                    ? 'bg-green-50 text-green-600'
+                                    : 'bg-red-50 text-red-600'
+                                    }`}>
+                                    {event.event_type === 'join' ? 'Katıldı' : 'Ayrıldı'}
+                                </span>
+                                <span className="text-xs text-gray-400">
+                                    {new Date(event.created_at).toLocaleString('tr-TR', {
+                                        day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
+                                    })}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="text-center py-12 text-gray-400">
+                        <Users size={40} className="mx-auto mb-3" />
+                        <p className="font-bold">Henüz hareket yok</p>
+                        <p className="text-sm mt-1">Kanalınıza üye giriş/çıkış olduğunda burada görünecek.</p>
+                    </div>
+                )}
+            </div>
         </div>
+    );
+}
+
+export default function StatsPage() {
+    return (
+        <Suspense fallback={<div className="h-96 flex items-center justify-center text-gray-400">Yükleniyor...</div>}>
+            <StatsContent />
+        </Suspense>
     );
 }
