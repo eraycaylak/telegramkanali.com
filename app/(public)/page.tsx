@@ -7,6 +7,7 @@ import SearchFilter from '@/components/SearchFilter';
 import PopularTicker from '@/components/PopularTicker';
 import Pagination from '@/components/Pagination';
 import JsonLd, { generateFAQSchema } from '@/components/JsonLd';
+import FeaturedAds from '@/components/FeaturedAds';
 import { Channel, Category } from '@/lib/types';
 import { Suspense } from 'react';
 
@@ -95,6 +96,9 @@ export default async function Home({ searchParams }: HomeProps) {
       {/* Popular Ticker (Editor's Picks) */}
       <PopularTicker channels={popularChannels} />
 
+      {/* Story Ads */}
+      <FeaturedAds adType="story" maxAds={10} />
+
       {/* SEO H1-H2 Hierarchy */}
       <div className="text-center pb-2 pt-4">
         <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-1">Telegram Kanalları ve Grupları (2026)</h1>
@@ -103,6 +107,12 @@ export default async function Home({ searchParams }: HomeProps) {
 
       {/* Banner Grid (Dynamic from DB - Only show if no search) */}
       {!search && !categoryId && <BannerGrid />}
+
+      {/* Banner Ads */}
+      <FeaturedAds adType="banner" maxAds={2} />
+
+      {/* Sponsored Featured Channels */}
+      <FeaturedAds adType="featured" maxAds={6} />
 
       {/* MASSIVE Channels Grid */}
       <section id="channels-list" className="scroll-mt-20">

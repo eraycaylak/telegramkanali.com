@@ -9,10 +9,13 @@ CREATE TABLE IF NOT EXISTS public.settings (
 ALTER TABLE public.settings ENABLE ROW LEVEL SECURITY;
 
 -- Allow public read (everyone can see settings like logo)
+-- Allow public read (everyone can see settings like logo)
+DROP POLICY IF EXISTS "Allow public read" ON public.settings;
 CREATE POLICY "Allow public read" ON public.settings
     FOR SELECT USING (true);
 
 -- Allow admin insert/update/delete
+DROP POLICY IF EXISTS "Allow admin write" ON public.settings;
 CREATE POLICY "Allow admin write" ON public.settings
     FOR ALL USING (true) WITH CHECK (true);
 

@@ -11,7 +11,8 @@ import {
     LogOut,
     Menu,
     X,
-    PlusCircle
+    PlusCircle,
+    TrendingUp
 } from 'lucide-react';
 import { useState } from 'react';
 import { signOut } from '@/app/actions/auth';
@@ -23,7 +24,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     const menuItems = [
         { name: 'Genel Bakış', href: '/dashboard', icon: LayoutDashboard },
         { name: 'Kanallarım', href: '/dashboard/channels', icon: Tv },
-        { name: 'Bakiye & Reklam', href: '/dashboard/billing', icon: CreditCard },
+        { name: 'Jeton & Bakiye', href: '/dashboard/billing', icon: CreditCard },
+        { name: 'Reklamlarım', href: '/dashboard/ads', icon: TrendingUp },
         { name: 'Bot Ayarları', href: '/dashboard/bot', icon: Settings },
         { name: 'İstatistikler', href: '/dashboard/stats', icon: PieChart },
     ];
@@ -62,8 +64,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                                     href={item.href}
                                     onClick={() => setIsSidebarOpen(false)}
                                     className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all ${active
-                                            ? 'bg-blue-600 text-white shadow-lg shadow-blue-100'
-                                            : 'text-gray-500 hover:bg-gray-100 hover:text-gray-900'
+                                        ? 'bg-blue-600 text-white shadow-lg shadow-blue-100'
+                                        : 'text-gray-500 hover:bg-gray-100 hover:text-gray-900'
                                         }`}
                                 >
                                     <item.icon size={20} />

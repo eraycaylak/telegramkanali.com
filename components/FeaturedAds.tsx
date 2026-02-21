@@ -1,0 +1,163 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { getActiveAds } from '@/app/actions/tokens';
+import AdTracker from '@/components/AdTracker';
+import Link from 'next/link';
+import { Zap, ExternalLink } from 'lucide-react';
+
+interface FeaturedAdsProps {
+    adType: 'featured' | 'banner' | 'story';
+    maxAds?: number;
+    categoryId?: string;
+}
+
+export default function FeaturedAds({ adType, maxAds = 6, categoryId }: FeaturedAdsProps) {
+    const [ads, setAds] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        async function loadAds() {
+            try {
+                const data = await getActiveAds(adType, categoryId);
+                setAds(data.slice(0, maxAds));
+            } catch (error) {
+                console.error('Error loading ads:', error);
+            } finally {
+                setLoading(false);
+            }
+        }
+        loadAds();
+    }, [adType, maxAds, categoryId]);
+
+    if (loading || ads.length === 0) return null;
+
+    if (adType === 'featured') {
+        return (
+            <div className="mb-6">
+                <div className="flex items-center gap-2 mb-3">
+                    <Zap size={16} className="text-purple-500" />
+                    <span className="text-xs font-bold text-purple-600 uppercase tracking-wider">Sponsorlu</span>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-3 md:gap-4">
+                    {ads.map((ad: any) => (
+                        <AdTracker key={ad.id} campaignId={ad.id}>
+                            <Link
+                                href={ad.channels?.join_link || '#'}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="group relative bg-white border-2 border-purple-100 rounded-2xl p-4 hover:border-purple-300 hover:shadow-lg hover:shadow-purple-50 transition-all duration-300 block"
+                            >
+                                <div className="absolute top-2 right-2">
+                                    <span className="text-[10px] font-bold text-purple-400 bg-purple-50 px-2 py-0.5 rounded-full">
+                                        Reklam
+                                    </span>
+                                </div>
+                                <div className="flex items-center gap-3 mb-3">
+                                    {ad.channels?.image ? (
+                                        <img
+                                            src={ad.channels.image}
+                                            alt={ad.channels.name}
+                                            className="w-12 h-12 rounded-xl object-cover border border-purple-100"
+                                        />
+                                    ) : (
+                                        <div className="w-12 h-12 rounded-xl bg-purple-50 flex items-center justify-center text-purple-400 font-bold border border-purple-100">
+                                            {ad.channels?.name?.charAt(0) || '?'}
+                                        </div>
+                                    )}
+                                    <div className="flex-1 min-w-0">
+                                        <h4 className="font-bold text-gray-900 text-sm truncate group-hover:text-purple-600 transition">
+                                            {ad.channels?.name}
+                                        </h4>
+                                        <p className="text-xs text-gray-400">
+                                            {ad.channels?.member_count?.toLocaleString() || '0'} üye
+                                        </p>
+                                    </div>
+                                </div>
+                                {ad.channels?.description && (
+                                    <p className="text-xs text-gray-500 line-clamp-2 mb-2">
+                                        {ad.channels.description}
+                                    </p>
+                                )}
+                                <div className="flex items-center gap-1 text-purple-600 text-xs font-bold group-hover:gap-2 transition-all">
+                                    <ExternalLink size={12} /> Katıl
+                                </div>
+                            </Link>
+                        </AdTracker>
+                    ))}
+                </div>
+            </div>
+        );
+    }
+
+    if (adType === 'banner') {
+        return (
+            <div className="mb-6">
+                {ads.map((ad: any) => (
+                    <AdTracker key={ad.id} campaignId={ad.id}>
+                        <Link
+                            href={ad.channels?.join_link || '#'}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="block bg-gradient-to-r from-purple-500 to-blue-500 rounded-2xl p-5 text-white hover:shadow-lg hover:shadow-purple-200 transition-all mb-3"
+                        >
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-4">
+                                    {ad.channels?.image && (
+                                        <img
+                                            src={ad.channels.image}
+                                            alt={ad.channels.name}
+                                            className="w-14 h-14 rounded-xl object-cover border-2 border-white/30"
+                                        />
+                                    )}
+                                    <div>
+                                        <span className="text-[10px] font-bold bg-white/20 px-2 py-0.5 rounded-full mb-1 inline-block">Sponsorlu</span>
+                                        <h4 className="font-bold text-lg">{ad.channels?.name}</h4>
+                                        <p className="text-white/80 text-sm">
+                                            {ad.channels?.member_count?.toLocaleString() || '0'} üye · {ad.channels?.description?.substring(0, 60)}
+                                        </p>
+                                    </div>
+                                </div>
+                                <span className="bg-white text-purple-600 px-4 py-2 rounded-xl font-bold text-sm shrink-0">
+                                    Katıl →
+                                </span>
+                            </div>
+                        </Link>
+                    </AdTracker>
+                ))}
+            </div>
+        );
+    }
+
+    // Story type
+    return (
+        <div className="flex gap-3 overflow-x-auto pb-2 mb-6 scrollbar-hide">
+            {ads.map((ad: any) => (
+                <AdTracker key={ad.id} campaignId={ad.id}>
+                    <Link
+                        href={ad.channels?.join_link || '#'}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex-shrink-0 w-20 text-center group"
+                    >
+                        <div className="w-16 h-16 mx-auto rounded-full border-2 border-purple-400 p-0.5 bg-gradient-to-tr from-purple-500 to-pink-500 mb-1">
+                            {ad.channels?.image ? (
+                                <img
+                                    src={ad.channels.image}
+                                    alt={ad.channels.name}
+                                    className="w-full h-full rounded-full object-cover"
+                                />
+                            ) : (
+                                <div className="w-full h-full rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-bold">
+                                    {ad.channels?.name?.charAt(0) || '?'}
+                                </div>
+                            )}
+                        </div>
+                        <span className="text-[10px] font-bold text-gray-600 truncate block">{ad.channels?.name}</span>
+                        <span className="text-[9px] text-purple-500 font-bold">Reklam</span>
+                    </Link>
+                </AdTracker>
+            ))}
+        </div>
+    );
+}

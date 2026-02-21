@@ -2,6 +2,7 @@ import { getCategoryBySlug, getChannelsByCategory, getCategories, getChannelBySl
 import ChannelCard from '@/components/ChannelCard';
 import ChannelDetail from '@/components/ChannelDetail';
 import BannerGrid from '@/components/BannerGrid';
+import FeaturedAds from '@/components/FeaturedAds';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import JsonLd, { generateBreadcrumbSchema, generateChannelSchema, generateItemListSchema } from '@/components/JsonLd';
@@ -143,6 +144,12 @@ export default async function DynamicPage({ params }: PageProps) {
           {/* Banner Grid */}
           <BannerGrid type="category" categoryId={category.id} />
 
+          {/* Sponsored Banner Ads */}
+          <FeaturedAds adType="banner" maxAds={1} categoryId={category.id} />
+
+          {/* Sponsored Featured Channels */}
+          <FeaturedAds adType="featured" maxAds={6} categoryId={category.id} />
+
           {/* Channels Grid */}
           <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
             {channels.length > 0 ? (
@@ -217,12 +224,12 @@ export default async function DynamicPage({ params }: PageProps) {
                 </ul>
               </div>
 
-              <div className="bg-gradient-to-br from-yellow-400 to-orange-500 rounded-2xl p-6 text-white shadow-xl shadow-yellow-500/20">
-                <h3 className="font-extrabold mb-2 text-lg">Hızlı Reklam</h3>
-                <p className="text-sm text-yellow-50 mb-6 opacity-90">
-                  Kanalınızı bu kategoride en üst sıraya taşıyarak binlerce yeni abone kazanın.
+              <div className="bg-gradient-to-br from-purple-500 to-blue-600 rounded-2xl p-6 text-white shadow-xl shadow-purple-500/20">
+                <h3 className="font-extrabold mb-2 text-lg">Kanalınızı Öne Çıkarın</h3>
+                <p className="text-sm text-purple-100 mb-6 opacity-90">
+                  Jeton satın alarak kanalınızı bu kategoride en üst sıraya taşıyın ve binlerce yeni abone kazanın.
                 </p>
-                <Link href="/reklam" className="block w-full bg-white text-orange-600 text-center font-black py-3 rounded-xl hover:bg-yellow-50 transition-colors">
+                <Link href="/dashboard/ads" className="block w-full bg-white text-purple-600 text-center font-black py-3 rounded-xl hover:bg-purple-50 transition-colors">
                   HEMEN BAŞLA
                 </Link>
               </div>

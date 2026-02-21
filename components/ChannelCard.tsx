@@ -137,9 +137,16 @@ export default function ChannelCard({ channel, compact = false }: ChannelCardPro
     }
 
     // NORMAL MODE
+    const isSponsored = (channel as any).is_sponsored;
+
     return (
-        <div className="group relative flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white transition-all hover:border-blue-300 hover:shadow-lg h-full">
-            {/* ... (rest of the normal component) */}
+        <div className={`group relative flex flex-col overflow-hidden rounded-xl border bg-white transition-all hover:shadow-lg h-full ${isSponsored ? 'border-purple-200 ring-1 ring-purple-100' : 'border-gray-200 hover:border-blue-300'}`}>
+            {/* Sponsored Badge */}
+            {isSponsored && (
+                <div className="absolute top-0 left-14 md:left-14 z-30 bg-purple-600 text-white text-[9px] font-bold px-2.5 py-0.5 rounded-b-lg shadow-sm tracking-wider">
+                    SPONSORLU
+                </div>
+            )}
             {/* Voting Sidebar */}
             <div className="hidden md:flex absolute left-0 top-0 bottom-0 w-12 bg-gray-50 flex-col items-center justify-center gap-2 border-r border-gray-100 z-30">
                 <button

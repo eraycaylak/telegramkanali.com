@@ -1,5 +1,5 @@
 -- Add score column to channels for sorting
-alter table public.channels_old add column if not exists score integer default 0;
+-- alter table public.channels_old add column if not exists score integer default 0;
 -- Note: 'channels_old' is what supabase might have renamed if I had conflict, 
 -- but wait, I just created 'channels' in previous step. 
 -- Let's check table name. It was 'channels'.

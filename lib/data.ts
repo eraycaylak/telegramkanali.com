@@ -1,5 +1,18 @@
 import { supabase } from './supabaseClient';
 import { Channel, Category, SeoPage, BlogPost } from './types';
+import { getActiveAds } from '@/app/actions/tokens';
+
+// Helper: Get IDs of channels with active featured campaigns
+async function getSponsoredChannelIds(categoryId?: string): Promise<string[]> {
+    try {
+        const ads = await getActiveAds('featured', categoryId);
+        return ads
+            .map((ad: any) => ad.channels?.id)
+            .filter(Boolean) as string[];
+    } catch {
+        return [];
+    }
+}
 
 // Fetch Categories
 export async function getCategories(): Promise<Category[]> {
@@ -51,10 +64,22 @@ export async function getChannels(
         return { data: [], count: 0 };
     }
 
-    const mappedData = data.map((d: any) => ({
+    let mappedData = data.map((d: any) => ({
         ...d,
         categoryName: d.categories?.name,
     })) as Channel[];
+
+    // Boost sponsored channels to top (only on first page)
+    if (page === 1) {
+        const sponsoredIds = await getSponsoredChannelIds(categoryId);
+        if (sponsoredIds.length > 0) {
+            const sponsored = mappedData.filter(ch => sponsoredIds.includes(ch.id));
+            const regular = mappedData.filter(ch => !sponsoredIds.includes(ch.id));
+            // Mark sponsored channels
+            sponsored.forEach(ch => { (ch as any).is_sponsored = true; });
+            mappedData = [...sponsored, ...regular];
+        }
+    }
 
     return { data: mappedData, count: count || 0 };
 }
@@ -139,7 +164,18 @@ export async function getChannelsByCategory(categoryId: string): Promise<Channel
     // .eq('status', 'approved'); // Disabled until status migration is applied
 
     if (error) return [];
-    return (data || []).map((d: any) => ({ ...d, category: d.category_id, categoryName: d.categories?.name })) as Channel[];
+    let channels = (data || []).map((d: any) => ({ ...d, category: d.category_id, categoryName: d.categories?.name })) as Channel[];
+
+    // Boost sponsored channels to top
+    const sponsoredIds = await getSponsoredChannelIds(categoryId);
+    if (sponsoredIds.length > 0) {
+        const sponsored = channels.filter(ch => sponsoredIds.includes(ch.id));
+        const regular = channels.filter(ch => !sponsoredIds.includes(ch.id));
+        sponsored.forEach(ch => { (ch as any).is_sponsored = true; });
+        channels = [...sponsored, ...regular];
+    }
+
+    return channels;
 }
 
 // SEO Pages

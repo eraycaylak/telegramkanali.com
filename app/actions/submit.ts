@@ -1,6 +1,7 @@
-'use client';
+'use server';
 
-import { supabase } from '@/lib/supabaseClient';
+import { createServerClient } from '@supabase/ssr';
+import { cookies } from 'next/headers';
 
 export async function submitChannel(formData: FormData) {
     const name = formData.get('name') as string;
@@ -11,6 +12,27 @@ export async function submitChannel(formData: FormData) {
 
     if (!name || !join_link || !category_id) {
         return { error: 'Lütfen zorunlu alanları doldurun.' };
+    }
+
+    // Create server-side Supabase client to get authenticated user reliably
+    const cookieStore = await cookies();
+    const supabase = createServerClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        {
+            cookies: {
+                get(name: string) {
+                    return cookieStore.get(name)?.value;
+                },
+            },
+        }
+    );
+
+    // Get authenticated user from server-side session
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (!user || authError) {
+        return { error: 'Oturum açmanız gerekiyor. Lütfen giriş yapın.' };
     }
 
     // Check for existing channel
@@ -25,8 +47,6 @@ export async function submitChannel(formData: FormData) {
     }
 
     // Generate slug from name
-    // 1. Convert to simple alphanumeric or fallback to 'channel'
-    // 2. Append timestamp for 100% uniqueness
     let baseSlug = name.toLowerCase()
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/(^-|-$)/g, '');
@@ -35,18 +55,19 @@ export async function submitChannel(formData: FormData) {
 
     const slug = `${baseSlug}-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
 
-    // Get current user to link ownership
-    const { data: { user } } = await supabase.auth.getUser();
+    // Use admin client for insert to bypass RLS, but set owner_id from the authenticated user
+    const { getAdminClient } = await import('@/lib/supabaseAdmin');
+    const adminClient = getAdminClient();
 
-    const { error } = await supabase.from('channels').insert({
+    const { error } = await adminClient.from('channels').insert({
         name,
         description,
         join_link,
         category_id,
         contact_info,
         slug,
-        owner_id: user?.id, // Explicitly set owner
-        status: 'pending' // Force pending for public submissions
+        owner_id: user.id, // Server-side authenticated user ID - always reliable
+        status: 'pending'
     });
 
     if (error) {

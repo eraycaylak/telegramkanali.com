@@ -18,7 +18,10 @@ CREATE TABLE IF NOT EXISTS public.banners (
 ALTER TABLE public.banners ENABLE ROW LEVEL SECURITY;
 
 -- Policies
+DROP POLICY IF EXISTS "Public read access" ON public.banners;
 CREATE POLICY "Public read access" ON public.banners FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Admin write access" ON public.banners;
 CREATE POLICY "Admin write access" ON public.banners FOR ALL USING (true) WITH CHECK (true);
 
 -- Indexes

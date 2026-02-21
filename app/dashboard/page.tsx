@@ -8,7 +8,8 @@ import {
     CreditCard,
     TrendingUp,
     ArrowUpRight,
-    Plus
+    Plus,
+    Coins
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -27,8 +28,8 @@ export default function DashboardOverview() {
                 const { data: { user } } = await supabase.auth.getUser();
                 if (!user) return;
 
-                // Fetch profile (balance)
-                const { data: profile } = await supabase.from('profiles').select('balance').eq('id', user.id).single();
+                // Fetch profile (token_balance)
+                const { data: profile } = await supabase.from('profiles').select('token_balance').eq('id', user.id).single();
 
                 // Fetch channel count
                 const { count: channelCount } = await supabase.from('channels').select('*', { count: 'exact', head: true }).eq('owner_id', user.id);
@@ -37,11 +38,14 @@ export default function DashboardOverview() {
                 const { data: channels } = await supabase.from('channels').select('member_count').eq('owner_id', user.id);
                 const totalMembers = channels?.reduce((acc, curr) => acc + (curr.member_count || 0), 0) || 0;
 
+                // Active ad campaigns count
+                const { count: activeAdCount } = await supabase.from('ad_campaigns').select('*', { count: 'exact', head: true }).eq('user_id', user.id).eq('status', 'active');
+
                 setStats({
                     channels: channelCount || 0,
-                    balance: profile?.balance || 0,
+                    balance: profile?.token_balance || 0,
                     totalMembers: totalMembers,
-                    activeAds: 0
+                    activeAds: activeAdCount || 0
                 });
             } catch (error) {
                 console.error('Dashboard stats fetch error:', error);
@@ -55,7 +59,7 @@ export default function DashboardOverview() {
 
     const cards = [
         { name: 'Kanallarım', value: stats.channels, icon: Tv, shadow: 'shadow-blue-100', text: 'text-blue-600', bg: 'bg-blue-50' },
-        { name: 'Mevcut Bakiye', value: `$${stats.balance}`, icon: CreditCard, shadow: 'shadow-green-100', text: 'text-green-600', bg: 'bg-green-50' },
+        { name: 'Jeton Bakiyem', value: `🪙 ${stats.balance.toLocaleString()}`, icon: Coins, shadow: 'shadow-green-100', text: 'text-green-600', bg: 'bg-green-50' },
         { name: 'Toplam Üye', value: stats.totalMembers.toLocaleString(), icon: Users, shadow: 'shadow-purple-100', text: 'text-purple-600', bg: 'bg-purple-50' },
         { name: 'Aktif Reklamlar', value: stats.activeAds, icon: TrendingUp, shadow: 'shadow-orange-100', text: 'text-orange-600', bg: 'bg-orange-50' },
     ];
@@ -74,8 +78,8 @@ export default function DashboardOverview() {
                     <h2 className="text-2xl font-bold text-gray-900">Hoş Geldiniz! 👋</h2>
                     <p className="text-gray-500">Kanallarınızın performansını ve reklam bütçenizi buradan yönetebilirsiniz.</p>
                 </div>
-                <Link href="/dashboard/billing" className="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-700 transition shadow-lg shadow-blue-200 flex items-center gap-2 w-fit">
-                    <CreditCard size={18} /> Bakiye Yükle
+                <Link href="/dashboard/billing" className="bg-purple-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-purple-700 transition shadow-lg shadow-purple-200 flex items-center gap-2 w-fit">
+                    <Coins size={18} /> Jeton Yükle
                 </Link>
             </div>
 

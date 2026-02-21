@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS public.votes (
 ALTER TABLE public.votes ENABLE ROW LEVEL SECURITY;
 
 -- Allow all operations via service role
+DROP POLICY IF EXISTS "Enable all for votes" ON public.votes;
 CREATE POLICY "Enable all for votes" ON public.votes FOR ALL USING (true) WITH CHECK (true);
 
 -- Create index for faster lookups
