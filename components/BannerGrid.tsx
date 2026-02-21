@@ -10,7 +10,7 @@ interface BannerGridProps {
 export default async function BannerGrid({ type = 'homepage', categoryId }: BannerGridProps) {
     let banners: Banner[] = [];
     try {
-        banners = await getBanners(type, categoryId);
+        banners = await getBanners(type, categoryId, true);
     } catch (e) {
         console.error('Banner fetch failed', e);
     }

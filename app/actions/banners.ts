@@ -30,7 +30,7 @@ export interface Banner {
     floating_logo_url?: string | null;
 }
 
-export async function getBanners(type?: BannerType, categoryId?: string) {
+export async function getBanners(type?: BannerType, categoryId?: string, activeOnly: boolean = false) {
     let query = publicSupabase
         .from('banners')
         .select('*')
@@ -42,6 +42,10 @@ export async function getBanners(type?: BannerType, categoryId?: string) {
 
     if (categoryId) {
         query = query.eq('category_id', categoryId);
+    }
+
+    if (activeOnly) {
+        query = query.eq('active', true);
     }
 
     const { data, error } = await query;
