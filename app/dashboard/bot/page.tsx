@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
-import { setupTelegramWebhook } from '@/app/actions/bot';
+import { setupTelegramWebhook, generateBotToken } from '@/app/actions/bot';
 import {
     Settings,
     HelpCircle,
@@ -57,15 +57,13 @@ function BotSettingsContent() {
 
     async function generateToken() {
         if (!selectedId) return;
-        const newToken = 'TK_' + Math.random().toString(36).substring(2, 10).toUpperCase();
 
-        const { error } = await supabase
-            .from('channels')
-            .update({ bot_token: newToken })
-            .eq('id', selectedId);
+        const res = await generateBotToken(selectedId);
 
-        if (!error) {
+        if (res.success) {
             fetchChannels();
+        } else {
+            alert('Kod oluşturulurken bir hata oluştu: ' + res.error);
         }
     }
 
