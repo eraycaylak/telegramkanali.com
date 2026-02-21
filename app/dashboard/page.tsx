@@ -28,14 +28,19 @@ export default function DashboardOverview() {
                 const { data: { user } } = await supabase.auth.getUser();
                 if (!user) return;
 
-                // Fetch profile (token_balance)
-                const { data: profile } = await supabase.from('profiles').select('token_balance').eq('id', user.id).single();
+                // Fetch profile (token_balance + role)
+                const { data: profile } = await supabase.from('profiles').select('token_balance, role').eq('id', user.id).single();
+                const isAdmin = profile?.role === 'admin';
 
-                // Fetch channel count
-                const { count: channelCount } = await supabase.from('channels').select('*', { count: 'exact', head: true }).eq('owner_id', user.id);
+                // Fetch channel count (admin sees all, user sees own)
+                let channelQuery = supabase.from('channels').select('*', { count: 'exact', head: true });
+                if (!isAdmin) channelQuery = channelQuery.eq('owner_id', user.id);
+                const { count: channelCount } = await channelQuery;
 
                 // Total members sum
-                const { data: channels } = await supabase.from('channels').select('member_count').eq('owner_id', user.id);
+                let memberQuery = supabase.from('channels').select('member_count');
+                if (!isAdmin) memberQuery = memberQuery.eq('owner_id', user.id);
+                const { data: channels } = await memberQuery;
                 const totalMembers = channels?.reduce((acc, curr) => acc + (curr.member_count || 0), 0) || 0;
 
                 // Active ad campaigns count
@@ -59,7 +64,7 @@ export default function DashboardOverview() {
 
     const cards = [
         { name: 'Kanallarım', value: stats.channels, icon: Tv, shadow: 'shadow-blue-100', text: 'text-blue-600', bg: 'bg-blue-50' },
-        { name: 'Jeton Bakiyem', value: `🪙 ${stats.balance.toLocaleString()}`, icon: Coins, shadow: 'shadow-green-100', text: 'text-green-600', bg: 'bg-green-50' },
+        { name: 'Jeton Bakiyem', value: `💰 ${stats.balance.toLocaleString()}`, icon: Coins, shadow: 'shadow-green-100', text: 'text-green-600', bg: 'bg-green-50' },
         { name: 'Toplam Üye', value: stats.totalMembers.toLocaleString(), icon: Users, shadow: 'shadow-purple-100', text: 'text-purple-600', bg: 'bg-purple-50' },
         { name: 'Aktif Reklamlar', value: stats.activeAds, icon: TrendingUp, shadow: 'shadow-orange-100', text: 'text-orange-600', bg: 'bg-orange-50' },
     ];

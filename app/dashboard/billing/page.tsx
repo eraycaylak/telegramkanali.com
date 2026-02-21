@@ -98,7 +98,7 @@ export default function BillingPage() {
                 <div className="relative z-10">
                     <p className="text-purple-200 text-sm font-bold uppercase tracking-wider mb-1">Mevcut Bakiye</p>
                     <div className="flex items-center gap-3 mb-4">
-                        <span className="text-4xl font-extrabold">🪙 {balance.toLocaleString()}</span>
+                        <span className="text-4xl font-extrabold">💰 {balance.toLocaleString()}</span>
                         <span className="text-xl text-purple-200">Jeton</span>
                     </div>
                     <div className="flex gap-3">
@@ -158,7 +158,7 @@ export default function BillingPage() {
                                 </div>
                                 <div className="text-right">
                                     <span className={`font-bold text-sm ${tx.amount > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                        {tx.amount > 0 ? '+' : ''}{tx.amount.toLocaleString()} 🪙
+                                        {tx.amount > 0 ? '+' : ''}{tx.amount.toLocaleString()} 💰
                                     </span>
                                     <p className="text-xs text-gray-400">Bakiye: {tx.balance_after.toLocaleString()}</p>
                                 </div>
@@ -191,7 +191,7 @@ export default function BillingPage() {
                                     className="border-2 border-gray-200 rounded-2xl p-4 text-center hover:border-purple-500 hover:shadow-lg transition-all duration-200 disabled:opacity-50"
                                 >
                                     <div className="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3">
-                                        <span className="text-3xl">🪙</span>
+                                        <span className="text-3xl">💰</span>
                                     </div>
                                     <p className="font-bold text-gray-900 text-lg">{pkg.tokens.toLocaleString()} Jeton</p>
                                     <p className="text-sm text-gray-500 mb-3">{pkg.price_tl.toLocaleString()} TL</p>
@@ -255,7 +255,7 @@ export default function BillingPage() {
                                             {p.note && <span className="text-xs text-gray-400 block">({p.note})</span>}
                                         </td>
                                         <td className="py-3 text-center">
-                                            <span className="inline-flex items-center gap-1 font-bold text-gray-700">🪙 {p.tokens_required.toLocaleString()}</span>
+                                            <span className="inline-flex items-center gap-1 font-bold text-gray-700">💰 {p.tokens_required.toLocaleString()}</span>
                                         </td>
                                         <td className="py-3 text-right text-purple-600 font-bold">
                                             {p.price_tl > 0 ? `${p.price_tl.toLocaleString()} TL` : '-'}
@@ -270,7 +270,7 @@ export default function BillingPage() {
                                 onClick={() => { setShowPricingModal(false); setShowTokenModal(true); }}
                                 className="bg-purple-600 text-white px-6 py-2.5 rounded-xl font-bold hover:bg-purple-700 transition text-sm inline-flex items-center gap-2"
                             >
-                                🪙 Jeton Yükle
+                                💰 Jeton Yükle
                             </button>
                         </div>
                     </div>

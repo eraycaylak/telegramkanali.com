@@ -199,7 +199,7 @@ export default function AdsPage() {
                                                 {p.note && <span className="text-xs text-gray-500 block mt-0.5">({p.note})</span>}
                                             </div>
                                             <div className="text-right">
-                                                <span className="font-bold text-purple-600">🪙 {p.tokens_required.toLocaleString()}</span>
+                                                <span className="font-bold text-purple-600">💰 {p.tokens_required.toLocaleString()}</span>
                                                 <span className="text-xs text-gray-500 block">{p.price_tl.toLocaleString()} TL</span>
                                             </div>
                                         </button>
@@ -282,7 +282,7 @@ export default function AdsPage() {
                                         <span>{campaign.current_views.toLocaleString()} gösterim</span>
                                     </div>
                                     <div className="flex items-center gap-1 text-gray-500">
-                                        <span>🪙 {campaign.tokens_spent} jeton</span>
+                                        <span>💰 {campaign.tokens_spent} jeton</span>
                                     </div>
                                     <div className="text-gray-400">
                                         {new Date(campaign.created_at).toLocaleDateString('tr-TR')}

@@ -27,12 +27,26 @@ export default function MyChannelsPage() {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) return;
 
-            const { data } = await supabase
+            // Check if user is admin
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('role')
+                .eq('id', user.id)
+                .single();
+
+            const isAdmin = profile?.role === 'admin';
+
+            let query = supabase
                 .from('channels')
                 .select('*')
-                .eq('owner_id', user.id)
                 .order('created_at', { ascending: false });
 
+            // Admin sees all channels, regular users see only their own
+            if (!isAdmin) {
+                query = query.eq('owner_id', user.id);
+            }
+
+            const { data } = await query;
             setChannels(data || []);
         } catch (error) {
             console.error('Error fetching channels:', error);
