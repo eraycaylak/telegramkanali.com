@@ -11,7 +11,8 @@ import {
     Search,
     CheckCircle2,
     X,
-    Save
+    Save,
+    Coins
 } from 'lucide-react';
 
 export default function UsersContent() {
@@ -25,6 +26,7 @@ export default function UsersContent() {
     const [editForm, setEditForm] = useState({
         role: 'user',
         balance: 0,
+        token_balance: 0,
         permissions: {
             manage_blog: false,
             manage_channels: false,
@@ -89,6 +91,7 @@ export default function UsersContent() {
         setEditForm({
             role: user.role || 'user',
             balance: user.balance || 0,
+            token_balance: user.token_balance || 0,
             permissions: user.permissions || {
                 manage_blog: false,
                 manage_channels: false,
@@ -120,6 +123,7 @@ export default function UsersContent() {
                 .update({
                     role: editForm.role,
                     balance: editForm.balance,
+                    token_balance: editForm.token_balance,
                     permissions: editForm.role === 'editor' ? editForm.permissions : null
                 })
                 .eq('id', editingUser.id);
@@ -188,8 +192,8 @@ export default function UsersContent() {
                                     </td>
                                     <td className="p-4">
                                         <div className="flex items-center gap-1.5 text-gray-900 font-extrabold bg-green-50 px-3 py-1 rounded-lg w-fit">
-                                            <CreditCard size={14} className="text-green-600" />
-                                            ${u.balance?.toLocaleString()}
+                                            <Coins size={14} className="text-green-600" />
+                                            {(u.token_balance || 0).toLocaleString()} jeton
                                         </div>
                                     </td>
                                     <td className="p-4">
@@ -299,6 +303,16 @@ export default function UsersContent() {
                                     </div>
                                 </div>
                             )}
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Jeton Bakiye</label>
+                                <input
+                                    type="number"
+                                    value={editForm.token_balance}
+                                    onChange={(e) => setEditForm({ ...editForm, token_balance: parseInt(e.target.value) || 0 })}
+                                    className="w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500"
+                                />
+                            </div>
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Bakiye ($)</label>

@@ -28,19 +28,14 @@ export default function DashboardOverview() {
                 const { data: { user } } = await supabase.auth.getUser();
                 if (!user) return;
 
-                // Fetch profile (token_balance + role)
-                const { data: profile } = await supabase.from('profiles').select('token_balance, role').eq('id', user.id).single();
-                const isAdmin = profile?.role === 'admin';
+                // Fetch profile (token_balance)
+                const { data: profile } = await supabase.from('profiles').select('token_balance').eq('id', user.id).single();
 
-                // Fetch channel count (admin sees all, user sees own)
-                let channelQuery = supabase.from('channels').select('*', { count: 'exact', head: true });
-                if (!isAdmin) channelQuery = channelQuery.eq('owner_id', user.id);
-                const { count: channelCount } = await channelQuery;
+                // Fetch user's own channel count
+                const { count: channelCount } = await supabase.from('channels').select('*', { count: 'exact', head: true }).eq('owner_id', user.id);
 
-                // Total members sum
-                let memberQuery = supabase.from('channels').select('member_count');
-                if (!isAdmin) memberQuery = memberQuery.eq('owner_id', user.id);
-                const { data: channels } = await memberQuery;
+                // Total members sum for user's own channels
+                const { data: channels } = await supabase.from('channels').select('member_count').eq('owner_id', user.id);
                 const totalMembers = channels?.reduce((acc, curr) => acc + (curr.member_count || 0), 0) || 0;
 
                 // Active ad campaigns count

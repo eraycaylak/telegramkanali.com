@@ -35,14 +35,8 @@ function BotSettingsContent() {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) return;
 
-            // Check admin
-            const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
-            const isAdmin = profile?.role === 'admin';
-
-            let query = supabase.from('channels').select('*').order('created_at', { ascending: false });
-            if (!isAdmin) query = query.eq('owner_id', user.id);
-
-            const { data } = await query;
+            // Always show user's own channels
+            const { data } = await supabase.from('channels').select('*').eq('owner_id', user.id).order('created_at', { ascending: false });
             const userChannels = data || [];
             setChannels(userChannels);
 
