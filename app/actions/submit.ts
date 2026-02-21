@@ -59,6 +59,9 @@ export async function submitChannel(formData: FormData) {
     const { getAdminClient } = await import('@/lib/supabaseAdmin');
     const adminClient = getAdminClient();
 
+    // Generate a unique bot token for this channel at creation time
+    const botToken = 'TK_' + Math.random().toString(36).substring(2, 10).toUpperCase();
+
     const { error } = await adminClient.from('channels').insert({
         name,
         description,
@@ -67,7 +70,8 @@ export async function submitChannel(formData: FormData) {
         contact_info,
         slug,
         owner_id: user.id, // Server-side authenticated user ID - always reliable
-        status: 'pending'
+        status: 'pending',
+        bot_token: botToken, // Auto-generated unique token, ready to use immediately
     });
 
     if (error) {
