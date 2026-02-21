@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { getUserCampaigns, getAdPricing, createAdCampaign } from '@/app/actions/tokens';
+import { getUserCampaigns, getAdPricing, createAdCampaign, toggleCampaignStatus } from '@/app/actions/tokens';
 import { supabase } from '@/lib/supabaseClient';
 import {
     TrendingUp,
@@ -23,6 +23,7 @@ const AD_TYPE_LABELS: Record<string, { label: string; icon: any; color: string; 
 };
 
 const STATUS_LABELS: Record<string, { label: string; icon: any; color: string }> = {
+    pending: { label: 'Beklemede', icon: Clock, color: 'text-gray-600' },
     active: { label: 'Aktif', icon: TrendingUp, color: 'text-green-600' },
     completed: { label: 'Tamamlandı', icon: CheckCircle2, color: 'text-blue-600' },
     paused: { label: 'Duraklatıldı', icon: PauseCircle, color: 'text-yellow-600' },
@@ -40,6 +41,7 @@ export default function AdsPage() {
     const [selectedPricing, setSelectedPricing] = useState('');
     const [creating, setCreating] = useState(false);
     const [message, setMessage] = useState('');
+    const [togglingId, setTogglingId] = useState<string | null>(null);
 
     useEffect(() => {
         loadData();
@@ -104,6 +106,18 @@ export default function AdsPage() {
         }
 
         setCreating(false);
+    }
+
+    async function handleToggleStatus(campaignId: string) {
+        setTogglingId(campaignId);
+        const result = await toggleCampaignStatus(campaignId);
+        if (result.error) {
+            setMessage(result.error);
+        } else {
+            setMessage('Kampanya durumu güncellendi.');
+            loadData();
+        }
+        setTogglingId(null);
     }
 
     if (loading) {
@@ -276,17 +290,36 @@ export default function AdsPage() {
                                     </div>
                                 </div>
 
-                                <div className="flex items-center gap-6 text-xs">
-                                    <div className="flex items-center gap-1 text-gray-500">
-                                        <Eye size={14} />
-                                        <span>{campaign.current_views.toLocaleString()} gösterim</span>
+                                <div className="flex items-center justify-between text-xs mt-4 pt-4 border-t border-gray-100">
+                                    <div className="flex items-center gap-4 flex-wrap">
+                                        <div className="flex items-center gap-1 text-gray-500">
+                                            <Eye size={14} />
+                                            <span>{campaign.current_views.toLocaleString()} gösterim</span>
+                                        </div>
+                                        <div className="flex items-center gap-1 text-gray-500">
+                                            <span>💰 {campaign.tokens_spent} jeton</span>
+                                        </div>
+                                        <div className="text-gray-400">
+                                            {new Date(campaign.created_at).toLocaleDateString('tr-TR')}
+                                        </div>
                                     </div>
-                                    <div className="flex items-center gap-1 text-gray-500">
-                                        <span>💰 {campaign.tokens_spent} jeton</span>
-                                    </div>
-                                    <div className="text-gray-400">
-                                        {new Date(campaign.created_at).toLocaleDateString('tr-TR')}
-                                    </div>
+
+                                    {(campaign.status === 'active' || campaign.status === 'paused') && (
+                                        <button
+                                            onClick={() => handleToggleStatus(campaign.id)}
+                                            disabled={togglingId === campaign.id}
+                                            className="px-3 py-1.5 text-xs font-bold rounded-lg border transition-colors flex items-center gap-1.5 disabled:opacity-50 border-gray-200 hover:bg-gray-50 text-gray-700"
+                                        >
+                                            {campaign.status === 'active' ? (
+                                                <><PauseCircle size={14} /> Duraklat</>
+                                            ) : (
+                                                <><TrendingUp size={14} /> Devam Et</>
+                                            )}
+                                        </button>
+                                    )}
+                                    {campaign.status === 'pending' && (
+                                        <span className="text-xs text-gray-500 italic">Onay bekliyor...</span>
+                                    )}
                                 </div>
                             </div>
                         );

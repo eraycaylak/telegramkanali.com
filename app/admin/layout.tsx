@@ -2,7 +2,7 @@
 
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { LayoutDashboard, FolderTree, FileText, Users, Settings, LogOut, Menu, Image, Shield, BarChart, Send, BookOpen, Zap } from 'lucide-react';
+import { LayoutDashboard, FolderTree, FileText, Users, Settings, LogOut, Menu, Image, Shield, BarChart, Send, BookOpen, Zap, Star } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { UserProfile } from '@/lib/types';
@@ -90,7 +90,8 @@ export default function AdminLayout({
     // Role-based menu filtering
     const allMenuItems = [
         { name: 'Kanal Yönetimi', href: '/admin/dashboard', icon: LayoutDashboard, perm: 'manage_channels' },
-        { name: 'Reklam Yönetimi', href: '/admin/ads', icon: Zap, perm: 'manage_banners' },
+        { name: 'Kampanya Onayları', href: '/admin/campaigns', icon: Star, perm: 'manage_banners' },
+        { name: 'Reklam Paketleri', href: '/admin/ads', icon: Zap, perm: 'manage_banners' },
         { name: 'Toplu Kanal Ekle', href: '/admin/bulk-add', icon: Send, perm: 'manage_channels' },
         { name: 'Kategoriler', href: '/admin/categories', icon: FolderTree, perm: 'manage_categories' },
         { name: 'Bannerlar', href: '/admin/banners', icon: Image, perm: 'manage_banners' },

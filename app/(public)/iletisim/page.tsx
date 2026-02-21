@@ -22,12 +22,12 @@ export default function ContactPage() {
 
                         <div className="space-y-4">
                             <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl border border-gray-100">
-                                <div className="bg-blue-500 p-3 rounded-lg text-white">
-                                    <Mail size={24} />
+                                <div className="bg-green-500 p-3 rounded-lg text-white">
+                                    <MessageCircle size={24} />
                                 </div>
                                 <div>
-                                    <h3 className="font-bold text-gray-900">E-posta</h3>
-                                    <a href="mailto:iletisim@telegramkanali.com" className="text-blue-600 hover:underline">iletisim@telegramkanali.com</a>
+                                    <h3 className="font-bold text-gray-900">WhatsApp</h3>
+                                    <a href="https://wa.me/905427879595" target="_blank" rel="noopener noreferrer" className="text-green-600 hover:underline">0542 787 95 95</a>
                                 </div>
                             </div>
 

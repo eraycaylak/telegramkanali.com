@@ -30,6 +30,9 @@ export default async function Footer() {
                             <a href="https://t.me/Errccyy" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-blue-500 transition-colors tooltip" aria-label="Telegram">
                                 <Send size={20} />
                             </a>
+                            <a href="https://wa.me/905427879595" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-green-500 transition-colors tooltip" aria-label="WhatsApp">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-message-circle"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z" /></svg>
+                            </a>
                         </div>
                     </div>
 

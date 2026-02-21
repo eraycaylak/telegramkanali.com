@@ -132,7 +132,7 @@ export default function ReklamPage() {
                                         ))}
                                     </ul>
 
-                                    <a href="https://t.me/eraycaylak" target="_blank" className="block w-full text-center bg-gray-900 text-white font-bold py-3 rounded-xl hover:bg-black transition">
+                                    <a href="https://t.me/Errccyy" target="_blank" rel="noopener noreferrer" className="block w-full text-center bg-gray-900 text-white font-bold py-3 rounded-xl hover:bg-black transition">
                                         {pkg.price === 0 ? 'Detaylı Bilgi' : 'Satın Al'}
                                     </a>
                                 </div>
@@ -145,14 +145,26 @@ export default function ReklamPage() {
                 {/* Contact CTA */}
                 <div className="mt-16 text-center">
                     <p className="text-gray-500 font-medium mb-4">Özel paketler ve detaylı bilgi için iletişime geçin</p>
-                    <a
-                        href="https://t.me/eraycaylak"
-                        target="_blank"
-                        className="inline-flex items-center gap-2 bg-[#0088cc] text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-[#0077b5] transition shadow-lg shadow-blue-200"
-                    >
-                        <MessageCircle size={24} />
-                        Telegram Üzerinden İletişime Geç
-                    </a>
+                    <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                        <a
+                            href="https://t.me/Errccyy"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center justify-center gap-2 bg-[#0088cc] text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-[#0077b5] transition shadow-lg shadow-blue-200 w-full sm:w-auto"
+                        >
+                            <MessageCircle size={24} />
+                            Telegram
+                        </a>
+                        <a
+                            href="https://wa.me/905427879595"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center justify-center gap-2 bg-[#25D366] text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-[#128C7E] transition shadow-lg shadow-green-200 w-full sm:w-auto"
+                        >
+                            <MessageCircle size={24} />
+                            WhatsApp
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>

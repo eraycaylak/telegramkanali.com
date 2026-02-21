@@ -183,7 +183,7 @@ export async function createAdCampaign(data: {
         total_views: pricing.views,
         current_views: 0,
         tokens_spent: pricing.tokens_required,
-        status: 'active',
+        status: 'pending', // YENİ: Reklam onay bekliyor statüsüne alındı
     };
 
     // Story tipi için süre bazlı
@@ -244,6 +244,118 @@ export async function getUserCampaigns() {
         return [];
     }
     return data || [];
+}
+
+// ========================
+// USER TOGGLE CAMPAIGN STATUS
+// ========================
+
+export async function toggleCampaignStatus(campaignId: string) {
+    const userId = await getAuthUserId();
+    if (!userId) return { error: 'Oturum açmanız gerekiyor.' };
+
+    const { data: campaign, error: fetchError } = await adminClient
+        .from('ad_campaigns')
+        .select('id, user_id, status')
+        .eq('id', campaignId)
+        .single();
+
+    if (fetchError || !campaign) {
+        return { error: 'Kampanya bulunamadı.' };
+    }
+
+    if (campaign.user_id !== userId) {
+        return { error: 'Bu kampanya size ait değil.' };
+    }
+
+    if (campaign.status !== 'active' && campaign.status !== 'paused') {
+        return { error: 'Sadece aktif veya duraklatılmış kampanyalar değiştirilebilir.' };
+    }
+
+    const newStatus = campaign.status === 'active' ? 'paused' : 'active';
+
+    const { error: updateError } = await adminClient
+        .from('ad_campaigns')
+        .update({ status: newStatus, updated_at: new Date().toISOString() })
+        .eq('id', campaignId);
+
+    if (updateError) {
+        console.error('[TOKENS] Status update error:', updateError);
+        return { error: 'Durum güncellenemedi.' };
+    }
+
+    revalidatePath('/dashboard/ads');
+    return { success: true, newStatus };
+}
+
+// ========================
+// ADMIN CAMPAIGN MANAGEMENT
+// ========================
+
+export async function getAdminCampaigns() {
+    const userId = await getAuthUserId();
+    if (!userId) return [];
+
+    // Auth Check Let's ensure user is admin/editor
+    const { data: profile } = await adminClient
+        .from('profiles')
+        .select('role')
+        .eq('id', userId)
+        .single();
+
+    if (!profile || (profile.role !== 'admin' && profile.role !== 'editor')) {
+        return [];
+    }
+
+    const { data, error } = await adminClient
+        .from('ad_campaigns')
+        .select(`
+        id,
+        ad_type,
+        total_views,
+        current_views,
+        status,
+        tokens_spent,
+        created_at,
+        user_id,
+        channels:channel_id (name, slug),
+        profiles:user_id (id, full_name, email)
+    `)
+        .order('created_at', { ascending: false });
+
+    if (error) {
+        console.error('[TOKENS] Admin fetch campaigns error:', error);
+        return [];
+    }
+    return data || [];
+}
+
+export async function adminUpdateCampaignStatus(campaignId: string, newStatus: string) {
+    const userId = await getAuthUserId();
+    if (!userId) return { error: 'Oturum açmanız gerekiyor.' };
+
+    const { data: profile } = await adminClient
+        .from('profiles')
+        .select('role')
+        .eq('id', userId)
+        .single();
+
+    if (!profile || (profile.role !== 'admin' && profile.role !== 'editor')) {
+        return { error: 'Yetkiniz yok.' };
+    }
+
+    const { error } = await adminClient
+        .from('ad_campaigns')
+        .update({ status: newStatus, updated_at: new Date().toISOString() })
+        .eq('id', campaignId);
+
+    if (error) {
+        console.error('[TOKENS] Admin Status update error:', error);
+        return { error: 'Durum güncellenemedi.' };
+    }
+
+    revalidatePath('/admin/campaigns');
+    return { success: true };
 }
 
 // ========================

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, Trash2, Edit, Search, LogOut, ExternalLink, RefreshCw } from 'lucide-react';
+import { Plus, Trash2, Edit, Search, LogOut, ExternalLink, RefreshCw, BarChart3, Bot, Users as UsersIcon } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 import { deleteChannel, addChannel, updateChannel, scrapeTelegramInfo, syncAllChannelsFromTelegram, approveChannel, rejectChannel, syncChannelFromTelegram } from '@/app/actions/admin';
 import { Channel, Category } from '@/lib/types';
@@ -163,6 +163,40 @@ export default function DashboardClient() {
         <div className="min-h-screen bg-transparent text-gray-900 font-sans">
 
             <div className="container mx-auto">
+                {/* Stats Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                    <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex items-center gap-4">
+                        <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center">
+                            <BarChart3 size={24} />
+                        </div>
+                        <div>
+                            <div className="text-sm text-gray-500 font-medium">Toplam Kanal</div>
+                            <div className="text-2xl font-bold text-gray-900">{channels.length}</div>
+                        </div>
+                    </div>
+                    <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex items-center gap-4">
+                        <div className="w-12 h-12 bg-green-50 text-green-600 rounded-lg flex items-center justify-center">
+                            <Bot size={24} />
+                        </div>
+                        <div>
+                            <div className="text-sm text-gray-500 font-medium">Bot Bağlı Kanal</div>
+                            {/* TypeScript doesn't strictly type bot_enabled on Channel if not defined, assuming it exists */}
+                            <div className="text-2xl font-bold text-gray-900">{channels.filter((c: any) => c.bot_enabled).length}</div>
+                        </div>
+                    </div>
+                    <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex items-center gap-4">
+                        <div className="w-12 h-12 bg-purple-50 text-purple-600 rounded-lg flex items-center justify-center">
+                            <UsersIcon size={24} />
+                        </div>
+                        <div>
+                            <div className="text-sm text-gray-500 font-medium">Toplam Abone</div>
+                            <div className="text-2xl font-bold text-gray-900">
+                                {new Intl.NumberFormat('tr-TR').format(channels.reduce((sum, c) => sum + (c.member_count || 0), 0))}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 {/* Actions Bar */}
                 <div className="flex flex-col xl:flex-row justify-between items-center gap-4 mb-8">
                     {/* Search & Filter Group */}
