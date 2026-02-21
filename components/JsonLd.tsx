@@ -72,17 +72,21 @@ export function generateChannelSchema(channel: {
     image?: string;
     member_count?: number;
     categoryName?: string;
+    created_at?: string;
 }, baseUrl: string) {
+    const channelUrl = `${baseUrl}/${channel.slug}`;
     return {
         "@context": "https://schema.org",
         "@type": "SocialMediaPosting",
         "name": channel.name,
         "description": channel.description || `${channel.name} Telegram kanalı`,
-        "url": `${baseUrl}/${channel.slug}`,
+        "url": channelUrl,
         "image": channel.image || `${baseUrl}/logo.png`,
+        "datePublished": channel.created_at || new Date().toISOString(),
         "author": {
             "@type": "Organization",
-            "name": channel.name
+            "name": channel.name,
+            "url": channelUrl
         },
         "interactionStatistic": {
             "@type": "InteractionCounter",
