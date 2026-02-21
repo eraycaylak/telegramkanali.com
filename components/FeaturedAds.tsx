@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { getActiveAds } from '@/app/actions/tokens';
 import AdTracker from '@/components/AdTracker';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Zap, ExternalLink } from 'lucide-react';
 
 interface FeaturedAdsProps {
@@ -49,27 +50,29 @@ export default function FeaturedAds({ adType, maxAds = 6, categoryId }: Featured
                                 className="group relative bg-white border-2 border-purple-100 rounded-2xl p-4 hover:border-purple-300 hover:shadow-lg hover:shadow-purple-50 transition-all duration-300 block"
                             >
                                 <div className="absolute top-2 right-2">
-                                    <span className="text-[10px] font-bold text-purple-400 bg-purple-50 px-2 py-0.5 rounded-full">
+                                    <span className="text-[10px] font-bold text-purple-600 bg-purple-50 px-2 py-0.5 rounded-full">
                                         Reklam
                                     </span>
                                 </div>
                                 <div className="flex items-center gap-3 mb-3">
                                     {ad.channels?.image ? (
-                                        <img
+                                        <Image
                                             src={ad.channels.image}
                                             alt={ad.channels.name}
+                                            width={48}
+                                            height={48}
                                             className="w-12 h-12 rounded-xl object-cover border border-purple-100"
                                         />
                                     ) : (
-                                        <div className="w-12 h-12 rounded-xl bg-purple-50 flex items-center justify-center text-purple-400 font-bold border border-purple-100">
+                                        <div className="w-12 h-12 rounded-xl bg-purple-50 flex items-center justify-center text-purple-600 font-bold border border-purple-100">
                                             {ad.channels?.name?.charAt(0) || '?'}
                                         </div>
                                     )}
                                     <div className="flex-1 min-w-0">
-                                        <h4 className="font-bold text-gray-900 text-sm truncate group-hover:text-purple-600 transition">
+                                        <div className="font-bold text-gray-900 text-sm truncate group-hover:text-purple-600 transition">
                                             {ad.channels?.name}
-                                        </h4>
-                                        <p className="text-xs text-gray-400">
+                                        </div>
+                                        <p className="text-xs text-gray-500">
                                             {ad.channels?.member_count?.toLocaleString() || '0'} üye
                                         </p>
                                     </div>
@@ -104,15 +107,17 @@ export default function FeaturedAds({ adType, maxAds = 6, categoryId }: Featured
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-4">
                                     {ad.channels?.image && (
-                                        <img
+                                        <Image
                                             src={ad.channels.image}
                                             alt={ad.channels.name}
+                                            width={56}
+                                            height={56}
                                             className="w-14 h-14 rounded-xl object-cover border-2 border-white/30"
                                         />
                                     )}
                                     <div>
                                         <span className="text-[10px] font-bold bg-white/20 px-2 py-0.5 rounded-full mb-1 inline-block">Sponsorlu</span>
-                                        <h4 className="font-bold text-lg">{ad.channels?.name}</h4>
+                                        <div className="font-bold text-lg">{ad.channels?.name}</div>
                                         <p className="text-white/80 text-sm">
                                             {ad.channels?.member_count?.toLocaleString() || '0'} üye · {ad.channels?.description?.substring(0, 60)}
                                         </p>
@@ -140,11 +145,13 @@ export default function FeaturedAds({ adType, maxAds = 6, categoryId }: Featured
                         rel="noopener noreferrer"
                         className="flex-shrink-0 w-20 text-center group"
                     >
-                        <div className="w-16 h-16 mx-auto rounded-full border-2 border-purple-400 p-0.5 bg-gradient-to-tr from-purple-500 to-pink-500 mb-1">
+                        <div className="w-16 h-16 mx-auto rounded-full border-2 border-purple-600 p-0.5 bg-gradient-to-tr from-purple-600 to-pink-600 mb-1">
                             {ad.channels?.image ? (
-                                <img
+                                <Image
                                     src={ad.channels.image}
                                     alt={ad.channels.name}
+                                    width={64}
+                                    height={64}
                                     className="w-full h-full rounded-full object-cover"
                                 />
                             ) : (

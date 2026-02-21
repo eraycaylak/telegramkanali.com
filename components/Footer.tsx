@@ -24,10 +24,10 @@ export default async function Footer() {
                             Türkiye'nin en büyük ve en güncel Telegram kanal dizini. Harika toplulukları keşfedin, kanalınızı tanıtın ve büyütün.
                         </p>
                         <div className="flex gap-4">
-                            <a href="https://instagram.com/telegramkanaliofficial" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-pink-600 transition-colors tooltip" aria-label="Instagram">
+                            <a href="https://instagram.com/telegramkanaliofficial" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-pink-600 transition-colors tooltip" aria-label="Instagram">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-instagram"><rect width="20" height="20" x="2" y="2" rx="5" ry="5" /><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" /><line x1="17.5" x2="17.51" y1="6.5" y2="6.5" /></svg>
                             </a>
-                            <a href="https://t.me/Errccyy" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-blue-500 transition-colors tooltip" aria-label="Telegram">
+                            <a href="https://t.me/Errccyy" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-blue-500 transition-colors tooltip" aria-label="Telegram">
                                 <Send size={20} />
                             </a>
                         </div>
@@ -84,7 +84,7 @@ export default async function Footer() {
                     </div>
                 </div>
 
-                <div className="mt-12 border-t border-gray-100 pt-8 text-center text-sm text-gray-400">
+                <div className="mt-12 border-t border-gray-100 pt-8 text-center text-sm text-gray-500">
                     <p>&copy; {new Date().getFullYear()} TelegramKanali.com. Tüm hakları saklıdır. Telegram, Telegram FZ-LLC'nin ticari markasıdır.</p>
                 </div>
             </div>

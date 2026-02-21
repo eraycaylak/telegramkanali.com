@@ -112,7 +112,7 @@ export default function HeaderClient({ categories, logo, user: initialUser }: He
                             placeholder="Aradığınız grubu yazınız..."
                             className="w-full h-12 bg-[#555555] text-gray-100 placeholder-gray-400 rounded-full px-6 pr-12 text-sm outline-none focus:bg-[#666] focus:ring-2 focus:ring-gray-400 transition-all shadow-inner"
                         />
-                        <button type="submit" className="absolute right-4 top-0 h-12 flex items-center text-gray-300 hover:text-white transition">
+                        <button type="submit" aria-label="Ara" className="absolute right-4 top-0 h-12 flex items-center text-gray-300 hover:text-white transition">
                             <Search size={22} />
                         </button>
                     </form>
@@ -131,7 +131,7 @@ export default function HeaderClient({ categories, logo, user: initialUser }: He
                                     <Link href="/dashboard" className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 rounded-full px-5 py-2.5 transition text-white shadow-md font-bold text-sm">
                                         <LayoutDashboard size={16} /> PANEL
                                     </Link>
-                                    <button onClick={() => signOut()} className="bg-gray-700 p-2.5 rounded-full text-gray-300 hover:text-white hover:bg-gray-600 transition" title="Çıkış Yap">
+                                    <button onClick={() => signOut()} aria-label="Çıkış Yap" className="bg-gray-700 p-2.5 rounded-full text-gray-300 hover:text-white hover:bg-gray-600 transition" title="Çıkış Yap">
                                         <LogOut size={18} />
                                     </button>
                                 </>
@@ -179,7 +179,7 @@ export default function HeaderClient({ categories, logo, user: initialUser }: He
                     >
                         <div className="p-4 border-b border-gray-700 flex items-center justify-between">
                             <span className="font-bold text-lg">Kategoriler</span>
-                            <button onClick={() => setMenuOpen(false)} className="p-1">
+                            <button onClick={() => setMenuOpen(false)} aria-label="Menüyü Kapat" className="p-1">
                                 <X size={24} />
                             </button>
                         </div>

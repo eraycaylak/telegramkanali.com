@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { BadgeCheck, Users, ThumbsUp, ThumbsDown, ArrowUp } from 'lucide-react';
 import { Channel } from '@/lib/types';
 import { useState, useEffect } from 'react';
@@ -100,13 +101,15 @@ export default function ChannelCard({ channel, compact = false }: ChannelCardPro
     if (compact) {
         return (
             <div className="group relative flex flex-col rounded-xl border border-gray-100 bg-white p-4 shadow-sm transition-all hover:shadow-md hover:border-blue-200 text-center h-full">
-                <Link href={`/${channel.slug}`} className="absolute inset-0 z-10" />
+                <Link href={`/${channel.slug}`} aria-label={channel.name} className="absolute inset-0 z-10" />
 
                 <div className="mx-auto mb-3 relative">
                     {channel.image && channel.image !== '/images/logo.png' ? (
-                        <img
+                        <Image
                             src={channel.image}
                             alt={channel.name}
+                            width={64}
+                            height={64}
                             className="h-16 w-16 rounded-full object-cover border border-gray-100 shadow-sm group-hover:scale-105 transition-transform"
                         />
                     ) : (
@@ -152,38 +155,38 @@ export default function ChannelCard({ channel, compact = false }: ChannelCardPro
                 <button
                     onClick={() => handleVote(1)}
                     disabled={loading}
-                    className={`p-1 rounded hover:bg-gray-200 transition ${userVote === 1 ? 'text-green-600' : 'text-gray-400'}`}
+                    className={`p-1 rounded hover:bg-gray-200 transition ${userVote === 1 ? 'text-green-700' : 'text-gray-500'}`}
                 >
                     <ArrowUp size={20} className={userVote === 1 ? 'fill-current' : ''} />
                 </button>
-                <span className={`font-bold text-sm ${score > 0 ? 'text-green-600' : score < 0 ? 'text-red-600' : 'text-gray-600'}`}>
+                <span className={`font-bold text-sm ${score > 0 ? 'text-green-700' : score < 0 ? 'text-red-700' : 'text-gray-700'}`}>
                     {score}
                 </span>
                 <button
                     onClick={() => handleVote(-1)}
                     disabled={loading}
-                    className={`p-1 rounded hover:bg-gray-200 transition ${userVote === -1 ? 'text-red-600' : 'text-gray-400'}`}
+                    className={`p-1 rounded hover:bg-gray-200 transition ${userVote === -1 ? 'text-red-700' : 'text-gray-500'}`}
                 >
                     <ThumbsDown size={14} className={userVote === -1 ? 'fill-current' : ''} />
                 </button>
             </div>
 
             {/* Mobile Vote Badge */}
-            <div className="md:hidden absolute top-2 right-2 z-30 bg-white/90 backdrop-blur text-gray-600 text-[10px] font-bold px-2 py-1 rounded-lg border flex items-center gap-1.5 shadow-sm">
+            <div className="md:hidden absolute top-2 right-2 z-30 bg-white/90 backdrop-blur text-gray-700 text-[10px] font-bold px-2 py-1 rounded-lg border flex items-center gap-1.5 shadow-sm">
                 <button
                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleVote(1); }}
                     disabled={loading}
-                    className={`p-0.5 ${userVote === 1 ? 'text-green-600' : 'text-gray-400'}`}
+                    className={`p-0.5 ${userVote === 1 ? 'text-green-700' : 'text-gray-500'}`}
                 >
                     <ThumbsUp size={12} className={userVote === 1 ? 'fill-current' : ''} />
                 </button>
-                <span className={`font-bold ${score > 0 ? 'text-green-600' : score < 0 ? 'text-red-600' : 'text-gray-600'}`}>
+                <span className={`font-bold ${score > 0 ? 'text-green-700' : score < 0 ? 'text-red-700' : 'text-gray-700'}`}>
                     {score}
                 </span>
                 <button
                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleVote(-1); }}
                     disabled={loading}
-                    className={`p-0.5 ${userVote === -1 ? 'text-red-600' : 'text-gray-400'}`}
+                    className={`p-0.5 ${userVote === -1 ? 'text-red-700' : 'text-gray-500'}`}
                 >
                     <ThumbsDown size={12} className={userVote === -1 ? 'fill-current' : ''} />
                 </button>
@@ -192,9 +195,11 @@ export default function ChannelCard({ channel, compact = false }: ChannelCardPro
             <div className="flex flex-col md:flex-row flex-1 gap-3 md:gap-5 p-3 md:p-5 md:pl-16 items-center md:items-start text-center md:text-left">
                 {/* Logo */}
                 {channel.image && channel.image !== '/images/logo.png' ? (
-                    <img
+                    <Image
                         src={channel.image}
                         alt={channel.name}
+                        width={80}
+                        height={80}
                         className="h-10 w-10 md:h-20 md:w-20 flex-shrink-0 rounded-full object-cover border border-gray-200 shadow-sm"
                     />
                 ) : (
@@ -206,7 +211,7 @@ export default function ChannelCard({ channel, compact = false }: ChannelCardPro
                 <div className="flex flex-col gap-1 w-full relative z-20 min-w-0">
                     <div className="flex flex-col md:flex-row items-center md:justify-between">
                         <div className="w-full">
-                            <div className="flex justify-center md:justify-start text-yellow-500 mb-0.5 text-[10px] md:text-xs">
+                            <div className="flex justify-center md:justify-start text-yellow-600 mb-0.5 text-[10px] md:text-xs">
                                 {[...Array(channel.rating || 5)].map((_, i) => (
                                     <span key={i}>★</span>
                                 ))}

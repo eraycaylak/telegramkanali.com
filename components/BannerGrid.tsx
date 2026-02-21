@@ -1,5 +1,6 @@
 import { getBanners, BannerType } from '@/app/actions/banners';
 import { Banner } from '@/lib/types';
+import Image from 'next/image';
 
 interface BannerGridProps {
     type?: BannerType;
@@ -34,11 +35,12 @@ export default async function BannerGrid({ type = 'homepage', categoryId }: Bann
                 >
                     {/* 1. Image Banner Content */}
                     {banner.image_url && (
-                        <img
+                        <Image
                             src={banner.image_url}
                             alt={banner.title || 'Banner'}
-                            className="w-full h-full object-contain md:object-cover"
-                            style={{ maxHeight: '100%', width: '100%' }}
+                            fill
+                            sizes="(max-width: 768px) 100vw, 50vw"
+                            className="object-contain md:object-cover"
                         />
                     )}
 
@@ -71,7 +73,7 @@ export default async function BannerGrid({ type = 'homepage', categoryId }: Bann
                             {/* Floating Logo */}
                             {banner.floating_logo_url && (
                                 <div className="absolute right-4 bottom-4 w-16 h-16 opacity-90 z-10 pointer-events-none">
-                                    <img src={banner.floating_logo_url} alt="" className="w-full h-full object-contain drop-shadow-lg" />
+                                    <Image src={banner.floating_logo_url} alt="" width={64} height={64} className="w-full h-full object-contain drop-shadow-lg" />
                                 </div>
                             )}
 

@@ -70,6 +70,7 @@ export default function MobileBottomNav({ categories }: MobileBottomNavProps) {
                     return (
                         <button
                             key={item.label}
+                            aria-label={item.label}
                             onClick={() => {
                                 if (item.action) {
                                     item.action();
@@ -99,8 +100,8 @@ export default function MobileBottomNav({ categories }: MobileBottomNavProps) {
                         style={{ paddingTop: 'max(env(safe-area-inset-top, 12px), 12px)' }}
                     >
                         <div className="flex items-center gap-3 mb-4">
-                            <h3 className="text-lg font-bold text-gray-900 flex-1">Kanal Ara</h3>
-                            <button onClick={() => setShowSearch(false)} className="p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100">
+                            <div className="text-lg font-bold text-gray-900 flex-1">Kanal Ara</div>
+                            <button onClick={() => setShowSearch(false)} aria-label="Aramayı Kapat" className="p-2 text-gray-500 hover:text-gray-700 rounded-full hover:bg-gray-100">
                                 <X size={22} />
                             </button>
                         </div>
@@ -114,7 +115,7 @@ export default function MobileBottomNav({ categories }: MobileBottomNavProps) {
                                     placeholder="Kanal veya grup ara..."
                                     className="w-full h-14 bg-gray-100 rounded-2xl px-5 pr-14 text-base outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white border border-gray-200 transition-all"
                                 />
-                                <button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2 bg-blue-600 text-white p-2.5 rounded-xl hover:bg-blue-700 transition">
+                                <button type="submit" aria-label="Arama Yap" className="absolute right-2 top-1/2 -translate-y-1/2 bg-blue-600 text-white p-2.5 rounded-xl hover:bg-blue-700 transition">
                                     <Search size={20} />
                                 </button>
                             </div>
@@ -149,7 +150,7 @@ export default function MobileBottomNav({ categories }: MobileBottomNavProps) {
 
                         <div className="px-5 pb-6">
                             {/* Section: Kategoriler */}
-                            <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-3 mt-2">Kategoriler</h3>
+                            <div className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3 mt-2">Kategoriler</div>
                             <div className="grid grid-cols-2 gap-2 mb-6">
                                 {categories.map((cat) => (
                                     <Link
@@ -163,7 +164,7 @@ export default function MobileBottomNav({ categories }: MobileBottomNavProps) {
                             </div>
 
                             {/* Section: Hızlı Erişim */}
-                            <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-3">Hızlı Erişim</h3>
+                            <div className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3">Hızlı Erişim</div>
                             <div className="space-y-1 mb-6">
                                 {[
                                     { label: 'Yeni Eklenenler', href: '/yeni-eklenenler', emoji: '🆕' },
@@ -183,7 +184,7 @@ export default function MobileBottomNav({ categories }: MobileBottomNavProps) {
                             </div>
 
                             {/* Section: Kurumsal */}
-                            <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-3">Kurumsal</h3>
+                            <div className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3">Kurumsal</div>
                             <div className="space-y-1">
                                 {[
                                     { label: 'Hakkımızda', href: '/hakkimizda' },

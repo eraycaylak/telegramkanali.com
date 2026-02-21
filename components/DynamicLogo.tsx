@@ -30,7 +30,7 @@ export default async function DynamicLogo() {
     const logoUrl = await getLogoUrl();
 
     return (
-        <Link href="/" className="flex items-center flex-shrink-0 hover:opacity-90 transition">
+        <Link href="/" aria-label="Ana Sayfa" className="flex items-center flex-shrink-0 hover:opacity-90 transition">
             {logoUrl ? (
                 <img
                     src={logoUrl}

@@ -19,7 +19,7 @@ const faqs = [
   {
     question: "Telegram Kanalları nedir?",
     answer: "Telegram kanalları, yöneticilerin sınırsız sayıda aboneye mesaj, fotoğraf, video ve dosya paylaşabildiği tek yönlü iletişim platformlarıdır. Detaylı liste için en iyi Telegram kanalları sayfamızı inceleyebilirsiniz.",
-    link: { href: "/rehber/en-iyi-telegram-kanallari", text: "en iyi Telegram kanalları" }
+    link: { href: "/rehber/en-iyi-telegram-kanallari", text: "en iyi Telegram kanalları", className: "underline" }
   },
   {
     question: "Telegram kanallarına nasıl katılabilirim?",
@@ -32,7 +32,7 @@ const faqs = [
   {
     question: "Kendi kanalımı nasıl ekleyebilirim?",
     answer: "Kanalınızı sitemize eklemek için 'Kanal Ekle' sayfasını ziyaret edebilir veya iletişim bölümünden bize ulaşabilirsiniz.",
-    link: { href: "/kanal-ekle", text: "Kanal Ekle" }
+    link: { href: "/kanal-ekle", text: "Kanal Ekle", className: "underline" }
   }
 ];
 
@@ -116,6 +116,7 @@ export default async function Home({ searchParams }: HomeProps) {
 
       {/* MASSIVE Channels Grid */}
       <section id="channels-list" className="scroll-mt-20">
+        <h2 className="sr-only">Kanal Listesi</h2>
         <div className="flex justify-between items-center mb-4">
           <span className="text-sm text-gray-500 font-medium">Toplam {totalCount} kanal listeleniyor</span>
         </div>
@@ -139,7 +140,7 @@ export default async function Home({ searchParams }: HomeProps) {
         ) : (
           <div className="text-center py-20 bg-gray-50 rounded-xl border border-dashed border-gray-300">
             <p className="text-gray-500 text-lg">Aradığınız kriterlere uygun kanal bulunamadı.</p>
-            <Link href="/" className="mt-4 inline-block text-blue-600 font-medium hover:underline">Filtreleri Temizle</Link>
+            <Link href="/" className="mt-4 inline-block text-blue-600 font-medium underline hover:text-blue-800">Filtreleri Temizle</Link>
           </div>
         )}
 
@@ -157,7 +158,7 @@ export default async function Home({ searchParams }: HomeProps) {
               <span className="text-blue-500">Telegram</span> Kanalları
             </h2>
             <p className="mb-4">
-              Telegram, güvenli ve hızlı mesajlaşma deneyimi sunan popüler bir uygulamadır. Sitemizdeki <Link href="/rehber/en-iyi-telegram-kanallari" className="text-blue-600 hover:underline">En iyi Telegram kanalları</Link> listesi ile ilgi alanlarınıza uygun toplulukları keşfedebilirsiniz.
+              Telegram, güvenli ve hızlı mesajlaşma deneyimi sunan popüler bir uygulamadır. Sitemizdeki <Link href="/rehber/en-iyi-telegram-kanallari" className="text-blue-600 underline hover:text-blue-800">En iyi Telegram kanalları</Link> listesi ile ilgi alanlarınıza uygun toplulukları keşfedebilirsiniz.
             </p>
             <div className="bg-blue-50 p-6 rounded-xl border border-blue-100 my-6 flex items-start gap-4">
               <Globe className="text-blue-500 flex-shrink-0 mt-1" size={32} />
@@ -206,6 +207,13 @@ export default async function Home({ searchParams }: HomeProps) {
               </summary>
               <div className="px-5 pb-5 text-gray-600 leading-relaxed border-t border-gray-100 pt-3">
                 {faq.answer}
+                {faq.link && (
+                  <div className="mt-2">
+                    <Link href={faq.link.href} className={`text-blue-600 hover:text-blue-800 ${faq.link.className || ''}`}>
+                      {faq.link.text}
+                    </Link>
+                  </div>
+                )}
               </div>
             </details>
           ))}
