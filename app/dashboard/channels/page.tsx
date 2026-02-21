@@ -138,9 +138,9 @@ export default function MyChannelsPage() {
                                     <Link href={`/dashboard/bot?channel=${channel.id}`} className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition">
                                         <Settings size={18} />
                                     </Link>
-                                    <button className="bg-gray-50 text-gray-600 px-4 py-2 rounded-xl text-xs font-bold hover:bg-gray-100 transition">
+                                    <Link href={`/dashboard/stats?channel=${channel.id}`} className="bg-gray-50 text-gray-600 px-4 py-2 rounded-xl text-xs font-bold hover:bg-gray-100 transition">
                                         Analizler
-                                    </button>
+                                    </Link>
                                 </div>
                             </div>
                         </div>
