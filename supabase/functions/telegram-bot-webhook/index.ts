@@ -183,10 +183,26 @@ Deno.serve(async (req: Request) => {
         if (msg && msg.text === '/start') {
             const chatId = msg.chat.id.toString()
             await sendTelegramMessage(chatId,
-                '👋 Merhaba! Ben telegramkanali.com kanal istatistik botuyum.\n\n' +
-                '📊 Beni kanalınıza yönetici olarak ekleyin ve\n' +
-                '🔗 telegramkanali.com/dashboard/bot sayfasından doğrulama kodunu alın.\n\n' +
-                'Sorularınız için: @tgkanalicom'
+                '👋 Merhaba! Ben telegramkanali.com resmi istatistik ve doğrulama botuyum.\n\n' +
+                'ℹ️ *telegramkanali.com Nedir?*\n' +
+                'Türkiye\'nin en aktif ve güncel Telegram kanal dizinidir. Kanalınızı sitemize ekleyerek binlerce organik yeni üyeye ulaşabilirsiniz.\n\n' +
+                '🤖 *Bu Bot Ne İşe Yarar?*\n' +
+                'Beni kanalınıza yönetici olarak eklediğinizde:\n' +
+                '✅ Kanalınız sitemizde "Doğrulanmış" (Verified) rozeti alır.\n' +
+                '✅ Giren ve çıkan üyelerin istatistikleri sitemizde günlük/haftalık olarak otomatik tutulur.\n' +
+                '✅ Kategorilerde daha üst sıralarda listelenirsiniz.\n\n' +
+                '🛠 *Nasıl Kullanılır?*\n' +
+                '1. Beni kanalınıza **Yönetici** olarak ekleyin.\n' +
+                '2. telegramkanali.com/dashboard/bot adresinden size özel üretilen **Doğrulama Kodunu** hesaba giriş yaparak kopyalayın.\n' +
+                '3. O kodu kanalınıza mesaj olarak gönderin (Örn: `/verify TK_12345`).\n' +
+                '4. Bot kodunuzu görür görmez onaylar. Ardından mesajı silebilirsiniz!\n\n' +
+                '📢 *Reklam ve VIP Avantajları*\n' +
+                'Platformumuzda kanalınızı öne çıkarmak, "Öne Çıkanlar" vitrininde yer almak, anasayfa banner reklamı vermek ve token bakiyesiyle işlemler yapmak için sitemizdeki **Reklam** (telegramkanali.com/reklam) sayfasını veya **VIP Paketleri** inceleyebilirsiniz.\n\n' +
+                '📞 *İletişim Bilgilerimiz*\n' +
+                'Soru, destek ve reklam anlaşmaları için bizimle doğrudan iletişime geçebilirsiniz:\n' +
+                '💬 Telegram: @Errccyy\n' +
+                '🟢 WhatsApp: 0542 787 95 95\n\n' +
+                '🚀 Kanalınızı büyütmeye hazırsanız hemen başlayalım!'
             )
             return okResponse()
         }
