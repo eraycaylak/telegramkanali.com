@@ -1,4 +1,7 @@
+'use client';
+
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface PaginationProps {
@@ -8,6 +11,8 @@ interface PaginationProps {
 }
 
 export default function Pagination({ currentPage, totalPages, searchParams }: PaginationProps) {
+    const pathname = usePathname() || '/';
+
     // Generate URL for a page
     const getPageUrl = (page: number) => {
         const params = new URLSearchParams();
@@ -22,7 +27,7 @@ export default function Pagination({ currentPage, totalPages, searchParams }: Pa
         }
 
         params.set('page', page.toString());
-        return `/?${params.toString()}`;
+        return `${pathname}?${params.toString()}`;
     };
 
     if (totalPages <= 1) return null;

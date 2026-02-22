@@ -1,4 +1,4 @@
-import { getCategoryBySlug, getChannelsByCategory, getCategories, getChannelBySlug, getFeaturedChannels } from '@/lib/data';
+import { getCategoryBySlug, getChannelsByCategory, getCategories, getChannelBySlug, getFeaturedChannels, getChannels } from '@/lib/data';
 import ChannelCard from '@/components/ChannelCard';
 import ChannelDetail from '@/components/ChannelDetail';
 import BannerGrid from '@/components/BannerGrid';
@@ -9,6 +9,7 @@ import JsonLd, { generateBreadcrumbSchema, generateChannelSchema, generateItemLi
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
+import Pagination from '@/components/Pagination';
 
 const baseUrl = 'https://telegramkanali.com';
 
@@ -19,6 +20,7 @@ interface PageProps {
   params: {
     slug: string;
   };
+  searchParams?: { [key: string]: string | string[] | undefined };
 }
 
 // Generate SEO Metadata
@@ -54,8 +56,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
-export default async function DynamicPage({ params }: PageProps) {
+export default async function DynamicPage({ params, searchParams }: PageProps) {
   const { slug } = await params;
+  const resolvedSearchParams = searchParams ? await searchParams : {};
+  const pageParam = resolvedSearchParams?.page;
+  const page = pageParam ? parseInt(pageParam as string) : 1;
+  const LIMIT = 20;
 
   // 1. Attempt to fetch Category
   const category = await getCategoryBySlug(slug);
@@ -63,7 +69,8 @@ export default async function DynamicPage({ params }: PageProps) {
   // === RENDER CATEGORY VIEW ===
   if (category) {
     const allCategories = await getCategories();
-    const channels = await getChannelsByCategory(category.id);
+    const { data: channels, count: totalCount } = await getChannels(page, LIMIT, undefined, category.id);
+    const totalPages = Math.ceil(totalCount / LIMIT);
 
     return (
       <>
@@ -101,6 +108,10 @@ export default async function DynamicPage({ params }: PageProps) {
 
         <Header />
         <main className="container mx-auto px-4 py-8 space-y-8">
+          {/* SEO Pagination Tags (Next.js Hoisting) */}
+          {page > 1 && <link rel="prev" href={`${baseUrl}/${category.slug}?page=${page - 1}`} />}
+          {page < totalPages && <link rel="next" href={`${baseUrl}/${category.slug}?page=${page + 1}`} />}
+
           {/* Category Header with SEO Intro */}
           <div className="bg-gradient-to-br from-gray-50 to-white border rounded-xl p-8 shadow-sm">
             <div className="text-center mb-6">
@@ -127,7 +138,7 @@ export default async function DynamicPage({ params }: PageProps) {
             {/* Quick Stats */}
             <div className="mt-6 flex justify-center gap-6 text-sm">
               <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">{channels.length}</div>
+                <div className="text-2xl font-bold text-blue-600">{totalCount}</div>
                 <div className="text-gray-500">Kanal</div>
               </div>
               <div className="text-center">
@@ -162,6 +173,13 @@ export default async function DynamicPage({ params }: PageProps) {
               </div>
             )}
           </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="mt-8 flex justify-center">
+              <Pagination totalPages={totalPages} currentPage={page} searchParams={resolvedSearchParams} />
+            </div>
+          )}
 
           {/* SEO Content Section */}
           <section className="grid gap-12 lg:grid-cols-3 pt-12 border-t border-gray-100">
