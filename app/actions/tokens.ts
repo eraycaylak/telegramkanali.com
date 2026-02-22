@@ -272,7 +272,7 @@ export async function getUserCampaigns() {
         .from('ad_campaigns')
         .select(`
             *,
-            channels:channel_id (name, image, slug)
+            channels (name, image, slug)
         `)
         .eq('user_id', userId)
         .order('created_at', { ascending: false });
@@ -433,8 +433,8 @@ export async function getAdminCampaigns() {
         tokens_spent,
         created_at,
         user_id,
-        channels:channel_id (name, slug),
-        profiles:user_id (id, full_name, email)
+        channels (name, slug),
+        profiles (id, full_name, email)
     `)
         .order('created_at', { ascending: false });
 
@@ -572,7 +572,7 @@ export async function getActiveAds(adType: 'featured' | 'banner' | 'story', cate
             total_views,
             current_views,
             expires_at,
-            channels:channel_id (id, name, image, slug, join_link, description, member_count, category_id)
+            channels (id, name, image, slug, join_link, description, member_count, category_id)
         `)
         .eq('ad_type', adType)
         .eq('status', 'active')
