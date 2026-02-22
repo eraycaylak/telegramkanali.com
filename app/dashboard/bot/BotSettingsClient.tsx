@@ -58,8 +58,8 @@ export default function BotSettingsClient({
                                 key={c.id}
                                 onClick={() => setSelectedId(c.id)}
                                 className={`w-full text-left p-4 rounded-2xl border transition-all ${selectedId === c.id
-                                        ? 'bg-blue-600 text-white border-blue-600 shadow-lg shadow-blue-100'
-                                        : 'bg-white text-gray-700 border-gray-100 hover:border-gray-300'
+                                    ? 'bg-blue-600 text-white border-blue-600 shadow-lg shadow-blue-100'
+                                    : 'bg-white text-gray-700 border-gray-100 hover:border-gray-300'
                                     }`}
                             >
                                 <div className="font-bold truncate">{c.name}</div>
@@ -168,9 +168,13 @@ export default function BotSettingsClient({
                                 </div>
                             </div>
 
-                            <div className="text-center">
-                                <a href="https://t.me/tgkanalicom_bot" target="_blank" className="inline-flex items-center gap-2 text-blue-600 font-bold hover:underline">
-                                    <MessageSquare size={18} /> Yardıma mı ihtiyacınız var?
+                            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                                <a href="https://t.me/Errccyy" target="_blank" className="inline-flex items-center gap-2 text-blue-600 font-bold hover:underline">
+                                    <MessageSquare size={18} /> Telegram: @Errccyy
+                                </a>
+                                <span className="text-gray-300 hidden sm:block">|</span>
+                                <a href="https://wa.me/905427879595" target="_blank" className="inline-flex items-center gap-2 text-green-600 font-bold hover:underline">
+                                    <MessageSquare size={18} /> WhatsApp: 0542 787 95 95
                                 </a>
                             </div>
                         </>

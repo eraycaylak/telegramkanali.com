@@ -14,7 +14,7 @@ export default function DashboardClient() {
     const [profiles, setProfiles] = useState<any[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('all');
-    const [viewStatus, setViewStatus] = useState<'approved' | 'pending' | 'rejected'>('approved');
+    const [viewStatus, setViewStatus] = useState<'approved' | 'pending' | 'rejected' | 'bot'>('approved');
     const [loading, setLoading] = useState(true);
 
     // Modal State
@@ -45,17 +45,41 @@ export default function DashboardClient() {
     async function fetchData() {
         setLoading(true);
         try {
-            // Fetch Channels
-            const { data: chanData } = await supabase.from('channels').select('*, categories(name)').order('created_at', { ascending: false });
-            if (chanData) setChannels(chanData.map((d: any) => ({ ...d, categoryName: d.categories?.name })) as Channel[]);
+            // 1000 limit aşmak için range ile tüm kanalları çek
+            let allChannels: any[] = [];
+            let from = 0;
+            const batchSize = 1000;
+            while (true) {
+                const { data: batch, error } = await supabase
+                    .from('channels')
+                    .select('*, categories(name)')
+                    .order('created_at', { ascending: false })
+                    .range(from, from + batchSize - 1);
+                if (error || !batch || batch.length === 0) break;
+                allChannels = [...allChannels, ...batch];
+                if (batch.length < batchSize) break;
+                from += batchSize;
+            }
+            setChannels(allChannels.map((d: any) => ({ ...d, categoryName: d.categories?.name })) as Channel[]);
 
             // Fetch Categories for dropdown
             const { data: catData } = await supabase.from('categories').select('*');
             if (catData) setCategories(catData as Category[]);
 
-            // Fetch Profiles
-            const { data: profData } = await supabase.from('profiles').select('id, email, full_name');
-            if (profData) setProfiles(profData);
+            // Fetch Profiles (range ile)
+            let allProfiles: any[] = [];
+            let pFrom = 0;
+            while (true) {
+                const { data: pBatch, error: pErr } = await supabase
+                    .from('profiles')
+                    .select('id, email, full_name')
+                    .range(pFrom, pFrom + 999);
+                if (pErr || !pBatch || pBatch.length === 0) break;
+                allProfiles = [...allProfiles, ...pBatch];
+                if (pBatch.length < 1000) break;
+                pFrom += 1000;
+            }
+            setProfiles(allProfiles);
         } catch (error) {
             console.error('Admin dashboard data fetch error:', error);
         } finally {
@@ -136,10 +160,11 @@ export default function DashboardClient() {
     };
 
     // Filter Logic
-    const filteredChannels = channels.filter(c => {
+    const filteredChannels = channels.filter((c: any) => {
         const matchesSearch = c.name.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesCategory = selectedCategory === 'all' || c.category_id === selectedCategory;
-        const matchesStatus = c.status === viewStatus || (viewStatus === 'approved' && !c.status); // Default to approved
+        if (viewStatus === 'bot') return matchesSearch && matchesCategory && c.bot_enabled;
+        const matchesStatus = c.status === viewStatus || (viewStatus === 'approved' && !c.status);
         return matchesSearch && matchesCategory && matchesStatus;
     });
 
@@ -174,16 +199,18 @@ export default function DashboardClient() {
                             <div className="text-2xl font-bold text-gray-900">{channels.length}</div>
                         </div>
                     </div>
-                    <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex items-center gap-4">
+                    <button
+                        onClick={() => setViewStatus('bot')}
+                        className={`bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex items-center gap-4 w-full text-left hover:border-green-300 hover:shadow-md transition ${viewStatus === 'bot' ? 'border-green-500 ring-2 ring-green-100' : ''}`}
+                    >
                         <div className="w-12 h-12 bg-green-50 text-green-600 rounded-lg flex items-center justify-center">
                             <Bot size={24} />
                         </div>
                         <div>
                             <div className="text-sm text-gray-500 font-medium">Bot Bağlı Kanal</div>
-                            {/* TypeScript doesn't strictly type bot_enabled on Channel if not defined, assuming it exists */}
                             <div className="text-2xl font-bold text-gray-900">{channels.filter((c: any) => c.bot_enabled).length}</div>
                         </div>
-                    </div>
+                    </button>
                     <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex items-center gap-4">
                         <div className="w-12 h-12 bg-purple-50 text-purple-600 rounded-lg flex items-center justify-center">
                             <UsersIcon size={24} />
@@ -235,6 +262,12 @@ export default function DashboardClient() {
                                 className={`px-4 py-2 rounded-lg text-sm font-bold transition ${viewStatus === 'rejected' ? 'bg-white text-red-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
                             >
                                 Reddedilenler
+                            </button>
+                            <button
+                                onClick={() => setViewStatus('bot')}
+                                className={`px-4 py-2 rounded-lg text-sm font-bold transition flex items-center gap-2 ${viewStatus === 'bot' ? 'bg-white text-green-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                            >
+                                <Bot size={14} /> Bot Bağlı
                             </button>
                         </div>
                     </div>

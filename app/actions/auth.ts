@@ -4,6 +4,7 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import { getAdminClient } from '@/lib/supabaseAdmin';
 
 async function createClient() {
     const cookieStore = await cookies();
@@ -44,20 +45,21 @@ export async function signUp(formData: FormData) {
     const password = formData.get('password') as string;
     const fullName = formData.get('full_name') as string;
 
-    const supabase = await createClient();
-
-    const { data, error } = await supabase.auth.signUp({
+    // Admin client ile kullanıcı oluştur — email rate limit yok, otomatik onaylı
+    const adminClient = getAdminClient();
+    const { data: createdUser, error: createError } = await adminClient.auth.admin.createUser({
         email,
         password,
-        options: {
-            data: {
-                full_name: fullName,
-            },
-            emailRedirectTo: 'https://telegramkanali.com',
-        },
+        email_confirm: true, // Email onayını otomatik geçir
+        user_metadata: { full_name: fullName },
     });
 
-    if (error) return { error: error.message };
+    if (createError) return { error: createError.message };
+
+    // Kullanıcıyı hemen oturum açtır
+    const supabase = await createClient();
+    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+    if (signInError) return { error: signInError.message };
 
     revalidatePath('/');
     return { success: true };
