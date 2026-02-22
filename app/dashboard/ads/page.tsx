@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { getUserCampaigns, getAdPricing, createAdCampaign, toggleCampaignStatus } from '@/app/actions/tokens';
-import { supabase } from '@/lib/supabaseClient';
+import { getMyChannels } from '@/app/actions/channels';
 import {
     TrendingUp,
     Eye,
@@ -53,20 +53,12 @@ export default function AdsPage() {
 
     async function loadData() {
         try {
-            const [campaignsData] = await Promise.all([
+            const [campaignsData, channelsResult] = await Promise.all([
                 getUserCampaigns(),
+                getMyChannels(),
             ]);
             setCampaigns(campaignsData);
-
-            // Fetch user's channels
-            const { data: { user } } = await supabase.auth.getUser();
-            if (user) {
-                const { data: userChannels } = await supabase
-                    .from('channels')
-                    .select('id, name, image')
-                    .eq('owner_id', user.id);
-                setChannels(userChannels || []);
-            }
+            setChannels(channelsResult.channels || []);
         } catch (error) {
             console.error('Error loading ads data:', error);
         } finally {

@@ -1,0 +1,77 @@
+
+> telegramkanali@0.1.0 build
+> next build
+
+▲ Next.js 16.1.6 (Turbopack)
+- Environments: .env.local
+
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+  Creating an optimized production build ...
+✓ Compiled successfully in 3.7s
+  Running TypeScript ...
+  Collecting page data using 11 workers ...
+  Generating static pages using 11 workers (0/1104) ...
+[ADMIN] Blog posts count: 1610
+  Generating static pages using 11 workers (276/1104) 
+  Generating static pages using 11 workers (552/1104) 
+  Generating static pages using 11 workers (828/1104) 
+✓ Generating static pages using 11 workers (1104/1104) in 6.9s
+  Finalizing page optimization ...
+
+Route (app)
+┌ ƒ /
+├ ƒ /_not-found
+├ ƒ /[slug]
+├ ƒ /admin
+├ ƒ /admin/ads
+├ ƒ /admin/analytics
+├ ƒ /admin/banners
+├ ○ /admin/blog
+├ ƒ /admin/blog/[id]
+├ ○ /admin/blog/new
+├ ƒ /admin/bulk-add
+├ ○ /admin/campaigns
+├ ƒ /admin/categories
+├ ƒ /admin/dashboard
+├ ○ /admin/deposits
+├ ƒ /admin/pages
+├ ƒ /admin/settings
+├ ƒ /admin/users
+├ ƒ /api/update-member-counts
+├ ƒ /blog
+├ ƒ /blog/[slug]
+├ ○ /dashboard
+├ ○ /dashboard/ads
+├ ○ /dashboard/billing
+├ ○ /dashboard/bot
+├ ○ /dashboard/channels
+├ ƒ /dashboard/kanal-ekle
+├ ○ /dashboard/stats
+├ ƒ /gizlilik
+├ ƒ /hakkimizda
+├ ƒ /iletisim
+├ ƒ /kanal-ekle
+├ ● /kanallar/[slug]
+│ ├ /kanallar/_-hfsea
+│ ├ /kanallar/-
+│ ├ /kanallar/--
+│ └ [+996 more paths]
+├ ƒ /kullanim-sartlari
+├ ƒ /login
+├ ƒ /one-cikanlar
+├ ƒ /populer
+├ ƒ /register
+├ ƒ /rehber/[slug]
+├ ƒ /reklam
+├ ○ /robots.txt
+├ ○ /sitemap.xml
+├ ƒ /webmaster
+└ ƒ /yeni-eklenenler
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+●  (SSG)      prerendered as static HTML (uses generateStaticParams)
+ƒ  (Dynamic)  server-rendered on demand
+
