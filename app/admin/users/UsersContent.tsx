@@ -13,7 +13,9 @@ import {
     CheckCircle2,
     X,
     Save,
-    Coins
+    Coins,
+    Tv,
+    ExternalLink
 } from 'lucide-react';
 
 export default function UsersContent() {
@@ -71,7 +73,7 @@ export default function UsersContent() {
         try {
             const { data } = await supabase
                 .from('profiles')
-                .select('*')
+                .select('*, channels(id, name, slug, bot_enabled, status, member_count)')
                 .order('created_at', { ascending: false });
 
             setUsers(data || []);
@@ -161,6 +163,7 @@ export default function UsersContent() {
                     <thead>
                         <tr className="bg-gray-50 text-gray-500 text-[10px] font-bold uppercase tracking-widest border-b border-gray-100">
                             <th className="p-4">Kullanıcı Bilgileri</th>
+                            <th className="p-4">Kanallar</th>
                             <th className="p-4">Bakiye</th>
                             <th className="p-4">Yetki</th>
                             <th className="p-4">Kayıt Tarihi</th>
@@ -169,15 +172,15 @@ export default function UsersContent() {
                     </thead>
                     <tbody className="divide-y divide-gray-50">
                         {loading ? (
-                            <tr><td colSpan={5} className="p-8 text-center text-gray-400">Yükleniyor...</td></tr>
+                            <tr><td colSpan={6} className="p-8 text-center text-gray-400">Yükleniyor...</td></tr>
                         ) : filteredUsers.length === 0 ? (
-                            <tr><td colSpan={5} className="p-8 text-center text-gray-400">Kullanıcı bulunamadı.</td></tr>
+                            <tr><td colSpan={6} className="p-8 text-center text-gray-400">Kullanıcı bulunamadı.</td></tr>
                         ) : (
                             filteredUsers.map(u => (
-                                <tr key={u.id} className="hover:bg-gray-50 transition">
+                                <tr key={u.id} className="hover:bg-gray-50 transition align-top">
                                     <td className="p-4">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
+                                            <div className="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-bold shrink-0">
                                                 {u.full_name?.charAt(0) || u.email.charAt(0)}
                                             </div>
                                             <div>
@@ -187,6 +190,27 @@ export default function UsersContent() {
                                                 </div>
                                             </div>
                                         </div>
+                                    </td>
+                                    {/* Kanallar sütunu */}
+                                    <td className="p-4 max-w-[200px]">
+                                        {u.channels && u.channels.length > 0 ? (
+                                            <div className="space-y-1">
+                                                {u.channels.map((ch: any) => (
+                                                    <a
+                                                        key={ch.id}
+                                                        href={`/${ch.slug}`}
+                                                        target="_blank"
+                                                        className="flex items-center gap-1.5 group"
+                                                    >
+                                                        <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${ch.bot_enabled ? 'bg-green-500' : 'bg-gray-300'}`}></span>
+                                                        <span className="text-xs text-gray-700 font-medium truncate max-w-[150px] group-hover:text-blue-600 transition">{ch.name}</span>
+                                                        <ExternalLink size={10} className="text-gray-300 group-hover:text-blue-400 shrink-0" />
+                                                    </a>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <span className="text-xs text-gray-300 italic">Kanal yok</span>
+                                        )}
                                     </td>
                                     <td className="p-4">
                                         <div className="flex items-center gap-1.5 text-gray-900 font-extrabold bg-green-50 px-3 py-1 rounded-lg w-fit">
@@ -231,6 +255,33 @@ export default function UsersContent() {
                             </button>
                         </div>
                         <div className="p-6 space-y-4">
+                            {/* Kullanıcının Kanalları */}
+                            {editingUser.channels && editingUser.channels.length > 0 && (
+                                <div className="bg-blue-50 p-4 rounded-xl border border-blue-100">
+                                    <label className="block text-xs font-bold text-blue-800 uppercase tracking-wider mb-3 flex items-center gap-2">
+                                        <Tv size={14} /> Sahip Olduğu Kanallar ({editingUser.channels.length})
+                                    </label>
+                                    <div className="space-y-2">
+                                        {editingUser.channels.map((ch: any) => (
+                                            <div key={ch.id} className="flex items-center justify-between bg-white rounded-lg px-3 py-2">
+                                                <div className="flex items-center gap-2">
+                                                    <span className={`w-2 h-2 rounded-full ${ch.bot_enabled ? 'bg-green-500' : 'bg-gray-300'}`}></span>
+                                                    <span className="text-sm font-medium text-gray-800 truncate max-w-[180px]">{ch.name}</span>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-[10px] text-gray-400">{(ch.member_count || 0).toLocaleString()} üye</span>
+                                                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${ch.status === 'approved' ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}`}>
+                                                        {ch.status === 'approved' ? 'Onaylı' : 'Bekliyor'}
+                                                    </span>
+                                                    <a href={`/${ch.slug}`} target="_blank" className="text-blue-400 hover:text-blue-600">
+                                                        <ExternalLink size={12} />
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">E-posta</label>
                                 <input type="text" value={editingUser.email} disabled className="w-full bg-gray-100 border border-gray-200 rounded-lg px-3 py-2 text-gray-500 text-sm" />
