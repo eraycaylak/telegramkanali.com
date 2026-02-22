@@ -188,7 +188,7 @@ export async function createAdCampaign(data: {
 
     // Story tipi için süre bazlı
     if (data.adType === 'story') {
-        campaignData.expires_at = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(); // 1 gün
+        campaignData.expires_at = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
     }
 
     const { data: campaign, error: campaignError } = await adminClient
@@ -205,6 +205,44 @@ export async function createAdCampaign(data: {
             .update({ token_balance: currentBalance })
             .eq('id', userId);
         return { error: 'Kampanya oluşturulamadı.' };
+    }
+
+    // Try to send a Telegram notification to the Admin
+    try {
+        const botToken = process.env.TELEGRAM_BOT_TOKEN;
+        const adminId = process.env.TELEGRAM_ADMIN_ID;
+
+        // Get user email for notification
+        const { data: userProfile } = await adminClient
+            .from('profiles')
+            .select('email')
+            .eq('id', userId)
+            .single();
+        const userEmail = userProfile?.email || 'Bilinmeyen Kullanıcı';
+
+        if (botToken && adminId) {
+            const message = `🔔 *Yeni Reklam Kampanyası Bekliyor!*\n\n` +
+                `👤 Kullanıcı: ${userEmail}\n` +
+                `📺 Tip: ${data.adType.toUpperCase()}\n` +
+                `👁️ Hedef Gösterim: ${pricing.views}\n` +
+                `💰 Bütçe: ${pricing.tokens_required} Jeton\n\n` +
+                `👉 Lütfen onaylamak veya reddetmek için admin paneline gidin: https://telegramkanali.com/admin/campaigns`; // Replace with actual admin URL
+
+            await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: adminId,
+                    text: message,
+                    parse_mode: 'Markdown'
+                })
+            });
+            console.log("Admin notification sent to Telegram.");
+        } else {
+            console.log("Admin notification skipped: TELEGRAM_BOT_TOKEN or TELEGRAM_ADMIN_ID missing.");
+        }
+    } catch (err) {
+        console.error("Failed to send admin notification:", err);
     }
 
     // Log transaction
