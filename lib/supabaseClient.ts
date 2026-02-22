@@ -1,4 +1,5 @@
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { createBrowserClient } from '@supabase/ssr';
+import { SupabaseClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -13,17 +14,12 @@ export const supabase = (() => {
         console.error('CRITICAL: Supabase environment variables are missing!');
         // Return a dummy client that warns but doesn't crash the app immediately on import
         // This allows error boundaries to render instead of a hard 500 on module load
-        return createClient('https://placeholder.supabase.co', 'placeholder', {
+        return createBrowserClient('https://placeholder.supabase.co', 'placeholder', {
             auth: { persistSession: false }
         });
     }
 
-    supabaseInstance = createClient(supabaseUrl, supabaseKey, {
-        auth: {
-            persistSession: true,
-            autoRefreshToken: true,
-        }
-    });
+    supabaseInstance = createBrowserClient(supabaseUrl, supabaseKey);
 
     return supabaseInstance;
 })();
