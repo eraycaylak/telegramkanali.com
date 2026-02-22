@@ -327,12 +327,86 @@ export async function toggleCampaignStatus(campaignId: string) {
 }
 
 // ========================
+// USER DELETE CAMPAIGN
+// ========================
+
+export async function deleteAdCampaign(campaignId: string) {
+    const userId = await getAuthUserId();
+    if (!userId) return { error: 'Oturum açmanız gerekiyor.' };
+
+    const { data: campaign, error: fetchError } = await adminClient
+        .from('ad_campaigns')
+        .select('id, user_id, status, tokens_spent')
+        .eq('id', campaignId)
+        .single();
+
+    if (fetchError || !campaign) {
+        return { error: 'Kampanya bulunamadı.' };
+    }
+
+    if (campaign.user_id !== userId) {
+        return { error: 'Bu kampanya size ait değil.' };
+    }
+
+    // Yalnızca beklemede (pending) veya iptal edilmiş (cancelled) kampanyalar silinebilir
+    if (campaign.status !== 'pending' && campaign.status !== 'cancelled') {
+        return { error: 'Oluşturulmuş aktif kampanyaları ancak iptal edildikten sonra (veya onay beklerken) silebilirsiniz.' };
+    }
+
+    // Beklemedeyken siliniyorsa iade yap
+    if (campaign.status === 'pending') {
+        const { data: profile } = await adminClient
+            .from('profiles')
+            .select('token_balance')
+            .eq('id', userId)
+            .single();
+
+        const currentBalance = profile?.token_balance || 0;
+        const newBalance = currentBalance + campaign.tokens_spent;
+
+        await adminClient
+            .from('profiles')
+            .update({ token_balance: newBalance })
+            .eq('id', userId);
+
+        // Jeton iade kaydı
+        await adminClient.from('token_transactions').insert({
+            user_id: userId,
+            type: 'refund',
+            amount: campaign.tokens_spent,
+            description: `Reklam İptali İadesi (${campaign.tokens_spent} Jeton)`,
+            reference_id: campaign.id,
+            balance_after: newBalance,
+        });
+    }
+
+    // Kampanyayı Veritabanından Sil
+    const { error: deleteError } = await adminClient
+        .from('ad_campaigns')
+        .delete()
+        .eq('id', campaignId);
+
+    if (deleteError) {
+        console.error('[TOKENS] Delete error:', deleteError);
+        return { error: 'Kampanya silinemedi.' };
+    }
+
+    revalidatePath('/dashboard/ads');
+    return { success: true };
+}
+
+// ========================
 // ADMIN CAMPAIGN MANAGEMENT
 // ========================
 
 export async function getAdminCampaigns() {
     const userId = await getAuthUserId();
-    if (!userId) return [];
+    console.log('[TOKENS] getAdminCampaigns - userId:', userId);
+
+    if (!userId) {
+        console.log('[TOKENS] getAdminCampaigns - NOT AUTHENTICATED');
+        return [];
+    }
 
     // Auth Check Let's ensure user is admin/editor
     const { data: profile } = await adminClient
@@ -341,7 +415,10 @@ export async function getAdminCampaigns() {
         .eq('id', userId)
         .single();
 
+    console.log('[TOKENS] getAdminCampaigns - user profile role:', profile?.role);
+
     if (!profile || (profile.role !== 'admin' && profile.role !== 'editor')) {
+        console.log('[TOKENS] getAdminCampaigns - UNAUTHORIZED ROLE');
         return [];
     }
 
@@ -365,6 +442,8 @@ export async function getAdminCampaigns() {
         console.error('[TOKENS] Admin fetch campaigns error:', error);
         return [];
     }
+
+    console.log(`[TOKENS] getAdminCampaigns - Retrieved ${data?.length || 0} campaigns`);
     return data || [];
 }
 

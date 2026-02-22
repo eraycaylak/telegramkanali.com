@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { getUserCampaigns, getAdPricing, createAdCampaign, toggleCampaignStatus } from '@/app/actions/tokens';
+import { getUserCampaigns, getAdPricing, createAdCampaign, toggleCampaignStatus, deleteAdCampaign } from '@/app/actions/tokens';
 import { getMyChannels } from '@/app/actions/channels';
 import {
     TrendingUp,
@@ -13,7 +13,8 @@ import {
     PlusCircle,
     Zap,
     Image as ImageIcon,
-    Film
+    Film,
+    Trash2
 } from 'lucide-react';
 
 const AD_TYPE_LABELS: Record<string, { label: string; icon: any; color: string; bg: string }> = {
@@ -107,6 +108,20 @@ export default function AdsPage() {
             setMessage(result.error);
         } else {
             setMessage('Kampanya durumu güncellendi.');
+            loadData();
+        }
+        setTogglingId(null);
+    }
+
+    async function handleDeleteCampaign(campaignId: string) {
+        if (!window.confirm('Bu kampanyayı silmek istediğinize emin misiniz? Beklemede olan kampanyaların jetonları iade edilir.')) return;
+
+        setTogglingId(campaignId);
+        const result = await deleteAdCampaign(campaignId);
+        if (result.error) {
+            setMessage(result.error);
+        } else {
+            setMessage('Kampanya silindi ve varsa jeton iadesi yapıldı.');
             loadData();
         }
         setTogglingId(null);
@@ -309,8 +324,20 @@ export default function AdsPage() {
                                             )}
                                         </button>
                                     )}
+
+                                    {/* Delete Button for pending or cancelled campaigns */}
+                                    {(campaign.status === 'pending' || campaign.status === 'cancelled') && (
+                                        <button
+                                            onClick={() => handleDeleteCampaign(campaign.id)}
+                                            disabled={togglingId === campaign.id}
+                                            className="px-3 py-1.5 text-xs font-bold rounded-lg border transition-colors flex items-center gap-1.5 disabled:opacity-50 border-red-200 hover:bg-red-50 text-red-600 ml-auto"
+                                            title="Kampanyayı Sil"
+                                        >
+                                            <Trash2 size={14} /> Sil
+                                        </button>
+                                    )}
                                     {campaign.status === 'pending' && (
-                                        <span className="text-xs text-gray-500 italic">Onay bekliyor...</span>
+                                        <span className="text-xs text-gray-500 italic ml-2">Onay bekliyor...</span>
                                     )}
                                 </div>
                             </div>
