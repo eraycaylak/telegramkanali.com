@@ -22,7 +22,7 @@ export default function PrivacyPage() {
                     <p>Sitemiz otomatik olarak IP adresiniz, tarayıcı türünüz ve ziyaret ettiğiniz sayfalar gibi anonim kullanım verilerini (Log Dosyaları) toplayabilir. Bu veriler yalnızca istatistiksel analizler ve site performansını iyileştirmek için kullanılır.</p>
 
                     <h2 className="text-xl font-bold text-gray-900 mt-6 mb-2">2. Çerezler (Cookies)</h2>
-                    <p>Kullanıcı deneyimini iyileştirmek için çerezler kullanmaktayız. Çerezler, tarayıcınız tarafından bilgisayarınıza kaydedilen küçük dosyalardır. Reklam ortaklarımız (örneğin Google AdSense) de ilgi alanına dayalı reklamlar sunmak için çerez kullanabilir.</p>
+                    <p>Sitemiz (telegramkanali.com), yalnızca temel işlevler (kullanıcı girişleri, favori kanalları kaydetme ve benzersiz ziyaretçi tespiti) için tarayıcınızın geçici hafızasını (sessionStorage/localStorage) veya çerezleri (cookies) kullanır. Sitemizde <strong>üçüncü taraf reklam takip çerezleri (örneğin Google AdSense) kullanılmamaktadır.</strong> Ziyaretleriniz reklam profili oluşturmak amacıyla izlenmez.</p>
 
                     <h2 className="text-xl font-bold text-gray-900 mt-6 mb-2">3. Üçüncü Taraf Linkler</h2>
                     <p>Sitemizde Telegram kanallarına veya diğer web sitelerine linkler bulunmaktadır. Bu dış sitelerin gizlilik politikalarından sorumlu değiliz. Herhangi bir kanala katılırken kendi gizliliğinizi korumak sizin sorumluluğunuzdadır.</p>

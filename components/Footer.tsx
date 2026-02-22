@@ -9,19 +9,7 @@ export default async function Footer() {
         <footer className="w-full border-t border-gray-100 bg-white pt-8 pb-8 mb-20 md:mb-0">
             <div className="container mx-auto px-4 md:px-6">
 
-                {/* Sponsorlu Bağlantılar (SEO & Spam Protection) */}
-                <div className="mb-12 bg-gray-50 border border-gray-200 rounded-2xl p-5 md:p-6">
-                    <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 border-b border-gray-200 pb-2">
-                        Sponsorlu Bağlantılar
-                    </h3>
-                    <div className="flex flex-wrap gap-x-6 gap-y-3">
-                        <a href="https://example.com" target="_blank" rel="sponsored nofollow noreferrer" className="text-xs md:text-sm text-gray-500 hover:text-gray-800 transition-colors">Sponsor Site 1</a>
-                        <a href="https://example.com" target="_blank" rel="sponsored nofollow noreferrer" className="text-xs md:text-sm text-gray-500 hover:text-gray-800 transition-colors">Kripto Borsası Önerisi</a>
-                        <a href="https://example.com" target="_blank" rel="sponsored nofollow noreferrer" className="text-xs md:text-sm text-gray-500 hover:text-gray-800 transition-colors">Güvenilir Analiz Sitesi</a>
-                        <a href="https://example.com" target="_blank" rel="sponsored nofollow noreferrer" className="text-xs md:text-sm text-gray-500 hover:text-gray-800 transition-colors">Yatırım Araçları</a>
-                        <a href="https://example.com" target="_blank" rel="sponsored nofollow noreferrer" className="text-xs md:text-sm text-gray-500 hover:text-gray-800 transition-colors">Telegram İstatistikleri</a>
-                    </div>
-                </div>
+                {/* Sponsor links have been removed due to SEO policy */}
 
                 <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-5">
 
