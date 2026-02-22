@@ -3,45 +3,34 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Lock, Loader2 } from 'lucide-react';
-import { supabase } from '@/lib/supabaseClient';
+import { adminSignIn } from '@/app/actions/auth';
 
 export default function AdminLoginClient() {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const router = useRouter();
 
-    const handleLogin = async (e: React.FormEvent) => {
+    const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setLoading(true);
 
         try {
-            const { data, error } = await supabase.auth.signInWithPassword({
-                email,
-                password
-            });
+            const formData = new FormData(e.currentTarget);
+            const result = await adminSignIn(formData);
 
-            if (error) throw error;
-
-            // Check if user is actually admin
-            const { data: profile } = await supabase
-                .from('profiles')
-                .select('role')
-                .eq('id', data.user.id)
-                .single();
-
-            if (profile?.role !== 'admin' && profile?.role !== 'editor') {
-                await supabase.auth.signOut();
-                alert('Bu panele erişim yetkiniz yok.');
+            if (result?.error) {
+                alert(result.error);
                 setLoading(false);
                 return;
             }
 
-            // Success
-            localStorage.setItem('isAdmin', profile.role === 'admin' ? 'true' : 'false');
-            localStorage.setItem('userId', data.user.id);
-            router.push('/admin/dashboard');
-            router.refresh();
+            if (result?.success) {
+                // Set localStorage for client-side layout checks
+                localStorage.setItem('isAdmin', result.role === 'admin' ? 'true' : 'false');
+                localStorage.setItem('userId', result.userId || '');
+
+                // Use window.location to force a full reload and ensure cookies are picked up by Middleware/SSR
+                window.location.href = '/admin/dashboard';
+            }
         } catch (error: any) {
             alert('Giriş hatası: ' + error.message);
             setLoading(false);
@@ -63,9 +52,8 @@ export default function AdminLoginClient() {
                     <div>
                         <label className="block text-sm font-medium text-gray-700">E-posta</label>
                         <input
+                            name="email"
                             type="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
                             className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                             placeholder="admin@ornek.com"
                             required
@@ -74,9 +62,8 @@ export default function AdminLoginClient() {
                     <div>
                         <label className="block text-sm font-medium text-gray-700">Şifre</label>
                         <input
+                            name="password"
                             type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
                             className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                             placeholder="••••••••"
                             required

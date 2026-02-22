@@ -82,6 +82,39 @@ export async function signIn(formData: FormData) {
     return { success: true };
 }
 
+export async function adminSignIn(formData: FormData) {
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
+
+    const supabase = await createClient();
+
+    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+    });
+
+    if (authError) return { error: authError.message };
+
+    const adminClient = getAdminClient();
+    const { data: profile } = await adminClient
+        .from('profiles')
+        .select('role')
+        .eq('id', authData.user.id)
+        .single();
+
+    if (profile?.role !== 'admin' && profile?.role !== 'editor') {
+        await supabase.auth.signOut();
+        return { error: 'Bu panele erişim yetkiniz yok.' };
+    }
+
+    revalidatePath('/admin/dashboard');
+    return {
+        success: true,
+        role: profile.role,
+        userId: authData.user.id
+    };
+}
+
 export async function signOut() {
     const supabase = await createClient();
     await supabase.auth.signOut();
