@@ -30,58 +30,40 @@ export default function AdminLayout({
             return;
         }
 
-        // Client-side auth check
+        // Client-side auth check via Supabase Session
         const checkAuth = async () => {
-            const adminStatus = localStorage.getItem('isAdmin');
-            // Check legacy local storage auth (mostly for dev/demo)
-            // Ideally we should check supabase session or fetch profile
+            try {
+                const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
-            if (adminStatus === 'true') {
-                setIsAuthenticated(true);
-
-                // Fetch profile to get permissions (Simulating "logged in user" since we don't have full Auth)
-                // In a real app we'd use supabase.auth.getUser()
-                // For now, let's fetch the first admin/editor profile or handle mock
-                // Since this is a specialized requested feature, we'll try to get the profile if stored, 
-                // OR we just use the local storage 'isAdmin' as a fallback master admin.
-                // 
-                // However, to test "Editor" role, we need a way to know WHICH user is logged in.
-                // Since we don't have a login flow that sets a user ID, we will assume:
-                // If localStorage has 'userId', use it. If not, assume 'admin' role.
-
-                const storedUserId = localStorage.getItem('userId');
-                if (storedUserId) {
-                    const { data } = await supabase
-                        .from('profiles')
-                        .select('*')
-                        .eq('id', storedUserId)
-                        .single();
-
-                    if (data) {
-                        setUserProfile(data);
-                        // If role is user, kick them out
-                        if (data.role === 'user') {
-                            setIsAuthenticated(false);
-                            router.replace('/admin');
-                        }
-                    }
-                } else {
-                    // Fallback for legacy admin login (User 1)
-                    setUserProfile({
-                        id: 'admin',
-                        email: 'admin@admin.com',
-                        role: 'admin',
-                        balance: 0,
-                        created_at: new Date().toISOString()
-                    });
+                if (sessionError || !session?.user) {
+                    setIsAuthenticated(false);
+                    router.replace('/admin');
+                    setIsLoading(false);
+                    return;
                 }
 
-            } else {
+                // Fetch real profile to get role and permissions
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('*')
+                    .eq('id', session.user.id)
+                    .single();
+
+                if (profile && (profile.role === 'admin' || profile.role === 'editor')) {
+                    setUserProfile(profile);
+                    setIsAuthenticated(true);
+                } else {
+                    // Kick out if not admin or editor
+                    setIsAuthenticated(false);
+                    router.replace('/admin');
+                }
+            } catch (err) {
+                console.error("Auth check failed:", err);
                 setIsAuthenticated(false);
-                // Login sayfasına yönlendir
                 router.replace('/admin');
+            } finally {
+                setIsLoading(false);
             }
-            setIsLoading(false);
         };
 
         checkAuth();
@@ -190,9 +172,8 @@ export default function AdminLayout({
 
                 <div className="p-4 border-t">
                     <button
-                        onClick={() => {
-                            localStorage.removeItem('isAdmin');
-                            localStorage.removeItem('userId'); // Also clear userId
+                        onClick={async () => {
+                            await supabase.auth.signOut();
                             window.location.href = '/admin';
                         }}
                         className="flex items-center gap-3 w-full px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl transition-colors font-medium"

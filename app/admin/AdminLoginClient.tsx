@@ -24,10 +24,6 @@ export default function AdminLoginClient() {
             }
 
             if (result?.success) {
-                // Set localStorage for client-side layout checks
-                localStorage.setItem('isAdmin', result.role === 'admin' ? 'true' : 'false');
-                localStorage.setItem('userId', result.userId || '');
-
                 // Use window.location to force a full reload and ensure cookies are picked up by Middleware/SSR
                 window.location.href = '/admin/dashboard';
             }

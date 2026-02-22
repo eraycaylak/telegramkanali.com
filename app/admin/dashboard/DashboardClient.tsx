@@ -35,11 +35,7 @@ export default function DashboardClient() {
 
     // Protect Route
     useEffect(() => {
-        if (localStorage.getItem('isAdmin') !== 'true') {
-            router.push('/admin');
-        } else {
-            fetchData();
-        }
+        fetchData();
     }, [router]);
 
     async function fetchData() {

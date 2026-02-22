@@ -12,30 +12,17 @@ export default function SettingsClient() {
     const [saved, setSaved] = useState(false);
     const [loading, setLoading] = useState(true);
 
-    // Load settings from database on mount
     useEffect(() => {
-        // Permission Check
-        const isAdmin = localStorage.getItem('isAdmin');
-        const userId = localStorage.getItem('userId');
-
-        // Strict Admin Check
-        if (isAdmin !== 'true') {
-            // Second check via profile for security if ignoring localStorage
-            // But for now, let's trust localStorage + profile fetch if needed.
-            // Ideally we fetch profile. 
-            // Let's do the profile fetch pattern as standard.
-        }
-
         async function checkAndLoad() {
-            if (userId) {
-                const { data: user } = await supabase.from('profiles').select('role').eq('id', userId).single();
-                if (user?.role !== 'admin') {
-                    alert('Bu sayfaya erişim yetkiniz yok (Sadece Admin).');
-                    window.location.href = '/admin/dashboard';
-                    return;
-                }
-            } else if (isAdmin !== 'true') {
-                // No user ID and not legacy admin
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session?.user) {
+                window.location.href = '/admin';
+                return;
+            }
+
+            const { data: user } = await supabase.from('profiles').select('role').eq('id', session.user.id).single();
+            if (user?.role !== 'admin') {
+                alert('Bu sayfaya erişim yetkiniz yok (Sadece Admin).');
                 window.location.href = '/admin/dashboard';
                 return;
             }
@@ -43,7 +30,6 @@ export default function SettingsClient() {
             loadSettings();
         }
         checkAndLoad();
-
     }, []);
 
     async function loadSettings() {

@@ -16,22 +16,21 @@ export default function AnalyticsClient() {
     }, []);
 
     const checkPermission = async () => {
-        const storedUserId = localStorage.getItem('userId');
-        const isAdmin = localStorage.getItem('isAdmin');
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.user) {
+            window.location.href = '/admin';
+            return;
+        }
 
-        if (isAdmin === 'true' && !storedUserId) return;
+        const { data: user } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', session.user.id)
+            .single();
 
-        if (storedUserId) {
-            const { data: user } = await supabase
-                .from('profiles')
-                .select('*')
-                .eq('id', storedUserId)
-                .single();
-
-            if (user) {
-                if (user.role === 'admin') return;
-                if (user.role === 'editor' && user.permissions?.view_analytics) return;
-            }
+        if (user) {
+            if (user.role === 'admin') return;
+            if (user.role === 'editor' && user.permissions?.view_analytics) return;
         }
 
         alert('Bu sayfaya erişim yetkiniz yok.');

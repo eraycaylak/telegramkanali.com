@@ -46,25 +46,23 @@ export default function UsersContent() {
     }, []);
 
     const checkPermission = async () => {
-        const storedUserId = localStorage.getItem('userId');
-        const isAdmin = localStorage.getItem('isAdmin');
-
-        if (isAdmin === 'true' && !storedUserId) return; // Legacy admin
-
-        if (storedUserId) {
-            const { data: user } = await supabase
-                .from('profiles')
-                .select('*')
-                .eq('id', storedUserId)
-                .single();
-
-            if (user) {
-                if (user.role === 'admin') return;
-                if (user.role === 'editor' && user.permissions?.manage_users) return;
-            }
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.user) {
+            window.location.href = '/admin';
+            return;
         }
 
-        // If we get here, no permission
+        const { data: user } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', session.user.id)
+            .single();
+
+        if (user) {
+            if (user.role === 'admin') return;
+            if (user.role === 'editor' && user.permissions?.manage_users) return;
+        }
+
         alert('Bu sayfaya erişim yetkiniz yok.');
         window.location.href = '/admin/dashboard';
     };
