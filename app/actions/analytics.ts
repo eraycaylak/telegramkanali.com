@@ -4,9 +4,12 @@ import { supabase } from '@/lib/supabaseClient';
 
 // Public Supabase client for analytics (RLS policies allow anonymous inserts)
 
-export async function trackPageView(path: string) {
+export async function trackPageView(path: string, isNewVisitor: boolean = false) {
     try {
-        const { error } = await supabase.rpc('increment_page_view', { p_path: path });
+        const { error } = await supabase.rpc('increment_page_view', {
+            p_path: path,
+            p_is_new_visitor: isNewVisitor
+        });
 
         if (error) {
             // Silently fail if function doesn't exist yet (migration not run)

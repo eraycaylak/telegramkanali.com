@@ -14,7 +14,15 @@ export default function AnalyticsTracker() {
             // Avoid tracking admin pages or api routes
             if (pathname.startsWith('/admin') || pathname.startsWith('/api')) return;
 
-            await trackPageView(pathname);
+            let isNewVisitor = false;
+            // Benzersiz ziyaretçiyi path (sayfa) bazında belirle
+            const pathSessionKey = `tk_visited_${pathname}`;
+            if (!sessionStorage.getItem(pathSessionKey)) {
+                isNewVisitor = true;
+                sessionStorage.setItem(pathSessionKey, 'true');
+            }
+
+            await trackPageView(pathname, isNewVisitor);
         };
 
         track();
