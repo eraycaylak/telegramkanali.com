@@ -77,6 +77,18 @@ export default async function Home({ searchParams }: HomeProps) {
 
   const totalPages = Math.ceil(totalCount / LIMIT);
 
+  // Sayfalama (Pagination) SEO URL Builder
+  const buildPageUrl = (targetPage: number) => {
+    const params = new URLSearchParams();
+    if (search) params.set('q', search as string);
+    if (categoryId) params.set('category', categoryId as string);
+    if (targetPage > 1) params.set('page', targetPage.toString());
+
+    const qs = params.toString();
+    // Vercel/Next.js canonical structure absolute URL could be better, but relative is also fine for rel="next/prev"
+    return qs ? `/?${qs}` : '/';
+  };
+
   if (errorMsg) {
     return (
       <div className="flex flex-col items-center justify-center py-20 bg-red-50 rounded-xl border border-red-200 m-8">
@@ -93,6 +105,10 @@ export default async function Home({ searchParams }: HomeProps) {
 
   return (
     <div className="space-y-6">
+      {/* SEO Pagination Tags (Next.js Hoisting) */}
+      {page > 1 && <link rel="prev" href={buildPageUrl(page - 1)} />}
+      {page < totalPages && <link rel="next" href={buildPageUrl(page + 1)} />}
+
       {/* Popular Ticker (Editor's Picks) */}
       <PopularTicker channels={popularChannels} />
 
@@ -122,7 +138,7 @@ export default async function Home({ searchParams }: HomeProps) {
         </div>
 
         {allChannels.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
             {allChannels.map((channel, index) => (
               <div key={channel.id} className="contents">
                 <ChannelCard channel={channel} />
@@ -155,20 +171,33 @@ export default async function Home({ searchParams }: HomeProps) {
         <div className="lg:col-span-2 space-y-8 text-gray-700 leading-relaxed">
           <article className="prose prose-blue max-w-none">
             <h2 className="text-3xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-              <span className="text-blue-500">Telegram</span> Kanalları
+              <span className="text-blue-500">Telegram</span> Kanalları (2026)
             </h2>
-            <p className="mb-4">
-              Telegram, güvenli ve hızlı mesajlaşma deneyimi sunan popüler bir uygulamadır. Sitemizdeki <Link href="/rehber/en-iyi-telegram-kanallari" className="text-blue-600 underline hover:text-blue-800">En iyi Telegram kanalları</Link> listesi ile ilgi alanlarınıza uygun toplulukları keşfedebilirsiniz.
+            <p className="mb-4 text-lg">
+              Telegram, güvenli ve hızlı mesajlaşma deneyimi sunan popüler bir uygulamadır. Sitemizdeki <Link href="/rehber/en-iyi-telegram-kanallari" className="text-blue-600 font-bold hover:underline">En iyi Telegram kanalları</Link> listesi ile ilgi alanlarınıza uygun toplulukları kolayca keşfedebilirsiniz. Aktif olarak güncellenen dizinimiz sayesinde binlerce farklı kategoride en kaliteli gruplara ulaşmak artık çok daha kolay.
             </p>
+
+            <h3 className="text-2xl font-bold text-gray-800 mt-8 mb-3">Popüler Telegram Kanalları ve Kategorileri</h3>
+            <p className="mb-4">
+              Kullanıcılarımızın ilgi alanlarına göre özenle listelediğimiz kategoriler sayesinde, aradığınız içeriğe hızlıca ulaşabilirsiniz. Örneğin, internet dünyasındaki son gelişmeleri takip etmek ve yeni bilgiler öğrenmek isterseniz <Link href="/teknoloji" className="text-blue-600 font-bold hover:underline">Teknoloji Kanalları</Link> kategorimizi inceleyebilirsiniz. Yatırım araçları, borsa ve dijital varlıklarla ilgilenen kullanıcılarımız içinse özel olarak derlenmiş <Link href="/kripto" className="text-blue-600 font-bold hover:underline">Kripto Para Kanalları</Link> bölümümüz oldukça yoğun ilgi görmektedir.
+            </p>
+            <p className="mb-4">
+              Ayrıca yabancı dil öğrenmek, soru çözmek veya sınavlara hazırlanan öğrencilerin sıklıkla tercih ettiği <Link href="/egitim-ders" className="text-blue-600 font-bold hover:underline">Eğitim ve Ders Kanalları</Link> sayesinde binlerce ücretsiz kaynağa, çalışma notlarına ve online denemelerle ilgili detaylara Telegram üzerinden hızlıca erişim sağlayabilirsiniz. Günün stresini atmak için ise <Link href="/chat-sohbet" className="text-blue-600 font-bold hover:underline">Sohbet Grupları</Link> ideal bir tercih olacaktır.
+            </p>
+
             <div className="bg-blue-50 p-6 rounded-xl border border-blue-100 my-6 flex items-start gap-4">
               <Globe className="text-blue-500 flex-shrink-0 mt-1" size={32} />
               <div>
-                <h3 className="font-bold text-gray-900 text-lg mb-2">Telegram Kanalları ile İletişim</h3>
+                <h3 className="font-bold text-gray-900 text-lg mb-2">Telegram Kanallarına Nasıl Katılınır?</h3>
                 <p className="text-sm">
-                  Milyonlarca kullanıcıya hitap eden Telegram kanalları; haber, eğlence, eğitim ve kripto gibi birçok kategoride içerik sunar.
+                  Sitemiz üzerinden "Kanala Git" veya "Katıl" butonlarına tıklayarak doğrudan Telegram uygulamasına yönlendirilirsiniz. Öncesinde bir hesaba ihtiyacınız varsa uygulamasını indirip kısa sürede kullanmaya başlayabilirsiniz.
                 </p>
               </div>
             </div>
+
+            <p className="text-xs text-gray-500 leading-relaxed mt-4">
+              * Not: Sitemizde yer alan listeler topluluk paylaşımlarıyla oluşturulmaktadır. Herhangi bir kanala/gruba katılırken platform kurallarına uymayı unutmayınız.
+            </p>
           </article>
         </div>
 

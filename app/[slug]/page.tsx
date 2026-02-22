@@ -151,7 +151,7 @@ export default async function DynamicPage({ params }: PageProps) {
           <FeaturedAds adType="featured" maxAds={6} categoryId={category.id} />
 
           {/* Channels Grid */}
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
             {channels.length > 0 ? (
               channels.map((channel) => (
                 <ChannelCard key={channel.id} channel={channel} />
@@ -325,7 +325,7 @@ export default async function DynamicPage({ params }: PageProps) {
                   Tümünü Gör &rarr;
                 </Link>
               </div>
-              <div className="grid grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 {similarChannels.map(c => (
                   <ChannelCard key={c.id} channel={c} />
                 ))}

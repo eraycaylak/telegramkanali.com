@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { BadgeCheck, Users, ThumbsUp, ThumbsDown, ArrowUp } from 'lucide-react';
+import { BadgeCheck, Users, ThumbsUp, ThumbsDown, ArrowUp, ExternalLink } from 'lucide-react';
 import { Channel } from '@/lib/types';
 import { useState, useEffect } from 'react';
 
@@ -143,14 +143,15 @@ export default function ChannelCard({ channel, compact = false }: ChannelCardPro
     const isSponsored = (channel as any).is_sponsored;
 
     return (
-        <div className={`group relative flex flex-col overflow-hidden rounded-xl border bg-white transition-all hover:shadow-lg h-full ${isSponsored ? 'border-purple-200 ring-1 ring-purple-100' : 'border-gray-200 hover:border-blue-300'}`}>
+        <div className={`group relative flex flex-col overflow-hidden rounded-xl border bg-white transition-all hover:shadow-lg min-h-[72px] md:h-full ${isSponsored ? 'border-purple-200 ring-1 ring-purple-100' : 'border-gray-200 hover:border-blue-300'}`}>
             {/* Sponsored Badge */}
             {isSponsored && (
-                <div className="absolute top-0 left-14 md:left-14 z-30 bg-purple-600 text-white text-[9px] font-bold px-2.5 py-0.5 rounded-b-lg shadow-sm tracking-wider">
-                    SPONSORLU
+                <div className="absolute top-0 left-3 md:left-14 z-30 bg-purple-600 text-white text-[9px] font-bold px-2 py-0.5 rounded-b-md shadow-sm tracking-wider">
+                    SPONS.
                 </div>
             )}
-            {/* Voting Sidebar */}
+
+            {/* Voting Sidebar (Desktop Only) */}
             <div className="hidden md:flex absolute left-0 top-0 bottom-0 w-12 bg-gray-50 flex-col items-center justify-center gap-2 border-r border-gray-100 z-30">
                 <button
                     onClick={() => handleVote(1)}
@@ -171,28 +172,8 @@ export default function ChannelCard({ channel, compact = false }: ChannelCardPro
                 </button>
             </div>
 
-            {/* Mobile Vote Badge */}
-            <div className="md:hidden absolute top-2 right-2 z-30 bg-white/90 backdrop-blur text-gray-700 text-[10px] font-bold px-2 py-1 rounded-lg border flex items-center gap-1.5 shadow-sm">
-                <button
-                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleVote(1); }}
-                    disabled={loading}
-                    className={`p-0.5 ${userVote === 1 ? 'text-green-700' : 'text-gray-500'}`}
-                >
-                    <ThumbsUp size={12} className={userVote === 1 ? 'fill-current' : ''} />
-                </button>
-                <span className={`font-bold ${score > 0 ? 'text-green-700' : score < 0 ? 'text-red-700' : 'text-gray-700'}`}>
-                    {score}
-                </span>
-                <button
-                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleVote(-1); }}
-                    disabled={loading}
-                    className={`p-0.5 ${userVote === -1 ? 'text-red-700' : 'text-gray-500'}`}
-                >
-                    <ThumbsDown size={12} className={userVote === -1 ? 'fill-current' : ''} />
-                </button>
-            </div>
-
-            <div className="flex flex-col md:flex-row flex-1 gap-3 md:gap-5 p-3 md:p-5 md:pl-16 items-center md:items-start text-center md:text-left">
+            {/* Mobile View / Main Content Container */}
+            <div className="flex flex-row flex-1 gap-3 md:gap-5 p-3 pr-14 md:p-5 md:pl-16 md:pr-5 items-center md:items-start text-left">
                 {/* Logo */}
                 {channel.image && channel.image !== '/images/logo.png' ? (
                     <Image
@@ -200,37 +181,38 @@ export default function ChannelCard({ channel, compact = false }: ChannelCardPro
                         alt={channel.name}
                         width={80}
                         height={80}
-                        className="h-10 w-10 md:h-20 md:w-20 flex-shrink-0 rounded-full object-cover border border-gray-200 shadow-sm"
+                        className="h-12 w-12 md:h-20 md:w-20 flex-shrink-0 rounded-full object-cover border border-gray-200 shadow-sm"
                     />
                 ) : (
-                    <div className="h-10 w-10 md:h-20 md:w-20 flex-shrink-0 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 font-bold text-lg md:text-3xl border border-blue-100 shadow-sm">
+                    <div className="h-12 w-12 md:h-20 md:w-20 flex-shrink-0 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 font-bold text-xl md:text-3xl border border-blue-100 shadow-sm">
                         {channel.name.charAt(0)}
                     </div>
                 )}
 
-                <div className="flex flex-col gap-1 w-full relative z-20 min-w-0">
-                    <div className="flex flex-col md:flex-row items-center md:justify-between">
-                        <div className="w-full">
-                            <div className="flex justify-center md:justify-start text-yellow-600 mb-0.5 text-[10px] md:text-xs">
+                {/* Info Text */}
+                <div className="flex flex-col gap-0.5 md:gap-1 w-full relative z-20 min-w-0 justify-center">
+                    <div className="flex items-center w-full">
+                        <div className="w-full flex items-center pr-2 md:pr-0">
+                            {/* Star Rating mapped to small text on Mobile */}
+                            <div className="hidden md:flex text-yellow-600 mr-1 text-[10px]">
                                 {[...Array(channel.rating || 5)].map((_, i) => (
                                     <span key={i}>★</span>
                                 ))}
                             </div>
-                            <h3 className="font-bold text-gray-900 text-sm md:text-lg group-hover:text-blue-600 transition-colors truncate w-full">
+                            <h3 className="font-bold text-gray-900 text-[15px] md:text-lg group-hover:text-blue-600 transition-colors truncate">
                                 <Link href={`/${channel.slug}`}>
                                     <span className="absolute inset-0 z-10" />
                                     {channel.name}
                                 </Link>
                             </h3>
+                            {channel.verified && (
+                                <BadgeCheck className="h-4 w-4 md:h-5 md:w-5 text-blue-500 flex-shrink-0 ml-1" />
+                            )}
                         </div>
-                        {channel.verified && (
-                            <BadgeCheck className="hidden md:block h-5 w-5 text-blue-500 flex-shrink-0 ml-1" />
-                        )}
                     </div>
 
-                    <div className="flex items-center justify-center md:justify-start gap-2 text-[10px] md:text-xs text-gray-500">
-                        {/* Hide Category on Mobile Compact? Maybe keep it short */}
-                        <span className="bg-gray-100 px-1.5 py-0.5 rounded-full truncate max-w-[80px] md:max-w-none">{categoryName}</span>
+                    <div className="flex items-center gap-2 text-[10px] md:text-xs text-gray-500">
+                        <span className="bg-gray-100 px-1.5 py-0.5 rounded-md truncate max-w-[100px] md:max-w-none font-medium">{categoryName}</span>
                         <div className="flex items-center gap-1 font-medium text-gray-700">
                             <Users size={12} className="text-blue-500" />
                             {channel.member_count ? (
@@ -241,25 +223,41 @@ export default function ChannelCard({ channel, compact = false }: ChannelCardPro
                         </div>
                     </div>
 
-                    <p className="hidden md:block mt-2 text-sm text-gray-600 line-clamp-2 leading-normal">
+                    <p className="mt-0.5 md:mt-2 text-[11px] md:text-sm text-gray-500 md:text-gray-600 line-clamp-1 md:line-clamp-2 leading-tight md:leading-normal">
                         {channel.description}
                     </p>
                 </div>
             </div>
 
-            {/* Footer Actions */}
-            <div className="mt-auto px-3 pb-3 md:px-5 md:pb-5 pt-0 relative z-20 md:pl-16">
+            {/* Mobile Small Join Button */}
+            <div className="md:hidden absolute right-3 top-1/2 -translate-y-1/2 z-20">
+                <a
+                    href={channel.join_link}
+                    target="_blank"
+                    rel="nofollow noreferrer"
+                    onClick={(e) => {
+                        import('@/app/actions/analytics').then(mod => mod.trackChannelClick(channel.id));
+                    }}
+                    className="flex h-9 w-9 items-center justify-center rounded-full bg-green-100 text-green-700 shadow-sm border border-green-200"
+                    aria-label="Katıl"
+                >
+                    <ExternalLink size={16} />
+                </a>
+            </div>
+
+            {/* Desktop Full Join Button */}
+            <div className="hidden md:flex mt-auto px-5 pb-5 pt-0 relative z-20 pl-16">
                 <span className="sr-only">
-                    {channel.name} Telegram kanalı, {categoryName} kategorisinde aktif bir kanaldır. Abone sayısı: {channel.member_count || channel.stats.subscribers}
+                    {channel.name} Telegram kanalı, {categoryName} kategorisinde aktif bir kanaldır.
                 </span>
                 <a
                     href={channel.join_link}
                     target="_blank"
                     rel="nofollow noreferrer"
-                    onClick={() => {
+                    onClick={(e) => {
                         import('@/app/actions/analytics').then(mod => mod.trackChannelClick(channel.id));
                     }}
-                    className="flex w-full items-center justify-center rounded-lg bg-green-600 py-1.5 md:py-2.5 text-center text-xs md:text-sm font-bold text-white shadow-sm transition-colors hover:bg-green-700"
+                    className="flex w-full items-center justify-center rounded-lg bg-green-600 py-2.5 text-center text-sm font-bold text-white shadow-sm transition-colors hover:bg-green-700"
                 >
                     KANALA GİT
                 </a>
