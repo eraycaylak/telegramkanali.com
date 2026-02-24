@@ -54,17 +54,28 @@ export async function generateMetadata({ searchParams }: HomeProps): Promise<Met
   }
 
   if (categoryId) {
-    // If we wanted to be perfectly dynamic we could fetch the category details,
-    // but typically homepage categories are handled by [slug], this is just a fallback filter.
+    // Determine category metadata dynamically if possible, or provide a robust fallback
     return {
       title: `Telegram Kanalları | Kategori Filtresi`,
       description: `Seçili kategorideki en popüler Telegram kanallarını keşfedin.`,
+      openGraph: {
+        title: `Telegram Kanalları | Kategori Filtresi`,
+        description: `Seçili kategorideki en popüler Telegram kanallarını keşfedin.`,
+      }
     };
   }
 
   return {
     title: "Telegram Kanalları ve Grupları (2026)",
     description: "En iyi Telegram kanalları, grupları ve botlarını keşfedin. Haber, Kripto, Eğitim ve İndirim kanalları listesi.",
+    openGraph: {
+      title: "Telegram Kanalları ve Grupları (2026)",
+      description: "En iyi Telegram kanalları, grupları ve botlarını keşfedin. Haber, Kripto, Eğitim ve İndirim kanalları listesi.",
+    },
+    twitter: {
+      title: "Telegram Kanalları ve Grupları (2026)",
+      description: "En iyi Telegram kanalları, grupları ve botlarını keşfedin. Haber, Kripto, Eğitim ve İndirim kanalları listesi.",
+    }
   };
 }
 
@@ -133,9 +144,6 @@ export default async function Home({ searchParams }: HomeProps) {
 
   return (
     <div className="space-y-6">
-      {/* SEO Pagination Tags (Next.js Hoisting) */}
-      {page > 1 && <link rel="prev" href={buildPageUrl(page - 1)} />}
-      {page < totalPages && <link rel="next" href={buildPageUrl(page + 1)} />}
 
       {/* Dynamic ItemList Schema (GÖREV 3) */}
       {allChannels.length > 0 && (
@@ -145,15 +153,29 @@ export default async function Home({ searchParams }: HomeProps) {
         )} />
       )}
 
+      {/* Breadcrumb Schema (GÖREV 3) */}
+      <JsonLd data={{
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Anasayfa",
+            "item": "https://telegramkanali.com/"
+          }
+        ]
+      }} />
+
       {/* Popular Ticker (Editor's Picks) */}
       <PopularTicker channels={popularChannels} />
 
       {/* Story Ads */}
       <FeaturedAds adType="story" maxAds={10} />
 
-      {/* SEO H2 Hierarchy (Replaced H1 to prevent double H1 on specific index conditions) */}
+      {/* SEO H1 Hierarchy (Main Page Title) */}
       <div className="text-center pb-2 pt-4">
-        <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-1">Telegram Kanalları ve Grupları (2026)</h2>
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-1">Telegram Kanalları ve Grupları (2026)</h1>
         <p className="text-gray-500 text-sm tracking-wide">Güncel ve Aktif Telegram Kanalları - Şubat 2026</p>
       </div>
 
@@ -206,14 +228,16 @@ export default async function Home({ searchParams }: HomeProps) {
       <section className="grid gap-12 lg:grid-cols-3 pt-12 border-t border-gray-100 mt-12">
         <div className="lg:col-span-2 space-y-8 text-gray-700 leading-relaxed">
           <article className="prose prose-blue max-w-none">
-            <h3 className="text-3xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+            {/* Changed from H3 to H2 */}
+            <h2 className="text-3xl font-bold text-gray-900 mb-4 flex items-center gap-2">
               <span className="text-blue-500">Telegram</span> Kanalları (2026)
-            </h3>
+            </h2>
             <p className="mb-4 text-lg">
               Telegram, güvenli ve hızlı mesajlaşma deneyimi sunan popüler bir uygulamadır. Sitemizdeki <Link href="/rehber/en-iyi-telegram-kanallari" className="text-blue-600 font-bold hover:underline">En iyi Telegram kanalları</Link> listesi ile ilgi alanlarınıza uygun toplulukları kolayca keşfedebilirsiniz. Aktif olarak güncellenen dizinimiz sayesinde binlerce farklı kategoride en kaliteli gruplara ulaşmak artık çok daha kolay.
             </p>
 
-            <h4 className="text-2xl font-bold text-gray-800 mt-8 mb-3">Popüler Telegram Kanalları ve Kategorileri</h4>
+            {/* Changed from H4 to H3 */}
+            <h3 className="text-2xl font-bold text-gray-800 mt-8 mb-3">Popüler Telegram Kanalları ve Kategorileri</h3>
             <p className="mb-4">
               Kullanıcılarımızın ilgi alanlarına göre özenle listelediğimiz kategoriler sayesinde, aradığınız içeriğe hızlıca ulaşabilirsiniz. Örneğin, internet dünyasındaki son gelişmeleri takip etmek ve yeni bilgiler öğrenmek isterseniz <Link href="/teknoloji" className="text-blue-600 font-bold hover:underline">Teknoloji Kanalları</Link> kategorimizi inceleyebilirsiniz. Yatırım araçları, borsa ve dijital varlıklarla ilgilenen kullanıcılarımız içinse özel olarak derlenmiş <Link href="/kripto" className="text-blue-600 font-bold hover:underline">Kripto Para Kanalları</Link> bölümümüz oldukça yoğun ilgi görmektedir.
             </p>
@@ -224,7 +248,8 @@ export default async function Home({ searchParams }: HomeProps) {
             <div className="bg-blue-50 p-6 rounded-xl border border-blue-100 my-6 flex items-start gap-4">
               <Globe className="text-blue-500 flex-shrink-0 mt-1" size={32} />
               <div>
-                <h4 className="font-bold text-gray-900 text-lg mb-2">Telegram Kanallarına Nasıl Katılınır?</h4>
+                {/* Changed from H4 to H3 */}
+                <h3 className="font-bold text-gray-900 text-lg mb-2">Telegram Kanallarına Nasıl Katılınır?</h3>
                 <p className="text-sm">
                   Sitemiz üzerinden "Kanala Git" veya "Katıl" butonlarına tıklayarak doğrudan Telegram uygulamasına yönlendirilirsiniz. Öncesinde bir hesaba ihtiyacınız varsa uygulamasını indirip kısa sürede kullanmaya başlayabilirsiniz.
                 </p>

@@ -35,6 +35,16 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       description: `${category.name} kategorisindeki en iyi ve popüler Telegram kanallarını keşfedin. Güvenilir ${category.name} grupları ve listeleri.`,
       alternates: {
         canonical: `${baseUrl}/${category.slug}`,
+      },
+      openGraph: {
+        title: `${category.name} Telegram Kanalları - 2026`,
+        description: `${category.name} kategorisindeki en iyi ve popüler Telegram kanallarını keşfedin. Güvenilir ${category.name} grupları ve listeleri.`,
+        url: `${baseUrl}/${category.slug}`,
+        type: 'website',
+      },
+      twitter: {
+        title: `${category.name} Telegram Kanalları - 2026`,
+        description: `${category.name} kategorisindeki en iyi ve popüler Telegram kanallarını keşfedin.`,
       }
     };
   }
@@ -47,6 +57,18 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       description: `${channel.name} Telegram kanalına katılın. ${channel.description?.slice(0, 150)}... En güncel ${channel.categoryName || 'Telegram'} kanalları.`,
       alternates: {
         canonical: `${baseUrl}/${channel.slug}`,
+      },
+      openGraph: {
+        title: `${channel.name} Telegram Kanalı - Katıl (2026)`,
+        description: `${channel.name} Telegram kanalına katılın. ${channel.description?.slice(0, 150)}...`,
+        url: `${baseUrl}/${channel.slug}`,
+        images: channel.image ? [{ url: channel.image }] : undefined,
+        type: 'article',
+      },
+      twitter: {
+        title: `${channel.name} Telegram Kanalı - Katıl (2026)`,
+        description: `${channel.name} Telegram kanalına katılın.`,
+        images: channel.image ? [channel.image] : undefined,
       }
     };
   }
@@ -108,10 +130,6 @@ export default async function DynamicPage({ params, searchParams }: PageProps) {
 
         <Header />
         <main className="container mx-auto px-4 py-8 space-y-8">
-          {/* SEO Pagination Tags (Next.js Hoisting) */}
-          {page > 1 && <link rel="prev" href={`${baseUrl}/${category.slug}?page=${page - 1}`} />}
-          {page < totalPages && <link rel="next" href={`${baseUrl}/${category.slug}?page=${page + 1}`} />}
-
           {/* Category Header with SEO Intro */}
           <div className="bg-gradient-to-br from-gray-50 to-white border rounded-xl p-8 shadow-sm">
             <div className="text-center mb-6">
