@@ -62,21 +62,30 @@ export async function getAnalyticsSummary(days: number = 30) {
 
         const pageViews = Object.values(pathAggregation).sort((a: any, b: any) => b.total_views - a.total_views);
 
-        // Calculate Category Views from Paths
-        // Example path: "/kripto-para" -> We can derive this if it doesn't have other slashes like "/admin/..."
+        // Calculate Category Views from Paths — using ACTUAL category slugs from DB
+        const { data: actualCategories } = await supabase
+            .from('categories')
+            .select('slug, name');
+
+        const categorySlugSet = new Set((actualCategories || []).map(c => c.slug));
+        const categoryNameMap: Record<string, string> = {};
+        (actualCategories || []).forEach(c => { categoryNameMap[c.slug] = c.name; });
+
         const categoriesAggregation: any = {};
         Object.values(pathAggregation).forEach((p: any) => {
-            // Basic heuristic: if it's a root level path like /xxx and not /api or /dashboard etc
             const segments = p.path.split('/').filter(Boolean);
-            if (segments.length === 1 && !['admin', 'dashboard', 'api', 'kanal-ekle'].includes(segments[0])) {
+            // Only match if root-level path AND it's a real category slug
+            if (segments.length === 1 && categorySlugSet.has(segments[0])) {
                 const catSlug = segments[0];
                 categoriesAggregation[catSlug] = {
-                    name: catSlug, // Will map to real name ideally, but slug is close enough for quick stats
+                    name: categoryNameMap[catSlug] || catSlug,
+                    slug: catSlug,
                     views: p.total_views
                 };
             }
         });
         const categoryViews = Object.values(categoriesAggregation).sort((a: any, b: any) => b.views - a.views);
+
 
 
         // 2. Get Channel Clicks
