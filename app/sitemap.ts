@@ -25,16 +25,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }));
 
     // 2. Dynamic Data from database
-    const { data: channels } = await getChannels(1, 2000); // Fetch more for sitemap
+    const { data: channels } = await getChannels(1, 2000);
     const categories = await getCategories();
     const seoPages = await getSeoPages();
 
-    // Regex to filter out suspicious or non-standard slugs
-    // 1. Must be alphanumeric + hyphens
-    // 2. Must be > 2 chars
-    // 3. Must not start/end with hyphen
-    // 4. Must not contain consecutive hyphens (--)
-    // 5. Must not start with 'telegram-contact-' (junk data)
+    // Filter out invalid slugs
     const isValidSlug = (slug: string) => {
         if (!slug) return false;
         if (slug.length < 3) return false;
@@ -45,32 +40,45 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         return true;
     };
 
-    const channelsUrls = channels
-        .filter(c => {
-            // Filter by slug
-            if (!isValidSlug(c.slug)) return false;
+    const validChannels = channels.filter(c => {
+        if (!isValidSlug(c.slug)) return false;
+        if (!c.description || c.description.trim().length < 20) return false;
+        return true;
+    });
 
-            // Filter by description length (Thin Content Check)
-            // If description is missing or very short, skip it to save crawl budget
-            if (!c.description || c.description.trim().length < 20) return false;
+    // Turkish channel URLs
+    const channelsUrls = validChannels.map((channel) => ({
+        url: `${baseUrl}/${channel.slug}`,
+        lastModified: new Date(channel.created_at ?? Date.now()),
+        changeFrequency: 'weekly' as const,
+        priority: 0.6,
+    }));
 
-            return true;
-        })
-        .map((channel) => ({
-            url: `${baseUrl}/${channel.slug}`,
-            lastModified: new Date(channel.created_at ?? Date.now()),
-            changeFrequency: 'weekly' as const,
-            priority: 0.6,
-        }));
+    // English channel URLs
+    const channelsUrlsEn = validChannels.map((channel) => ({
+        url: `${baseUrl}/en/${channel.slug}`,
+        lastModified: new Date(channel.created_at ?? Date.now()),
+        changeFrequency: 'weekly' as const,
+        priority: 0.5,
+    }));
 
-    const categoriesUrls = categories
-        .filter(cat => isValidSlug(cat.slug))
-        .map((category) => ({
-            url: `${baseUrl}/${category.slug}`,
-            lastModified: new Date(),
-            changeFrequency: 'daily' as const,
-            priority: 0.9,
-        }));
+    const validCategories = categories.filter(cat => isValidSlug(cat.slug));
+
+    // Turkish category URLs
+    const categoriesUrls = validCategories.map((category) => ({
+        url: `${baseUrl}/${category.slug}`,
+        lastModified: new Date(),
+        changeFrequency: 'daily' as const,
+        priority: 0.9,
+    }));
+
+    // English category URLs
+    const categoriesUrlsEn = validCategories.map((category) => ({
+        url: `${baseUrl}/en/${category.slug}`,
+        lastModified: new Date(),
+        changeFrequency: 'daily' as const,
+        priority: 0.8,
+    }));
 
     const seoPageUrls = seoPages.map((page) => ({
         url: `${baseUrl}/rehber/${page.slug}`,
@@ -79,7 +87,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.8,
     }));
 
-    // Blog posts
     const blogSlugs = await getAllBlogSlugs();
     const blogUrls = blogSlugs.map((slug) => ({
         url: `${baseUrl}/blog/${slug}`,
@@ -91,8 +98,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     return [
         ...staticPages,
         ...categoriesUrls,
+        ...categoriesUrlsEn,
         ...seoPageUrls,
         ...blogUrls,
         ...channelsUrls,
+        ...channelsUrlsEn,
     ];
 }

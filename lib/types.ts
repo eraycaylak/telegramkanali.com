@@ -28,6 +28,9 @@ export interface Channel {
     bot_token?: string;
     bot_enabled?: boolean;
     telegram_chat_id?: string;
+    // English translations (auto-generated)
+    name_en?: string;
+    description_en?: string;
 }
 
 export interface Category {
@@ -40,6 +43,10 @@ export interface Category {
     seo_intro?: string;
     seo_title?: string;
     seo_description?: string;
+    // English translations (auto-generated)
+    name_en?: string;
+    description_en?: string;
+    seo_intro_en?: string;
 }
 
 export interface SeoPage {
