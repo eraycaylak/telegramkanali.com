@@ -118,19 +118,17 @@ export async function getAnalyticsSummary(days: number = 30) {
         // To handle large datasets efficiently, we get channels that have stats, or just top overall channels
         const { data: channelsData, error: channelsError } = await supabase
             .from('channels')
-            .select('id, name, image, clicks')
-            // If they want period clicks we can sort in memory since we need joins otherwise
-            // For now, grabbing all channels with period clicks or fallback to top total clicks
+            .select('id, name, slug, image, clicks')
             .order('clicks', { ascending: false })
-            .limit(50); // Increased limit for better coverage
+            .limit(500); // Fetch all channels with data
 
         const channelClicks = channelsData?.map(c => ({
-            channel: { name: c.name, image: c.image },
-            total_clicks: c.clicks, // Lifetime clicks
-            period_clicks: periodClicksMap[c.id] || 0, // Clicks within date range
-            daily_clicks: dailyClicksMap[c.id] || 0, // Last 24h
+            channel: { name: c.name, image: c.image, slug: c.slug },
+            total_clicks: c.clicks,
+            period_clicks: periodClicksMap[c.id] || 0,
+            daily_clicks: dailyClicksMap[c.id] || 0,
             id: c.id
-        })).sort((a, b) => b.period_clicks - a.period_clicks); // Sort by period clicks!
+        })).sort((a, b) => b.period_clicks - a.period_clicks);
 
         return {
             pageViews: pageViews,
