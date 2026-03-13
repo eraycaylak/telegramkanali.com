@@ -12,9 +12,9 @@ import { Channel, Category } from '@/lib/types';
 import { Suspense } from 'react';
 import { Metadata } from 'next';
 
-// Cache for 60 seconds - improves performance
-export const revalidate = 60;
+// Always dynamic so search params work correctly
 export const dynamic = 'force-dynamic';
+
 
 const faqs = [
   {

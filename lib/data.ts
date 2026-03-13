@@ -44,8 +44,12 @@ export async function getChannels(
     // .eq('status', 'approved');
 
     if (search) {
-        query = query.ilike('name', `%${search}%`);
+        const term = search.replace(/[%_]/g, '\\$&'); // escape special chars
+        query = query.or(
+            `name.ilike.%${term}%,slug.ilike.%${term}%,description.ilike.%${term}%`
+        );
     }
+
 
     if (categoryId && categoryId !== 'all') {
         query = query.eq('category_id', categoryId);
