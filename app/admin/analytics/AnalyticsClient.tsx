@@ -21,6 +21,10 @@ export default function AnalyticsClient() {
     const [sortDir, setSortDir] = useState<'desc' | 'asc'>('desc');
     const [showAllChannels, setShowAllChannels] = useState(false);
 
+    // Server-side search results
+    const [searchResults, setSearchResults] = useState<any[] | null>(null);
+    const [searchLoading, setSearchLoading] = useState(false);
+
     useEffect(() => {
         checkPermission();
     }, []);
@@ -28,6 +32,29 @@ export default function AnalyticsClient() {
     useEffect(() => {
         loadData(daysFilter);
     }, [daysFilter]);
+
+    // Server-side search with debounce
+    useEffect(() => {
+        if (!channelSearch.trim()) {
+            setSearchResults(null);
+            return;
+        }
+        const timer = setTimeout(async () => {
+            setSearchLoading(true);
+            try {
+                const mod = await import('@/app/actions/analyticsAdmin');
+                const results = await mod.searchChannelStats(channelSearch.trim(), daysFilter);
+                setSearchResults(results);
+            } catch (err) {
+                console.error('Search error:', err);
+            } finally {
+                setSearchLoading(false);
+            }
+        }, 400);
+        return () => clearTimeout(timer);
+    }, [channelSearch, daysFilter]);
+
+
 
     const checkPermission = async () => {
         const { data: { session } } = await supabase.auth.getSession();
@@ -65,26 +92,29 @@ export default function AnalyticsClient() {
     const totalDailyVisitors = pageViews.reduce((acc, curr) => acc + (curr.daily_visitors || 0), 0);
     const totalPeriodClicks = channelClicks.reduce((acc, curr) => acc + (curr.period_clicks || 0), 0);
 
-    // Filtered + sorted channel clicks
+    // When user is searching → use server-side results; otherwise → client-side sorted list
     const filteredChannels = useMemo(() => {
-        let list = [...channelClicks];
-
-        // Filter by search term
-        if (channelSearch.trim()) {
-            const q = channelSearch.toLowerCase();
-            list = list.filter(s => s.channel?.name?.toLowerCase().includes(q));
+        if (channelSearch.trim() && searchResults !== null) {
+            // Server returned results — sort them per current sort settings
+            return [...searchResults].sort((a, b) => {
+                const val = b[sortBy] - a[sortBy];
+                return sortDir === 'desc' ? val : -val;
+            });
         }
-
-        // Sort
-        list.sort((a, b) => {
+        if (channelSearch.trim() && searchResults === null) {
+            // Still loading server results
+            return [];
+        }
+        // No search → use loaded top-clicked list with client-side sort
+        return [...channelClicks].sort((a, b) => {
             const val = b[sortBy] - a[sortBy];
             return sortDir === 'desc' ? val : -val;
         });
-
-        return list;
-    }, [channelClicks, channelSearch, sortBy, sortDir]);
+    }, [channelClicks, channelSearch, searchResults, sortBy, sortDir]);
 
     const displayedChannels = showAllChannels ? filteredChannels : filteredChannels.slice(0, 20);
+
+
 
     const toggleSort = (col: typeof sortBy) => {
         if (sortBy === col) {
@@ -182,7 +212,12 @@ export default function AnalyticsClient() {
                                     Kanal Tıklama Detayları
                                 </h2>
                                 <p className="text-sm text-gray-500 mt-0.5">
-                                    {filteredChannels.length} kanal ({channelSearch ? `"${channelSearch}" araması için ` : ''}son {daysFilter} gün)
+                                    {searchLoading
+                                        ? '🔍 Veritabanında aranıyor...'
+                                        : channelSearch.trim()
+                                            ? `${filteredChannels.length} sonuç bulundu: "${channelSearch}"`
+                                            : `${filteredChannels.length} kanal (son ${daysFilter} gün, en çok tıklananlar)`
+                                    }
                                 </p>
                             </div>
 

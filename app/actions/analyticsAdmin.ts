@@ -141,3 +141,55 @@ export async function getAnalyticsSummary(days: number = 30) {
         return null;
     }
 }
+
+// Search ALL channels by name (for admin analytics search box)
+// This bypasses the top-500 limit so channels with 0 clicks can also be found
+export async function searchChannelStats(searchTerm: string, days: number = 30) {
+    try {
+        if (!searchTerm.trim()) return [];
+
+        const timeAgo = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
+        const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+        const term = searchTerm.replace(/[%_]/g, '\\$&');
+
+        // Search channels by name, slug, or description - no limit, show all matches
+        const { data: channels, error } = await supabase
+            .from('channels')
+            .select('id, name, slug, image, clicks')
+            .or(`name.ilike.%${term}%,slug.ilike.%${term}%,description.ilike.%${term}%`)
+            .limit(100);
+
+        if (error || !channels || channels.length === 0) return [];
+
+        // Get click stats for these specific channels in the date range
+        const channelIds = channels.map(c => c.id);
+        const { data: clickStats } = await supabase
+            .from('channel_stats')
+            .select('channel_id, clicks, date')
+            .in('channel_id', channelIds)
+            .gte('date', timeAgo);
+
+        const periodMap: Record<string, number> = {};
+        const dailyMap: Record<string, number> = {};
+
+        (clickStats || []).forEach(stat => {
+            periodMap[stat.channel_id] = (periodMap[stat.channel_id] || 0) + stat.clicks;
+            if (stat.date >= twentyFourHoursAgo) {
+                dailyMap[stat.channel_id] = (dailyMap[stat.channel_id] || 0) + stat.clicks;
+            }
+        });
+
+        return channels.map(c => ({
+            channel: { name: c.name, image: c.image, slug: c.slug },
+            total_clicks: c.clicks || 0,
+            period_clicks: periodMap[c.id] || 0,
+            daily_clicks: dailyMap[c.id] || 0,
+            id: c.id
+        })).sort((a, b) => b.total_clicks - a.total_clicks);
+
+    } catch (error) {
+        console.error('searchChannelStats Error:', error);
+        return [];
+    }
+}
+
