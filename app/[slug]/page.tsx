@@ -10,6 +10,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import Pagination from '@/components/Pagination';
+import Comments from '@/components/Comments';
 
 const baseUrl = 'https://telegramkanali.com';
 
@@ -368,6 +369,9 @@ export default async function DynamicPage({ params, searchParams }: PageProps) {
               </div>
             </section>
           )}
+
+          {/* User Comments Component for SEO & Engagement */}
+          <Comments channelId={channel.id} />
 
           {/* User Guide Internal Link */}
           <section className="mt-16 bg-gray-900 rounded-3xl p-8 md:p-12 text-center text-white">

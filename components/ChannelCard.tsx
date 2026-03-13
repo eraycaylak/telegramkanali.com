@@ -232,14 +232,10 @@ export default function ChannelCard({ channel, compact = false }: ChannelCardPro
             {/* Mobile Small Join Button */}
             <div className="md:hidden absolute right-3 top-1/2 -translate-y-1/2 z-20">
                 <a
-                    href={channel.join_link}
+                    href={`/api/go?id=${channel.id}`}
                     target="_blank"
                     rel="nofollow noreferrer"
-                    onClick={(e) => {
-                        import('@/app/actions/analytics').then(mod => mod.trackChannelClick(channel.id));
-                    }}
-                    className="flex h-9 w-9 items-center justify-center rounded-full bg-green-100 text-green-700 shadow-sm border border-green-200"
-                    aria-label="Katıl"
+                    className="flex w-full items-center justify-center rounded-lg bg-green-600 py-2.5 text-center text-sm font-bold text-white shadow-sm transition-colors hover:bg-green-700"
                 >
                     <ExternalLink size={16} />
                 </a>
@@ -251,12 +247,9 @@ export default function ChannelCard({ channel, compact = false }: ChannelCardPro
                     {channel.name} Telegram kanalı, {categoryName} kategorisinde aktif bir kanaldır.
                 </span>
                 <a
-                    href={channel.join_link}
+                    href={`/api/go?id=${channel.id}`}
                     target="_blank"
                     rel="nofollow noreferrer"
-                    onClick={(e) => {
-                        import('@/app/actions/analytics').then(mod => mod.trackChannelClick(channel.id));
-                    }}
                     className="flex w-full items-center justify-center rounded-lg bg-green-600 py-2.5 text-center text-sm font-bold text-white shadow-sm transition-colors hover:bg-green-700"
                 >
                     KANALA GİT

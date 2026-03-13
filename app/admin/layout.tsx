@@ -2,7 +2,7 @@
 
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { LayoutDashboard, FolderTree, FileText, Users, Settings, LogOut, Menu, Image, Shield, BarChart, Send, BookOpen, Zap, Star } from 'lucide-react';
+import { LayoutDashboard, FolderTree, FileText, Users, Settings, LogOut, Menu, Image, Shield, BarChart, Send, BookOpen, Zap, Star, MessageSquare } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { UserProfile } from '@/lib/types';
@@ -82,6 +82,7 @@ export default function AdminLayout({
         { name: 'Blog Yönetimi', href: '/admin/blog', icon: BookOpen, perm: 'manage_blog' },
         { name: 'Sayfalar', href: '/admin/pages', icon: FileText, perm: 'manage_blog' },
         { name: 'Kullanıcılar', href: '/admin/users', icon: Users, perm: 'manage_users' },
+        { name: 'Yorumlar', href: '/admin/comments', icon: MessageSquare, perm: 'manage_blog' },
         { name: 'Ayarlar', href: '/admin/settings', icon: Settings }, // No perm = Admin only
     ];
 
