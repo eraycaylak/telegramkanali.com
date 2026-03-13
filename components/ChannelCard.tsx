@@ -232,7 +232,7 @@ export default function ChannelCard({ channel, compact = false }: ChannelCardPro
             {/* Mobile Small Join Button */}
             <div className="md:hidden absolute right-3 top-1/2 -translate-y-1/2 z-20">
                 <a
-                    href={`/api/go?id=${channel.id}`}
+                    href={`/go/${channel.id}`}
                     target="_blank"
                     rel="nofollow noreferrer"
                     className="flex w-full items-center justify-center rounded-lg bg-green-600 py-2.5 text-center text-sm font-bold text-white shadow-sm transition-colors hover:bg-green-700"
@@ -247,7 +247,7 @@ export default function ChannelCard({ channel, compact = false }: ChannelCardPro
                     {channel.name} Telegram kanalı, {categoryName} kategorisinde aktif bir kanaldır.
                 </span>
                 <a
-                    href={`/api/go?id=${channel.id}`}
+                    href={`/go/${channel.id}`}
                     target="_blank"
                     rel="nofollow noreferrer"
                     className="flex w-full items-center justify-center rounded-lg bg-green-600 py-2.5 text-center text-sm font-bold text-white shadow-sm transition-colors hover:bg-green-700"

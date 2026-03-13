@@ -6,16 +6,23 @@ export default function LanguageSwitcher() {
     const pathname = usePathname();
     const router = useRouter();
 
-    const isEnglish = pathname.startsWith('/en');
+    const isEnglish = pathname === '/en' || pathname.startsWith('/en/');
 
     const toggleLanguage = () => {
         if (isEnglish) {
-            // Remove /en prefix
-            const trPath = pathname.replace(/^\/en/, '') || '/';
-            router.push(trPath);
+            // /en → /   and   /en/xxx → /xxx
+            if (pathname === '/en') {
+                router.push('/');
+            } else {
+                router.push(pathname.replace(/^\/en/, '') || '/');
+            }
         } else {
-            // Add /en prefix
-            router.push(`/en${pathname}`);
+            // / → /en   and   /xxx → /en/xxx
+            if (pathname === '/') {
+                router.push('/en');
+            } else {
+                router.push(`/en${pathname}`);
+            }
         }
     };
 

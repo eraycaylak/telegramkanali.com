@@ -159,7 +159,7 @@ export default function ChannelDetail({ channel }: ChannelDetailProps) {
 
                         <div className="hidden md:flex gap-3 pb-2">
                             <a
-                                href={`/api/go?id=${channel.id}`}
+                                href={`/go/${channel.id}`}
                                 target="_blank"
                                 rel="nofollow noreferrer"
                                 className="bg-blue-600 hover:bg-blue-500 text-white px-8 py-3.5 rounded-xl font-bold text-lg shadow-xl shadow-blue-600/30 hover:shadow-blue-600/50 transition-all transform hover:-translate-y-1 flex items-center gap-2"
@@ -321,7 +321,7 @@ export default function ChannelDetail({ channel }: ChannelDetailProps) {
                     <div className="font-bold text-gray-900 truncate">{channel.name}</div>
                 </div>
                 <a
-                    href={`/api/go?id=${channel.id}`}
+                    href={`/go/${channel.id}`}
                     target="_blank"
                     rel="nofollow noreferrer"
                     className="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-blue-500/30 flex items-center gap-2"
