@@ -123,128 +123,176 @@ export default function VisitorsPage() {
                     </div>
                 </div>
 
-                <div className="grid lg:grid-cols-3 gap-6">
-                    {/* Top Interests */}
-                    <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-                        <h2 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
-                            <TrendingUp size={18} className="text-orange-500" /> İlgi Alanları (Top 15)
-                        </h2>
-                        <div className="space-y-3">
-                            {stats.topInterests.map((interest: any, i: number) => {
-                                const maxCount = stats.topInterests[0]?.count || 1;
-                                const pct = Math.round((interest.count / maxCount) * 100);
-                                return (
-                                    <div key={interest.name} className="flex items-center gap-3">
-                                        <span className="text-xs text-gray-400 w-5 text-right font-mono">{i + 1}</span>
-                                        <div className="flex-1 min-w-0">
-                                            <div className="flex justify-between items-center mb-1">
-                                                <span className="text-sm font-medium text-gray-800 truncate">{interest.name}</span>
-                                                <span className="text-xs text-gray-500 font-mono ml-2">{interest.count}</span>
-                                            </div>
-                                            <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                                                <div
-                                                    className="h-full bg-gradient-to-r from-orange-400 to-orange-600 rounded-full transition-all"
-                                                    style={{ width: `${pct}%` }}
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                            {stats.topInterests.length === 0 && (
-                                <p className="text-sm text-gray-400 text-center py-4">Henüz ilgi alanı verisi yok</p>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Device Distribution */}
-                    <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-                        <h2 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
-                            <Monitor size={18} className="text-blue-500" /> Cihaz Dağılımı
-                        </h2>
-                        <div className="space-y-4">
-                            {Object.entries(stats.deviceDistribution as Record<string, number>)
-                                .sort((a, b) => b[1] - a[1])
-                                .map(([device, count]) => {
-                                    const pct = totalDevices > 0 ? Math.round((count / totalDevices) * 100) : 0;
-                                    const colors: Record<string, string> = {
-                                        mobile: 'from-green-400 to-green-600',
-                                        desktop: 'from-blue-400 to-blue-600',
-                                        tablet: 'from-purple-400 to-purple-600',
-                                        unknown: 'from-gray-400 to-gray-600'
-                                    };
+                {/* Helper for bar distribution rendering */}
+                {(() => {
+                    const DistBar = ({ items, gradient, emptyText }: { items: [string, number][]; gradient: string; emptyText: string }) => {
+                        const total = items.reduce((a, b) => a + b[1], 0);
+                        if (items.length === 0) return <p className="text-sm text-gray-400 text-center py-4">{emptyText}</p>;
+                        return (
+                            <div className="space-y-3">
+                                {items.map(([name, count]) => {
+                                    const pct = total > 0 ? Math.round((count / total) * 100) : 0;
                                     return (
-                                        <div key={device}>
-                                            <div className="flex items-center justify-between mb-1.5">
-                                                <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
-                                                    {deviceIcons[device] || <Globe size={16} />}
-                                                    {device === 'mobile' ? 'Mobil' : device === 'desktop' ? 'Masaüstü' : device === 'tablet' ? 'Tablet' : 'Bilinmiyor'}
-                                                </div>
-                                                <span className="text-sm font-bold text-gray-900">{pct}%</span>
+                                        <div key={name}>
+                                            <div className="flex items-center justify-between mb-1">
+                                                <span className="text-sm font-medium text-gray-700 truncate">{name}</span>
+                                                <span className="text-xs font-bold text-gray-600">{pct}% <span className="text-gray-400 font-normal">({count})</span></span>
                                             </div>
-                                            <div className="w-full h-3 bg-gray-100 rounded-full overflow-hidden">
-                                                <div
-                                                    className={`h-full bg-gradient-to-r ${colors[device] || colors.unknown} rounded-full transition-all`}
-                                                    style={{ width: `${pct}%` }}
-                                                />
+                                            <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+                                                <div className={`h-full bg-gradient-to-r ${gradient} rounded-full`} style={{ width: `${pct}%` }} />
                                             </div>
-                                            <p className="text-xs text-gray-400 mt-1">{count.toLocaleString('tr-TR')} ziyaretçi</p>
                                         </div>
                                     );
                                 })}
-                            {Object.keys(stats.deviceDistribution).length === 0 && (
-                                <p className="text-sm text-gray-400 text-center py-4">Henüz cihaz verisi yok</p>
-                            )}
-                        </div>
-                    </div>
+                            </div>
+                        );
+                    };
 
-                    {/* Recent Visitors */}
-                    <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-                        <h2 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
-                            <Eye size={18} className="text-green-500" /> Son Ziyaretçiler
-                        </h2>
-                        <div className="space-y-2 max-h-[500px] overflow-y-auto">
-                            {stats.recentVisitors.map((v: any) => (
-                                <div key={v.id} className="border border-gray-50 rounded-xl p-3 hover:bg-gray-50 transition">
-                                    <div className="flex items-center justify-between mb-1">
-                                        <div className="flex items-center gap-2">
-                                            {v.device_type === 'mobile' ? <Smartphone size={12} className="text-green-500" /> :
-                                                v.device_type === 'tablet' ? <Tablet size={12} className="text-purple-500" /> :
-                                                    <Monitor size={12} className="text-blue-500" />}
-                                            <span className="text-xs font-mono text-gray-500">{v.visitor_id?.substring(0, 12)}...</span>
-                                        </div>
-                                        <span className="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full font-bold">
-                                            {v.visit_count}x
-                                        </span>
-                                    </div>
-                                    <div className="flex items-center gap-2 text-xs text-gray-400">
-                                        <span>{v.country || '?'}</span>
-                                        <span>•</span>
-                                        <span>{v.total_pages_viewed} sayfa</span>
-                                        <span>•</span>
-                                        <span>{formatSeconds(v.avg_session_seconds || 0)}</span>
-                                    </div>
-                                    {v.interests && v.interests.length > 0 && (
-                                        <div className="flex flex-wrap gap-1 mt-2">
-                                            {v.interests.slice(0, 4).map((int: string) => (
-                                                <span key={int} className="text-xs bg-orange-50 text-orange-600 px-1.5 py-0.5 rounded font-medium">
-                                                    {int}
-                                                </span>
+                    const browserItems = Object.entries(stats.browserDistribution || {}).sort((a, b) => (b[1] as number) - (a[1] as number)) as [string, number][];
+                    const osItems = Object.entries(stats.osDistribution || {}).sort((a, b) => (b[1] as number) - (a[1] as number)) as [string, number][];
+                    const deviceItems = Object.entries(stats.deviceDistribution || {}).sort((a, b) => (b[1] as number) - (a[1] as number)) as [string, number][];
+
+                    return (
+                        <>
+                            {/* ROW 1: Interests + Device + Browser */}
+                            <div className="grid lg:grid-cols-3 gap-6 mb-6">
+                                {/* Top Interests */}
+                                <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
+                                    <h2 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                        <TrendingUp size={18} className="text-orange-500" /> İlgi Alanları
+                                    </h2>
+                                    <DistBar
+                                        items={stats.topInterests.map((i: any) => [i.name, i.count])}
+                                        gradient="from-orange-400 to-orange-600"
+                                        emptyText="Henüz veri yok"
+                                    />
+                                </div>
+
+                                {/* Device Distribution */}
+                                <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
+                                    <h2 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                        <Monitor size={18} className="text-blue-500" /> Cihaz Dağılımı
+                                    </h2>
+                                    <DistBar
+                                        items={deviceItems.map(([k, v]) => [k === 'mobile' ? 'Mobil' : k === 'desktop' ? 'Masaüstü' : k === 'tablet' ? 'Tablet' : k, v])}
+                                        gradient="from-blue-400 to-blue-600"
+                                        emptyText="Henüz veri yok"
+                                    />
+                                </div>
+
+                                {/* Browser Distribution */}
+                                <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
+                                    <h2 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                        <Globe size={18} className="text-indigo-500" /> Tarayıcılar
+                                    </h2>
+                                    <DistBar
+                                        items={browserItems}
+                                        gradient="from-indigo-400 to-indigo-600"
+                                        emptyText="Henüz veri yok"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* ROW 2: OS + Cities + Screens */}
+                            <div className="grid lg:grid-cols-3 gap-6 mb-6">
+                                {/* OS Distribution */}
+                                <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
+                                    <h2 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                        <Monitor size={18} className="text-teal-500" /> İşletim Sistemi
+                                    </h2>
+                                    <DistBar
+                                        items={osItems}
+                                        gradient="from-teal-400 to-teal-600"
+                                        emptyText="Henüz veri yok"
+                                    />
+                                </div>
+
+                                {/* Top Cities */}
+                                <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
+                                    <h2 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                        <Globe size={18} className="text-pink-500" /> Şehirler
+                                    </h2>
+                                    <DistBar
+                                        items={(stats.topCities || []).map((c: any) => [c.name, c.count])}
+                                        gradient="from-pink-400 to-pink-600"
+                                        emptyText="Henüz şehir verisi yok"
+                                    />
+                                </div>
+
+                                {/* Screen Resolutions */}
+                                <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
+                                    <h2 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                        <BarChart3 size={18} className="text-amber-500" /> Ekran Çözünürlükleri
+                                    </h2>
+                                    <DistBar
+                                        items={(stats.topScreens || []).map((s: any) => [s.name, s.count])}
+                                        gradient="from-amber-400 to-amber-600"
+                                        emptyText="Henüz veri yok"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* ROW 3: Recent Visitors (full width) */}
+                            <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
+                                <h2 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                    <Eye size={18} className="text-green-500" /> Son Ziyaretçiler
+                                </h2>
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-sm">
+                                        <thead>
+                                            <tr className="border-b border-gray-100 text-left text-xs text-gray-500 font-medium">
+                                                <th className="pb-3 pr-4">ID</th>
+                                                <th className="pb-3 pr-4">Ziyaret</th>
+                                                <th className="pb-3 pr-4">Sayfa</th>
+                                                <th className="pb-3 pr-4">Oturum</th>
+                                                <th className="pb-3 pr-4">Cihaz</th>
+                                                <th className="pb-3 pr-4">Tarayıcı</th>
+                                                <th className="pb-3 pr-4">OS</th>
+                                                <th className="pb-3 pr-4">Şehir</th>
+                                                <th className="pb-3 pr-4">IP</th>
+                                                <th className="pb-3">İlgi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-gray-50">
+                                            {stats.recentVisitors.map((v: any) => (
+                                                <tr key={v.id} className="hover:bg-gray-50 transition">
+                                                    <td className="py-2.5 pr-4 font-mono text-xs text-gray-500">{v.visitor_id?.substring(0, 14)}..</td>
+                                                    <td className="py-2.5 pr-4">
+                                                        <span className="bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full text-xs font-bold">{v.visit_count}x</span>
+                                                    </td>
+                                                    <td className="py-2.5 pr-4 text-gray-700">{v.total_pages_viewed}</td>
+                                                    <td className="py-2.5 pr-4 text-gray-600">{formatSeconds(v.avg_session_seconds || 0)}</td>
+                                                    <td className="py-2.5 pr-4">
+                                                        {v.device_type === 'mobile' ? <Smartphone size={14} className="text-green-500" /> :
+                                                            v.device_type === 'tablet' ? <Tablet size={14} className="text-purple-500" /> :
+                                                                <Monitor size={14} className="text-blue-500" />}
+                                                    </td>
+                                                    <td className="py-2.5 pr-4 text-xs text-gray-600">{v.browser || '-'}</td>
+                                                    <td className="py-2.5 pr-4 text-xs text-gray-600">{v.os || '-'}</td>
+                                                    <td className="py-2.5 pr-4 text-xs text-gray-600">{v.city || v.country || '-'}</td>
+                                                    <td className="py-2.5 pr-4 font-mono text-xs text-gray-400">{v.ip_address ? v.ip_address.substring(0, 15) : '-'}</td>
+                                                    <td className="py-2.5">
+                                                        <div className="flex flex-wrap gap-1">
+                                                            {(v.interests || []).slice(0, 3).map((int: string) => (
+                                                                <span key={int} className="text-xs bg-orange-50 text-orange-600 px-1.5 py-0.5 rounded font-medium">{int}</span>
+                                                            ))}
+                                                            {(v.interests || []).length > 3 && <span className="text-xs text-gray-400">+{v.interests.length - 3}</span>}
+                                                        </div>
+                                                    </td>
+                                                </tr>
                                             ))}
-                                            {v.interests.length > 4 && (
-                                                <span className="text-xs text-gray-400">+{v.interests.length - 4}</span>
-                                            )}
-                                        </div>
+                                        </tbody>
+                                    </table>
+                                    {stats.recentVisitors.length === 0 && (
+                                        <p className="text-sm text-gray-400 text-center py-8">Henüz ziyaretçi verisi yok</p>
                                     )}
                                 </div>
-                            ))}
-                            {stats.recentVisitors.length === 0 && (
-                                <p className="text-sm text-gray-400 text-center py-4">Henüz ziyaretçi verisi yok</p>
-                            )}
-                        </div>
-                    </div>
-                </div>
+                            </div>
+                        </>
+                    );
+                })()}
             </div>
         </div>
     );
 }
+
