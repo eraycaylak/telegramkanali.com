@@ -78,6 +78,7 @@ export default function AdminLayout({
         { name: 'Kategoriler', href: '/admin/categories', icon: FolderTree, perm: 'manage_categories' },
         { name: 'Bannerlar', href: '/admin/banners', icon: Image, perm: 'manage_banners' },
         { name: 'Analitik', href: '/admin/analytics', icon: BarChart, perm: 'view_analytics' },
+        { name: 'Ziyaretçi Profilleri', href: '/admin/visitors', icon: Users, perm: 'view_analytics' },
         { name: 'Ödemeler', href: '/admin/deposits', icon: Shield, perm: 'manage_users' }, // Re-using Shield or similar
         { name: 'Blog Yönetimi', href: '/admin/blog', icon: BookOpen, perm: 'manage_blog' },
         { name: 'Sayfalar', href: '/admin/pages', icon: FileText, perm: 'manage_blog' },
