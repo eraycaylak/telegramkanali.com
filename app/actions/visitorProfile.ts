@@ -9,7 +9,13 @@ export async function trackVisitorProfile(
     sessionSeconds: number,
     deviceType: string | null,
     referrer: string | null,
-    country: string | null
+    country: string | null,
+    ipAddress: string | null = null,
+    city: string | null = null,
+    screenResolution: string | null = null,
+    browser: string | null = null,
+    os: string | null = null,
+    fingerprint: string | null = null
 ) {
     try {
         const { error } = await supabase.rpc('upsert_visitor_profile', {
@@ -19,7 +25,13 @@ export async function trackVisitorProfile(
             p_session_seconds: sessionSeconds,
             p_device_type: deviceType,
             p_referrer: referrer,
-            p_country: country
+            p_country: country,
+            p_ip_address: ipAddress,
+            p_city: city,
+            p_screen_resolution: screenResolution,
+            p_browser: browser,
+            p_os: os,
+            p_fingerprint: fingerprint
         });
 
         if (error) {
@@ -32,6 +44,7 @@ export async function trackVisitorProfile(
         return { error: err.message };
     }
 }
+
 
 // Admin: Get visitor profile stats
 export async function getVisitorStats() {
@@ -96,12 +109,72 @@ export async function getVisitorStats() {
             ? Math.round(avgData.reduce((a, b) => a + b.avg_session_seconds, 0) / avgData.length)
             : 0;
 
+        // Browser distribution
+        const { data: browsers } = await supabase
+            .from('visitor_profiles')
+            .select('browser')
+            .not('browser', 'is', null);
+
+        const browserCounts: Record<string, number> = {};
+        (browsers || []).forEach(b => {
+            const name = b.browser || 'Other';
+            browserCounts[name] = (browserCounts[name] || 0) + 1;
+        });
+
+        // OS distribution
+        const { data: osList } = await supabase
+            .from('visitor_profiles')
+            .select('os')
+            .not('os', 'is', null);
+
+        const osCounts: Record<string, number> = {};
+        (osList || []).forEach(o => {
+            const name = o.os || 'Other';
+            osCounts[name] = (osCounts[name] || 0) + 1;
+        });
+
+        // Top cities
+        const { data: cities } = await supabase
+            .from('visitor_profiles')
+            .select('city')
+            .not('city', 'is', null);
+
+        const cityCounts: Record<string, number> = {};
+        (cities || []).forEach(c => {
+            const name = c.city || 'Bilinmiyor';
+            cityCounts[name] = (cityCounts[name] || 0) + 1;
+        });
+        const topCities = Object.entries(cityCounts)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 15)
+            .map(([name, count]) => ({ name, count }));
+
+        // Top screen resolutions
+        const { data: screens } = await supabase
+            .from('visitor_profiles')
+            .select('screen_resolution')
+            .not('screen_resolution', 'is', null);
+
+        const screenCounts: Record<string, number> = {};
+        (screens || []).forEach(s => {
+            const name = s.screen_resolution || 'unknown';
+            screenCounts[name] = (screenCounts[name] || 0) + 1;
+        });
+        const topScreens = Object.entries(screenCounts)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 10)
+            .map(([name, count]) => ({ name, count }));
+
         return {
             totalVisitors: (totalVisitors as any)?.length ?? 0,
             todayVisitors: todayCount ?? 0,
             returningVisitors: returningCount ?? 0,
             topInterests,
             deviceDistribution: deviceCounts,
+            browserDistribution: browserCounts,
+            osDistribution: osCounts,
+            topCities,
+            topScreens,
             recentVisitors: recentVisitors || [],
             avgSessionSeconds: avgSession
         };
@@ -110,3 +183,4 @@ export async function getVisitorStats() {
         return null;
     }
 }
+

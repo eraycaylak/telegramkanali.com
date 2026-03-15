@@ -5,7 +5,7 @@ import { usePathname, useSearchParams } from 'next/navigation';
 import { trackPageView } from '@/app/actions/analytics';
 import { trackVisitorProfile } from '@/app/actions/visitorProfile';
 
-// Cookie helpers
+// ============ Cookie Helpers ============
 function getCookie(name: string): string | null {
     if (typeof document === 'undefined') return null;
     const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
@@ -17,12 +17,12 @@ function setCookie(name: string, value: string, days: number) {
     document.cookie = `${name}=${encodeURIComponent(value)}; max-age=${maxAge}; path=/; SameSite=Lax`;
 }
 
-// Generate unique visitor ID
+// ============ Visitor ID ============
 function generateVisitorId(): string {
     return 'v_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 9);
 }
 
-// Detect device type
+// ============ Device Detection ============
 function getDeviceType(): string {
     if (typeof navigator === 'undefined') return 'unknown';
     const ua = navigator.userAgent;
@@ -31,34 +31,110 @@ function getDeviceType(): string {
     return 'desktop';
 }
 
-// Detect language/country from browser
-function getBrowserCountry(): string {
+// ============ Browser Detection ============
+function getBrowser(): string {
     if (typeof navigator === 'undefined') return 'unknown';
-    const lang = navigator.language || (navigator as any).userLanguage || 'unknown';
-    return lang; // e.g. "tr-TR", "en-US"
+    const ua = navigator.userAgent;
+    if (ua.includes('Firefox/')) return 'Firefox';
+    if (ua.includes('Edg/')) return 'Edge';
+    if (ua.includes('OPR/') || ua.includes('Opera/')) return 'Opera';
+    if (ua.includes('Chrome/') && !ua.includes('Edg/')) return 'Chrome';
+    if (ua.includes('Safari/') && !ua.includes('Chrome/')) return 'Safari';
+    if (ua.includes('MSIE') || ua.includes('Trident/')) return 'IE';
+    return 'Other';
 }
 
-// Known category slugs cache (loaded once)
+// ============ OS Detection ============
+function getOS(): string {
+    if (typeof navigator === 'undefined') return 'unknown';
+    const ua = navigator.userAgent;
+    if (ua.includes('Windows')) return 'Windows';
+    if (ua.includes('Mac OS')) return 'macOS';
+    if (ua.includes('iPhone') || ua.includes('iPad')) return 'iOS';
+    if (ua.includes('Android')) return 'Android';
+    if (ua.includes('Linux')) return 'Linux';
+    if (ua.includes('CrOS')) return 'ChromeOS';
+    return 'Other';
+}
+
+// ============ Screen Resolution ============
+function getScreenResolution(): string {
+    if (typeof screen === 'undefined') return 'unknown';
+    return `${screen.width}x${screen.height}`;
+}
+
+// ============ Browser Language/Country ============
+function getBrowserCountry(): string {
+    if (typeof navigator === 'undefined') return 'unknown';
+    return navigator.language || (navigator as any).userLanguage || 'unknown';
+}
+
+// ============ Canvas Fingerprint (lightweight) ============
+function getFingerprint(): string {
+    try {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return 'no-canvas';
+
+        canvas.width = 200;
+        canvas.height = 50;
+
+        ctx.textBaseline = 'top';
+        ctx.font = '14px Arial';
+        ctx.fillStyle = '#f60';
+        ctx.fillRect(125, 1, 62, 20);
+        ctx.fillStyle = '#069';
+        ctx.fillText('TKfp1.0', 2, 15);
+        ctx.fillStyle = 'rgba(102, 204, 0, 0.7)';
+        ctx.fillText('TKfp1.0', 4, 17);
+
+        const dataUrl = canvas.toDataURL();
+        // Simple hash
+        let hash = 0;
+        for (let i = 0; i < dataUrl.length; i++) {
+            const char = dataUrl.charCodeAt(i);
+            hash = ((hash << 5) - hash) + char;
+            hash = hash & hash; // Convert to 32bit integer
+        }
+        return 'fp_' + Math.abs(hash).toString(36);
+    } catch {
+        return 'fp_error';
+    }
+}
+
+// ============ IP & Geo Cache ============
+let geoCache: { ip: string; country: string | null; city: string | null } | null = null;
+
+async function getGeoInfo(): Promise<{ ip: string; country: string | null; city: string | null }> {
+    if (geoCache) return geoCache;
+    try {
+        const res = await fetch('/api/visitor-info');
+        if (res.ok) {
+            geoCache = await res.json();
+            return geoCache!;
+        }
+    } catch {}
+    geoCache = { ip: 'unknown', country: null, city: null };
+    return geoCache;
+}
+
+// ============ Category Slugs Cache ============
 let categorySlugCache: string[] | null = null;
 
 async function loadCategorySlugs(): Promise<string[]> {
     if (categorySlugCache) return categorySlugCache;
     try {
-        const response = await fetch('/api/categories-list');
-        if (response.ok) {
-            categorySlugCache = await response.json();
+        const res = await fetch('/api/categories-list');
+        if (res.ok) {
+            categorySlugCache = await res.json();
             return categorySlugCache || [];
         }
     } catch {}
-    // Fallback: well-known category slugs
-    categorySlugCache = [
-        '18', 'kripto-para', 'haber', 'egitim-ders', 'sohbet', 'oyun',
-        'teknoloji', 'film-dizi', 'spor', 'mzik', 'futbol', 'topluluk',
-        'para-kazanma', 'iddia', 'kitap', 'hobi', 'salik', 'din'
-    ];
+    categorySlugCache = [];
     return categorySlugCache;
 }
 
+// ============ MAIN COMPONENT ============
 export default function AnalyticsTracker() {
     const pathname = usePathname();
     const searchParams = useSearchParams();
@@ -75,12 +151,7 @@ export default function AnalyticsTracker() {
 
             const sessionSeconds = Math.round((Date.now() - sessionStartRef.current) / 1000);
             if (sessionSeconds > 1 && sessionSeconds < 3600) {
-                // Use sendBeacon for reliable tracking on page close
-                const payload = JSON.stringify({
-                    visitorId,
-                    sessionSeconds
-                });
-                navigator.sendBeacon('/api/session-end', payload);
+                navigator.sendBeacon('/api/session-end', JSON.stringify({ visitorId, sessionSeconds }));
             }
         };
 
@@ -93,78 +164,83 @@ export default function AnalyticsTracker() {
         sessionStartRef.current = Date.now();
     }, [pathname]);
 
-    // Main tracking logic
+    // Main tracking
     useEffect(() => {
         const track = async () => {
-            // Skip admin and API pages
             if (pathname.startsWith('/admin') || pathname.startsWith('/api')) return;
 
             const consent = getCookie('tk_consent');
-
             let isNewVisitor = false;
 
             if (consent === '1') {
-                // === COOKIE MODE: Full tracking ===
+                // === FULL COOKIE MODE ===
 
-                // 1. Ensure visitor has a unique ID (30-day cookie)
+                // 1. Unique Visitor ID (30 days)
                 let visitorId = getCookie('tk_uid');
                 if (!visitorId) {
                     visitorId = generateVisitorId();
-                    setCookie('tk_uid', visitorId, 30); // 30 days
+                    setCookie('tk_uid', visitorId, 30);
                     isNewVisitor = true;
                 }
 
-                // 2. Daily unique visitor check
+                // 2. Daily unique check
                 const today = new Date().toISOString().split('T')[0];
-                const lastVisitDay = getCookie('tk_day');
-                if (!lastVisitDay || lastVisitDay !== today) {
+                const lastDay = getCookie('tk_day');
+                if (!lastDay || lastDay !== today) {
                     isNewVisitor = true;
                     setCookie('tk_day', today, 1);
                 }
 
-                // 3. Track visit count
-                const visitCount = parseInt(getCookie('tk_vc') || '0') + 1;
-                setCookie('tk_vc', visitCount.toString(), 30);
+                // 3. Visit count
+                const vc = parseInt(getCookie('tk_vc') || '0') + 1;
+                setCookie('tk_vc', vc.toString(), 30);
 
-                // 4. Interest tracking — detect if current path is a category
+                // 4. Interest tracking
                 const categorySlugs = await loadCategorySlugs();
                 const pathSlug = pathname.replace(/^\//, '').split('/')[0];
                 const interests: string[] = [];
-
                 if (pathSlug && categorySlugs.includes(pathSlug)) {
-                    // User is visiting a category page
                     interests.push(pathSlug);
-
-                    // Update interests cookie (keep last 20)
-                    const existingInterests = getCookie('tk_int');
-                    const interestList = existingInterests ? existingInterests.split(',') : [];
-                    if (!interestList.includes(pathSlug)) {
-                        interestList.push(pathSlug);
-                    }
-                    setCookie('tk_int', interestList.slice(-20).join(','), 30);
+                    const existing = getCookie('tk_int');
+                    const list = existing ? existing.split(',') : [];
+                    if (!list.includes(pathSlug)) list.push(pathSlug);
+                    setCookie('tk_int', list.slice(-20).join(','), 30);
                 }
 
-                // 5. Send profile to server (non-blocking)
+                // 5. Collect extended data
+                const geo = await getGeoInfo();
+                const browser = getBrowser();
+                const os = getOS();
+                const screenRes = getScreenResolution();
+                const fingerprint = getFingerprint();
+                const referrer = document.referrer || null;
+
+                // 6. Send to server (non-blocking)
                 trackVisitorProfile(
                     visitorId,
                     pathname,
                     interests,
-                    0, // session seconds will be tracked on beforeunload
+                    0,
                     getDeviceType(),
-                    document.referrer || null,
-                    getBrowserCountry()
-                ).catch(() => {}); // silent fail
+                    referrer,
+                    geo.country || getBrowserCountry(),
+                    geo.ip,
+                    geo.city,
+                    screenRes,
+                    browser,
+                    os,
+                    fingerprint
+                ).catch(() => {});
 
             } else {
-                // === FALLBACK MODE: sessionStorage (no cookies) ===
-                const pathSessionKey = `tk_visited_${pathname}`;
-                if (!sessionStorage.getItem(pathSessionKey)) {
+                // === FALLBACK: sessionStorage ===
+                const key = `tk_visited_${pathname}`;
+                if (!sessionStorage.getItem(key)) {
                     isNewVisitor = true;
-                    sessionStorage.setItem(pathSessionKey, 'true');
+                    sessionStorage.setItem(key, 'true');
                 }
             }
 
-            // Always track page view
             await trackPageView(pathname, isNewVisitor);
         };
 
