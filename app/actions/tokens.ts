@@ -140,7 +140,7 @@ export async function createAdCampaign(data: {
     if (!channel) return { error: 'Kanal bulunamadı.' };
     if (channel.owner_id !== userId) return { error: 'Bu kanal size ait değil.' };
 
-    // Get pricing
+    // Get pricing details for notifications
     const { data: pricing } = await adminClient
         .from('ad_pricing')
         .select('*')
@@ -149,61 +149,18 @@ export async function createAdCampaign(data: {
 
     if (!pricing) return { error: 'Fiyatlandırma bulunamadı.' };
 
-    // Check balance
-    const { data: profile } = await adminClient
-        .from('profiles')
-        .select('token_balance')
-        .eq('id', userId)
-        .single();
+    // Atomik olarak jetonları düş ve kampanyayı oluştur (TOCTOU race condition önleme)
+    const { data: campaignId, error: rpcError } = await adminClient.rpc('create_ad_campaign_atomic', {
+        p_user_id: userId,
+        p_channel_id: data.channelId,
+        p_ad_type: data.adType,
+        p_pricing_id: data.pricingId
+    });
 
-    const currentBalance = profile?.token_balance || 0;
-
-    if (currentBalance < pricing.tokens_required) {
-        return { error: `Yetersiz jeton. Gereken: ${pricing.tokens_required}, Mevcut: ${currentBalance}` };
-    }
-
-    // Deduct tokens
-    const newBalance = currentBalance - pricing.tokens_required;
-
-    const { error: balanceError } = await adminClient
-        .from('profiles')
-        .update({ token_balance: newBalance })
-        .eq('id', userId);
-
-    if (balanceError) {
-        console.error('[TOKENS] Balance deduction error:', balanceError);
-        return { error: 'Jeton düşülürken hata oluştu.' };
-    }
-
-    // Create campaign
-    const campaignData: any = {
-        user_id: userId,
-        channel_id: data.channelId,
-        ad_type: data.adType,
-        total_views: pricing.views,
-        current_views: 0,
-        tokens_spent: pricing.tokens_required,
-        status: 'pending', // YENİ: Reklam onay bekliyor statüsüne alındı
-    };
-
-    // Story tipi için süre bazlı
-    if (data.adType === 'story') {
-        campaignData.expires_at = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
-    }
-
-    const { data: campaign, error: campaignError } = await adminClient
-        .from('ad_campaigns')
-        .insert(campaignData)
-        .select()
-        .single();
-
-    if (campaignError) {
-        console.error('[TOKENS] Campaign creation error:', campaignError);
-        // Refund tokens on failure
-        await adminClient
-            .from('profiles')
-            .update({ token_balance: currentBalance })
-            .eq('id', userId);
+    if (rpcError) {
+        console.error('[TOKENS] RPC Campaign creation error:', rpcError);
+        if (rpcError.message.includes('insufficient_funds')) return { error: 'Yetersiz jeton.' };
+        if (rpcError.message.includes('invalid_pricing')) return { error: 'Fiyatlandırma bilgisi geçersiz veya pasif.' };
         return { error: 'Kampanya oluşturulamadı.' };
     }
 
@@ -245,19 +202,9 @@ export async function createAdCampaign(data: {
         console.error("Failed to send admin notification:", err);
     }
 
-    // Log transaction
-    await adminClient.from('token_transactions').insert({
-        user_id: userId,
-        type: 'spend',
-        amount: -pricing.tokens_required,
-        description: `${data.adType === 'featured' ? 'Öne Çıkarma' : data.adType === 'banner' ? 'Banner' : 'Hikaye'} Reklam - ${pricing.tokens_required} Jeton (${pricing.label})`,
-        reference_id: campaign.id,
-        balance_after: newBalance,
-    });
-
     revalidatePath('/dashboard');
     revalidatePath('/dashboard/ads');
-    return { success: true, campaignId: campaign.id };
+    return { success: true, campaignId: campaignId };
 }
 
 // ========================
@@ -334,61 +281,16 @@ export async function deleteAdCampaign(campaignId: string) {
     const userId = await getAuthUserId();
     if (!userId) return { error: 'Oturum açmanız gerekiyor.' };
 
-    const { data: campaign, error: fetchError } = await adminClient
-        .from('ad_campaigns')
-        .select('id, user_id, status, tokens_spent')
-        .eq('id', campaignId)
-        .single();
+    const { error: rpcError } = await adminClient.rpc('delete_ad_campaign_atomic', {
+        p_campaign_id: campaignId,
+        p_user_id: userId
+    });
 
-    if (fetchError || !campaign) {
-        return { error: 'Kampanya bulunamadı.' };
-    }
-
-    if (campaign.user_id !== userId) {
-        return { error: 'Bu kampanya size ait değil.' };
-    }
-
-    // Yalnızca beklemede (pending) veya iptal edilmiş (cancelled) kampanyalar silinebilir
-    if (campaign.status !== 'pending' && campaign.status !== 'cancelled') {
-        return { error: 'Oluşturulmuş aktif kampanyaları ancak iptal edildikten sonra (veya onay beklerken) silebilirsiniz.' };
-    }
-
-    // Beklemedeyken siliniyorsa iade yap
-    if (campaign.status === 'pending') {
-        const { data: profile } = await adminClient
-            .from('profiles')
-            .select('token_balance')
-            .eq('id', userId)
-            .single();
-
-        const currentBalance = profile?.token_balance || 0;
-        const newBalance = currentBalance + campaign.tokens_spent;
-
-        await adminClient
-            .from('profiles')
-            .update({ token_balance: newBalance })
-            .eq('id', userId);
-
-        // Jeton iade kaydı
-        await adminClient.from('token_transactions').insert({
-            user_id: userId,
-            type: 'refund',
-            amount: campaign.tokens_spent,
-            description: `Reklam İptali İadesi (${campaign.tokens_spent} Jeton)`,
-            reference_id: campaign.id,
-            balance_after: newBalance,
-        });
-    }
-
-    // Kampanyayı Veritabanından Sil
-    const { error: deleteError } = await adminClient
-        .from('ad_campaigns')
-        .delete()
-        .eq('id', campaignId);
-
-    if (deleteError) {
-        console.error('[TOKENS] Delete error:', deleteError);
-        return { error: 'Kampanya silinemedi.' };
+    if (rpcError) {
+        console.error('[TOKENS] RPC Delete error:', rpcError);
+        if (rpcError.message.includes('not_found')) return { error: 'Kampanya bulunamadı veya size ait değil.' };
+        if (rpcError.message.includes('invalid_status')) return { error: 'Sadece beklemedeki veya iptal edilmiş kampanyalar silinebilir.' };
+        return { error: 'Kampanya silinemedi. Lütfen tekrar deneyin.' };
     }
 
     revalidatePath('/dashboard/ads');
@@ -459,6 +361,29 @@ export async function adminUpdateCampaignStatus(campaignId: string, newStatus: s
 
     if (!profile || (profile.role !== 'admin' && profile.role !== 'editor')) {
         return { error: 'Yetkiniz yok.' };
+    }
+
+    // Eğer admin, beklemedeki kampanyayı iptal/reddediyorsa, kullanıcıya jeton iadesi yapılmalı
+    if (newStatus === 'cancelled') {
+        const { data: campaign } = await adminClient
+            .from('ad_campaigns')
+            .select('user_id, status')
+            .eq('id', campaignId)
+            .single();
+
+        if (campaign && campaign.status === 'pending') {
+            const { error: rpcError } = await adminClient.rpc('refund_ad_campaign_atomic', {
+                p_campaign_id: campaignId,
+                p_user_id: campaign.user_id
+            });
+            
+            if (rpcError) {
+                console.error('[TOKENS] Admin refund error:', rpcError);
+                return { error: 'İptal ve iade işlemi başarısız oldu.' };
+            }
+            revalidatePath('/admin/campaigns');
+            return { success: true };
+        }
     }
 
     const { error } = await adminClient

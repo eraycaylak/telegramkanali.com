@@ -20,11 +20,24 @@ export default function AdTracker({ campaignId, children }: AdTrackerProps) {
     useEffect(() => {
         if (!campaignId || tracked.current) return;
 
+        // F5 ve aynı oturumda tekrar sayımı önlemek için sessionStorage kontrolü
+        const SEEN_ADS_KEY = 'tk_seen_ads';
+        const seenAds: string[] = JSON.parse(sessionStorage.getItem(SEEN_ADS_KEY) || '[]');
+        if (seenAds.includes(campaignId)) {
+            tracked.current = true;
+            return;
+        }
+
         const observer = new IntersectionObserver(
             (entries) => {
                 entries.forEach((entry) => {
                     if (entry.isIntersecting && !tracked.current) {
                         tracked.current = true;
+                        
+                        // Session'a kaydet
+                        seenAds.push(campaignId);
+                        sessionStorage.setItem(SEEN_ADS_KEY, JSON.stringify(seenAds));
+                        
                         trackAdView(campaignId);
                     }
                 });
