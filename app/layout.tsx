@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { Suspense } from "react";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
 import AnalyticsTracker from "@/components/AnalyticsTracker";
+import CookieConsent from "@/components/CookieConsent";
+
 import JsonLd, { generateWebsiteSchema, generateOrganizationSchema } from "@/components/JsonLd";
 import "./globals.css";
 
@@ -102,8 +104,10 @@ export default function RootLayout({
         <Suspense fallback={null}>
           <AnalyticsTracker />
         </Suspense>
+        <CookieConsent />
 
         {children}
+
       </body>
     </html>
   );
