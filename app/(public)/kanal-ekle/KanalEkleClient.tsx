@@ -81,28 +81,28 @@ export default function KanalEkleClient({ categories }: Props) {
 
     if (status === 'restricted') {
         return (
-            <div className="bg-white border-2 border-orange-200 rounded-2xl shadow-xl p-8 text-center animate-in fade-in zoom-in duration-300">
-                <div className="bg-orange-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <AlertCircle className="text-orange-600 w-12 h-12" />
+            <div className="bg-white border-2 border-orange-200 rounded-2xl shadow-xl p-4 md:p-8 text-center animate-in fade-in zoom-in duration-300">
+                <div className="bg-orange-100 w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <AlertCircle className="text-orange-600 w-8 h-8 md:w-10 md:w-10" />
                 </div>
-                <h2 className="text-2xl font-black text-gray-900 mb-4">Bu Kanal Doğrudan Eklenemez!</h2>
-                <p className="text-gray-600 mb-8 leading-relaxed">
-                    Seçtiğiniz kategori (**+18, İddaa veya Kripto**) için başvurular sadece manuel olarak kabul edilmektedir.
-                    Lütfen devam etmek için Telegram üzerinden yönetici ile iletişime geçin.
+                <h2 className="text-lg md:text-2xl font-black text-gray-900 mb-2 md:mb-4">Bu Kanal Doğrudan Eklenemez!</h2>
+                <p className="text-sm md:text-base text-gray-600 mb-4 md:mb-8 leading-relaxed">
+                    Seçtiğiniz kategori (**+18, İddaa veya Kripto**) için başvurular manuel kabul edilmektedir.
+                    Devam etmek için Telegram'dan yöneticiye yazın.
                 </p>
-                <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-2 md:gap-3">
                     <a
                         href="https://t.me/Errccyy"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center justify-center gap-2 bg-[#229ED9] text-white font-bold py-4 rounded-xl hover:bg-[#1c86b8] transition shadow-lg shadow-blue-100"
+                        className="flex items-center justify-center gap-2 bg-[#229ED9] text-white font-bold py-3 md:py-4 rounded-xl hover:bg-[#1c86b8] transition shadow-lg shadow-blue-100"
                     >
-                        <MessageCircle size={20} />
+                        <MessageCircle size={18} className="md:w-5 md:h-5" />
                         Yöneticiye Yaz (Telegram)
                     </a>
                     <button
                         onClick={() => setStatus('idle')}
-                        className="text-gray-400 font-bold py-2 hover:text-gray-600 transition text-sm"
+                        className="text-gray-400 font-bold py-1 hover:text-gray-600 transition text-xs md:text-sm"
                     >
                         Vazgeç ve Kategori Değiştir
                     </button>
