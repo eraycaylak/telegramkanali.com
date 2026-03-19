@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus, Trash2, Edit, Search, LogOut, ExternalLink, RefreshCw, BarChart3, Bot, Users as UsersIcon } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
-import { deleteChannel, addChannel, updateChannel, scrapeTelegramInfo, syncAllChannelsFromTelegram, approveChannel, rejectChannel, syncChannelFromTelegram } from '@/app/actions/admin';
+import { deleteChannel, addChannel, updateChannel, scrapeTelegramInfo, syncAllChannelsFromTelegram, approveChannel, rejectChannel, syncChannelFromTelegram, getChannelFollowers } from '@/app/actions/admin';
 import { Channel, Category } from '@/lib/types';
 
 export default function DashboardClient() {
@@ -12,6 +12,7 @@ export default function DashboardClient() {
     const [channels, setChannels] = useState<Channel[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
     const [profiles, setProfiles] = useState<any[]>([]);
+    const [categoryCounts, setCategoryCounts] = useState<Record<string, number>>({});
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('all');
     const [viewStatus, setViewStatus] = useState<'approved' | 'pending' | 'rejected' | 'bot'>('approved');
@@ -32,6 +33,10 @@ export default function DashboardClient() {
     const [scraping, setScraping] = useState(false);
     const [syncing, setSyncing] = useState(false);
     const [lastEditedId, setLastEditedId] = useState<string | null>(null);
+    const [followerModalOpen, setFollowerModalOpen] = useState(false);
+    const [selectedChannelForFollowers, setSelectedChannelForFollowers] = useState<Channel | null>(null);
+    const [followers, setFollowers] = useState<any[]>([]);
+    const [loadingFollowers, setLoadingFollowers] = useState(false);
 
     // Protect Route
     useEffect(() => {
@@ -59,8 +64,18 @@ export default function DashboardClient() {
             setChannels(allChannels.map((d: any) => ({ ...d, categoryName: d.categories?.name })) as Channel[]);
 
             // Fetch Categories for dropdown
-            const { data: catData } = await supabase.from('categories').select('*');
-            if (catData) setCategories(catData as Category[]);
+            const { data: catData } = await supabase.from('categories').select('*').order('name');
+            if (catData) {
+                setCategories(catData as Category[]);
+                // Count channels per category
+                const counts: Record<string, number> = {};
+                allChannels.forEach((ch: any) => {
+                    if (ch.category_id) {
+                        counts[ch.category_id] = (counts[ch.category_id] || 0) + 1;
+                    }
+                });
+                setCategoryCounts(counts);
+            }
 
             // Fetch Profiles (range ile)
             let allProfiles: any[] = [];
@@ -180,6 +195,19 @@ export default function DashboardClient() {
         }
     };
 
+    const viewFollowers = async (channel: Channel) => {
+        setSelectedChannelForFollowers(channel);
+        setFollowerModalOpen(true);
+        setLoadingFollowers(true);
+        const res = await getChannelFollowers(channel.id);
+        if (res.success) {
+            setFollowers(res.data);
+        } else {
+            alert(res.error);
+        }
+        setLoadingFollowers(false);
+    };
+
     return (
         <div className="min-h-screen bg-transparent text-gray-900 font-sans">
 
@@ -268,6 +296,31 @@ export default function DashboardClient() {
                         </div>
                     </div>
 
+                    {/* Category Selection Filter (New) */}
+                    <div className="w-full mt-4 flex flex-wrap gap-2 overflow-x-auto pb-2 scrollbar-hide">
+                        <button
+                            onClick={() => setSelectedCategory('all')}
+                            className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold transition whitespace-nowrap ${selectedCategory === 'all'
+                                ? 'bg-blue-600 text-white shadow-md'
+                                : 'bg-white text-gray-600 border border-gray-200 hover:border-blue-300'
+                                }`}
+                        >
+                            Tümü <span className={`${selectedCategory === 'all' ? 'text-blue-100' : 'text-gray-400'}`}>({channels.length})</span>
+                        </button>
+                        {categories.map(cat => (
+                            <button
+                                key={cat.id}
+                                onClick={() => setSelectedCategory(cat.id)}
+                                className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold transition whitespace-nowrap ${selectedCategory === cat.id
+                                    ? 'bg-blue-600 text-white shadow-md'
+                                    : 'bg-white text-gray-600 border border-gray-200 hover:border-blue-300'
+                                    }`}
+                            >
+                                {cat.name} <span className={`${selectedCategory === cat.id ? 'text-blue-100' : 'text-gray-400'}`}>({categoryCounts[cat.id] || 0})</span>
+                            </button>
+                        ))}
+                    </div>
+
                     <div className="flex items-center gap-3 w-full xl:w-auto justify-end">
                         <button
                             onClick={async () => {
@@ -306,6 +359,8 @@ export default function DashboardClient() {
                                 <tr className="bg-gray-50 border-b border-gray-200 text-gray-500 text-sm uppercase tracking-wider">
                                     <th className="p-4 font-semibold">Kanal Adı</th>
                                     <th className="p-4 font-semibold">Kategori</th>
+                                    <th className="p-4 font-semibold text-center">Abone</th>
+                                    <th className="p-4 font-semibold text-center">Tıklama</th>
                                     <th className="p-4 font-semibold text-center">Skor</th>
                                     <th className="p-4 font-semibold text-right">İşlemler</th>
                                 </tr>
@@ -348,6 +403,12 @@ export default function DashboardClient() {
                                             <td className="p-4 text-gray-500 text-sm">
                                                 <span className="bg-blue-50 text-blue-700 px-2 py-1 rounded-md">{channel.categoryName || 'Genel'}</span>
                                             </td>
+                                            <td className="p-4 p-4 text-center font-medium text-gray-700">
+                                                {new Intl.NumberFormat('tr-TR').format(channel.member_count || 0)}
+                                            </td>
+                                            <td className="p-4 text-center font-medium text-gray-700">
+                                                {new Intl.NumberFormat('tr-TR').format(channel.clicks || 0)}
+                                            </td>
                                             <td className="p-4 text-center font-bold text-gray-700">{channel.score || 0}</td>
                                             <td className="p-4 text-right flex items-center justify-end gap-2">
                                                 {channel.status === 'pending' && (
@@ -374,6 +435,13 @@ export default function DashboardClient() {
                                                         Geri Al
                                                     </button>
                                                 )}
+                                                <button
+                                                    onClick={() => viewFollowers(channel)}
+                                                    className="p-2 text-gray-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition"
+                                                    title="Takipçileri Gör"
+                                                >
+                                                    <UsersIcon size={18} />
+                                                </button>
                                                 <button
                                                     onClick={async () => {
                                                         setSyncing(true);
@@ -445,6 +513,12 @@ export default function DashboardClient() {
                                                     <span className="text-[10px] font-bold text-gray-400">
                                                         Skor: {channel.score || 0}
                                                     </span>
+                                                    <span className="text-[10px] font-bold text-gray-400">
+                                                        • {new Intl.NumberFormat('tr-TR').format(channel.member_count || 0)} Abone
+                                                    </span>
+                                                    <span className="text-[10px] font-bold text-gray-400">
+                                                        • {new Intl.NumberFormat('tr-TR').format(channel.clicks || 0)} Tık
+                                                    </span>
                                                 </div>
                                             </div>
                                         </div>
@@ -462,6 +536,12 @@ export default function DashboardClient() {
                                                 className="p-2.5 text-blue-600 bg-blue-50 rounded-xl transition"
                                             >
                                                 <Edit size={18} />
+                                            </button>
+                                            <button
+                                                onClick={() => viewFollowers(channel)}
+                                                className="p-2.5 text-purple-600 bg-purple-50 rounded-xl transition"
+                                            >
+                                                <UsersIcon size={18} />
                                             </button>
                                             <button
                                                 onClick={async () => {
@@ -594,6 +674,74 @@ export default function DashboardClient() {
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Follower Modal */}
+            {followerModalOpen && selectedChannelForFollowers && (
+                <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[60] backdrop-blur-sm p-4">
+                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl p-6 md:p-8 animate-in zoom-in duration-300 max-h-[80vh] flex flex-col">
+                        <div className="flex items-center justify-between mb-6">
+                            <div>
+                                <h2 className="text-xl font-black text-gray-900">{selectedChannelForFollowers.name}</h2>
+                                <p className="text-sm text-gray-500">Son Takipçi Hareketleri</p>
+                            </div>
+                            <button
+                                onClick={() => setFollowerModalOpen(false)}
+                                className="p-2 hover:bg-gray-100 rounded-full transition"
+                            >
+                                <Plus size={24} className="rotate-45 text-gray-400" />
+                            </button>
+                        </div>
+
+                        <div className="flex-1 overflow-y-auto min-h-[300px]">
+                            {loadingFollowers ? (
+                                <div className="flex items-center justify-center h-full py-12">
+                                    <RefreshCw className="animate-spin text-purple-600" size={32} />
+                                </div>
+                            ) : followers.length === 0 ? (
+                                <div className="text-center py-12">
+                                    <UsersIcon size={48} className="mx-auto text-gray-200 mb-4" />
+                                    <p className="text-gray-400">Henüz takipçi hareketi kaydedilmemiş.</p>
+                                    <p className="text-xs text-gray-400 mt-1">(Sadece bot bağlı kanallarda takip edilir)</p>
+                                </div>
+                            ) : (
+                                <table className="w-full text-left">
+                                    <thead>
+                                        <tr className="text-xs font-bold text-gray-400 uppercase tracking-widest border-b border-gray-100">
+                                            <th className="pb-3">Kullanıcı</th>
+                                            <th className="pb-3 text-center">İşlem</th>
+                                            <th className="pb-3 text-right">Tarih</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-gray-50">
+                                        {followers.map((ev: any) => (
+                                            <tr key={ev.id} className="text-sm hover:bg-gray-50 transition">
+                                                <td className="py-3">
+                                                    <div className="flex flex-col">
+                                                        <span className="font-bold text-gray-900">
+                                                            {ev.first_name} {ev.last_name}
+                                                        </span>
+                                                        {ev.username && (
+                                                            <span className="text-xs text-purple-600">@{ev.username}</span>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                                <td className="py-3 text-center">
+                                                    <span className={`px-2 py-1 rounded-full text-[10px] font-black uppercase ${ev.event_type === 'join' ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`}>
+                                                        {ev.event_type === 'join' ? 'KATILDI' : 'AYRILDI'}
+                                                    </span>
+                                                </td>
+                                                <td className="py-3 text-right text-gray-500 tabular-nums">
+                                                    {new Date(ev.created_at).toLocaleString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            )}
+                        </div>
                     </div>
                 </div>
             )}

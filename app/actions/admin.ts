@@ -670,6 +670,25 @@ export async function rejectChannel(id: string, userId?: string) {
     }
 }
 
+export async function getChannelFollowers(channelId: string) {
+    if (!channelId) return { error: 'Channel ID required' };
+
+    try {
+        const { data, error } = await adminClient
+            .from('member_events')
+            .select('*')
+            .eq('channel_id', channelId)
+            .order('created_at', { ascending: false })
+            .limit(50);
+
+        if (error) throw error;
+        return { success: true, data };
+    } catch (error) {
+        console.error('Fetch followers error:', error);
+        return { error: 'Takipçi verileri alınamadı' };
+    }
+}
+
 export async function addChannelByUrl(url: string, categoryId: string, userId?: string) {
     const cleanUrl = url.trim();
     if (!cleanUrl) return { error: 'Link gereklidir' };

@@ -28,6 +28,7 @@ export interface Channel {
     bot_token?: string;
     bot_enabled?: boolean;
     telegram_chat_id?: string;
+    clicks?: number;
     // English translations (auto-generated)
     name_en?: string;
     description_en?: string;
