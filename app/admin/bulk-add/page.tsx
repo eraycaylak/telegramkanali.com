@@ -1,0 +1,59 @@
+import { getCategories } from '@/lib/data';
+import BulkAddClient from '@/components/admin/BulkAddClient';
+import { createServerClient } from '@supabase/ssr';
+import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
+
+export default async function BulkAddPage() {
+    const cookieStore = await cookies();
+    const supabase = createServerClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        {
+            cookies: {
+                get(name: string) {
+                    return cookieStore.get(name)?.value;
+                },
+            },
+        }
+    );
+
+    const { data: { user } } = await supabase.auth.getUser();
+
+    // Check if user is admin (simple check for now based on email or role if exists)
+    // The existing system uses middleware but extra safety here
+    if (!user) {
+        redirect('/login');
+    }
+
+    // RBAC Check
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+    // Type assertion or check for permissions
+    const permissions = profile?.permissions as any;
+
+    if (profile?.role !== 'admin') {
+        if (profile?.role !== 'editor' || !permissions?.manage_channels) {
+            redirect('/admin/dashboard');
+        }
+    }
+
+    const categories = await getCategories();
+
+    return (
+        <div className="max-w-4xl mx-auto py-6 md:py-8 px-0 md:px-4">
+            <div className="mb-8 px-4 md:px-0 text-center md:text-left">
+                <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Toplu Kanal Ekle</h1>
+                <p className="text-sm md:text-base text-gray-500">Birden fazla kanal linkini alt alta yazarak hızlıca ekleyebilirsiniz.</p>
+            </div>
+
+            <div className="bg-white p-5 md:p-8 rounded-none md:rounded-3xl border-y md:border border-gray-100 shadow-sm">
+                <BulkAddClient categories={categories} />
+            </div>
+        </div>
+    );
+}

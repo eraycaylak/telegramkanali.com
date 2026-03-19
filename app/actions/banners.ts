@@ -1,0 +1,158 @@
+'use server';
+
+import { getAdminClient } from '@/lib/supabaseAdmin';
+import { supabase as publicSupabase } from '@/lib/supabaseClient';
+import { revalidatePath } from 'next/cache';
+
+// Remove top-level client init to prevent module load crashes
+// const supabase = getAdminClient();
+
+export type BannerType = 'homepage' | 'category';
+
+export interface Banner {
+    id: string;
+    type: BannerType;
+    category_id?: string | null;
+    title: string;
+    subtitle?: string | null;
+    image_url?: string | null;
+    link_url?: string | null;
+    button_text?: string | null;
+    bg_color?: string | null;
+    active: boolean;
+    display_order: number;
+    badge_text?: string | null;
+    badge_bg_color?: string | null;
+    text_color?: string | null;
+    font_size?: string | null;
+    text_align?: 'left' | 'center' | 'right' | null;
+    overlay_opacity?: number | null;
+    floating_logo_url?: string | null;
+    image_alignment?: 'top' | 'center' | 'bottom' | null;
+    aspect_ratio?: string | null;
+}
+
+export async function getBanners(type?: BannerType, categoryId?: string, activeOnly: boolean = false) {
+    let query = publicSupabase
+        .from('banners')
+        .select('*')
+        .order('display_order', { ascending: true });
+
+    if (type) {
+        query = query.eq('type', type);
+    }
+
+    if (categoryId) {
+        query = query.eq('category_id', categoryId);
+    }
+
+    if (activeOnly) {
+        query = query.eq('active', true);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+        console.error('Error fetching banners:', error);
+        return [];
+    }
+
+    return (data || []) as Banner[];
+}
+
+export async function saveBanner(banner: Partial<Banner>) {
+    const supabaseAdmin = getAdminClient();
+    const { data, error } = await supabaseAdmin
+        .from('banners')
+        .upsert({
+            id: banner.id,
+            type: banner.type || 'homepage',
+            category_id: banner.category_id,
+            title: banner.title,
+            subtitle: banner.subtitle,
+            image_url: banner.image_url,
+            link_url: banner.link_url,
+            button_text: banner.button_text,
+            bg_color: banner.bg_color,
+            active: banner.active ?? true,
+            display_order: banner.display_order ?? 0,
+            badge_text: banner.badge_text,
+            badge_bg_color: banner.badge_bg_color,
+            text_color: banner.text_color,
+            font_size: banner.font_size,
+            text_align: banner.text_align,
+            overlay_opacity: banner.overlay_opacity,
+            floating_logo_url: banner.floating_logo_url,
+            image_alignment: banner.image_alignment || 'center',
+            aspect_ratio: banner.aspect_ratio || '4:1'
+        })
+        .select()
+        .single();
+
+    if (error) {
+        console.error('Error saving banner:', error);
+        return { success: false, error: error.message };
+    }
+
+    revalidatePath('/');
+    revalidatePath('/admin/banners');
+    if (banner.category_id) {
+        revalidatePath('/[slug]', 'page');
+    }
+
+    return { success: true, banner: data };
+}
+
+export async function deleteBanner(id: string) {
+    const supabaseAdmin = getAdminClient();
+    const { error } = await supabaseAdmin
+        .from('banners')
+        .delete()
+        .eq('id', id);
+
+    if (error) {
+        console.error('Error deleting banner:', error);
+        return { success: false, error: error.message };
+    }
+
+    revalidatePath('/');
+    revalidatePath('/admin/banners');
+    return { success: true };
+}
+
+export async function toggleBannerActive(id: string, currentState: boolean) {
+    const supabaseAdmin = getAdminClient();
+    const { error } = await supabaseAdmin
+        .from('banners')
+        .update({ active: !currentState })
+        .eq('id', id);
+
+    if (error) {
+        return { success: false, error: error.message };
+    }
+
+    revalidatePath('/');
+    revalidatePath('/admin/banners');
+    return { success: true };
+}
+
+export async function reorderBanners(items: { id: string; display_order: number }[]) {
+    try {
+        const supabaseAdmin = getAdminClient();
+        const updates = items.map(item =>
+            supabaseAdmin
+                .from('banners')
+                .update({ display_order: item.display_order })
+                .eq('id', item.id)
+        );
+
+        await Promise.all(updates);
+
+        revalidatePath('/');
+        revalidatePath('/admin/banners');
+        return { success: true };
+    } catch (error: any) {
+        console.error('Reorder error:', error);
+        return { success: false, error: error.message };
+    }
+}
