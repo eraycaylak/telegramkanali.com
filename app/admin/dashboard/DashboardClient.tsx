@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, Trash2, Edit, Search, LogOut, ExternalLink, RefreshCw, BarChart3, Bot, Users as UsersIcon } from 'lucide-react';
+import { Plus, Trash2, Edit, Search, LogOut, ExternalLink, RefreshCw, BarChart3, Bot, Users as UsersIcon, CheckCircle2 } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 import { deleteChannel, addChannel, updateChannel, scrapeTelegramInfo, syncAllChannelsFromTelegram, approveChannel, rejectChannel, syncChannelFromTelegram, getChannelFollowers } from '@/app/actions/admin';
 import { Channel, Category } from '@/lib/types';
@@ -249,104 +249,106 @@ export default function DashboardClient() {
                 </div>
 
                 {/* Actions Bar */}
-                <div className="flex flex-col xl:flex-row justify-between items-center gap-4 mb-8">
-                    {/* Search & Filter Group */}
-                    <div className="flex flex-col sm:flex-row gap-3 w-full xl:w-auto">
-                        <div className="relative w-full sm:w-80">
-                            <Search className="absolute left-3 top-3 text-gray-400" size={18} />
+                <div className="bg-white p-4 md:p-6 rounded-2xl border border-gray-200 shadow-sm mb-8 space-y-6">
+                    {/* Top Row: Search and Status Tabs */}
+                    <div className="flex flex-col xl:flex-row gap-4 items-start xl:items-center justify-between">
+                        <div className="relative w-full xl:max-w-xs">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                             <input
                                 type="text"
                                 placeholder="Kanal ara..."
-                                className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none"
+                                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none transition"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />
                         </div>
-                        {/* Status Tabs */}
-                        <div className="flex bg-gray-100 p-1 rounded-xl w-full sm:w-auto">
+
+                        <div className="flex flex-wrap items-center gap-2 bg-gray-50 p-1 rounded-xl w-full xl:w-auto">
                             <button
                                 onClick={() => setViewStatus('approved')}
-                                className={`px-4 py-2 rounded-lg text-sm font-bold transition ${viewStatus === 'approved' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                                className={`flex-1 sm:flex-none px-4 py-2 rounded-lg text-sm font-bold transition flex items-center justify-center gap-2 ${viewStatus === 'approved' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
                             >
-                                Yayındakiler
+                                <BarChart3 size={14} /> Yayındakiler
                             </button>
                             <button
                                 onClick={() => setViewStatus('pending')}
-                                className={`px-4 py-2 rounded-lg text-sm font-bold transition flex items-center gap-2 ${viewStatus === 'pending' ? 'bg-white text-orange-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                                className={`flex-1 sm:flex-none px-4 py-2 rounded-lg text-sm font-bold transition flex items-center justify-center gap-2 ${viewStatus === 'pending' ? 'bg-white text-orange-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
                             >
-                                Bekleyenler
-                                {channels.filter(c => c.status === 'pending').length > 0 && (
-                                    <span className="bg-orange-500 text-white text-[10px] px-1.5 py-0.5 rounded-full">
-                                        {channels.filter(c => c.status === 'pending').length}
-                                    </span>
-                                )}
+                                <CheckCircle2 size={14} /> Bekleyenler {channels.filter(c => c.status === 'pending').length > 0 && <span className="bg-orange-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold">{channels.filter(c => c.status === 'pending').length}</span>}
                             </button>
                             <button
                                 onClick={() => setViewStatus('rejected')}
-                                className={`px-4 py-2 rounded-lg text-sm font-bold transition ${viewStatus === 'rejected' ? 'bg-white text-red-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                                className={`flex-1 sm:flex-none px-4 py-2 rounded-lg text-sm font-bold transition flex items-center justify-center gap-2 ${viewStatus === 'rejected' ? 'bg-white text-red-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
                             >
-                                Reddedilenler
+                                <Trash2 size={14} /> Reddedilenler
                             </button>
                             <button
                                 onClick={() => setViewStatus('bot')}
-                                className={`px-4 py-2 rounded-lg text-sm font-bold transition flex items-center gap-2 ${viewStatus === 'bot' ? 'bg-white text-green-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                                className={`flex-1 sm:flex-none px-4 py-2 rounded-lg text-sm font-bold transition flex items-center justify-center gap-2 ${viewStatus === 'bot' ? 'bg-white text-green-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
                             >
                                 <Bot size={14} /> Bot Bağlı
                             </button>
                         </div>
+
+                        <div className="flex items-center gap-2 w-full xl:w-auto">
+                            <button
+                                onClick={async () => {
+                                    setSyncing(true);
+                                    const res = await syncAllChannelsFromTelegram();
+                                    setSyncing(false);
+                                    if (res.error) alert(res.error);
+                                    else {
+                                        alert('Tüm kanallar senkronize edildi!');
+                                        fetchData();
+                                    }
+                                }}
+                                disabled={syncing}
+                                className="flex-1 xl:flex-none flex items-center justify-center gap-2 bg-green-600 text-white px-4 py-2.5 rounded-xl text-sm font-bold hover:bg-green-700 transition shadow-lg shadow-green-100 disabled:opacity-50"
+                            >
+                                <RefreshCw size={16} className={syncing ? 'animate-spin' : ''} />
+                                {syncing ? 'Yükleniyor...' : 'Sync'}
+                            </button>
+                            <button
+                                onClick={() => setIsModalOpen(true)}
+                                className="flex-1 xl:flex-none flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-2.5 rounded-xl text-sm font-bold hover:bg-blue-700 transition shadow-lg shadow-blue-100"
+                            >
+                                <Plus size={16} />
+                                Ekle
+                            </button>
+                        </div>
                     </div>
 
-                    {/* Category Selection Filter (New) */}
-                    <div className="w-full mt-4 flex flex-wrap gap-2 overflow-x-auto pb-2 scrollbar-hide">
-                        <button
-                            onClick={() => setSelectedCategory('all')}
-                            className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold transition whitespace-nowrap ${selectedCategory === 'all'
-                                ? 'bg-blue-600 text-white shadow-md'
-                                : 'bg-white text-gray-600 border border-gray-200 hover:border-blue-300'
-                                }`}
-                        >
-                            Tümü <span className={`${selectedCategory === 'all' ? 'text-blue-100' : 'text-gray-400'}`}>({channels.length})</span>
-                        </button>
-                        {categories.map(cat => (
+                    {/* Bottom Row: Compact Categories */}
+                    <div className="pt-4 border-t border-gray-100">
+                        <div className="flex items-center justify-between mb-3 px-1">
+                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Kategori Filtresi</span>
+                            {selectedCategory !== 'all' && (
+                                <button onClick={() => setSelectedCategory('all')} className="text-[10px] font-bold text-blue-600 hover:underline transition">Filtreyi Temizle</button>
+                            )}
+                        </div>
+                        <div className="flex flex-wrap gap-2 max-h-[100px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-200">
                             <button
-                                key={cat.id}
-                                onClick={() => setSelectedCategory(cat.id)}
-                                className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold transition whitespace-nowrap ${selectedCategory === cat.id
-                                    ? 'bg-blue-600 text-white shadow-md'
-                                    : 'bg-white text-gray-600 border border-gray-200 hover:border-blue-300'
+                                onClick={() => setSelectedCategory('all')}
+                                className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition border ${selectedCategory === 'all'
+                                    ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
+                                    : 'bg-white text-gray-600 border-gray-200 hover:border-blue-300'
                                     }`}
                             >
-                                {cat.name} <span className={`${selectedCategory === cat.id ? 'text-blue-100' : 'text-gray-400'}`}>({categoryCounts[cat.id] || 0})</span>
+                                Tümü ({channels.length})
                             </button>
-                        ))}
-                    </div>
-
-                    <div className="flex items-center gap-3 w-full xl:w-auto justify-end">
-                        <button
-                            onClick={async () => {
-                                if (!confirm('Tüm kanalları Telegram\'\'dan güncellemek istediğinize emin misiniz? Bu işlem biraz zaman alabilir.')) return;
-                                setSyncing(true);
-                                const res = await syncAllChannelsFromTelegram();
-                                setSyncing(false);
-                                if (res.error) {
-                                    alert('Hata: ' + res.error);
-                                } else {
-                                    alert(res.message);
-                                    fetchData();
-                                }
-                            }}
-                            disabled={syncing}
-                            className="flex items-center gap-2 bg-green-600 text-white px-4 py-2.5 rounded-lg hover:bg-green-700 transition disabled:opacity-50"
-                        >
-                            <RefreshCw size={18} className={syncing ? 'animate-spin' : ''} />
-                            {syncing ? 'Senkronize Ediliyor...' : 'Telegram Sync'}
-                        </button>
-                        <button
-                            onClick={() => setIsModalOpen(true)}
-                            className="flex items-center gap-2 bg-blue-600 text-white px-6 py-2.5 rounded-lg hover:bg-blue-700 transition shadow-lg shadow-blue-200"
-                        >
-                            <Plus size={18} /> Yeni Kanal Ekle
-                        </button>
+                            {categories.map(cat => (
+                                <button
+                                    key={cat.id}
+                                    onClick={() => setSelectedCategory(cat.id)}
+                                    className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition border ${selectedCategory === cat.id
+                                        ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
+                                        : 'bg-white text-gray-600 border-gray-200 hover:border-blue-300'
+                                        }`}
+                                >
+                                    {cat.name} ({categoryCounts[cat.id] || 0})
+                                </button>
+                            ))}
+                        </div>
                     </div>
                 </div>
 

@@ -3,18 +3,47 @@
 import { useState } from 'react';
 import { Category } from '@/lib/types';
 import { submitChannel } from '@/app/actions/submit';
-import { Send, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Send, CheckCircle2, AlertCircle, MessageCircle } from 'lucide-react';
 
 interface Props {
     categories: Category[];
 }
 
 export default function KanalEkleClient({ categories }: Props) {
-    const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+    const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error' | 'restricted'>('idle');
     const [errorMessage, setErrorMessage] = useState('');
+    const [selectedCategory, setSelectedCategory] = useState('');
+
+    const RESTRICTED_CATEGORIES = ['+18', 'İDDAA', 'KRİPTO PARA & BORSA'];
+
+    const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const catId = e.target.value;
+        setSelectedCategory(catId);
+
+        const category = categories.find(c => c.id === catId);
+        if (category) {
+            const name = category.name.toLowerCase();
+            if (name.includes('18') || name.includes('iddaa') || name.includes('kripto')) {
+                setStatus('restricted');
+            } else {
+                if (status === 'restricted') setStatus('idle');
+            }
+        }
+    };
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+
+        // Final validation for restricted categories
+        const category = categories.find(c => c.id === selectedCategory);
+        if (category) {
+            const name = category.name.toLowerCase();
+            if (name.includes('18') || name.includes('iddaa') || name.includes('kripto')) {
+                setStatus('restricted');
+                return;
+            }
+        }
+
         setStatus('loading');
         setErrorMessage('');
 
@@ -50,6 +79,38 @@ export default function KanalEkleClient({ categories }: Props) {
         );
     }
 
+    if (status === 'restricted') {
+        return (
+            <div className="bg-white border-2 border-orange-200 rounded-2xl shadow-xl p-8 text-center animate-in fade-in zoom-in duration-300">
+                <div className="bg-orange-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <AlertCircle className="text-orange-600 w-12 h-12" />
+                </div>
+                <h2 className="text-2xl font-black text-gray-900 mb-4">Bu Kanal Doğrudan Eklenemez!</h2>
+                <p className="text-gray-600 mb-8 leading-relaxed">
+                    Seçtiğiniz kategori (**+18, İddaa veya Kripto**) için başvurular sadece manuel olarak kabul edilmektedir.
+                    Lütfen devam etmek için Telegram üzerinden yönetici ile iletişime geçin.
+                </p>
+                <div className="flex flex-col gap-3">
+                    <a
+                        href="https://t.me/Errccyy"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-center gap-2 bg-[#229ED9] text-white font-bold py-4 rounded-xl hover:bg-[#1c86b8] transition shadow-lg shadow-blue-100"
+                    >
+                        <MessageCircle size={20} />
+                        Yöneticiye Yaz (Telegram)
+                    </a>
+                    <button
+                        onClick={() => setStatus('idle')}
+                        className="text-gray-400 font-bold py-2 hover:text-gray-600 transition text-sm"
+                    >
+                        Vazgeç ve Kategori Değiştir
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 md:p-8">
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -78,6 +139,8 @@ export default function KanalEkleClient({ categories }: Props) {
                         <select
                             required
                             name="category_id"
+                            value={selectedCategory}
+                            onChange={handleCategoryChange}
                             className="w-full border border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-blue-500 outline-none transition bg-white"
                         >
                             <option value="">Seçiniz...</option>
