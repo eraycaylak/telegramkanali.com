@@ -970,26 +970,33 @@ export async function uploadBlogImage(formData: FormData) {
     const file = formData.get('file') as File;
     if (!file) return { error: 'Dosya bulunamadı' };
 
-    const ext = file.name.split('.').pop();
-    const fileName = `blog/${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`;
+    try {
+        const ext = file.name.split('.').pop() || 'jpg';
+        const fileName = `blog/${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`;
+        const buffer = Buffer.from(await file.arrayBuffer());
 
-    const { data, error } = await adminClient.storage
-        .from('images')
-        .upload(fileName, file, {
-            cacheControl: '31536000',
-            upsert: false,
-        });
+        const { data, error } = await adminClient.storage
+            .from('assets')
+            .upload(fileName, buffer, {
+                contentType: file.type,
+                cacheControl: '31536000',
+                upsert: false,
+            });
 
-    if (error) {
-        console.error('[ADMIN] Error uploading blog image:', error);
-        return { error: error.message };
+        if (error) {
+            console.error('[ADMIN] Error uploading blog image:', error);
+            return { error: error.message };
+        }
+
+        const { data: urlData } = adminClient.storage
+            .from('assets')
+            .getPublicUrl(data.path);
+
+        return { success: true, url: urlData.publicUrl };
+    } catch (error: any) {
+        console.error('Upload exception:', error);
+        return { error: `Yükleme hatası: ${error?.message || 'Bilinmeyen hata'}` };
     }
-
-    const { data: urlData } = adminClient.storage
-        .from('images')
-        .getPublicUrl(data.path);
-
-    return { success: true, url: urlData.publicUrl };
 }
 
 // ========================

@@ -256,6 +256,9 @@ export async function getBlogPosts(
 
     if (category) {
         query = query.eq('category', category);
+    } else {
+        // "x" kategorisini tüm listelemelerden (anasayfa vb.) gizle
+        query = query.neq('category', 'x');
     }
 
     if (search) {
@@ -294,6 +297,7 @@ export async function getFeaturedBlogPosts(limit: number = 3): Promise<BlogPost[
         .select('*')
         .eq('published', true)
         .eq('featured', true)
+        .neq('category', 'x') // "x" kategorisini izole et
         .order('created_at', { ascending: false })
         .limit(limit);
 
@@ -306,6 +310,7 @@ export async function getRecentBlogPosts(limit: number = 6): Promise<BlogPost[]>
         .from('blog_posts')
         .select('*')
         .eq('published', true)
+        .neq('category', 'x') // "x" kategorisini gizle
         .order('created_at', { ascending: false })
         .limit(limit);
 
