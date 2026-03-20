@@ -3,6 +3,7 @@ import ChannelCard from '@/components/ChannelCard';
 import ChannelDetail from '@/components/ChannelDetail';
 import BannerGrid from '@/components/BannerGrid';
 import FeaturedAds from '@/components/FeaturedAds';
+import TwitterFeed from '@/components/TwitterFeed';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import JsonLd, { generateBreadcrumbSchema, generateChannelSchema, generateItemListSchema } from '@/components/JsonLd';
@@ -28,6 +29,14 @@ interface PageProps {
 // Generate SEO Metadata
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
+
+  // Özel X Route Kontrolü
+  if (slug === 'x') {
+    return {
+      title: 'X Akışı - Telegram Mikro Blog',
+      description: 'Özel mikro-blog yayınları ve anlık duyurularımızın yer aldığı X akış formatı.',
+    };
+  }
 
   // 1. Try Category
   const category = await getCategoryBySlug(slug);
@@ -86,6 +95,20 @@ export default async function DynamicPage({ params, searchParams }: PageProps) {
   const pageParam = resolvedSearchParams?.page;
   const page = pageParam ? parseInt(pageParam as string) : 1;
   const LIMIT = 20;
+
+  // Özel X sayfası render'ı
+  if (slug === 'x') {
+    const { data: xPosts } = await getBlogPosts(1, 100, 'x');
+    return (
+      <>
+        <Header />
+        <main className="container mx-auto px-0 sm:px-4 min-h-screen bg-gray-50/30">
+          <TwitterFeed posts={xPosts} />
+        </main>
+        <Footer />
+      </>
+    );
+  }
 
   // 1. Attempt to fetch Category
   const category = await getCategoryBySlug(slug);
