@@ -2,7 +2,7 @@ import { getBlogPostBySlug, getRecentBlogPosts } from '@/lib/data';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import TwitterEmbed from '@/components/TwitterEmbed';
-import { Clock, Eye, Calendar, ArrowLeft, Tag, User, Share2 } from 'lucide-react';
+import { Clock, Eye, Calendar, ArrowLeft, Tag, User, Share2, MessageCircle, Repeat2, Heart, BarChart2, BadgeCheck } from 'lucide-react';
 import type { Metadata } from 'next';
 import { convertTwitterLinksToEmbeds } from '@/lib/utils';
 
@@ -47,6 +47,107 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         if (!d) return '';
         return new Date(d).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
     };
+
+    const formatTwitterTime = (d?: string) => {
+        if (!d) return '';
+        const date = new Date(d);
+        const time = date.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+        const dayMonthYear = date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
+        return `${time} · ${dayMonthYear}`;
+    };
+
+    const getInitials = (name: string) => name ? name.slice(0, 2).toUpperCase() : 'AD';
+
+    if (post.category === 'x') {
+        return (
+            <div className="max-w-2xl mx-auto border border-gray-200 bg-white min-h-[80vh] my-6 rounded-2xl shadow-sm pb-12">
+                {/* Header */}
+                <div className="sticky top-0 bg-white/80 backdrop-blur-md z-10 border-b border-gray-200 p-4 flex items-center gap-6">
+                    <Link href={`/blog?category=${post.category}`} className="p-2 hover:bg-gray-100 rounded-full transition">
+                        <ArrowLeft size={20} className="text-gray-900" />
+                    </Link>
+                    <h1 className="text-xl font-bold text-gray-900">Gönderi</h1>
+                </div>
+
+                <article className="p-4">
+                    {/* Author */}
+                    <div className="flex items-center gap-3 mb-4">
+                        <div className="w-12 h-12 rounded-full bg-slate-800 text-white flex justify-center items-center font-bold text-lg flex-shrink-0">
+                            {getInitials(post.author || 'Admin')}
+                        </div>
+                        <div>
+                            <div className="flex items-center gap-1 group cursor-pointer">
+                                <span className="font-bold text-gray-900 group-hover:underline text-[15px]">
+                                    {post.author || 'Admin'}
+                                </span>
+                                <BadgeCheck className="w-4 h-4 text-blue-500" />
+                            </div>
+                            <div className="text-[15px] text-gray-500">
+                                @{post.author ? post.author.toLowerCase().replace(/\s+/g, '') : 'admin'}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Content */}
+                    <div className="text-gray-900 text-[17px] leading-normal whitespace-pre-wrap break-words mb-4 font-normal">
+                        <strong className="block mb-2 text-[19px]">{post.title}</strong>
+                        {post.excerpt && <div className="mb-4">{post.excerpt}</div>}
+                        <div 
+                            className="[&>p]:mb-4 [&_a]:text-blue-500 hover:[&_a]:underline"
+                            dangerouslySetInnerHTML={{ __html: convertTwitterLinksToEmbeds(post.content) }} 
+                        />
+                    </div>
+
+                    {/* Media */}
+                    {post.cover_image && (
+                        <div className="rounded-2xl border border-gray-200 overflow-hidden aspect-video bg-gray-100 mb-4">
+                            <img 
+                                src={post.cover_image} 
+                                alt={post.title} 
+                                className="w-full h-full object-cover"
+                            />
+                        </div>
+                    )}
+
+                    {/* Date */}
+                    <div className="text-[15px] text-gray-500 mb-4 hover:underline cursor-pointer">
+                        {formatTwitterTime(post.created_at)}
+                    </div>
+
+                    {/* Stats */}
+                    <div className="border-t border-b border-gray-200 py-3 mb-4 flex gap-4 text-[15px]">
+                        <div><span className="font-bold text-gray-900">{post.view_count || 1}</span> <span className="text-gray-500">Görüntülenme</span></div>
+                        <div className="cursor-pointer hover:underline"><span className="font-bold text-gray-900">0</span> <span className="text-gray-500">Yeniden Gönderi</span></div>
+                        <div className="cursor-pointer hover:underline"><span className="font-bold text-gray-900">0</span> <span className="text-gray-500">Beğeni</span></div>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex items-center justify-around text-gray-500 py-1">
+                        <button className="flex items-center group transition">
+                            <div className="p-2 -m-2 rounded-full group-hover:bg-blue-50 group-hover:text-blue-500 transition">
+                                <MessageCircle className="w-5 h-5" />
+                            </div>
+                        </button>
+                        <button className="flex items-center group transition">
+                            <div className="p-2 -m-2 rounded-full group-hover:bg-green-50 group-hover:text-green-500 transition">
+                                <Repeat2 className="w-5 h-5" />
+                            </div>
+                        </button>
+                        <button className="flex items-center group transition">
+                            <div className="p-2 -m-2 rounded-full group-hover:bg-pink-50 group-hover:text-pink-500 transition">
+                                <Heart className="w-5 h-5" />
+                            </div>
+                        </button>
+                        <button className="flex items-center group transition">
+                            <div className="p-2 -m-2 rounded-full group-hover:bg-blue-50 group-hover:text-blue-500 transition">
+                                <Share2 className="w-5 h-5" />
+                            </div>
+                        </button>
+                    </div>
+                </article>
+            </div>
+        );
+    }
 
     return (
         <div className="max-w-4xl mx-auto">

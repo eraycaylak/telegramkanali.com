@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { getBlogPosts, getFeaturedBlogPosts } from '@/lib/data';
 import { Clock, Eye, ArrowRight, Tag } from 'lucide-react';
+import TwitterFeed from '@/components/TwitterFeed';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -117,6 +118,9 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
                 <div className="text-center py-20">
                     <p className="text-gray-400 text-lg">Henüz blog yazısı yok</p>
                 </div>
+            ) : category === 'x' ? (
+                /* X Kategorisine Özel Twitter Benzeri Akış */
+                <TwitterFeed posts={posts} />
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {posts.map((post) => (
