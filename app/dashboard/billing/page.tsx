@@ -236,17 +236,10 @@ export default function BillingPage() {
                                     <h4 className="font-bold text-gray-900">Ödeme İletişim Bilgileri</h4>
                                     <div className="bg-gray-50 rounded-xl p-4 space-y-3 text-sm">
                                         <div className="flex items-center gap-3">
-                                            <span className="text-2xl">📱</span>
-                                            <div>
-                                                <p className="font-bold text-gray-700">WhatsApp ile İletişim</p>
-                                                <a href="https://wa.me/905427879595" target="_blank" className="text-green-600 font-bold hover:underline">0542 787 95 95</a>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-center gap-3">
                                             <span className="text-2xl">✈️</span>
                                             <div>
                                                 <p className="font-bold text-gray-700">Telegram ile İletişim</p>
-                                                <a href="https://t.me/Errccyy" target="_blank" className="text-blue-600 font-bold hover:underline">@Errccyy</a>
+                                                <a href="https://t.me/sibelliee" target="_blank" className="text-blue-600 font-bold hover:underline">@sibelliee</a>
                                             </div>
                                         </div>
                                     </div>

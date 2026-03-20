@@ -27,14 +27,8 @@ export default async function Footer() {
                             Türkiye'nin en büyük ve en güncel Telegram kanal dizini. Harika toplulukları keşfedin, kanalınızı tanıtın ve büyütün.
                         </p>
                         <div className="flex gap-4">
-                            <a href="https://instagram.com/telegramkanaliofficial" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-pink-600 transition-colors tooltip" aria-label="Instagram">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-instagram"><rect width="20" height="20" x="2" y="2" rx="5" ry="5" /><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" /><line x1="17.5" x2="17.51" y1="6.5" y2="6.5" /></svg>
-                            </a>
-                            <a href="https://t.me/Errccyy" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-blue-500 transition-colors tooltip" aria-label="Telegram">
+                            <a href="https://t.me/sibelliee" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-blue-500 transition-colors tooltip" aria-label="Telegram">
                                 <Send size={20} />
-                            </a>
-                            <a href="https://wa.me/905427879595" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-green-500 transition-colors tooltip" aria-label="WhatsApp">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-message-circle"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z" /></svg>
                             </a>
                         </div>
                     </div>
@@ -81,6 +75,7 @@ export default async function Footer() {
                     <div>
                         <h3 className="mb-4 text-sm font-semibold text-gray-900">Kurumsal</h3>
                         <ul className="space-y-2 text-sm text-gray-600">
+                            <li><Link href="/kunye" className="hover:text-blue-600">Künye (Zorunlu Bilgiler)</Link></li>
                             <li><Link href="/hakkimizda" className="hover:text-blue-600">Hakkımızda</Link></li>
                             <li><Link href="/reklam" className="hover:text-blue-600 font-bold text-blue-600">Reklam Paketleri</Link></li>
                             <li><Link href="/iletisim" className="hover:text-blue-600">İletişim</Link></li>

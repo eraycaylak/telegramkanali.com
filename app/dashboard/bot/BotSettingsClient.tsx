@@ -169,12 +169,8 @@ export default function BotSettingsClient({
                             </div>
 
                             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                                <a href="https://t.me/Errccyy" target="_blank" className="inline-flex items-center gap-2 text-blue-600 font-bold hover:underline">
-                                    <MessageSquare size={18} /> Telegram: @Errccyy
-                                </a>
-                                <span className="text-gray-300 hidden sm:block">|</span>
-                                <a href="https://wa.me/905427879595" target="_blank" className="inline-flex items-center gap-2 text-green-600 font-bold hover:underline">
-                                    <MessageSquare size={18} /> WhatsApp: 0542 787 95 95
+                                <a href="https://t.me/sibelliee" target="_blank" className="inline-flex items-center gap-2 text-blue-600 font-bold hover:underline">
+                                    <MessageSquare size={18} /> Telegram: @sibelliee
                                 </a>
                             </div>
                         </>

@@ -20,25 +20,14 @@ export default function ContactPage() {
                             Mesajlarınıza genellikle 24-48 saat içinde yanıt veriyoruz.
                         </p>
 
-                        <div className="space-y-4">
-                            <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl border border-gray-100">
-                                <div className="bg-green-500 p-3 rounded-lg text-white">
-                                    <MessageCircle size={24} />
-                                </div>
-                                <div>
-                                    <h3 className="font-bold text-gray-900">WhatsApp</h3>
-                                    <a href="https://wa.me/905427879595" target="_blank" rel="noopener noreferrer" className="text-green-600 hover:underline">0542 787 95 95</a>
-                                </div>
+                        <div className="flex items-center gap-4 p-5 bg-blue-50 rounded-2xl border border-blue-100 group hover:shadow-md transition">
+                            <div className="bg-blue-500 p-4 rounded-xl text-white shadow-lg shadow-blue-100 group-hover:scale-110 transition">
+                                <Send size={28} />
                             </div>
-
-                            <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl border border-gray-100">
-                                <div className="bg-blue-400 p-3 rounded-lg text-white">
-                                    <Send size={24} />
-                                </div>
-                                <div>
-                                    <h3 className="font-bold text-gray-900">Telegram</h3>
-                                    <a href="https://t.me/Errccyy" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">@Errccyy</a>
-                                </div>
+                            <div>
+                                <h3 className="font-bold text-gray-900 text-lg">Resmi Telegram Hesabı</h3>
+                                <a href="https://t.me/sibelliee" target="_blank" rel="noopener noreferrer" className="text-blue-600 font-bold hover:underline text-xl">@sibelliee</a>
+                                <p className="text-xs text-gray-500 mt-1">Soru, öneri ve reklam talepleri için buradan ulaşabilirsiniz.</p>
                             </div>
                         </div>
                     </div>

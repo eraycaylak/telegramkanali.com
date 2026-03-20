@@ -200,8 +200,7 @@ Deno.serve(async (req: Request) => {
                 'Platformumuzda kanalınızı öne çıkarmak, "Öne Çıkanlar" vitrininde yer almak, anasayfa banner reklamı vermek ve token bakiyesiyle işlemler yapmak için sitemizdeki **Reklam** (telegramkanali.com/reklam) sayfasını veya **VIP Paketleri** inceleyebilirsiniz.\n\n' +
                 '📞 *İletişim Bilgilerimiz*\n' +
                 'Soru, destek ve reklam anlaşmaları için bizimle doğrudan iletişime geçebilirsiniz:\n' +
-                '💬 Telegram: @Errccyy\n' +
-                '🟢 WhatsApp: 0542 787 95 95\n\n' +
+                '💬 Telegram: @sibelliee\n\n' +
                 '🚀 Kanalınızı büyütmeye hazırsanız hemen başlayalım!'
             )
             return okResponse()

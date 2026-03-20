@@ -92,7 +92,7 @@ export default function KanalEkleClient({ categories }: Props) {
                 </p>
                 <div className="flex flex-col gap-2 md:gap-3">
                     <a
-                        href="https://t.me/Errccyy"
+                        href="https://t.me/sibelliee"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center justify-center gap-2 bg-[#229ED9] text-white font-bold py-3 md:py-4 rounded-xl hover:bg-[#1c86b8] transition shadow-lg shadow-blue-100"
