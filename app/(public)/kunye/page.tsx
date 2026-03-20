@@ -24,11 +24,11 @@ export default function KunyePage() {
                         </div>
                         <div>
                             <h3 className="font-bold text-gray-400 uppercase tracking-widest text-xs mb-2">Yer Sağlayıcı</h3>
-                            <p className="text-gray-900 font-medium">Supabase, Inc. (Global) / Vercel Inc.</p>
+                            <p className="text-gray-900 font-medium">Amazon (AWS) / Vercel Inc. (Global)</p>
                         </div>
                         <div>
                             <h3 className="font-bold text-gray-400 uppercase tracking-widest text-xs mb-2">İletişim (E-Posta)</h3>
-                            <p className="text-gray-900 font-medium font-mono text-sm underline decoration-blue-200">iletisim@telegramkanali.com</p>
+                            <p className="text-gray-900 font-medium font-mono text-sm underline decoration-blue-200">telegramkanaliiletisim@outlook.com</p>
                         </div>
                         <div>
                             <h3 className="font-bold text-gray-400 uppercase tracking-widest text-xs mb-2">Resmi Destek Kanalı</h3>

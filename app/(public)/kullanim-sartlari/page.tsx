@@ -43,7 +43,7 @@ export default function TermsPage() {
 
                     <section>
                         <h2 className="text-xl font-bold text-gray-900 mt-6 mb-2">4. Uyar-Kaldır Sistemi</h2>
-                        <p>Hukuka aykırı olduğunu düşündüğünüz bir içeriğin veya telif haklarınızın ihlal edildiği bir kanalın sitemizden kaldırılmasını istiyorsanız, <strong>iletisim@telegramkanali.com</strong> veya <strong>@sibelliee</strong> (Telegram) üzerinden bizimle iletişime geçmelisiniz. Bildiriminiz en geç 48 saat içinde değerlendirilecektir.</p>
+                        <p>Hukuka aykırı olduğunu düşündüğünüz bir içeriğin veya telif haklarınızın ihlal edildiği bir kanalın sitemizden kaldırılmasını istiyorsanız, <strong>telegramkanaliiletisim@outlook.com</strong> veya <strong>@sibelliee</strong> (Telegram) üzerinden bizimle iletişime geçmelisiniz. Bildiriminiz en geç 48 saat içinde değerlendirilecektir.</p>
                     </section>
 
                     <section>

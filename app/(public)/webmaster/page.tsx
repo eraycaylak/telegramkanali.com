@@ -52,8 +52,8 @@ export default function WebmasterPage() {
                     <div className="text-center bg-gray-900 text-white p-8 rounded-2xl">
                         <h2 className="text-2xl font-bold mb-4">Bize Ulaşın</h2>
                         <p className="mb-6 opacity-80">Webmaster iş birlikleri için lütfen aşağıdaki adresi kullanın:</p>
-                        <a href="mailto:webmaster@telegramkanali.com" className="bg-blue-600 hover:bg-blue-700 px-8 py-3 rounded-full font-bold transition">
-                            iletisim@telegramkanali.com
+                        <a href="mailto:telegramkanaliiletisim@outlook.com" className="bg-blue-600 hover:bg-blue-700 px-8 py-3 rounded-full font-bold transition">
+                            telegramkanaliiletisim@outlook.com
                         </a>
                     </div>
                 </div>

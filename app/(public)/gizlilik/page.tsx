@@ -40,7 +40,7 @@ export default function PrivacyPage() {
 
                     <section>
                         <h2 className="text-xl font-bold text-gray-900 mt-6 mb-2">4. Haklarınız (KVKK Madde 11)</h2>
-                        <p>Veri sahibi olarak; verilerinizin işlenip işlenmediğini öğrenme, yanlış işlenmişse düzeltilmesini isteme ve silinmesini talep etme hakkına sahipsiniz. Taleplerinizi <strong>iletisim@telegramkanali.com</strong> adresine iletebilirsiniz.</p>
+                        <p>Veri sahibi olarak; verilerinizin işlenip işlenmediğini öğrenme, yanlış işlenmişse düzeltilmesini isteme ve silinmesini talep etme hakkına sahipsiniz. Taleplerinizi <strong>telegramkanaliiletisim@outlook.com</strong> adresine iletebilirsiniz.</p>
                     </section>
 
                     <section>

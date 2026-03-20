@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { BadgeCheck, Users, ThumbsUp, ThumbsDown, ArrowUp, ExternalLink } from 'lucide-react';
+import { BadgeCheck, Users, ThumbsUp, ThumbsDown, ArrowUp, ExternalLink, AlertTriangle } from 'lucide-react';
 import { Channel } from '@/lib/types';
 import { useState, useEffect } from 'react';
 
@@ -170,6 +170,14 @@ export default function ChannelCard({ channel, compact = false }: ChannelCardPro
                 >
                     <ThumbsDown size={14} className={userVote === -1 ? 'fill-current' : ''} />
                 </button>
+                <a
+                    href={`https://t.me/sibelliee?text=Şikayet: ${channel.name}`}
+                    target="_blank"
+                    title="Şikayet Et"
+                    className="p-1 mt-2 text-gray-400 hover:text-red-500 transition"
+                >
+                    <AlertTriangle size={16} />
+                </a>
             </div>
 
             {/* Mobile View / Main Content Container */}
