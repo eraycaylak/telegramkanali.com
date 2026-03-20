@@ -11,7 +11,7 @@ import { notFound, redirect } from 'next/navigation';
 import { Metadata } from 'next';
 import Pagination from '@/components/Pagination';
 import Comments from '@/components/Comments';
-import { Clock, Eye } from 'lucide-react';
+import { Clock, Eye, AlertCircle } from 'lucide-react';
 
 const baseUrl = 'https://telegramkanali.com';
 
@@ -98,6 +98,9 @@ export default async function DynamicPage({ params, searchParams }: PageProps) {
 
     const { data: blogPosts } = await getBlogPosts(1, 6, category.slug);
 
+    const catNameLower = category.name.toLowerCase();
+    const isRestrictedCategory = catNameLower.includes('18') || catNameLower.includes('iddaa') || catNameLower.includes('kripto');
+
     return (
       <>
         {/* Category Structured Data */}
@@ -173,6 +176,19 @@ export default async function DynamicPage({ params, searchParams }: PageProps) {
               </div>
             </div>
           </div>
+
+          {/* Legal Disclaimer for Restricted Categories */}
+          {isRestrictedCategory && (
+            <div className="bg-orange-50 border border-orange-200 p-6 rounded-xl shadow-sm">
+              <h3 className="text-orange-900 font-bold text-lg mb-2 flex items-center gap-2">
+                <AlertCircle className="w-6 h-6" /> 
+                Yasal Sorumluluk Reddi (Disclaimer)
+              </h3>
+              <p className="text-orange-800 text-sm leading-relaxed">
+                Bu kategoride (<strong>{category.name}</strong>) listelenen Telegram kanalları topluluk tarafından eklenmektedir. Türkiye Cumhuriyeti kanunlarına göre 18 yaşından küçüklerin şans oyunları, bahis veya müstehcenlik içeren kanallara erişimi yasaktır. Ayrıca kanallarda paylaşılan tüm finansal ve kripto bilgileri tamamen o kanalın kendi sorumluluğunda olup, borsalardaki işlemler kesinlikle <em>yatırım tavsiyesi değildir</em>. <strong>Siteyi kullanarak doğabilecek tüm hukuki ve maddi sorumluluğun size ait olduğunu kabul etmiş olursunuz.</strong> Sitemiz 5651 sayılı kanun kapsamında "Yer Sağlayıcı" olarak hizmet vermekte olup, içeriklere müdahale etmez; şikayetler <a href="/kullanim-sartlari" className="underline font-bold">Uyar-Kaldır</a> prensibiyle işlenir.
+              </p>
+            </div>
+          )}
 
           {/* Banner Grid */}
           <BannerGrid type="category" categoryId={category.id} />

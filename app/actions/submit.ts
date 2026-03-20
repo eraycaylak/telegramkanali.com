@@ -10,9 +10,17 @@ export async function submitChannel(formData: FormData) {
     const join_link = formData.get('join_link') as string;
     const category_id = formData.get('category_id') as string;
     const contact_info = formData.get('contact_info') as string;
+    
+    // Legal check
+    const terms_accepted = formData.get('terms_accepted') === 'true';
+    const privacy_accepted = formData.get('privacy_accepted') === 'true';
 
     if (!name || !join_link || !category_id) {
         return { error: 'Lütfen zorunlu alanları doldurun.' };
+    }
+
+    if (!terms_accepted || !privacy_accepted) {
+        return { error: 'İşleme devam edebilmek için Kullanım Şartları ve Gizlilik Politikası\'nı onaylamalısınız.' };
     }
 
     // Create server-side Supabase client to get authenticated user reliably

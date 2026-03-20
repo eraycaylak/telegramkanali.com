@@ -30,6 +30,17 @@ export default function ContactPage() {
                                 <p className="text-xs text-gray-500 mt-1">Soru, öneri ve reklam talepleri için buradan ulaşabilirsiniz.</p>
                             </div>
                         </div>
+
+                        <div className="flex items-center gap-4 p-5 bg-gray-50 rounded-2xl border border-gray-200 group hover:shadow-md transition">
+                            <div className="bg-gray-800 p-4 rounded-xl text-white shadow-lg shadow-gray-200 group-hover:scale-110 transition">
+                                <Mail size={28} />
+                            </div>
+                            <div className="min-w-0">
+                                <h3 className="font-bold text-gray-900 text-lg">Uyar-Kaldır & Hukuk Deplasmanı</h3>
+                                <a href="mailto:telegramkanaliiletisim@outlook.com" className="text-gray-800 font-bold hover:underline font-mono text-sm truncate block">telegramkanaliiletisim@outlook.com</a>
+                                <p className="text-xs text-gray-500 mt-1">Telif hakkı bildirimleri ve yasal talepler için bu adresi kullanınız.</p>
+                            </div>
+                        </div>
                     </div>
 
                     <div className="bg-white border rounded-2xl p-8 shadow-sm">

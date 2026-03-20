@@ -172,6 +172,34 @@ export default function KanalEkleClient({ categories }: Props) {
                     />
                 </div>
 
+                <div className="space-y-3 bg-gray-50 p-4 rounded-xl border border-gray-200">
+                    <label className="flex items-start gap-3 cursor-pointer">
+                        <input
+                            type="checkbox"
+                            name="terms_accepted"
+                            value="true"
+                            required
+                            className="mt-1 w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        />
+                        <span className="text-sm text-gray-700">
+                            <a href="/kullanim-sartlari" target="_blank" className="font-bold text-blue-600 hover:underline">Kullanım Şartları</a>'nı okudum, içeriğimin T.C. yasalarına (kumar, bahis, müstehcenlik vb.) aykırı olmadığını taahhüt ederim.
+                        </span>
+                    </label>
+
+                    <label className="flex items-start gap-3 cursor-pointer">
+                        <input
+                            type="checkbox"
+                            name="privacy_accepted"
+                            value="true"
+                            required
+                            className="mt-1 w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        />
+                        <span className="text-sm text-gray-700">
+                            <a href="/gizlilik" target="_blank" className="font-bold text-blue-600 hover:underline">KVKK Aydınlatma Metni ve Gizlilik Politikası</a>'nı okudum, iletişim ve kayıt verilerimin işlenmesine onay veriyorum.
+                        </span>
+                    </label>
+                </div>
+
                 {status === 'error' && (
                     <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl flex items-center gap-3">
                         <AlertCircle className="flex-shrink-0" />
@@ -193,7 +221,13 @@ export default function KanalEkleClient({ categories }: Props) {
                         </>
                     )}
                 </button>
+                
+                <p className="text-center text-xs text-gray-400 mt-4 leading-relaxed">
+                    * 5651 Sayılı İnternet Ortamında Yapılan Yayınların Düzenlenmesi Hakkında Kanun uyarınca, 
+                    <br />işlemleriniz IP adresi ve cihaz bilgileri ile birlikte kayıt altına alınmaktadır.
+                </p>
             </form>
         </div>
     );
 }
+
