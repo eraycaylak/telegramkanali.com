@@ -2,6 +2,7 @@
 
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
+import { slugify } from '@/lib/utils';
 
 export async function submitChannel(formData: FormData) {
     const name = formData.get('name') as string;
@@ -60,13 +61,8 @@ export async function submitChannel(formData: FormData) {
         return { error: 'Bu kanal zaten sistemde mevcut!' };
     }
 
-    // Generate slug from name
-    let baseSlug = name.toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/(^-|-$)/g, '');
-
-    if (baseSlug.length < 2) baseSlug = 'channel';
-
+    // Generate unique slug from name
+    const baseSlug = slugify(name) || 'channel';
     const slug = `${baseSlug}-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
 
     // Use admin client for insert to bypass RLS, but set owner_id from the authenticated user

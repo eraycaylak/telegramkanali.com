@@ -17,13 +17,18 @@ export function slugify(text: string): string {
         'ç': 'c', 'Ç': 'c'
     };
 
-    return text
+    let slug = text
         .split('')
         .map(char => trMap[char] || char)
         .join('')
-        .toLowerCase()
+        .toLowerCase();
+
+    // Specific typo fixes or cleanup
+    slug = slug.replace(/eyalar/g, 'esyalar'); // Example user requested fix
+
+    return slug
         .replace(/[^a-z0-9\s-]/g, '') // Remove invalid chars
-        .replace(/\s+/g, '-')         // Replace spaces with -
+        .replace(/[\s_]+/g, '-')      // Replace spaces and underscores with -
         .replace(/-+/g, '-')          // Replace multiple - with single -
         .replace(/^-+/, '')           // Trim - from start
         .replace(/-+$/, '');          // Trim - from end
@@ -31,10 +36,10 @@ export function slugify(text: string): string {
 
 export function convertTwitterLinksToEmbeds(content: string): string {
     if (!content) return '';
-    
+
     // href="..." içeriğindekileri dışlayarak sadece metin içerisindeki X (Twitter) URL'lerini ararız
     const regex = /(https?:\/\/(?:www\.)?(?:twitter\.com|x\.com)\/[a-zA-Z0-9_]+\/status\/[0-9]+(?:\?[^\s<"']*)?)/g;
-    
+
     return content.replace(regex, (match, url, offset, string) => {
         // Eğer bu link zaten HTML tag'i içindeyse (özellikle a href="#"), dokunma
         const prefix = string.slice(Math.max(0, offset - 6), offset);

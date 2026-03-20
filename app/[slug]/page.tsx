@@ -1,4 +1,4 @@
-import { getCategoryBySlug, getChannelsByCategory, getCategories, getChannelBySlug, getFeaturedChannels, getChannels, getBlogPosts } from '@/lib/data';
+import { getCategoryBySlug, getChannelsByCategory, getCategories, getChannelBySlug, getFeaturedChannels, getChannels, getBlogPosts, getRedirect } from '@/lib/data';
 import ChannelCard from '@/components/ChannelCard';
 import ChannelDetail from '@/components/ChannelDetail';
 import BannerGrid from '@/components/BannerGrid';
@@ -7,7 +7,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import JsonLd, { generateBreadcrumbSchema, generateChannelSchema, generateItemListSchema } from '@/components/JsonLd';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { Metadata } from 'next';
 import Pagination from '@/components/Pagination';
 import Comments from '@/components/Comments';
@@ -208,8 +208,8 @@ export default async function DynamicPage({ params, searchParams }: PageProps) {
             <div className="mt-12 relative">
               <div className="flex justify-between items-center mb-6">
                 <div>
-                    <h2 className="text-2xl font-black text-gray-900">{category.name} Kategorisi Blog Yazıları</h2>
-                    <p className="text-gray-500 text-sm mt-1">{category.name} hakkında yazdığımız son güncel makaleler ve incelemeler.</p>
+                  <h2 className="text-2xl font-black text-gray-900">{category.name} Kategorisi Blog Yazıları</h2>
+                  <p className="text-gray-500 text-sm mt-1">{category.name} hakkında yazdığımız son güncel makaleler ve incelemeler.</p>
                 </div>
                 <Link href={`/blog?category=${category.slug}`} className="hidden md:flex text-blue-600 bg-blue-50 px-4 py-2 rounded-xl font-bold text-sm hover:bg-blue-100 transition items-center gap-1">
                   Tümünü Gör →
@@ -217,47 +217,47 @@ export default async function DynamicPage({ params, searchParams }: PageProps) {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {blogPosts.map((post) => (
-                    <Link key={post.id} href={`/blog/${post.slug}`} className="group">
-                        <article className="bg-white border border-gray-100 rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1 h-full flex flex-col">
-                            {post.cover_image ? (
-                                <div className="aspect-video overflow-hidden">
-                                    <img
-                                        src={post.cover_image}
-                                        alt={post.title}
-                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                                    />
-                                </div>
-                            ) : (
-                                <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
-                                    <span className="text-4xl font-black text-gray-300">📝</span>
-                                </div>
-                            )}
-                            <div className="p-5 flex-1 flex flex-col">
-                                <div className="flex items-center gap-2 mb-2">
-                                    <span className="bg-blue-50 text-blue-600 px-2.5 py-0.5 rounded-full text-xs font-bold">
-                                        {category.name}
-                                    </span>
-                                    {post.reading_time && (
-                                        <span className="text-gray-400 text-xs flex items-center gap-1">
-                                            <Clock size={12} /> {post.reading_time} dk
-                                        </span>
-                                    )}
-                                </div>
-                                <h3 className="font-bold text-gray-900 text-lg mb-2 line-clamp-2 group-hover:text-blue-600 transition">
-                                    {post.title}
-                                </h3>
-                                {post.excerpt && (
-                                    <p className="text-gray-500 text-sm line-clamp-2 flex-1">{post.excerpt}</p>
-                                )}
-                                <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-100">
-                                    <span className="text-xs text-gray-400 flex items-center gap-1">
-                                        <Eye size={12} /> {post.view_count || 0}
-                                    </span>
-                                    <span className="text-xs font-medium text-blue-600 group-hover:underline">Devamını Oku &rarr;</span>
-                                </div>
-                            </div>
-                        </article>
-                    </Link>
+                  <Link key={post.id} href={`/blog/${post.slug}`} className="group">
+                    <article className="bg-white border border-gray-100 rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1 h-full flex flex-col">
+                      {post.cover_image ? (
+                        <div className="aspect-video overflow-hidden">
+                          <img
+                            src={post.cover_image}
+                            alt={post.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          />
+                        </div>
+                      ) : (
+                        <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                          <span className="text-4xl font-black text-gray-300">📝</span>
+                        </div>
+                      )}
+                      <div className="p-5 flex-1 flex flex-col">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="bg-blue-50 text-blue-600 px-2.5 py-0.5 rounded-full text-xs font-bold">
+                            {category.name}
+                          </span>
+                          {post.reading_time && (
+                            <span className="text-gray-400 text-xs flex items-center gap-1">
+                              <Clock size={12} /> {post.reading_time} dk
+                            </span>
+                          )}
+                        </div>
+                        <h3 className="font-bold text-gray-900 text-lg mb-2 line-clamp-2 group-hover:text-blue-600 transition">
+                          {post.title}
+                        </h3>
+                        {post.excerpt && (
+                          <p className="text-gray-500 text-sm line-clamp-2 flex-1">{post.excerpt}</p>
+                        )}
+                        <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-100">
+                          <span className="text-xs text-gray-400 flex items-center gap-1">
+                            <Eye size={12} /> {post.view_count || 0}
+                          </span>
+                          <span className="text-xs font-medium text-blue-600 group-hover:underline">Devamını Oku &rarr;</span>
+                        </div>
+                      </div>
+                    </article>
+                  </Link>
                 ))}
               </div>
               <div className="mt-6 md:hidden text-center">
@@ -411,9 +411,9 @@ export default async function DynamicPage({ params, searchParams }: PageProps) {
               <div className="bg-blue-50 p-6 rounded-xl border border-blue-100">
                 <h3 className="font-bold text-blue-900 mb-3 text-sm">Popüler Kategoriler</h3>
                 <div className="flex flex-wrap gap-2">
-                  <Link href="/rehber/teknoloji" className="text-xs bg-white text-blue-700 px-3 py-1.5 rounded-full border border-blue-200 hover:bg-blue-600 hover:text-white transition-all">Teknoloji</Link>
-                  <Link href="/rehber/kripto" className="text-xs bg-white text-blue-700 px-3 py-1.5 rounded-full border border-blue-200 hover:bg-blue-600 hover:text-white transition-all">Kripto Para</Link>
-                  <Link href="/rehber/egitim" className="text-xs bg-white text-blue-700 px-3 py-1.5 rounded-full border border-blue-200 hover:bg-blue-600 hover:text-white transition-all">Eğitim</Link>
+                  <Link href="/rehber/telegram-teknoloji-kanallari" className="text-xs bg-white text-blue-700 px-3 py-1.5 rounded-full border border-blue-200 hover:bg-blue-600 hover:text-white transition-all">Teknoloji</Link>
+                  <Link href="/rehber/en-iyi-kripto-telegram-kanallari" className="text-xs bg-white text-blue-700 px-3 py-1.5 rounded-full border border-blue-200 hover:bg-blue-600 hover:text-white transition-all">Kripto Para</Link>
+                  <Link href="/rehber/en-iyi-egitim-telegram-kanallari" className="text-xs bg-white text-blue-700 px-3 py-1.5 rounded-full border border-blue-200 hover:bg-blue-600 hover:text-white transition-all">Eğitim</Link>
                 </div>
               </div>
             </div>
@@ -457,6 +457,12 @@ export default async function DynamicPage({ params, searchParams }: PageProps) {
     );
   }
 
-  // 3. Fallback to 404
+  // 3. Attempt Redirect
+  const rdr = await getRedirect(`/${slug}`);
+  if (rdr) {
+    redirect(rdr.new_path);
+  }
+
+  // 4. Fallback to 404
   notFound();
 }

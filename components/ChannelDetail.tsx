@@ -31,6 +31,7 @@ export default function ChannelDetail({ channel }: ChannelDetailProps) {
 
     const [activityVote, setActivityVote] = useState<'active' | 'inactive' | null>(null);
     const [activitySent, setActivitySent] = useState(false);
+    const [imageError, setImageError] = useState(false);
 
     const [fingerprint, setFingerprint] = useState('');
 
@@ -113,17 +114,18 @@ export default function ChannelDetail({ channel }: ChannelDetailProps) {
             <div className="relative h-48 md:h-64 overflow-hidden group">
                 <div
                     className="absolute inset-0 bg-cover bg-center blur-xl scale-110 opacity-50 transition-transform duration-700 group-hover:scale-125"
-                    style={{ backgroundImage: `url(${channel.image || '/images/logo.png'})` }}
+                    style={{ backgroundImage: `url(${(!imageError && channel.image) || '/images/logo.png'})` }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-b from-black/40 to-black/80" />
 
                 <div className="absolute inset-0 flex flex-col justify-end p-6 md:p-8">
                     <div className="flex flex-col md:flex-row items-center md:items-end gap-6">
                         <div className="relative flex-shrink-0">
-                            {channel.image && channel.image !== '/images/logo.png' ? (
+                            {channel.image && channel.image !== '/images/logo.png' && !imageError ? (
                                 <img
                                     src={channel.image}
                                     alt={channel.name}
+                                    onError={() => setImageError(true)}
                                     className="w-24 h-24 md:w-32 md:h-32 rounded-2xl border-4 border-white/20 shadow-2xl object-cover bg-white"
                                 />
                             ) : (

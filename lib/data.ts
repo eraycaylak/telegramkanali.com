@@ -223,6 +223,19 @@ export async function getAllChannelSlugs(): Promise<string[]> {
     return data.map((d: any) => d.slug);
 }
 
+// Redirects
+export async function getRedirect(oldPath: string): Promise<{ new_path: string, status_code: number } | null> {
+    const { data, error } = await supabase
+        .from('redirects')
+        .select('new_path, status_code')
+        .eq('old_path', oldPath)
+        .eq('active', true)
+        .single();
+
+    if (error || !data) return null;
+    return { new_path: data.new_path, status_code: data.status_code };
+}
+
 // ========================
 // BLOG FUNCTIONS
 // ========================

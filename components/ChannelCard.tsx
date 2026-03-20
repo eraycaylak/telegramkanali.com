@@ -47,6 +47,7 @@ export default function ChannelCard({ channel, compact = false }: ChannelCardPro
     const [loading, setLoading] = useState(false);
     const [fingerprint, setFingerprint] = useState<string>('');
     const [hasVoted, setHasVoted] = useState(false);
+    const [imageError, setImageError] = useState(false);
     // const compact = ... removed
 
     useEffect(() => {
@@ -104,12 +105,13 @@ export default function ChannelCard({ channel, compact = false }: ChannelCardPro
                 <Link href={`/${channel.slug}`} aria-label={channel.name} className="absolute inset-0 z-10" />
 
                 <div className="mx-auto mb-3 relative">
-                    {channel.image && channel.image !== '/images/logo.png' ? (
+                    {channel.image && channel.image !== '/images/logo.png' && !imageError ? (
                         <Image
                             src={channel.image}
                             alt={channel.name}
                             width={64}
                             height={64}
+                            onError={() => setImageError(true)}
                             className="h-16 w-16 rounded-full object-cover border border-gray-100 shadow-sm group-hover:scale-105 transition-transform"
                         />
                     ) : (
@@ -183,12 +185,13 @@ export default function ChannelCard({ channel, compact = false }: ChannelCardPro
             {/* Mobile View / Main Content Container */}
             <div className="flex flex-row flex-1 gap-3 md:gap-5 p-3 pr-14 md:p-5 md:pl-16 md:pr-5 items-center md:items-start text-left">
                 {/* Logo */}
-                {channel.image && channel.image !== '/images/logo.png' ? (
+                {channel.image && channel.image !== '/images/logo.png' && !imageError ? (
                     <Image
                         src={channel.image}
                         alt={channel.name}
                         width={80}
                         height={80}
+                        onError={() => setImageError(true)}
                         className="h-12 w-12 md:h-20 md:w-20 flex-shrink-0 rounded-full object-cover border border-gray-200 shadow-sm"
                     />
                 ) : (
