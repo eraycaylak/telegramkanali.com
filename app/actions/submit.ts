@@ -42,6 +42,20 @@ export async function submitChannel(formData: FormData) {
         .eq('join_link', join_link)
         .single();
 
+    // Check for restricted categories (Bypass prevention)
+    const { data: category } = await supabase
+        .from('categories')
+        .select('name')
+        .eq('id', category_id)
+        .single();
+
+    if (category) {
+        const catName = category.name.toLowerCase();
+        if (catName.includes('18') || catName.includes('iddaa') || catName.includes('kripto')) {
+            return { error: 'Bu kategori için başvurular sadece Telegram üzerinden kabul edilmektedir.' };
+        }
+    }
+
     if (existing) {
         return { error: 'Bu kanal zaten sistemde mevcut!' };
     }
