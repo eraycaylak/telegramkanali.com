@@ -56,7 +56,7 @@ export default function MobileBottomNav({ categories }: MobileBottomNavProps) {
     const navItems = [
         { icon: Home, label: 'Ana Sayfa', href: '/', active: isActive('/') },
         { icon: Search, label: 'Ara', href: '#search', active: false, action: () => setShowSearch(true) },
-        { icon: Flame, label: 'Popüler', href: '/populer', active: isActive('/populer') },
+        { icon: Flame, label: 'Trendler', href: '/trends', active: pathname.startsWith('/trends') },
         { icon: PlusCircle, label: 'Ekle', href: '/kanal-ekle', active: isActive('/kanal-ekle') },
         { icon: Menu, label: 'Menü', href: '#menu', active: false, action: () => setShowDrawer(true) },
     ];

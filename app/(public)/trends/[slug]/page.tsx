@@ -1,7 +1,7 @@
 import { getTrendBySlug } from '@/app/actions/trendsPublic';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { ChevronLeft, Flame, Clock, Tag, Share2 } from 'lucide-react';
+import { Flame, Clock, Tag, ArrowLeft } from 'lucide-react';
 import { Metadata, ResolvingMetadata } from 'next';
 
 export const dynamic = 'force-dynamic';
@@ -39,70 +39,81 @@ export default async function TrendDetailPage({ params }: { params: Promise<{ sl
         notFound();
     }
 
-    const dateStr = new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date(trend.created_at));
+    const dateStr = new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }).format(new Date(trend.created_at));
 
     return (
-        <article className="min-h-screen bg-[#fafafa]">
-            {/* Dark & Sleek Article Header */}
-            <div className="bg-[#0a0a0a] text-white pt-12 pb-24 md:pt-16 md:pb-32 relative overflow-hidden flex flex-col items-center border-b border-[#222]">
-                <div className="absolute inset-0 opacity-[0.03]" style={{backgroundImage: 'radial-gradient(#fff 1px, transparent 1px)', backgroundSize: '32px 32px'}}></div>
-                
-                <div className="relative z-10 max-w-4xl w-full mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center text-center">
-                    <div className="w-full flex justify-between items-center mb-8">
-                        <Link href="/trends" className="inline-flex items-center gap-2 text-xs font-bold text-gray-400 hover:text-white transition-colors group px-3 py-1.5 rounded-full hover:bg-white/10">
-                            <ChevronLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
-                            Geri Dön
-                        </Link>
-                        
-                        <button className="inline-flex items-center gap-2 text-xs font-bold text-gray-400 hover:text-white transition-colors px-3 py-1.5 rounded-full hover:bg-white/10">
-                            <Share2 size={14} /> Paylaş
-                        </button>
-                    </div>
+        <article className="min-h-screen bg-white pb-32">
+            {/* Minimal App Header (Stark Contrast) */}
+            <div className="pt-6 pb-4 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto flex items-center justify-between">
+                <Link href="/trends" className="flex items-center justify-center w-12 h-12 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors">
+                    <ArrowLeft size={24} className="text-black" />
+                </Link>
+                <div className="text-[10px] font-black tracking-[0.2em] uppercase text-gray-400">
+                    Sıcak İçerik
+                </div>
+            </div>
 
-                    <div className="flex flex-wrap items-center justify-center gap-3 mb-6">
+            {/* Featured Image (Full bleed style) */}
+            {trend.image && (
+                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
+                    <div className="w-full aspect-square md:aspect-[16/9] rounded-[2rem] overflow-hidden bg-gray-100 relative shadow-xl">
+                        <img src={trend.image} alt={trend.title} className="w-full h-full object-cover" />
+                        <div className="absolute top-6 left-6 flex gap-2">
+                            {trend.trend_categories?.name && (
+                                <span className="bg-black/70 backdrop-blur-md text-white text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-full">
+                                    {trend.trend_categories.name}
+                                </span>
+                            )}
+                            {trend.subcategory && (
+                                <span className="bg-orange-500/90 backdrop-blur-md text-white text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-full">
+                                    #{trend.subcategory}
+                                </span>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Headline section */}
+            <div className="max-w-4xl mx-auto px-6 sm:px-8 lg:px-12 mb-10">
+                {!trend.image && (
+                    <div className="flex gap-2 mb-6">
                         {trend.trend_categories?.name && (
-                            <span className="bg-white/10 text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-md border border-white/10">
+                            <span className="bg-black text-white text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-full">
                                 {trend.trend_categories.name}
                             </span>
                         )}
-                        {trend.subcategory && (
-                            <span className="text-orange-400 text-[11px] font-bold uppercase tracking-wider">
-                                #{trend.subcategory}
-                            </span>
-                        )}
                     </div>
+                )}
+                
+                <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-black tracking-tighter leading-[0.95] mb-8 uppercase break-words">
+                    {trend.title}
+                </h1>
 
-                    <h1 className="text-2xl md:text-4xl lg:text-5xl font-black tracking-tight leading-snug mb-6 max-w-3xl">
-                        {trend.title}
-                    </h1>
-
-                    <div className="flex items-center justify-center gap-6 text-xs font-medium text-gray-400">
-                        <span className="flex items-center gap-1.5"><Clock size={14} /> {dateStr}</span>
-                        <span className="flex items-center gap-1.5 text-orange-400"><Flame size={14} /> {trend.view_count || 0} okuma</span>
-                    </div>
+                <div className="flex items-center gap-4 text-xs font-bold text-gray-500 uppercase tracking-widest">
+                    <span className="flex items-center gap-1.5 bg-gray-50 px-3 py-1.5 rounded-md"><Clock size={16} className="text-gray-400" /> {dateStr}</span>
+                    <span className="flex items-center gap-1.5 bg-orange-50/50 text-orange-500 px-3 py-1.5 rounded-md"><Flame size={16} /> {trend.view_count || 0}</span>
                 </div>
             </div>
 
-            {/* Content Container */}
-            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 -mt-16 md:-mt-24 relative z-20 pb-20">
-                <div className="bg-white rounded-[1.5rem] md:rounded-[2rem] shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden">
-                    
-                    {/* Featured Image */}
-                    {trend.image && (
-                        <div className="w-full aspect-video md:aspect-[21/9] bg-gray-100 border-b border-gray-100">
-                            <img src={trend.image} alt={trend.title} className="w-full h-full object-cover" />
-                        </div>
-                    )}
+            {/* Content Body */}
+            <div className="max-w-3xl mx-auto px-6 sm:px-8 lg:px-12">
+                <div 
+                    className="prose prose-lg max-w-none prose-headings:font-black md:prose-xl prose-headings:tracking-tighter prose-headings:uppercase prose-p:leading-relaxed prose-p:text-gray-800 prose-a:text-black prose-a:font-bold prose-img:rounded-[1.5rem] prose-img:shadow-lg"
+                    dangerouslySetInnerHTML={{ __html: trend.content || '' }}
+                />
+            </div>
 
-                    {/* Article Body */}
-                    <div className="p-6 md:p-12 lg:px-16 lg:py-14">
-                        <div 
-                            className="prose prose-base md:prose-lg max-w-none prose-headings:font-bold prose-headings:tracking-tight prose-a:text-blue-600 hover:prose-a:text-blue-500 prose-img:rounded-xl prose-img:shadow-md prose-p:leading-relaxed text-gray-800"
-                            dangerouslySetInnerHTML={{ __html: trend.content || '' }}
-                        />
-                    </div>
+            {/* Sticky Action Footer for App Feel */}
+            <div className="fixed bottom-safe left-0 right-0 p-4 pointer-events-none z-50 flex justify-center">
+                <div className="pointer-events-auto bg-black text-white px-8 py-4 rounded-full flex items-center justify-between gap-6 shadow-2xl w-full max-w-sm">
+                    <div className="text-sm font-black uppercase tracking-widest">İÇERİĞİ PAYLAŞ</div>
+                    <button className="bg-white text-black px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest hover:bg-gray-200 transition-colors">
+                        PAYLAŞ
+                    </button>
                 </div>
             </div>
+
         </article>
     );
 }
