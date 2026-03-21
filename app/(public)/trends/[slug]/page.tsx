@@ -6,12 +6,14 @@ import { Metadata, ResolvingMetadata } from 'next';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
+export const fetchCache = 'force-no-store';
 
 export async function generateMetadata(
     { params }: { params: { slug: string } },
     parent: ResolvingMetadata
 ): Promise<Metadata> {
-    const trend = await getTrendBySlug(params.slug);
+    const safeSlug = decodeURIComponent(params.slug);
+    const trend = await getTrendBySlug(safeSlug);
     if (!trend) return { title: 'Bulunamadı | TelegramKanali' };
 
     const strippedContent = trend.content ? trend.content.replace(/<[^>]+>/g, '').substring(0, 160) + '...' : '';
@@ -28,7 +30,8 @@ export async function generateMetadata(
 }
 
 export default async function TrendDetailPage({ params }: { params: { slug: string } }) {
-    const trend = await getTrendBySlug(params.slug);
+    const safeSlug = decodeURIComponent(params.slug);
+    const trend = await getTrendBySlug(safeSlug);
 
     if (!trend) {
         notFound();
