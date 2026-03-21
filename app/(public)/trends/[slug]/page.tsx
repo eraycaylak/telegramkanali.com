@@ -9,10 +9,11 @@ export const revalidate = 0;
 export const fetchCache = 'force-no-store';
 
 export async function generateMetadata(
-    { params }: { params: { slug: string } },
+    { params }: { params: Promise<{ slug: string }> },
     parent: ResolvingMetadata
 ): Promise<Metadata> {
-    const safeSlug = decodeURIComponent(params.slug);
+    const resolvedParams = await params;
+    const safeSlug = decodeURIComponent(resolvedParams.slug);
     const trend = await getTrendBySlug(safeSlug);
     if (!trend) return { title: 'Bulunamadı | TelegramKanali' };
 
@@ -29,8 +30,9 @@ export async function generateMetadata(
     };
 }
 
-export default async function TrendDetailPage({ params }: { params: { slug: string } }) {
-    const safeSlug = decodeURIComponent(params.slug);
+export default async function TrendDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+    const resolvedParams = await params;
+    const safeSlug = decodeURIComponent(resolvedParams.slug);
     const trend = await getTrendBySlug(safeSlug);
 
     if (!trend) {
