@@ -99,6 +99,14 @@ export default function AdminLayout({
         return false;
     });
 
+    // Toggle for mobile full menu
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+    // Close mobile menu on route change
+    useEffect(() => {
+        setIsMobileMenuOpen(false);
+    }, [pathname]);
+
     // Loading durumu
     if (isLoading) {
         return (
@@ -217,7 +225,7 @@ export default function AdminLayout({
 
                 {/* Mobile Bottom Navigation (Visible only on mobile) */}
                 <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-lg border-t border-gray-100 flex items-center justify-around px-2 py-3 z-40 pb-safe">
-                    {menuItems.slice(0, 5).map((item) => {
+                    {menuItems.slice(0, 4).map((item) => {
                         const Icon = item.icon;
                         const isActive = pathname === item.href;
                         return (
@@ -237,13 +245,61 @@ export default function AdminLayout({
                     })}
                     {/* More Menu Trigger */}
                     <button
-                        onClick={() => { /* Could open a drawer for remaining links */ }}
+                        onClick={() => setIsMobileMenuOpen(true)}
                         className="flex flex-col items-center gap-1 px-3 py-1 text-gray-400"
                     >
                         <Menu size={22} />
                         <span className="text-[10px] font-bold">Daha</span>
                     </button>
                 </nav>
+
+                {/* Mobile Menu Drawer/Overlay */}
+                {isMobileMenuOpen && (
+                    <div className="md:hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-end">
+                        <div className="bg-white w-full rounded-t-3xl p-6 min-h-[50vh] max-h-[85vh] overflow-y-auto animate-in slide-in-from-bottom flex flex-col">
+                            <div className="flex justify-between items-center mb-6">
+                                <h3 className="font-bold text-gray-900 text-lg">Tüm Menü</h3>
+                                <button 
+                                    onClick={() => setIsMobileMenuOpen(false)} 
+                                    className="p-2 bg-gray-100 rounded-full text-gray-600"
+                                >
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                                </button>
+                            </div>
+                            
+                            <div className="grid grid-cols-2 gap-3 flex-1">
+                                {menuItems.map((item) => {
+                                    const Icon = item.icon;
+                                    const isActive = pathname === item.href;
+                                    return (
+                                        <Link
+                                            key={item.href}
+                                            href={item.href}
+                                            onClick={() => setIsMobileMenuOpen(false)}
+                                            className={`flex flex-col items-center justify-center p-4 rounded-2xl gap-2 ${
+                                                isActive ? 'bg-blue-50 text-blue-600 border border-blue-100' : 'bg-gray-50 text-gray-600 border border-gray-100'
+                                            }`}
+                                        >
+                                            <Icon size={24} />
+                                            <span className="text-xs font-bold text-center">{item.name}</span>
+                                        </Link>
+                                    );
+                                })}
+                            </div>
+
+                            <button
+                                onClick={async () => {
+                                    await supabase.auth.signOut();
+                                    window.location.href = '/admin';
+                                }}
+                                className="mt-8 flex items-center justify-center gap-2 w-full px-4 py-4 text-red-600 bg-red-50 hover:bg-red-100 rounded-2xl transition-colors font-bold"
+                            >
+                                <LogOut size={20} />
+                                <span>Çıkış Yap</span>
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );
