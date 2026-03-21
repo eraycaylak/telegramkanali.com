@@ -2,12 +2,12 @@
 
 import { useState } from 'react';
 import dynamic from 'next/dynamic';
-import 'react-quill/dist/quill.snow.css';
+import 'react-quill-new/dist/quill.snow.css';
 import { Plus, Edit, Trash2, FolderTree, FileText } from 'lucide-react';
 import { addTrend, updateTrend, deleteTrend, addTrendCategory, deleteTrendCategory } from '@/app/actions/trends';
 import { useRouter } from 'next/navigation';
 
-const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
+const ReactQuill = dynamic(() => import('react-quill-new'), { ssr: false });
 
 export default function TrendsAdminClient({ initialTrends, initialCategories }: { initialTrends: any[], initialCategories: any[] }) {
     const router = useRouter();
