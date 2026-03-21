@@ -311,14 +311,17 @@ export async function updateChannel(id: string, formData: FormData) {
             })
             .eq('id', id);
 
-        if (error) throw error;
+        if (error) {
+            console.error('Update error (Supabase):', error);
+            throw error;
+        }
 
         revalidatePath('/');
         revalidatePath('/admin/dashboard');
         return { success: true };
-    } catch (error) {
-        console.error('Update error:', error);
-        return { error: 'Failed to update channel' };
+    } catch (error: any) {
+        console.error('Update catch error:', error);
+        return { error: `Güncelleme başarısız: ${error?.message || error?.details || 'Bilinmeyen hata'}` };
     }
 }
 
