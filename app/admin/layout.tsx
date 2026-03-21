@@ -76,6 +76,7 @@ export default function AdminLayout({
         { name: 'Reklam Paketleri', href: '/admin/ads', icon: Zap, perm: 'manage_banners' },
         { name: 'Toplu Kanal Ekle', href: '/admin/bulk-add', icon: Send, perm: 'manage_channels' },
         { name: 'Kategoriler', href: '/admin/categories', icon: FolderTree, perm: 'manage_categories' },
+        { name: 'Trend Yönetimi', href: '/admin/trends', icon: Zap, perm: 'manage_blog' },
         { name: 'Bannerlar', href: '/admin/banners', icon: Image, perm: 'manage_banners' },
         { name: 'Analitik', href: '/admin/analytics', icon: BarChart, perm: 'view_analytics' },
         { name: 'Ziyaretçi Profilleri', href: '/admin/visitors', icon: Users, perm: 'view_analytics' },
