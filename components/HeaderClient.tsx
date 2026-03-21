@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Search, Menu, X } from 'lucide-react';
+import { Search, Menu, X, Flame } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Category } from '@/lib/types';
@@ -153,6 +153,9 @@ export default function HeaderClient({ categories, logo, user: initialUser }: He
             <div className="hidden md:block bg-black shadow-lg border-t border-[#222]">
                 <div className="container mx-auto px-6">
                     <nav className="flex flex-wrap items-center gap-x-8 gap-y-4 py-5 text-[14px] font-bold tracking-wider text-white uppercase">
+                        <Link href="/trends" className="hover:text-orange-400 text-orange-500 transition-colors whitespace-nowrap font-black flex items-center gap-1">
+                            <Flame size={16} /> TRENDLER
+                        </Link>
                         {categories.map((cat) => (
                             <Link
                                 key={cat.id}
@@ -180,12 +183,18 @@ export default function HeaderClient({ categories, logo, user: initialUser }: He
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="p-4 border-b border-gray-700 flex items-center justify-between">
-                            <span className="font-bold text-lg">Kategoriler</span>
+                            <span className="font-bold text-lg">Menü</span>
                             <button onClick={() => setMenuOpen(false)} aria-label="Menüyü Kapat" className="p-1">
                                 <X size={24} />
                             </button>
                         </div>
                         <nav className="p-4 flex flex-col gap-3">
+                            <Link href="/trends" onClick={() => setMenuOpen(false)} className="py-2.5 px-3 bg-gradient-to-r from-orange-500 to-red-500 rounded-lg text-sm font-bold text-center text-white flex items-center justify-center gap-2 shadow-lg shadow-orange-500/20">
+                                <Flame size={18} /> GÜNÜN TRENDLERİ
+                            </Link>
+                            
+                            <div className="border-t border-gray-700 my-1"></div>
+                            
                             {categories.map((cat) => (
                                 <Link
                                     key={cat.id}
