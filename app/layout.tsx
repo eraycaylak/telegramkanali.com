@@ -97,7 +97,7 @@ export default function RootLayout({
         <JsonLd data={generateOrganizationSchema(baseUrl)} />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col bg-white text-gray-900`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col bg-white text-gray-900 overflow-x-hidden w-full max-w-[100vw]`}
       >
         {/* Google Analytics */}
         <GoogleAnalytics gaId="G-N9BJQBE7BB" />

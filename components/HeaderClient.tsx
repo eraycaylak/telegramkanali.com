@@ -109,22 +109,22 @@ export default function HeaderClient({ categories, logo, user: initialUser }: He
                     <div className="flex items-center justify-end gap-3 md:gap-4 md:flex-1">
                         
                         {/* Mobile Actions */}
-                        <div className="flex md:hidden items-center gap-4">
+                        <div className="flex md:hidden items-center gap-3">
                             <button onClick={() => setIsSearchVisible(!isSearchVisible)} className="text-white hover:text-white/80 transition-colors">
                                 <Search size={22} />
                             </button>
                             
-                            <button className="text-white hover:text-white/80 transition-colors relative">
+                            <button onClick={() => alert('Okunmamış yeni bildiriminiz bulunmuyor.')} className="text-white hover:text-white/80 transition-colors relative">
                                 <span className="absolute -top-1.5 -right-1.5 bg-white text-[#ed1c24] text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center">12</span>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
                             </button>
 
                             {user ? (
-                                <Link href="/dashboard" className="bg-[#c4151c] text-white flex items-center gap-1.5 px-3 py-1.5 rounded text-[11px] font-black tracking-wider shadow-sm border border-red-700/50">
+                                <Link href="/dashboard" className="whitespace-nowrap bg-[#c4151c] text-white flex items-center gap-1.5 px-3 py-1.5 rounded text-[11px] font-black tracking-wider shadow-sm border border-red-700/50">
                                     <UserIcon size={14} /> PANEL
                                 </Link>
                             ) : (
-                                <Link href="/login" className="bg-[#c4151c] text-white flex items-center gap-1.5 px-3 py-1.5 rounded text-[11px] font-black tracking-wider shadow-sm border border-red-700/50">
+                                <Link href="/login" className="whitespace-nowrap bg-[#c4151c] text-white flex items-center gap-1.5 px-3 py-1.5 rounded text-[11px] font-black tracking-wider shadow-sm border border-red-700/50">
                                     <UserIcon size={14} /> GİRİŞ
                                 </Link>
                             )}
