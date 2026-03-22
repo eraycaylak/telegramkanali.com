@@ -88,6 +88,63 @@ export async function getChannels(
     return { data: mappedData, count: count || 0 };
 }
 
+// ====== ŞEHİR BAZLI SEO FONKSİYONLARI ======
+
+// Tüm aktif şehirleri getir (programatik SEO için)
+export async function getAllCities(): Promise<string[]> {
+    const { data, error } = await supabase
+        .from('channels')
+        .select('city')
+        .eq('status', 'approved')
+        .not('city', 'is', null)
+        .neq('city', '');
+
+    if (error || !data) return [];
+
+    const uniqueCities = [...new Set(data.map((d: any) => d.city).filter(Boolean))];
+    return uniqueCities.sort();
+}
+
+// Şehire göre kanalları getir
+export async function getChannelsByCity(
+    city: string,
+    page: number = 1,
+    limit: number = 20,
+    categoryId?: string
+): Promise<{ data: Channel[], count: number }> {
+    const from = (page - 1) * limit;
+    const to = from + limit - 1;
+
+    let query = supabase
+        .from('channels')
+        .select('*, categories(name, slug)', { count: 'exact' })
+        .eq('status', 'approved')
+        .eq('city', city);
+
+    if (categoryId && categoryId !== 'all') {
+        query = query.eq('category_id', categoryId);
+    }
+
+    query = query
+        .order('score', { ascending: false })
+        .order('created_at', { ascending: false })
+        .range(from, to);
+
+    const { data, error, count } = await query;
+
+    if (error) {
+        console.error('[DATA] Error fetching city channels:', error);
+        return { data: [], count: 0 };
+    }
+
+    const mappedData = data.map((d: any) => ({
+        ...d,
+        categoryName: d.categories?.name,
+    })) as Channel[];
+
+    return { data: mappedData, count: count || 0 };
+}
+
 // Fetch Popular Channels (High Score)
 // Fetch Popular Channels (High Score)
 export async function getPopularChannels(limit: number = 5): Promise<Channel[]> {

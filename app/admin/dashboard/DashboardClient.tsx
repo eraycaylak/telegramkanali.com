@@ -27,7 +27,8 @@ export default function DashboardClient() {
         category_id: '',
         image: '',
         score: 0,
-        owner_id: ''
+        owner_id: '',
+        city: ''
     });
     const [editingId, setEditingId] = useState<string | null>(null);
     const [scraping, setScraping] = useState(false);
@@ -117,7 +118,8 @@ export default function DashboardClient() {
             category_id: channel.category_id || '',
             image: channel.image || '',
             score: channel.score || 0,
-            owner_id: channel.owner_id || ''
+            owner_id: channel.owner_id || '',
+            city: (channel as any).city || ''
         });
         setEditingId(channel.id);
         setLastEditedId(channel.id);
@@ -162,7 +164,7 @@ export default function DashboardClient() {
         if (res.success) {
             alert(editingId ? 'Kanal güncellendi!' : 'Kanal eklendi!');
             setIsModalOpen(false);
-            setFormData({ name: '', description: '', join_link: '', category_id: '', image: '', score: 0, owner_id: '' });
+            setFormData({ name: '', description: '', join_link: '', category_id: '', image: '', score: 0, owner_id: '', city: '' });
             setEditingId(null);
             fetchData();
         } else {
@@ -638,6 +640,27 @@ export default function DashboardClient() {
                                     />
                                 </div>
                                 <div>
+                                    <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">🏙️ Şehir (SEO)</label>
+                                    <select
+                                        className="w-full border-2 border-gray-100 rounded-2xl p-3 md:p-4 focus:border-blue-500 outline-none transition bg-white"
+                                        value={(formData as any).city || ''}
+                                        onChange={e => setFormData({ ...formData, city: e.target.value } as any)}
+                                    >
+                                        <option value="">— Şehir Seçin —</option>
+                                        <option value="İstanbul">İstanbul</option>
+                                        <option value="Ankara">Ankara</option>
+                                        <option value="İzmir">İzmir</option>
+                                        <option value="Bursa">Bursa</option>
+                                        <option value="Antalya">Antalya</option>
+                                        <option value="Adana">Adana</option>
+                                        <option value="Konya">Konya</option>
+                                        <option value="Gaziantep">Gaziantep</option>
+                                        <option value="Mersin">Mersin</option>
+                                        <option value="Kayseri">Kayseri</option>
+                                        <option value="Genele Ait">Genele Ait (Tüm Türkiye)</option>
+                                    </select>
+                                </div>
+                                <div>
                                     <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Kanal Sahibi</label>
                                     <select
                                         className="w-full border-2 border-gray-100 rounded-2xl p-3 md:p-4 focus:border-blue-500 outline-none transition bg-white"
@@ -663,7 +686,7 @@ export default function DashboardClient() {
                             <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 pb-4 md:pb-0">
                                 <button
                                     type="button"
-                                    onClick={() => { setIsModalOpen(false); setEditingId(null); setFormData({ name: '', description: '', join_link: '', category_id: '', image: '', score: 0, owner_id: '' }); }}
+                                    onClick={() => { setIsModalOpen(false); setEditingId(null); setFormData({ name: '', description: '', join_link: '', category_id: '', image: '', score: 0, owner_id: '', city: '' }); }}
                                     className="order-2 sm:order-1 px-8 py-4 text-gray-500 font-bold hover:bg-gray-50 rounded-2xl transition"
                                 >
                                     İptal

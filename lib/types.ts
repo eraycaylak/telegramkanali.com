@@ -29,6 +29,7 @@ export interface Channel {
     bot_enabled?: boolean;
     telegram_chat_id?: string;
     clicks?: number;
+    city?: string; // Şehir bazlı programatik SEO
     // English translations (auto-generated)
     name_en?: string;
     description_en?: string;

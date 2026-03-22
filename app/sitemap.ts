@@ -16,12 +16,25 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         '/yeni-eklenenler',
         '/one-cikanlar',
         '/reklam',
-        '/kanal-ekle'
+        '/kanal-ekle',
+        '/trends',
+        '/populer',
     ].map(route => ({
         url: `${baseUrl}${route}`,
         lastModified: new Date(),
         changeFrequency: 'daily' as const,
         priority: route === '' ? 1 : 0.7,
+    }));
+
+    // 2. Şehir bazlı SEO sayfaları
+    const cityPages = [
+        'istanbul', 'ankara', 'izmir', 'bursa', 'antalya',
+        'adana', 'konya', 'gaziantep', 'mersin', 'kayseri'
+    ].map(city => ({
+        url: `${baseUrl}/${city}-telegram-gruplari`,
+        lastModified: new Date(),
+        changeFrequency: 'weekly' as const,
+        priority: 0.85,
     }));
 
     // 2. Dynamic Data from database
@@ -97,6 +110,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     return [
         ...staticPages,
+        ...cityPages,
         ...categoriesUrls,
         ...categoriesUrlsEn,
         ...seoPageUrls,
