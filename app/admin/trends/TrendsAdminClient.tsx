@@ -34,21 +34,26 @@ export default function TrendsAdminClient({ initialTrends, initialCategories }: 
 
     const handleTrendSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        const data = new FormData();
-        Object.entries(trendForm).forEach(([key, value]) => {
-            data.append(key, value.toString());
-        });
-        if (trendImageFile) data.append('imageFile', trendImageFile);
+        try {
+            const data = new FormData();
+            Object.entries(trendForm).forEach(([key, value]) => {
+                data.append(key, value.toString());
+            });
+            if (trendImageFile) data.append('imageFile', trendImageFile);
 
-        const res = editingTrendId
-            ? await updateTrend(editingTrendId, data)
-            : await addTrend(data);
+            const res = editingTrendId
+                ? await updateTrend(editingTrendId, data)
+                : await addTrend(data);
 
-        if (res.error) return alert(res.error);
-        alert(editingTrendId ? 'Güncellendi' : 'Eklendi');
-        setIsTrendModalOpen(false);
-        resetTrendForm();
-        window.location.reload();
+            if (res.error) return alert(res.error);
+            alert(editingTrendId ? 'Güncellendi' : 'Eklendi');
+            setIsTrendModalOpen(false);
+            resetTrendForm();
+            window.location.reload();
+        } catch (err: any) {
+            console.error('Trend Submit Error:', err);
+            alert('Sunucu hatası veya geçersiz işlem: ' + err.message);
+        }
     };
 
     const resetTrendForm = () => {
@@ -72,30 +77,42 @@ export default function TrendsAdminClient({ initialTrends, initialCategories }: 
 
     const handleTrendDelete = async (id: string) => {
         if (!confirm('Emin misiniz?')) return;
-        const res = await deleteTrend(id);
-        if (res.error) alert(res.error);
-        else window.location.reload();
+        try {
+            const res = await deleteTrend(id);
+            if (res.error) alert(res.error);
+            else window.location.reload();
+        } catch (err: any) {
+            alert('Sunucu hatası: ' + err.message);
+        }
     };
 
     const handleCatSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        const data = new FormData();
-        data.append('name', catForm.name);
-        data.append('order_index', catForm.order_index.toString());
-        const res = await addTrendCategory(data);
-        if (res.error) alert(res.error);
-        else {
-            setIsCatModalOpen(false);
-            setCatForm({ name: '', order_index: 0 });
-            window.location.reload();
+        try {
+            const data = new FormData();
+            data.append('name', catForm.name);
+            data.append('order_index', catForm.order_index.toString());
+            const res = await addTrendCategory(data);
+            if (res.error) alert(res.error);
+            else {
+                setIsCatModalOpen(false);
+                setCatForm({ name: '', order_index: 0 });
+                window.location.reload();
+            }
+        } catch (err: any) {
+            alert('Sunucu hatası: ' + err.message);
         }
     };
 
     const handleCatDelete = async (id: string) => {
         if (!confirm('Emin misiniz? Kategoriye bağlı trendler kategorisiz kalır.')) return;
-        const res = await deleteTrendCategory(id);
-        if (res.error) alert(res.error);
-        else window.location.reload();
+        try {
+            const res = await deleteTrendCategory(id);
+            if (res.error) alert(res.error);
+            else window.location.reload();
+        } catch (err: any) {
+            alert('Sunucu hatası: ' + err.message);
+        }
     };
 
     const quillModules = {

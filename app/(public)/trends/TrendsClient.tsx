@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { Flame, Clock } from 'lucide-react';
 
 export default function TrendsClient({ initialTrends, initialCategories }: { initialTrends: any[], initialCategories: any[] }) {
     const [selectedCategory, setSelectedCategory] = useState<string>('all');
+    const sliderRef = useRef<HTMLDivElement>(null);
 
     const displayedTrends = useMemo(() => {
         if (selectedCategory === 'all') return initialTrends;
@@ -15,14 +16,35 @@ export default function TrendsClient({ initialTrends, initialCategories }: { ini
     // Top 5 trends go into the swipeable Hero Slider
     const sliderTrends = displayedTrends.filter(t => t.image).slice(0, 5);
     
-    // The rest go into the vertical list
-    const sliderIds = new Set(sliderTrends.map(t => t.id));
-    const listTrends = displayedTrends.filter(t => !sliderIds.has(t.id));
+    // The rest go into the vertical list. If there are very few articles, show all of them in the list so it's not empty, except the #1 hero.
+    const listTrends = displayedTrends.filter(t => t.id !== sliderTrends[0]?.id);
 
     const formatDate = (dateString: string) => {
         const date = new Date(dateString);
         return new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'short' }).format(date);
     };
+
+    // Auto-scroll the native CSS slider
+    useEffect(() => {
+        if (sliderTrends.length <= 1) return;
+        const interval = setInterval(() => {
+            if (!sliderRef.current) return;
+            const container = sliderRef.current;
+            const scrollLeft = container.scrollLeft;
+            const scrollWidth = container.scrollWidth;
+            const clientWidth = container.clientWidth;
+            
+            // If we are near the end, scroll back to the beginning
+            if (scrollLeft + clientWidth >= scrollWidth - 20) {
+                container.scrollTo({ left: 0, behavior: 'smooth' });
+            } else {
+                // Otherwise scroll right by one viewport width
+                container.scrollBy({ left: clientWidth, behavior: 'smooth' });
+            }
+        }, 4000); // 4 seconds
+
+        return () => clearInterval(interval);
+    }, [sliderTrends.length]);
 
     return (
         <div className="min-h-screen bg-gray-50/50 pb-24 md:pb-32 font-sans overflow-hidden w-full">
@@ -65,10 +87,13 @@ export default function TrendsClient({ initialTrends, initialCategories }: { ini
             ) : (
                 <div className="flex flex-col gap-6 w-full">
                     
-                    {/* NATIVE SWIPE HERO SLIDER */}
+                    {/* NATIVE SWIPE HERO SLIDER WITH AUTO PLAY */}
                     {sliderTrends.length > 0 && (
                         <div className="w-full">
-                            <div className="flex overflow-x-auto gap-4 snap-x snap-mandatory scrollbar-hide px-4 md:px-8 pb-4">
+                            <div 
+                                ref={sliderRef}
+                                className="flex overflow-x-auto gap-4 snap-x snap-mandatory scrollbar-hide px-4 md:px-8 pb-4"
+                            >
                                 {sliderTrends.map((trend) => (
                                     <Link 
                                         href={`/trends/${trend.slug}`} 
@@ -81,7 +106,7 @@ export default function TrendsClient({ initialTrends, initialCategories }: { ini
                                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
                                         />
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent flex flex-col justify-end p-5 md:p-8">
-                                            <div className="text-[10px] md:text-xs font-black text-white/80 tracking-widest uppercase mb-2 drop-shadow-sm">
+                                            <div className="bg-red-600 text-white w-max px-3 py-1.5 rounded text-[10px] md:text-xs font-black tracking-widest uppercase mb-3 shadow-sm">
                                                 {trend.trend_categories?.name || 'GÜNDEM'}
                                             </div>
                                             <h2 className="text-2xl md:text-3xl font-extrabold text-white leading-tight drop-shadow-md">
