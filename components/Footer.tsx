@@ -47,16 +47,16 @@ export default async function Footer() {
                         </ul>
                     </div>
 
-                    {/* SEO Rehberleri - YENİ */}
+                    {/* SEO - Popüler Sayfalar */}
                     <div>
-                        <h3 className="mb-4 text-sm font-semibold text-gray-900">Telegram Rehberleri</h3>
+                        <h3 className="mb-4 text-sm font-semibold text-gray-900">Popüler Sayfalar</h3>
                         <ul className="space-y-2 text-sm text-gray-600">
-                            <li><Link href="/rehber/telegram-kanallari-rehberi" className="hover:text-blue-600 font-medium">📚 Telegram Kanalları Rehberi</Link></li>
-                            <li><Link href="/rehber/telegram-kanallari-nedir" className="hover:text-blue-600">Telegram Kanalları Nedir?</Link></li>
-                            <li><Link href="/rehber/en-iyi-telegram-kanallari" className="hover:text-blue-600">En İyi Telegram Kanalları</Link></li>
-                            <li><Link href="/rehber/telegram-kripto-kanallari" className="hover:text-blue-600">Kripto Telegram Kanalları</Link></li>
-                            <li><Link href="/rehber/ucretsiz-telegram-kanallari" className="hover:text-blue-600">Ücretsiz Telegram Kanalları</Link></li>
-                            <li><Link href="/rehber/turk-telegram-kanallari" className="hover:text-blue-600">Türk Telegram Kanalları</Link></li>
+                            <li><Link href="/kripto-para" className="hover:text-blue-600 font-medium">Kripto Telegram Kanalları</Link></li>
+                            <li><Link href="/egitim-ders" className="hover:text-blue-600">Eğitim Telegram Kanalları</Link></li>
+                            <li><Link href="/haber" className="hover:text-blue-600">Haber Telegram Kanalları</Link></li>
+                            <li><Link href="/teknoloji" className="hover:text-blue-600">Teknoloji Telegram Kanalları</Link></li>
+                            <li><Link href="/spor" className="hover:text-blue-600">Spor Telegram Kanalları</Link></li>
+                            <li><Link href="/sohbet" className="hover:text-blue-600">Sohbet Telegram Kanalları</Link></li>
                         </ul>
                     </div>
 

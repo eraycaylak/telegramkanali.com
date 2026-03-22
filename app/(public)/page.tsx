@@ -176,7 +176,7 @@ export default async function Home({ searchParams }: HomeProps) {
       {/* SEO H1 Hierarchy (Main Page Title) */}
       <div className="text-center pb-2 pt-4">
         <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-1">Telegram Kanalları ve Grupları (2026)</h1>
-        <p className="text-gray-500 text-sm tracking-wide">Güncel ve Aktif Telegram Kanalları - Şubat 2026</p>
+        <p className="text-gray-500 text-sm tracking-wide">Güncel ve Aktif Telegram Kanalları - Mart 2026</p>
       </div>
 
       {/* Banner Grid (Dynamic from DB - Only show if no search) */}
@@ -233,7 +233,7 @@ export default async function Home({ searchParams }: HomeProps) {
               <span className="text-blue-500">Telegram</span> Kanalları (2026)
             </h2>
             <p className="mb-4 text-lg">
-              Telegram, güvenli ve hızlı mesajlaşma deneyimi sunan popüler bir uygulamadır. Sitemizdeki <Link href="/rehber/en-iyi-telegram-kanallari" className="text-blue-600 font-bold hover:underline">En iyi Telegram kanalları</Link> listesi ile ilgi alanlarınıza uygun toplulukları kolayca keşfedebilirsiniz. Aktif olarak güncellenen dizinimiz sayesinde binlerce farklı kategoride en kaliteli gruplara ulaşmak artık çok daha kolay.
+              Telegram, güvenli ve hızlı mesajlaşma deneyimi sunan popüler bir uygulamadır. Sitemizdeki <Link href="/teknoloji" className="text-blue-600 font-bold hover:underline">Teknoloji Telegram kanalları</Link> listesi ile ilgi alanlarınıza uygun toplulukları kolayca keşfedebilirsiniz. Aktif olarak güncellenen dizinimiz sayesinde binlerce farklı kategoride en kaliteli gruplara ulaşmak artık çok daha kolay.
             </p>
 
             {/* Changed from H4 to H3 */}
