@@ -1,10 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { Search, Menu, X, Flame } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { Search, Menu, X, Flame, Bell } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Category } from '@/lib/types';
+import { Category, Channel } from '@/lib/types';
 import { supabase } from '@/lib/supabaseClient';
 import { User } from '@supabase/supabase-js';
 import { LogIn, LayoutDashboard, LogOut, User as UserIcon } from 'lucide-react';
@@ -16,16 +16,30 @@ interface HeaderClientProps {
     categories: Category[];
     logo: React.ReactNode;
     user?: User | null;
+    recentChannels?: Channel[];
 }
 
-export default function HeaderClient({ categories, logo, user: initialUser }: HeaderClientProps) {
+export default function HeaderClient({ categories, logo, user: initialUser, recentChannels = [] }: HeaderClientProps) {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [menuOpen, setMenuOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState(searchParams.get('q') || '');
     const [isSearchVisible, setIsSearchVisible] = useState(false);
+    const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
     const [user, setUser] = useState<User | null>(initialUser || null);
     const [loading, setLoading] = useState(false);
+    const notificationsRef = useRef<HTMLDivElement>(null);
+
+    // Close dropdowns when clicking outside
+    useEffect(() => {
+        function handleClickOutside(event: MouseEvent) {
+            if (notificationsRef.current && !notificationsRef.current.contains(event.target as Node)) {
+                setIsNotificationsOpen(false);
+            }
+        }
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     // Sync searchTerm with URL if it changes externally
     useEffect(() => {
@@ -84,7 +98,8 @@ export default function HeaderClient({ categories, logo, user: initialUser }: He
 
 
             {/* 2. Main Bar - App Style Red Header */}
-            <div className="bg-[#ed1c24] py-3 md:py-4 relative z-20 shadow-md">
+            {/* Using #E30613 which is exact Hürriyet brand red, avoiding any pink hues */}
+            <div className="bg-[#E30613] py-3 md:py-4 relative z-20 shadow-md">
                 <div className="container mx-auto px-4 md:px-6 flex items-center justify-between gap-4">
 
                     {/* Left: Hamburger Menu (Mobile/Tablet) */}
@@ -114,17 +129,68 @@ export default function HeaderClient({ categories, logo, user: initialUser }: He
                                 <Search size={22} />
                             </button>
                             
-                            <button onClick={() => alert('Okunmamış yeni bildiriminiz bulunmuyor.')} className="text-white hover:text-white/80 transition-colors relative">
-                                <span className="absolute -top-1.5 -right-1.5 bg-white text-[#ed1c24] text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center">12</span>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
-                            </button>
+                            {/* Notification Dropdown Container */}
+                            <div className="relative" ref={notificationsRef}>
+                                <button 
+                                    onClick={() => setIsNotificationsOpen(!isNotificationsOpen)} 
+                                    className="text-white hover:text-white/80 transition-colors relative"
+                                    aria-label="Bildirimler"
+                                >
+                                    {recentChannels.length > 0 && (
+                                        <span className="absolute -top-1.5 -right-1.5 bg-white text-[#E30613] text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center">
+                                            {recentChannels.length}
+                                        </span>
+                                    )}
+                                    <Bell size={22} fill={isNotificationsOpen ? "currentColor" : "none"} />
+                                </button>
+                                
+                                {/* Dropdown Menu */}
+                                {isNotificationsOpen && (
+                                    <div className="absolute top-full right-0 mt-3 w-64 bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden animate-in fade-in slide-in-from-top-2 z-50">
+                                        <div className="bg-gray-50 border-b border-gray-100 px-4 py-2">
+                                            <span className="text-xs font-bold text-gray-800 uppercase tracking-wider">Son Eklenen Kanallar</span>
+                                        </div>
+                                        <div className="max-h-80 overflow-y-auto">
+                                            {recentChannels.length > 0 ? (
+                                                recentChannels.map((channel) => (
+                                                    <Link 
+                                                        href={`/kanal/${channel.slug}`} 
+                                                        key={`notif-${channel.id}`}
+                                                        onClick={() => setIsNotificationsOpen(false)}
+                                                        className="flex items-center gap-3 p-3 hover:bg-gray-50 border-b border-gray-50 last:border-0 transition-colors"
+                                                    >
+                                                        <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-100 flex-shrink-0 border border-gray-200">
+                                                            <img src={channel.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(channel.name)}&background=random`} alt={channel.name} className="w-full h-full object-cover" />
+                                                        </div>
+                                                        <div className="flex flex-col overflow-hidden">
+                                                            <span className="text-sm font-bold text-gray-900 truncate">{channel.name}</span>
+                                                            <span className="text-[11px] text-gray-500 truncate">Yeni eklendi!</span>
+                                                        </div>
+                                                    </Link>
+                                                ))
+                                            ) : (
+                                                <div className="p-4 text-center text-sm text-gray-500">
+                                                    Henüz kanal bulunmuyor.
+                                                </div>
+                                            )}
+                                        </div>
+                                        <Link 
+                                            href="/kategoriler" 
+                                            onClick={() => setIsNotificationsOpen(false)}
+                                            className="block w-full text-center py-2.5 bg-gray-50 text-[12px] font-black text-[#E30613] hover:bg-gray-100 transition-colors uppercase"
+                                        >
+                                            Tümünü Gör
+                                        </Link>
+                                    </div>
+                                )}
+                            </div>
 
                             {user ? (
-                                <Link href="/dashboard" className="whitespace-nowrap bg-[#c4151c] text-white flex items-center gap-1.5 px-3 py-1.5 rounded text-[11px] font-black tracking-wider shadow-sm border border-red-700/50">
+                                <Link href="/dashboard" className="whitespace-nowrap bg-[#B7050F] text-white flex items-center gap-1.5 px-3 py-1.5 rounded text-[11px] font-black tracking-wider shadow-sm border border-red-800/40">
                                     <UserIcon size={14} /> PANEL
                                 </Link>
                             ) : (
-                                <Link href="/login" className="whitespace-nowrap bg-[#c4151c] text-white flex items-center gap-1.5 px-3 py-1.5 rounded text-[11px] font-black tracking-wider shadow-sm border border-red-700/50">
+                                <Link href="/login" className="whitespace-nowrap bg-[#B7050F] text-white flex items-center gap-1.5 px-3 py-1.5 rounded text-[11px] font-black tracking-wider shadow-sm border border-red-800/40">
                                     <UserIcon size={14} /> GİRİŞ
                                 </Link>
                             )}

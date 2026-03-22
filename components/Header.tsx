@@ -1,19 +1,25 @@
 import React from 'react';
-import { getCategories } from '@/lib/data';
+import { getCategories, getNewChannels } from '@/lib/data';
 import HeaderClient from './HeaderClient';
 import DynamicLogo from './DynamicLogo';
-import { Category } from '@/lib/types';
+import { Category, Channel } from '@/lib/types';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 
 export default async function Header() {
     let categories: Category[] = [];
+    let recentChannels: Channel[] = [];
 
-    // Fetch Categories
+    // Fetch Categories and Recent Channels
     try {
-        categories = await getCategories();
+        [categories, recentChannels] = await Promise.all([
+            getCategories(),
+            getNewChannels()
+        ]);
+        // Limit recent channels to max 5 for the notification bell
+        recentChannels = recentChannels.slice(0, 5);
     } catch (error) {
-        console.error('Header categories fetch error:', error);
+        console.error('Header categories/channels fetch error:', error);
     }
 
     // Fetch User
@@ -33,7 +39,7 @@ export default async function Header() {
 
     return (
         <React.Suspense fallback={<div className="h-16 bg-[#333]"></div>}>
-            <HeaderClient categories={categories} logo={<DynamicLogo />} user={user} />
+            <HeaderClient categories={categories} logo={<DynamicLogo />} user={user} recentChannels={recentChannels} />
         </React.Suspense>
     );
 }
