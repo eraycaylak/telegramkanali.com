@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { Flame, Clock, PlayCircle } from 'lucide-react';
+import { Flame, Clock, PlayCircle, Menu, User, Map, BarChart2 } from 'lucide-react';
 
 export default function TrendsClient({ initialTrends, initialCategories }: { initialTrends: any[], initialCategories: any[] }) {
     const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -21,40 +21,40 @@ export default function TrendsClient({ initialTrends, initialCategories }: { ini
     };
 
     return (
-        <div className="min-h-screen bg-[#f8f9fa] pb-24 md:pb-32 font-sans font-medium text-gray-900">
-            {/* Minimal App Header */}
-            <div className="pt-8 pb-6 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto flex items-center justify-between">
-                <div className="flex flex-col">
-                    <span className="text-[10px] uppercase tracking-[0.2em] text-gray-400 font-bold mb-1">Gündem</span>
-                    <h1 className="text-3xl md:text-4xl font-black tracking-tighter text-black uppercase">Trendler</h1>
-                </div>
-                <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center border border-gray-200">
-                    <Flame size={20} className="text-black" />
-                </div>
+        <div className="min-h-screen bg-white pb-24 md:pb-32 font-sans text-gray-900">
+            {/* Minimal Centered App Header (Like "Find courses" screen) */}
+            <div className="pt-6 pb-4 px-6 flex items-center justify-between max-w-5xl mx-auto">
+                <button className="p-2 -ml-2 hover:bg-gray-100 rounded-full transition"><Menu size={24} className="text-black" /></button>
+                <h1 className="text-lg md:text-xl font-black text-black tracking-tight">Trendler & Gündem</h1>
+                <button className="p-2 -mr-2 bg-gray-100 rounded-full hover:bg-gray-200 transition"><User size={20} className="text-black" /></button>
             </div>
 
             {/* Horizontal Filter Chips (App Style) */}
-            <div className="px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto mb-8">
+            <div className="px-6 max-w-5xl mx-auto mb-6">
                 <div className="flex gap-3 overflow-x-auto scrollbar-hide py-2">
                     <button
                         onClick={() => setSelectedCategory('all')}
-                        className={`flex-shrink-0 px-5 py-2.5 rounded-full text-sm font-bold tracking-tight transition-all flex items-center gap-2 ${
+                        className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-bold tracking-tight transition-all flex items-center gap-2 ${
                             selectedCategory === 'all' 
-                                ? 'bg-black text-white shadow-lg' 
-                                : 'bg-white text-gray-600 border border-gray-200 hover:border-gray-300'
+                                ? 'bg-black text-white' 
+                                : 'bg-white text-black border border-gray-200 hover:bg-gray-50'
                         }`}
                     >
                         {selectedCategory === 'all' && <Flame size={16} fill="currentColor" />}
                         Popüler
                     </button>
+                    {/* Add some fake icon filters to perfectly match the right screen vibe */}
+                    <button className="flex-shrink-0 p-2 rounded-full border border-gray-200 hover:bg-gray-50"><Map size={18} className="text-black" /></button>
+                    <button className="flex-shrink-0 p-2 border-r border-gray-200 pr-4 mr-2"><BarChart2 size={18} className="text-black" /></button>
+
                     {initialCategories.map(cat => (
                         <button
                             key={cat.id}
                             onClick={() => setSelectedCategory(cat.id)}
-                            className={`flex-shrink-0 px-5 py-2.5 rounded-full text-sm font-bold tracking-tight transition-all ${
+                            className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-bold tracking-tight transition-all ${
                                 selectedCategory === cat.id 
-                                    ? 'bg-black text-white shadow-lg' 
-                                    : 'bg-white text-gray-600 border border-gray-200 hover:border-gray-300'
+                                    ? 'bg-black text-white' 
+                                    : 'bg-white text-black border border-gray-200 hover:bg-gray-50'
                             }`}
                         >
                             {cat.name}
@@ -63,90 +63,92 @@ export default function TrendsClient({ initialTrends, initialCategories }: { ini
                 </div>
             </div>
 
-            <div className="px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto">
+            <div className="px-6 max-w-5xl mx-auto">
                 {displayedTrends.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-20 bg-white rounded-[2rem] border border-gray-100">
+                    <div className="flex flex-col items-center justify-center py-20 bg-gray-50 rounded-[2rem]">
                         <Flame size={32} className="text-gray-300 mb-4" />
-                        <h3 className="text-xl font-bold text-gray-900 mb-1">Henüz İçerik Yok</h3>
-                        <p className="text-sm text-gray-500 font-medium tracking-tight">Bu kategoride trend bulunmuyor.</p>
+                        <h3 className="text-lg font-bold text-gray-900 mb-1">Henüz İçerik Yok</h3>
+                        <p className="text-sm text-gray-500 font-medium">Bu kategoride trend bulunmuyor.</p>
                     </div>
                 ) : (
                     <div className="flex flex-col gap-6">
-                        {/* Featured Top Card (Similar to the left phone UI) */}
+                        {/* Featured Top Card (White overlapping card style from the left screen) */}
                         {featuredTrend && (
-                            <Link href={`/trends/${featuredTrend.slug}`} className="group block w-full relative bg-black rounded-[2rem] overflow-hidden shadow-2xl">
-                                {featuredTrend.image ? (
-                                    <div className="w-full h-[400px] md:h-[500px] relative">
+                            <div className="relative w-full rounded-[2.5rem] overflow-hidden bg-gray-100 shadow-sm border border-gray-100 group">
+                                {/* Top Image Half */}
+                                <div className="w-full h-[280px] md:h-[400px] relative">
+                                    {featuredTrend.image ? (
                                         <img 
                                             src={featuredTrend.image} 
                                             alt={featuredTrend.title} 
-                                            className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700"
+                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                                         />
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
-                                    </div>
-                                ) : (
-                                    <div className="w-full h-[300px] bg-gradient-to-br from-gray-900 to-black"></div>
-                                )}
+                                    ) : (
+                                        <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300"></div>
+                                    )}
+                                </div>
                                 
-                                <div className="absolute inset-0 p-6 md:p-8 flex flex-col justify-end">
-                                    <div className="flex gap-2 mb-4">
-                                        <span className="bg-white/10 backdrop-blur-md text-white text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full border border-white/20">
-                                            {featuredTrend.trend_categories?.name || 'GÜNDEM'}
-                                        </span>
+                                {/* Bottom Overlapping White Box */}
+                                <div className="bg-white px-6 py-8 relative rounded-t-[2.5rem] -mt-12 w-full z-10 shadow-[0_-20px_25px_-5px_rgba(0,0,0,0.1)]">
+                                    <div className="text-[10px] font-black text-gray-400 tracking-widest uppercase mb-2">
+                                        {featuredTrend.trend_categories?.name || 'GÜNDEM'}
                                     </div>
-                                    
-                                    <h2 className="text-3xl md:text-5xl font-black text-white tracking-tighter leading-[1.1] mb-6 uppercase">
+                                    <h2 className="text-2xl md:text-4xl font-black text-black tracking-tighter leading-[1.05] uppercase mb-4">
                                         {featuredTrend.title}
                                     </h2>
                                     
-                                    <div className="flex items-center gap-3 mt-auto">
-                                        <div className="bg-white text-black px-6 py-3 rounded-full text-sm font-black tracking-tight flex items-center gap-2 group-hover:bg-gray-100 transition-colors">
-                                            Daha Fazla Oku <PlayCircle size={18} />
-                                        </div>
+                                    <div className="flex items-center gap-2 mb-6">
+                                        <PlayCircle size={16} className="text-red-500" fill="currentColor" />
+                                        <span className="text-xs font-bold text-gray-800 tracking-tight">Güncel Okuma & Detaylar</span>
+                                    </div>
+
+                                    <div className="flex gap-3">
+                                        <Link href={`/trends/${featuredTrend.slug}`} className="flex-1 bg-black text-white flex justify-center items-center py-3.5 rounded-2xl text-[11px] font-black tracking-widest uppercase transition-transform active:scale-95">
+                                            DEVAMI <span className="ml-2">→</span>
+                                        </Link>
+                                        <button className="px-6 bg-gray-100 text-black flex justify-center items-center py-3.5 rounded-2xl text-[11px] font-black tracking-widest uppercase transition-transform active:scale-95">
+                                            ATLA
+                                        </button>
                                     </div>
                                 </div>
-                            </Link>
+                            </div>
                         )}
 
-                        {/* Staggered Masonry / Grid for the rest */}
+                        {/* Narrower Grid for the rest of cards (like right screen) */}
                         {restTrends.length > 0 && (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-4">
                                 {restTrends.map((trend) => (
                                     <Link 
                                         href={`/trends/${trend.slug}`} 
                                         key={trend.id}
-                                        className="bg-white p-5 rounded-[2rem] border border-gray-100 shadow-sm hover:shadow-xl transition-all flex flex-col h-full group"
+                                        className="group flex flex-col w-full"
                                     >
                                         {trend.image && (
-                                            <div className="relative w-full h-[200px] rounded-[1.5rem] overflow-hidden mb-5 bg-gray-100">
+                                            <div className="w-full h-[180px] rounded-[2rem] overflow-hidden mb-4 relative bg-gray-100 shadow-sm">
                                                 <img 
                                                     src={trend.image} 
                                                     alt={trend.title} 
                                                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                                 />
-                                                <div className="absolute top-4 left-4 bg-black/60 backdrop-blur-md text-white px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-full">
-                                                    {trend.trend_categories?.name || 'GÜNDEM'}
-                                                </div>
                                             </div>
                                         )}
                                         
-                                        {!trend.image && trend.trend_categories?.name && (
-                                            <span className="text-[10px] font-black text-gray-400 tracking-widest uppercase mb-3 block">
-                                                {trend.trend_categories.name}
-                                            </span>
-                                        )}
-
-                                        <h3 className="text-xl md:text-2xl font-black text-black tracking-tighter leading-[1.15] mb-4 uppercase line-clamp-3">
-                                            {trend.title}
-                                        </h3>
-
-                                        <div className="mt-auto flex items-center justify-between pt-4">
-                                            <div className="flex items-center gap-3 text-xs font-bold text-gray-500 tracking-tight">
-                                                <span className="flex items-center gap-1"><Clock size={14} className="text-gray-400" /> {formatDate(trend.created_at)}</span>
-                                                <span className="flex items-center gap-1"><Flame size={14} className="text-gray-400" /> {trend.view_count || 0}</span>
+                                        <div className="px-2">
+                                            <div className="text-[10px] font-black text-gray-400 tracking-widest uppercase mb-1">
+                                                {trend.trend_categories?.name || 'GÜNDEM'}
                                             </div>
-                                            <div className="bg-black text-white px-4 py-2 rounded-full text-[11px] font-black tracking-widest uppercase group-hover:bg-gray-800 transition-colors">
-                                                Devamı →
+                                            <h3 className="text-xl md:text-2xl font-black text-black tracking-tighter leading-[1.1] uppercase line-clamp-2 mb-2">
+                                                {trend.title}
+                                            </h3>
+
+                                            <div className="flex items-center justify-between mt-3">
+                                                <div className="flex items-center gap-3 text-xs font-bold text-gray-500">
+                                                    <span className="flex items-center gap-1"><Clock size={14} className="text-gray-400" /> {formatDate(trend.created_at)}</span>
+                                                    <span className="flex items-center gap-1"><Flame size={14} className="text-gray-400" /> {trend.view_count || 0}</span>
+                                                </div>
+                                                <div className="bg-black text-white px-5 py-2.5 rounded-xl text-[10px] font-black tracking-widest uppercase transition-colors">
+                                                    GÖNDER <span className="ml-1">→</span>
+                                                </div>
                                             </div>
                                         </div>
                                     </Link>

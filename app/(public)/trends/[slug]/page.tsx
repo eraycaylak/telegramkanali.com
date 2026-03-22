@@ -86,7 +86,7 @@ export default async function TrendDetailPage({ params }: { params: Promise<{ sl
                     </div>
                 )}
                 
-                <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-black tracking-tighter leading-[0.95] mb-8 uppercase break-words">
+                <h1 className="text-2xl md:text-4xl lg:text-5xl font-black text-black tracking-tighter leading-[1.05] mb-6 uppercase break-words">
                     {trend.title}
                 </h1>
 
