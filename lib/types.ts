@@ -117,6 +117,31 @@ export interface BlogPost {
     created_at?: string;
     updated_at?: string;
 }
+
+export interface TrendCategory {
+    id: string;
+    name: string;
+    slug: string;
+    order_index: number;
+    subcategories: string[];
+    created_at?: string;
+}
+
+export interface Trend {
+    id: string;
+    title: string;
+    slug: string;
+    content: string;
+    category_id: string;
+    subcategory?: string;
+    categoryName?: string;
+    image?: string;
+    view_count: number;
+    is_active: boolean;
+    created_at?: string;
+    updated_at?: string;
+}
+
 export interface UserPermissions {
     manage_blog: boolean;
     manage_channels: boolean;

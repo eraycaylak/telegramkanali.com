@@ -30,7 +30,7 @@ export default function TrendsAdminClient({ initialTrends, initialCategories }: 
 
     // Category Form
     const [isCatModalOpen, setIsCatModalOpen] = useState(false);
-    const [catForm, setCatForm] = useState({ name: '', order_index: 0 });
+    const [catForm, setCatForm] = useState({ name: '', order_index: 0, subcategories: '' });
 
     const handleTrendSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -92,11 +92,12 @@ export default function TrendsAdminClient({ initialTrends, initialCategories }: 
             const data = new FormData();
             data.append('name', catForm.name);
             data.append('order_index', catForm.order_index.toString());
+            data.append('subcategories', catForm.subcategories);
             const res = await addTrendCategory(data);
             if (res.error) alert(res.error);
             else {
                 setIsCatModalOpen(false);
-                setCatForm({ name: '', order_index: 0 });
+                setCatForm({ name: '', order_index: 0, subcategories: '' });
                 window.location.reload();
             }
         } catch (err: any) {
@@ -238,6 +239,10 @@ export default function TrendsAdminClient({ initialTrends, initialCategories }: 
                                 <label className="block text-xs font-bold text-gray-500 mb-1 uppercase">Sıralama (Küçük önce)</label>
                                 <input type="number" className="w-full border-2 border-gray-100 rounded-xl p-3 outline-none focus:border-blue-500" value={catForm.order_index} onChange={e => setCatForm({...catForm, order_index: parseInt(e.target.value)||0})} />
                             </div>
+                            <div>
+                                <label className="block text-xs font-bold text-gray-500 mb-1 uppercase">Alt Kategoriler (Virgülle ayırın)</label>
+                                <input placeholder="Örn: Youtube, X, Instagram" className="w-full border-2 border-gray-100 rounded-xl p-3 outline-none focus:border-blue-500" value={catForm.subcategories} onChange={e => setCatForm({...catForm, subcategories: e.target.value})} />
+                            </div>
                             <div className="flex gap-3 pt-4">
                                 <button type="button" onClick={() => setIsCatModalOpen(false)} className="flex-1 py-3 text-gray-500 font-bold bg-gray-50 hover:bg-gray-100 rounded-xl">İptal</button>
                                 <button type="submit" className="flex-1 py-3 text-white font-bold bg-blue-600 hover:bg-blue-700 rounded-xl">Kaydet</button>
@@ -269,8 +274,23 @@ export default function TrendsAdminClient({ initialTrends, initialCategories }: 
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                                 <div>
-                                    <label className="block text-xs font-bold text-gray-500 mb-1 uppercase">Alt Kategori (Örn: Tiktok)</label>
-                                    <input placeholder="Opsiyonel" className="w-full border-2 border-gray-100 rounded-xl p-3 outline-none focus:border-blue-500" value={trendForm.subcategory} onChange={e => setTrendForm({...trendForm, subcategory: e.target.value})} />
+                                    <label className="block text-xs font-bold text-gray-500 mb-1 uppercase">Alt Kategori</label>
+                                    {(() => {
+                                        const selectedCat = categories.find((c: any) => c.id === trendForm.category_id);
+                                        if (selectedCat && selectedCat.subcategories && selectedCat.subcategories.length > 0) {
+                                            return (
+                                                <select className="w-full border-2 border-gray-100 rounded-xl p-3 outline-none focus:border-blue-500 bg-white" value={trendForm.subcategory} onChange={e => setTrendForm({ ...trendForm, subcategory: e.target.value })}>
+                                                    <option value="">Seçiniz...</option>
+                                                    {selectedCat.subcategories.map((sub: string) => (
+                                                        <option key={sub} value={sub}>{sub}</option>
+                                                    ))}
+                                                </select>
+                                            );
+                                        }
+                                        return (
+                                            <input placeholder="Opsiyonel (Örn: Tiktok)" className="w-full border-2 border-gray-100 rounded-xl p-3 outline-none focus:border-blue-500" value={trendForm.subcategory} onChange={e => setTrendForm({...trendForm, subcategory: e.target.value})} />
+                                        );
+                                    })()}
                                 </div>
                                 <div>
                                     <label className="block text-xs font-bold text-gray-500 mb-1 uppercase">Önizleme Resim Dosyası</label>

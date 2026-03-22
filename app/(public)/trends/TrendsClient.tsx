@@ -6,12 +6,28 @@ import { Flame, Clock } from 'lucide-react';
 
 export default function TrendsClient({ initialTrends, initialCategories }: { initialTrends: any[], initialCategories: any[] }) {
     const [selectedCategory, setSelectedCategory] = useState<string>('all');
+    const [selectedSubcategory, setSelectedSubcategory] = useState<string>('all');
     const sliderRef = useRef<HTMLDivElement>(null);
 
+    // Reset subcategory when category changes
+    useEffect(() => {
+        setSelectedSubcategory('all');
+    }, [selectedCategory]);
+
     const displayedTrends = useMemo(() => {
-        if (selectedCategory === 'all') return initialTrends;
-        return initialTrends.filter(t => t.category_id === selectedCategory);
-    }, [initialTrends, selectedCategory]);
+        let filtered = initialTrends;
+        if (selectedCategory !== 'all') {
+            filtered = filtered.filter(t => t.category_id === selectedCategory);
+            if (selectedSubcategory !== 'all') {
+                filtered = filtered.filter(t => t.subcategory === selectedSubcategory);
+            }
+        }
+        return filtered;
+    }, [initialTrends, selectedCategory, selectedSubcategory]);
+
+    const activeCategoryData = useMemo(() => {
+        return initialCategories.find(c => c.id === selectedCategory);
+    }, [selectedCategory, initialCategories]);
 
     // Top 5 trends go into the swipeable Hero Slider
     const sliderTrends = displayedTrends.filter(t => t.image).slice(0, 5);
@@ -57,7 +73,7 @@ export default function TrendsClient({ initialTrends, initialCategories }: { ini
                 </div>
                 
                 {/* Horizontal Category Chips */}
-                <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-2 w-full md:w-auto -mx-4 px-4 md:mx-0 md:px-0">
+                <div className="flex gap-2 overflow-x-auto scrollbar-hide w-full md:w-auto -mx-4 px-4 md:mx-0 md:px-0">
                     <button 
                         onClick={() => setSelectedCategory('all')} 
                         className={`flex-shrink-0 px-5 py-2.5 rounded-full text-[13px] font-bold transition-all shadow-sm ${selectedCategory === 'all' ? 'bg-black text-white' : 'bg-white text-gray-700 border border-gray-100 hover:bg-gray-50'}`}
@@ -75,6 +91,29 @@ export default function TrendsClient({ initialTrends, initialCategories }: { ini
                     ))}
                 </div>
             </div>
+
+            {/* Horizontal Subcategory Chips (Nested) */}
+            {activeCategoryData?.subcategories && activeCategoryData.subcategories.length > 0 && (
+                <div className="px-4 md:px-8 max-w-7xl mx-auto mb-4">
+                    <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-2 w-full md:w-auto -mx-4 px-4 md:mx-0 md:px-0">
+                        <button 
+                            onClick={() => setSelectedSubcategory('all')} 
+                            className={`flex-shrink-0 px-4 py-1.5 rounded-lg text-xs font-bold transition-all shadow-sm ${selectedSubcategory === 'all' ? 'bg-[#E30613] text-white' : 'bg-white text-gray-600 border border-gray-100 hover:bg-gray-50'}`}
+                        >
+                            Tümü
+                        </button>
+                        {activeCategoryData.subcategories.map((sub: string) => (
+                            <button 
+                                key={sub} 
+                                onClick={() => setSelectedSubcategory(sub)} 
+                                className={`flex-shrink-0 px-4 py-1.5 rounded-lg text-xs font-bold transition-all shadow-sm ${selectedSubcategory === sub ? 'bg-[#E30613] text-white' : 'bg-white text-gray-600 border border-gray-100 hover:bg-gray-50'}`}
+                            >
+                                {sub}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
 
             {displayedTrends.length === 0 ? (
                 <div className="px-4 md:px-8 max-w-7xl mx-auto">
