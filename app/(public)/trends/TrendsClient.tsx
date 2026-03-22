@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
-import { Flame, ArrowUpRight, ChevronRight, BarChart2 } from 'lucide-react';
+import { Flame, ArrowUpRight, ChevronRight, BarChart2, ChevronLeft } from 'lucide-react';
 
 export default function TrendsClient({ initialTrends, initialCategories }: { initialTrends: any[], initialCategories: any[] }) {
     const [selectedCategory, setSelectedCategory] = useState<string>('all');
+    const [currentSlide, setCurrentSlide] = useState(0);
 
     const displayedTrends = useMemo(() => {
         if (selectedCategory === 'all') return initialTrends;
@@ -13,30 +14,42 @@ export default function TrendsClient({ initialTrends, initialCategories }: { ini
     }, [initialTrends, selectedCategory]);
 
     const topTrends = displayedTrends.slice(0, 10);
-    const sliderTrends = displayedTrends.filter(t => t.image).slice(0, 6);
+    const sliderTrends = displayedTrends.filter(t => t.image).slice(0, 5);
+
+    // Auto-play slider
+    useEffect(() => {
+        if (sliderTrends.length <= 1) return;
+        const interval = setInterval(() => {
+            setCurrentSlide((prev) => (prev + 1) % sliderTrends.length);
+        }, 4000);
+        return () => clearInterval(interval);
+    }, [sliderTrends.length]);
+
+    const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % sliderTrends.length);
+    const prevSlide = () => setCurrentSlide((prev) => (prev === 0 ? sliderTrends.length - 1 : prev - 1));
 
     return (
         <div className="min-h-screen bg-white pb-24 md:pb-32 font-sans">
             
             {/* Header Area */}
-            <div className="px-4 md:px-8 py-8 md:py-12 max-w-7xl mx-auto flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div className="px-4 md:px-8 py-6 md:py-12 max-w-7xl mx-auto flex flex-col md:flex-row md:items-end justify-between gap-6">
                 <div>
-                    <h1 className="text-3xl md:text-4xl font-black text-gray-900 tracking-tight mb-2">Öne çıkan trendler</h1>
-                    <p className="text-gray-500 text-sm font-medium">Sosyal medya aramalarına ve site içi görüntülenmelere dayalı olarak nelerin trend olduğunu görün.</p>
+                    <h1 className="text-2xl md:text-4xl font-black text-gray-900 tracking-tighter mb-1 md:mb-2 uppercase">Günün Trendleri</h1>
+                    <p className="text-gray-500 text-xs md:text-sm font-medium">Türkiye'de anlık olarak en çok okunan ve paylaşılan başlıklar.</p>
                 </div>
                 
                 {/* Desktop Native Select / Mobile Chips */}
                 <div className="flex md:hidden gap-2 overflow-x-auto scrollbar-hide pb-2">
-                    <button onClick={() => setSelectedCategory('all')} className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-bold transition-all border ${selectedCategory === 'all' ? 'bg-black text-white border-black' : 'bg-white text-gray-700 border-gray-200'}`}>Tümü</button>
+                    <button onClick={() => setSelectedCategory('all')} className={`flex-shrink-0 px-5 py-2 rounded-full text-xs font-bold transition-all border ${selectedCategory === 'all' ? 'bg-black text-white border-black' : 'bg-white text-gray-700 border-gray-200'}`}>Tümü</button>
                     {initialCategories.map(cat => (
-                        <button key={cat.id} onClick={() => setSelectedCategory(cat.id)} className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-bold transition-all border ${selectedCategory === cat.id ? 'bg-black text-white border-black' : 'bg-white text-gray-700 border-gray-200'}`}>
+                        <button key={cat.id} onClick={() => setSelectedCategory(cat.id)} className={`flex-shrink-0 px-5 py-2 rounded-full text-xs font-bold transition-all border ${selectedCategory === cat.id ? 'bg-black text-white border-black' : 'bg-white text-gray-700 border-gray-200'}`}>
                             {cat.name}
                         </button>
                     ))}
                 </div>
 
                 <div className="hidden md:block">
-                    <label className="text-[10px] uppercase font-bold text-gray-400 mb-1 block">İlgi Alanı</label>
+                    <label className="text-[10px] uppercase font-bold text-gray-400 mb-1 block">Filtrele</label>
                     <select 
                         className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-black focus:border-black block w-full p-2.5 font-bold cursor-pointer outline-none"
                         value={selectedCategory}
@@ -58,26 +71,49 @@ export default function TrendsClient({ initialTrends, initialCategories }: { ini
                         <p className="text-sm text-gray-500 font-medium">Bu kategoride trend bulunmuyor.</p>
                     </div>
                 ) : (
-                    <div className="flex flex-col md:flex-row gap-8 lg:gap-16">
+                    <div className="flex flex-col md:flex-row gap-8 lg:gap-12">
                         
-                        {/* Mobile: Image Slider - Shown above the list on mobile only */}
+                        {/* Mobile & Desktop: True News Hero Carousel */}
                         {sliderTrends.length > 0 && (
-                            <div className="w-full md:hidden mb-2">
-                                <div className="flex overflow-x-auto gap-3 pb-4 scrollbar-hide snap-x px-1">
-                                    {sliderTrends.map((trend) => (
-                                        <Link href={`/trends/${trend.slug}`} key={`slider-${trend.id}`} className="snap-center shrink-0 w-[240px] h-[320px] rounded-3xl overflow-hidden relative shadow-sm group">
-                                            <img src={trend.image} alt={trend.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-5">
-                                                <div className="text-[10px] font-black text-white/80 tracking-widest uppercase mb-1">
-                                                    {trend.trend_categories?.name || 'GÜNDEM'}
-                                                </div>
-                                                <h3 className="text-white font-bold text-lg leading-tight line-clamp-3">
-                                                    {trend.title}
-                                                </h3>
-                                            </div>
-                                        </Link>
-                                    ))}
-                                </div>
+                            <div className="w-full md:w-[55%] lg:w-[60%] relative group">
+                                <Link href={`/trends/${sliderTrends[currentSlide].slug}`} className="block w-full h-[280px] md:h-[450px] relative rounded-3xl overflow-hidden shadow-lg bg-black">
+                                    <img 
+                                        key={sliderTrends[currentSlide].id}
+                                        src={sliderTrends[currentSlide].image} 
+                                        alt={sliderTrends[currentSlide].title} 
+                                        className="w-full h-full object-cover opacity-80 animate-in fade-in duration-500" 
+                                    />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent flex flex-col justify-end p-6 md:p-8">
+                                        <div className="bg-red-600 text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-sm w-fit mb-3">
+                                            {sliderTrends[currentSlide].trend_categories?.name || 'GÜNDEM'}
+                                        </div>
+                                        <h2 className="text-2xl md:text-3xl font-black text-white leading-tight md:leading-[1.1] uppercase drop-shadow-md decoration-white/30 decoration-2 underline-offset-4 hover:underline">
+                                            {sliderTrends[currentSlide].title}
+                                        </h2>
+                                    </div>
+                                </Link>
+
+                                {/* Slider Controls & Dots */}
+                                {sliderTrends.length > 1 && (
+                                    <>
+                                        <button onClick={(e) => { e.preventDefault(); prevSlide(); }} className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/50 hover:bg-black/80 backdrop-blur-md rounded-full flex items-center justify-center text-white transition-all opacity-0 group-hover:opacity-100 z-10 hidden md:flex">
+                                            <ChevronLeft size={24} />
+                                        </button>
+                                        <button onClick={(e) => { e.preventDefault(); nextSlide(); }} className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/50 hover:bg-black/80 backdrop-blur-md rounded-full flex items-center justify-center text-white transition-all opacity-0 group-hover:opacity-100 z-10 hidden md:flex">
+                                            <ChevronRight size={24} />
+                                        </button>
+                                        
+                                        <div className="absolute bottom-4 right-6 flex gap-2 z-10">
+                                            {sliderTrends.map((_, idx) => (
+                                                <button 
+                                                    key={idx} 
+                                                    onClick={() => setCurrentSlide(idx)}
+                                                    className={`h-1.5 rounded-full transition-all ${idx === currentSlide ? 'w-6 bg-white' : 'w-2 bg-white/40 hover:bg-white/60'}`}
+                                                />
+                                            ))}
+                                        </div>
+                                    </>
+                                )}
                             </div>
                         )}
 
@@ -116,28 +152,6 @@ export default function TrendsClient({ initialTrends, initialCategories }: { ini
                                     </Link>
                                 );
                             })}
-                        </div>
-
-                        {/* Desktop: Masonry / Grid for Images */}
-                        <div className="hidden md:block w-full md:w-[55%] lg:w-[60%]">
-                            {sliderTrends.length > 0 ? (
-                                <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-                                    {sliderTrends.map((trend, i) => (
-                                        <Link 
-                                            href={`/trends/${trend.slug}`} 
-                                            key={`grid-${trend.id}`}
-                                            className={`rounded-3xl overflow-hidden relative group bg-gray-100 shadow-sm ${i === 0 ? 'col-span-2 row-span-2 aspect-square lg:aspect-auto' : 'aspect-[4/5] lg:aspect-square'}`}
-                                        >
-                                            <img src={trend.image} alt={trend.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300"></div>
-                                        </Link>
-                                    ))}
-                                </div>
-                            ) : (
-                                <div className="w-full h-full min-h-[400px] bg-gray-50 rounded-3xl border border-gray-100 flex items-center justify-center">
-                                    <p className="text-gray-400 font-bold">Görsel bulunamadı</p>
-                                </div>
-                            )}
                         </div>
 
                     </div>
