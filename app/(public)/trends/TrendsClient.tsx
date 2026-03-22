@@ -74,9 +74,9 @@ export default function TrendsClient({ initialTrends, initialCategories }: { ini
                     <div className="flex flex-col gap-6">
                         {/* Featured Top Card (White overlapping card style from the left screen) */}
                         {featuredTrend && (
-                            <div className="relative w-full rounded-[2.5rem] overflow-hidden bg-gray-100 shadow-sm border border-gray-100 group">
+                            <div className="relative w-full rounded-[2rem] md:rounded-[2.5rem] overflow-hidden bg-gray-100 shadow-sm border border-gray-100 group">
                                 {/* Top Image Half */}
-                                <div className="w-full h-[280px] md:h-[400px] relative">
+                                <div className="w-full h-[200px] md:h-[400px] relative">
                                     {featuredTrend.image ? (
                                         <img 
                                             src={featuredTrend.image} 
@@ -89,24 +89,24 @@ export default function TrendsClient({ initialTrends, initialCategories }: { ini
                                 </div>
                                 
                                 {/* Bottom Overlapping White Box */}
-                                <div className="bg-white px-6 py-8 relative rounded-t-[2.5rem] -mt-12 w-full z-10 shadow-[0_-20px_25px_-5px_rgba(0,0,0,0.1)]">
-                                    <div className="text-[10px] font-black text-gray-400 tracking-widest uppercase mb-2">
+                                <div className="bg-white px-5 md:px-6 py-6 md:py-8 relative rounded-t-[2rem] md:rounded-t-[2.5rem] -mt-8 md:-mt-12 w-full z-10 shadow-lg">
+                                    <div className="text-[10px] font-black text-gray-400 tracking-widest uppercase mb-1 md:mb-2">
                                         {featuredTrend.trend_categories?.name || 'GÜNDEM'}
                                     </div>
-                                    <h2 className="text-2xl md:text-4xl font-black text-black tracking-tighter leading-[1.05] uppercase mb-4">
+                                    <h2 className="text-xl md:text-4xl font-black text-black tracking-tighter leading-[1.1] md:leading-[1.05] uppercase mb-3 md:mb-4">
                                         {featuredTrend.title}
                                     </h2>
                                     
-                                    <div className="flex items-center gap-2 mb-6">
+                                    <div className="flex items-center gap-2 mb-4 md:mb-6">
                                         <PlayCircle size={16} className="text-red-500" fill="currentColor" />
                                         <span className="text-xs font-bold text-gray-800 tracking-tight">Güncel Okuma & Detaylar</span>
                                     </div>
 
-                                    <div className="flex gap-3">
-                                        <Link href={`/trends/${featuredTrend.slug}`} className="flex-1 bg-black text-white flex justify-center items-center py-3.5 rounded-2xl text-[11px] font-black tracking-widest uppercase transition-transform active:scale-95">
-                                            DEVAMI <span className="ml-2">→</span>
+                                    <div className="flex gap-2 md:gap-3">
+                                        <Link href={`/trends/${featuredTrend.slug}`} className="flex-1 bg-black text-white flex justify-center items-center py-2.5 md:py-3.5 rounded-xl md:rounded-2xl text-[10px] md:text-[11px] font-black tracking-widest uppercase transition-transform active:scale-95">
+                                            DEVAMI <span className="ml-1 md:ml-2">→</span>
                                         </Link>
-                                        <button className="px-6 bg-gray-100 text-black flex justify-center items-center py-3.5 rounded-2xl text-[11px] font-black tracking-widest uppercase transition-transform active:scale-95">
+                                        <button className="px-5 md:px-6 bg-gray-100 text-black flex justify-center items-center py-2.5 md:py-3.5 rounded-xl md:rounded-2xl text-[10px] md:text-[11px] font-black tracking-widest uppercase transition-transform active:scale-95">
                                             ATLA
                                         </button>
                                     </div>
@@ -116,7 +116,7 @@ export default function TrendsClient({ initialTrends, initialCategories }: { ini
 
                         {/* Narrower Grid for the rest of cards (like right screen) */}
                         {restTrends.length > 0 && (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mt-2 md:mt-4">
                                 {restTrends.map((trend) => (
                                     <Link 
                                         href={`/trends/${trend.slug}`} 
@@ -124,7 +124,7 @@ export default function TrendsClient({ initialTrends, initialCategories }: { ini
                                         className="group flex flex-col w-full"
                                     >
                                         {trend.image && (
-                                            <div className="w-full h-[180px] rounded-[2rem] overflow-hidden mb-4 relative bg-gray-100 shadow-sm">
+                                            <div className="w-full h-[140px] md:h-[180px] rounded-[1.5rem] md:rounded-[2rem] overflow-hidden mb-3 md:mb-4 relative bg-gray-100 shadow-sm">
                                                 <img 
                                                     src={trend.image} 
                                                     alt={trend.title} 
@@ -133,20 +133,20 @@ export default function TrendsClient({ initialTrends, initialCategories }: { ini
                                             </div>
                                         )}
                                         
-                                        <div className="px-2">
+                                        <div className="px-1 md:px-2">
                                             <div className="text-[10px] font-black text-gray-400 tracking-widest uppercase mb-1">
                                                 {trend.trend_categories?.name || 'GÜNDEM'}
                                             </div>
-                                            <h3 className="text-xl md:text-2xl font-black text-black tracking-tighter leading-[1.1] uppercase line-clamp-2 mb-2">
+                                            <h3 className="text-lg md:text-2xl font-black text-black tracking-tighter leading-[1.15] md:leading-[1.1] uppercase line-clamp-2 mb-2">
                                                 {trend.title}
                                             </h3>
 
-                                            <div className="flex items-center justify-between mt-3">
+                                            <div className="flex items-center justify-between mt-2 md:mt-3">
                                                 <div className="flex items-center gap-3 text-xs font-bold text-gray-500">
-                                                    <span className="flex items-center gap-1"><Clock size={14} className="text-gray-400" /> {formatDate(trend.created_at)}</span>
-                                                    <span className="flex items-center gap-1"><Flame size={14} className="text-gray-400" /> {trend.view_count || 0}</span>
+                                                    <span className="flex items-center gap-1"><Clock size={12} className="text-gray-400" /> {formatDate(trend.created_at)}</span>
+                                                    <span className="flex items-center gap-1"><Flame size={12} className="text-gray-400" /> {trend.view_count || 0}</span>
                                                 </div>
-                                                <div className="bg-black text-white px-5 py-2.5 rounded-xl text-[10px] font-black tracking-widest uppercase transition-colors">
+                                                <div className="bg-black text-white px-4 md:px-5 py-2 md:py-2.5 rounded-lg md:rounded-xl text-[10px] font-black tracking-widest uppercase transition-colors">
                                                     GÖNDER <span className="ml-1">→</span>
                                                 </div>
                                             </div>
