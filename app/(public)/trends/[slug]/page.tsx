@@ -42,7 +42,7 @@ export default async function TrendDetailPage({ params }: { params: Promise<{ sl
     const dateStr = new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }).format(new Date(trend.created_at));
 
     return (
-        <article className="min-h-screen bg-white pb-32">
+        <article className="min-h-screen bg-white pb-32 overflow-x-hidden w-full max-w-full">
             {/* Minimal App Header (Stark Contrast) */}
             <div className="pt-6 pb-4 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto flex items-center justify-between">
                 <Link href="/trends" className="flex items-center justify-center w-12 h-12 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors">
@@ -75,7 +75,7 @@ export default async function TrendDetailPage({ params }: { params: Promise<{ sl
             )}
 
             {/* Headline section */}
-            <div className="max-w-4xl mx-auto px-6 sm:px-8 lg:px-12 mb-10">
+            <div className="max-w-4xl mx-auto px-6 sm:px-8 lg:px-12 mb-10 w-full overflow-hidden">
                 {!trend.image && (
                     <div className="flex gap-2 mb-6">
                         {trend.trend_categories?.name && (
@@ -97,9 +97,9 @@ export default async function TrendDetailPage({ params }: { params: Promise<{ sl
             </div>
 
             {/* Content Body */}
-            <div className="max-w-3xl mx-auto px-6 sm:px-8 lg:px-12">
+            <div className="max-w-3xl mx-auto px-6 sm:px-8 lg:px-12 w-full overflow-hidden break-words">
                 <div 
-                    className="prose prose-lg max-w-none prose-headings:font-black md:prose-xl prose-headings:tracking-tighter prose-headings:uppercase prose-p:leading-relaxed prose-p:text-gray-800 prose-a:text-black prose-a:font-bold prose-img:rounded-[1.5rem] prose-img:shadow-lg"
+                    className="prose prose-lg max-w-full prose-headings:font-black md:prose-xl prose-headings:tracking-tighter prose-headings:uppercase prose-p:leading-relaxed prose-p:text-gray-800 prose-a:text-black prose-a:font-bold prose-a:break-all prose-img:rounded-[1.5rem] prose-img:shadow-lg break-words overflow-hidden"
                     dangerouslySetInnerHTML={{ __html: trend.content || '' }}
                 />
             </div>
