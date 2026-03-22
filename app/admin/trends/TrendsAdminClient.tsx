@@ -4,7 +4,7 @@ import { useState } from 'react';
 import dynamic from 'next/dynamic';
 import 'react-quill-new/dist/quill.snow.css';
 import { Plus, Edit, Trash2, FolderTree, FileText } from 'lucide-react';
-import { addTrend, updateTrend, deleteTrend, addTrendCategory, deleteTrendCategory } from '@/app/actions/trends';
+import { addTrend, updateTrend, deleteTrend, addTrendCategory, updateTrendCategory, deleteTrendCategory } from '@/app/actions/trends';
 import { useRouter } from 'next/navigation';
 
 const ReactQuill = dynamic(() => import('react-quill-new'), { ssr: false });
@@ -30,6 +30,7 @@ export default function TrendsAdminClient({ initialTrends, initialCategories }: 
 
     // Category Form
     const [isCatModalOpen, setIsCatModalOpen] = useState(false);
+    const [editingCatId, setEditingCatId] = useState<string | null>(null);
     const [catForm, setCatForm] = useState({ name: '', order_index: 0, subcategories: '' });
 
     const handleTrendSubmit = async (e: React.FormEvent) => {
@@ -86,6 +87,16 @@ export default function TrendsAdminClient({ initialTrends, initialCategories }: 
         }
     };
 
+    const handleCatEdit = (c: any) => {
+        setCatForm({
+            name: c.name,
+            order_index: c.order_index || 0,
+            subcategories: c.subcategories ? c.subcategories.join(', ') : ''
+        });
+        setEditingCatId(c.id);
+        setIsCatModalOpen(true);
+    };
+
     const handleCatSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
@@ -93,11 +104,18 @@ export default function TrendsAdminClient({ initialTrends, initialCategories }: 
             data.append('name', catForm.name);
             data.append('order_index', catForm.order_index.toString());
             data.append('subcategories', catForm.subcategories);
-            const res = await addTrendCategory(data);
+            
+            if (editingCatId) {
+                data.append('id', editingCatId);
+            }
+
+            const res = editingCatId ? await updateTrendCategory(data) : await addTrendCategory(data);
+            
             if (res.error) alert(res.error);
             else {
                 setIsCatModalOpen(false);
                 setCatForm({ name: '', order_index: 0, subcategories: '' });
+                setEditingCatId(null);
                 window.location.reload();
             }
         } catch (err: any) {
@@ -206,7 +224,7 @@ export default function TrendsAdminClient({ initialTrends, initialCategories }: 
                      <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mb-6 flex justify-between items-center">
                         <p className="text-gray-500 text-sm">Trendler için "Türkiye Gündemi", "Sosyal Medya" gibi ana sekmeler oluşturun.</p>
                         <button
-                            onClick={() => setIsCatModalOpen(true)}
+                            onClick={() => { setEditingCatId(null); setCatForm({ name: '', order_index: 0, subcategories: '' }); setIsCatModalOpen(true); }}
                             className="bg-blue-600 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:bg-blue-700 transition"
                         >
                             <Plus size={18} /> Yeni Kategori
@@ -214,10 +232,16 @@ export default function TrendsAdminClient({ initialTrends, initialCategories }: 
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         {categories.map((c: any) => (
-                            <div key={c.id} className="bg-white border text-center border-gray-100 p-6 rounded-2xl shadow-sm flex flex-col items-center gap-2 relative">
+                            <div key={c.id} className="bg-white border text-center border-gray-100 p-6 rounded-2xl shadow-sm flex flex-col items-center gap-2 relative group">
                                 <h3 className="font-bold text-lg">{c.name}</h3>
                                 <p className="text-xs text-gray-400">Sıra: {c.order_index}</p>
-                                <button onClick={() => handleCatDelete(c.id)} className="absolute top-4 right-4 text-red-400 hover:text-red-600"><Trash2 size={16} /></button>
+                                {c.subcategories && c.subcategories.length > 0 && (
+                                    <p className="text-xs text-blue-500 font-medium">{c.subcategories.length} alt kategori</p>
+                                )}
+                                <div className="absolute top-4 right-4 flex gap-2">
+                                    <button onClick={() => handleCatEdit(c)} className="text-blue-400 hover:text-blue-600"><Edit size={16} /></button>
+                                    <button onClick={() => handleCatDelete(c.id)} className="text-red-400 hover:text-red-600"><Trash2 size={16} /></button>
+                                </div>
                             </div>
                         ))}
                         {categories.length === 0 && <div className="col-span-3 text-center p-8 text-gray-400">Kategori bulunamadı.</div>}
@@ -229,7 +253,7 @@ export default function TrendsAdminClient({ initialTrends, initialCategories }: 
             {isCatModalOpen && (
                 <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
                     <div className="bg-white rounded-3xl p-8 max-w-sm w-full animate-in zoom-in-95">
-                        <h2 className="text-xl font-bold mb-4">Kategori Ekle</h2>
+                        <h2 className="text-xl font-bold mb-4">{editingCatId ? 'Kategoriyi Düzenle' : 'Kategori Ekle'}</h2>
                         <form onSubmit={handleCatSubmit} className="space-y-4">
                             <div>
                                 <label className="block text-xs font-bold text-gray-500 mb-1 uppercase">Kategori Adı</label>
