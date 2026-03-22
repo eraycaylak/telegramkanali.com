@@ -83,70 +83,113 @@ export default function HeaderClient({ categories, logo, user: initialUser }: He
             {/* 1. Top Bar - Removed to simplify UI as requested */}
 
 
-            {/* 2. Main Bar - Logo & Search & Mobile Menu */}
-            <div className="bg-[#333333]/95 backdrop-blur-lg py-3 md:py-4 relative overflow-hidden">
-                {/* Pattern */}
-                <div className="absolute inset-0 opacity-10 pointer-events-none" style={{
-                    backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M0 40L40 0H20L0 20M40 40V20L20 40'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
-                }}></div>
+            {/* 2. Main Bar - App Style Red Header */}
+            <div className="bg-[#ed1c24] py-3 md:py-4 relative z-20 shadow-md">
+                <div className="container mx-auto px-4 md:px-6 flex items-center justify-between gap-4">
 
-                <div className="container mx-auto px-4 md:px-6 flex items-center justify-between md:justify-start gap-4 relative z-10">
+                    {/* Left: Hamburger Menu (Mobile/Tablet) */}
+                    <button 
+                        className="md:hidden text-white p-1 -ml-1 hover:bg-white/10 rounded-lg transition-colors"
+                        onClick={() => setMenuOpen(!menuOpen)}
+                        aria-label="Menü"
+                    >
+                        {menuOpen ? <X size={28} /> : <Menu size={28} />}
+                    </button>
 
-
-                    {/* Logo - Centered on mobile via flex-1 or absolute centering if needed, but flex-1 text-center usually easiest or just justify-center */}
-                    {/* Let's keep it simple: Menu (Left) - Logo (Center) - Search (Right) */}
+                    {/* Desktop: Empty space or menu for flex balance if needed, but we'll let logo sit left on Desktop */}
+                    
+                    {/* Logo: Centered on Mobile, Left on Desktop */}
                     <div className="flex-1 flex justify-center md:flex-none md:justify-start">
-                        <div className="scale-90 md:scale-100 origin-center">
+                        <Link href="/" className="scale-90 md:scale-100 origin-center block">
                             {logo}
-                        </div>
+                        </Link>
                     </div>
 
-                    {/* Mobile: Empty spacer to balance layout (buttons moved to bottom nav) */}
-                    <div className="md:hidden w-10" />
+                    {/* Right: Actions (Mobile & Desktop) */}
+                    <div className="flex items-center justify-end gap-3 md:gap-4 md:flex-1">
+                        
+                        {/* Mobile Actions */}
+                        <div className="flex md:hidden items-center gap-4">
+                            <button onClick={() => setIsSearchVisible(!isSearchVisible)} className="text-white hover:text-white/80 transition-colors">
+                                <Search size={22} />
+                            </button>
+                            
+                            <button className="text-white hover:text-white/80 transition-colors relative">
+                                <span className="absolute -top-1.5 -right-1.5 bg-white text-[#ed1c24] text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center">12</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+                            </button>
 
-                    {/* Desktop: Search Bar */}
-                    <form onSubmit={handleSearch} className="hidden md:flex flex-1 relative w-full lg:max-w-xl ml-8">
-                        <input
-                            type="text"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            placeholder="Aradığınız grubu yazınız..."
-                            className="w-full h-12 bg-[#555555] text-gray-100 placeholder-gray-400 rounded-full px-6 pr-12 text-sm outline-none focus:bg-[#666] focus:ring-2 focus:ring-gray-400 transition-all shadow-inner"
-                        />
-                        <button type="submit" aria-label="Ara" className="absolute right-4 top-0 h-12 flex items-center text-gray-300 hover:text-white transition">
-                            <Search size={22} />
-                        </button>
-                    </form>
-
-
-                    {/* Desktop Actions */}
-                    <div className="hidden md:flex items-center gap-3 ml-4">
-                        <LanguageSwitcher />
-                        <VisitorCounter />
-                        <Link href="/dashboard/kanal-ekle" className="whitespace-nowrap bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-full font-bold text-sm shadow-md hover:shadow-lg transition">
-                            + KANAL EKLE
-                        </Link>
-
-                        {!loading && (
-                            user ? (
-                                <>
-                                    <Link href="/dashboard" className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 rounded-full px-5 py-2.5 transition text-white shadow-md font-bold text-sm">
-                                        <LayoutDashboard size={16} /> PANEL
-                                    </Link>
-                                    <button onClick={() => signOut()} aria-label="Çıkış Yap" className="bg-gray-700 p-2.5 rounded-full text-gray-300 hover:text-white hover:bg-gray-600 transition" title="Çıkış Yap">
-                                        <LogOut size={18} />
-                                    </button>
-                                </>
-                            ) : (
-                                <Link href="/login" className="flex items-center gap-2 bg-white text-gray-800 hover:bg-gray-100 rounded-full px-6 py-2.5 transition shadow-md font-bold text-sm">
-                                    <LogIn size={16} /> GİRİŞ YAP
+                            {user ? (
+                                <Link href="/dashboard" className="bg-[#c4151c] text-white flex items-center gap-1.5 px-3 py-1.5 rounded text-[11px] font-black tracking-wider shadow-sm border border-red-700/50">
+                                    <UserIcon size={14} /> PANEL
                                 </Link>
-                            )
-                        )}
+                            ) : (
+                                <Link href="/login" className="bg-[#c4151c] text-white flex items-center gap-1.5 px-3 py-1.5 rounded text-[11px] font-black tracking-wider shadow-sm border border-red-700/50">
+                                    <UserIcon size={14} /> GİRİŞ
+                                </Link>
+                            )}
+                        </div>
+
+                        {/* Desktop: Search Bar */}
+                        <form onSubmit={handleSearch} className="hidden md:flex flex-1 relative max-w-xl mx-4">
+                            <input
+                                type="text"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                placeholder="Arama yapın..."
+                                className="w-full h-11 bg-white/10 text-white placeholder-white/60 rounded-full px-5 pr-12 text-sm outline-none focus:bg-white focus:text-gray-900 focus:placeholder-gray-400 transition-all shadow-inner border border-white/20"
+                            />
+                            <button type="submit" aria-label="Ara" className="absolute right-4 top-0 h-11 flex items-center text-white/80 hover:text-white transition">
+                                <Search size={20} />
+                            </button>
+                        </form>
+
+                        {/* Desktop Actions */}
+                        <div className="hidden md:flex items-center gap-3">
+                            <LanguageSwitcher />
+                            <VisitorCounter />
+                            <Link href="/dashboard/kanal-ekle" className="whitespace-nowrap bg-white text-[#ed1c24] px-5 py-2 rounded-full font-bold text-sm shadow hover:bg-gray-100 transition">
+                                + KANAL EKLE
+                            </Link>
+
+                            {!loading && (
+                                user ? (
+                                    <>
+                                        <Link href="/dashboard" className="flex items-center gap-2 bg-[#c4151c] border border-red-700/50 hover:bg-[#a31117] rounded-full px-5 py-2 transition text-white shadow font-bold text-sm">
+                                            <LayoutDashboard size={16} /> PANEL
+                                        </Link>
+                                        <button onClick={() => signOut()} aria-label="Çıkış Yap" className="bg-[#c4151c] border border-red-700/50 p-2 rounded-full text-white hover:bg-[#a31117] transition" title="Çıkış Yap">
+                                            <LogOut size={18} />
+                                        </button>
+                                    </>
+                                ) : (
+                                    <Link href="/login" className="flex items-center gap-2 bg-[#c4151c] border border-red-700/50 hover:bg-[#a31117] text-white rounded-full px-5 py-2 transition shadow font-bold text-sm">
+                                        <UserIcon size={16} /> GİRİŞ YAP
+                                    </Link>
+                                )
+                            )}
+                        </div>
                     </div>
                 </div>
 
-                {/* Mobile search moved to MobileBottomNav */}
+                {/* Mobile Search Dropdown */}
+                {isSearchVisible && (
+                    <div className="md:hidden absolute top-full left-0 right-0 bg-[#ed1c24] p-4 border-t border-red-800/30 shadow-lg animate-in slide-in-from-top-2">
+                        <form onSubmit={handleSearch} className="relative">
+                            <input
+                                type="text"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                placeholder="Arama yapın..."
+                                className="w-full h-12 bg-white text-gray-900 placeholder-gray-500 rounded-lg px-4 pr-12 text-[15px] outline-none shadow-inner"
+                                autoFocus
+                            />
+                            <button type="submit" className="absolute right-0 top-0 h-12 w-12 flex items-center justify-center text-gray-400 hover:text-[#ed1c24]">
+                                <Search size={20} />
+                            </button>
+                        </form>
+                    </div>
+                )}
             </div>
 
             {/* 3. Navigation Bar - Desktop */}
