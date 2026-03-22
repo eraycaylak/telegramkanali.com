@@ -16,8 +16,8 @@ export default function TrendsClient({ initialTrends, initialCategories }: { ini
     // Top 5 trends go into the swipeable Hero Slider
     const sliderTrends = displayedTrends.filter(t => t.image).slice(0, 5);
     
-    // The rest go into the vertical list. If there are very few articles, show all of them in the list so it's not empty, except the #1 hero.
-    const listTrends = displayedTrends.filter(t => t.id !== sliderTrends[0]?.id);
+    // The rest go into the vertical list. By user request, we show ALL items here so newly added ones don't 'disappear'.
+    const listTrends = displayedTrends;
 
     const formatDate = (dateString: string) => {
         const date = new Date(dateString);
