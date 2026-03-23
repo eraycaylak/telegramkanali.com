@@ -9,13 +9,16 @@ export async function submitChannel(formData: FormData) {
     const description = formData.get('description') as string;
     const join_link = formData.get('join_link') as string;
     const category_id = formData.get('category_id') as string;
-    const contact_info = formData.get('contact_info') as string;
+    const telegram_contact = formData.get('telegram_contact') as string;
+    const email_contact = formData.get('email_contact') as string;
+    // Telegram ve email'i contact_info olarak birleştir
+    const contact_info = `Telegram: @${telegram_contact} | E-posta: ${email_contact}`;
     
     // Legal check
     const terms_accepted = formData.get('terms_accepted') === 'true';
     const privacy_accepted = formData.get('privacy_accepted') === 'true';
 
-    if (!name || !join_link || !category_id) {
+    if (!name || !join_link || !category_id || !telegram_contact || !email_contact) {
         return { error: 'Lütfen zorunlu alanları doldurun.' };
     }
 
@@ -50,20 +53,6 @@ export async function submitChannel(formData: FormData) {
         .select('id')
         .eq('join_link', join_link)
         .single();
-
-    // Check for restricted categories (Bypass prevention)
-    const { data: category } = await supabase
-        .from('categories')
-        .select('name')
-        .eq('id', category_id)
-        .single();
-
-    if (category) {
-        const catName = category.name.toLowerCase();
-        if (catName.includes('18') || catName.includes('iddaa') || catName.includes('kripto')) {
-            return { error: 'Bu kategori için başvurular sadece Telegram üzerinden kabul edilmektedir.' };
-        }
-    }
 
     if (existing) {
         return { error: 'Bu kanal zaten sistemde mevcut!' };

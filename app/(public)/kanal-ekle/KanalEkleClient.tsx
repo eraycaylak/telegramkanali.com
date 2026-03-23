@@ -3,46 +3,18 @@
 import { useState } from 'react';
 import { Category } from '@/lib/types';
 import { submitChannel } from '@/app/actions/submit';
-import { Send, CheckCircle2, AlertCircle, MessageCircle } from 'lucide-react';
+import { Send, CheckCircle2, AlertCircle } from 'lucide-react';
 
 interface Props {
     categories: Category[];
 }
 
 export default function KanalEkleClient({ categories }: Props) {
-    const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error' | 'restricted'>('idle');
+    const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
     const [errorMessage, setErrorMessage] = useState('');
-    const [selectedCategory, setSelectedCategory] = useState('');
-
-    const RESTRICTED_CATEGORIES = ['+18', 'İDDAA', 'KRİPTO PARA & BORSA'];
-
-    const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const catId = e.target.value;
-        setSelectedCategory(catId);
-
-        const category = categories.find(c => c.id === catId);
-        if (category) {
-            const name = category.name.toLowerCase();
-            if (name.includes('18') || name.includes('iddaa') || name.includes('kripto')) {
-                setStatus('restricted');
-            } else {
-                if (status === 'restricted') setStatus('idle');
-            }
-        }
-    };
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-
-        // Final validation for restricted categories
-        const category = categories.find(c => c.id === selectedCategory);
-        if (category) {
-            const name = category.name.toLowerCase();
-            if (name.includes('18') || name.includes('iddaa') || name.includes('kripto')) {
-                setStatus('restricted');
-                return;
-            }
-        }
 
         setStatus('loading');
         setErrorMessage('');
@@ -79,41 +51,10 @@ export default function KanalEkleClient({ categories }: Props) {
         );
     }
 
-    if (status === 'restricted') {
-        return (
-            <div className="bg-white border-2 border-orange-200 rounded-2xl shadow-xl p-4 md:p-8 text-center animate-in fade-in zoom-in duration-300">
-                <div className="bg-orange-100 w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <AlertCircle className="text-orange-600 w-8 h-8 md:w-10 md:w-10" />
-                </div>
-                <h2 className="text-lg md:text-2xl font-black text-gray-900 mb-2 md:mb-4">Bu Kanal Doğrudan Eklenemez!</h2>
-                <p className="text-sm md:text-base text-gray-600 mb-4 md:mb-8 leading-relaxed">
-                    Seçtiğiniz kategori (**+18, İddaa veya Kripto**) için başvurular manuel kabul edilmektedir.
-                    Devam etmek için Telegram'dan yöneticiye yazın.
-                </p>
-                <div className="flex flex-col gap-2 md:gap-3">
-                    <a
-                        href="https://t.me/sibelliee"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center justify-center gap-2 bg-[#229ED9] text-white font-bold py-3 md:py-4 rounded-xl hover:bg-[#1c86b8] transition shadow-lg shadow-blue-100"
-                    >
-                        <MessageCircle size={18} className="md:w-5 md:h-5" />
-                        Yöneticiye Yaz (Telegram)
-                    </a>
-                    <button
-                        onClick={() => setStatus('idle')}
-                        className="text-gray-400 font-bold py-1 hover:text-gray-600 transition text-xs md:text-sm"
-                    >
-                        Vazgeç ve Kategori Değiştir
-                    </button>
-                </div>
-            </div>
-        );
-    }
-
     return (
         <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 md:p-8">
             <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Kanal Adı */}
                 <div>
                     <label className="block text-sm font-bold text-gray-700 mb-2">Kanal / Grup Adı *</label>
                     <input
@@ -124,6 +65,7 @@ export default function KanalEkleClient({ categories }: Props) {
                     />
                 </div>
 
+                {/* Link + Kategori */}
                 <div className="grid md:grid-cols-2 gap-6">
                     <div>
                         <label className="block text-sm font-bold text-gray-700 mb-2">t.me Linki *</label>
@@ -139,8 +81,6 @@ export default function KanalEkleClient({ categories }: Props) {
                         <select
                             required
                             name="category_id"
-                            value={selectedCategory}
-                            onChange={handleCategoryChange}
                             className="w-full border border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-blue-500 outline-none transition bg-white"
                         >
                             <option value="">Seçiniz...</option>
@@ -151,17 +91,39 @@ export default function KanalEkleClient({ categories }: Props) {
                     </div>
                 </div>
 
-                <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2">İletişim Bilgileriniz *</label>
-                    <input
-                        required
-                        name="contact_info"
-                        placeholder="Telegram kullanıcı adınız veya e-posta"
-                        className="w-full border border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-blue-500 outline-none transition"
-                    />
-                    <p className="text-xs text-gray-500 mt-2">Bu bilgi sadece yöneticiler tarafından görülecektir.</p>
+                {/* İletişim Alanları — Zorunlu */}
+                <div className="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <label className="block text-sm font-bold text-gray-700 mb-2">
+                            Telegram Kullanıcı Adı *
+                        </label>
+                        <div className="relative">
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-medium text-sm">@</span>
+                            <input
+                                required
+                                name="telegram_contact"
+                                placeholder="kullaniciadi"
+                                className="w-full border border-gray-300 rounded-xl pl-8 pr-3 py-3 focus:ring-2 focus:ring-blue-500 outline-none transition"
+                            />
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">Sizinle Telegram üzerinden iletişime geçeceğiz.</p>
+                    </div>
+                    <div>
+                        <label className="block text-sm font-bold text-gray-700 mb-2">
+                            E-posta Adresi *
+                        </label>
+                        <input
+                            required
+                            type="email"
+                            name="email_contact"
+                            placeholder="ornek@mail.com"
+                            className="w-full border border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-blue-500 outline-none transition"
+                        />
+                        <p className="text-xs text-gray-500 mt-1">Sadece yöneticiler görebilir, 3. kişilerle paylaşılmaz.</p>
+                    </div>
                 </div>
 
+                {/* Açıklama */}
                 <div>
                     <label className="block text-sm font-bold text-gray-700 mb-2">Açıklama</label>
                     <textarea
@@ -172,6 +134,7 @@ export default function KanalEkleClient({ categories }: Props) {
                     />
                 </div>
 
+                {/* Onay Kutuları */}
                 <div className="space-y-3 bg-gray-50 p-4 rounded-xl border border-gray-200">
                     <label className="flex items-start gap-3 cursor-pointer">
                         <input
@@ -230,4 +193,3 @@ export default function KanalEkleClient({ categories }: Props) {
         </div>
     );
 }
-
