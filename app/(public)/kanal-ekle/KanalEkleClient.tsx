@@ -106,7 +106,7 @@ export default function KanalEkleClient({ categories }: Props) {
                                 className="w-full border border-gray-300 rounded-xl pl-8 pr-3 py-3 focus:ring-2 focus:ring-blue-500 outline-none transition"
                             />
                         </div>
-                        <p className="text-xs text-gray-500 mt-1">Sizinle Telegram üzerinden iletişime geçeceğiz.</p>
+                        <p className="text-xs text-orange-600 mt-1 font-medium">⚠️ Doğru girmezseniz kanalınız yayınlanmaz.</p>
                     </div>
                     <div>
                         <label className="block text-sm font-bold text-gray-700 mb-2">
