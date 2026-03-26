@@ -809,7 +809,15 @@ export default function DashboardClient() {
                             <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 pb-4 md:pb-0">
                                 <button
                                     type="button"
-                                    onClick={() => { setIsModalOpen(false); setEditingId(null); setFormData({ name: '', description: '', join_link: '', category_id: '', image: '', score: 0, owner_id: '', city: '' }); }}
+                                    onClick={() => { 
+                                        setIsModalOpen(false); 
+                                        setEditingId(null); 
+                                        setFormData({ 
+                                            name: '', description: '', join_link: '', category_id: '', image: '', 
+                                            score: 0, owner_id: '', city: '', 
+                                            ad_start_date: '', ad_end_date: '', ad_type: '', ad_notes: '' 
+                                        }); 
+                                    }}
                                     className="order-2 sm:order-1 px-8 py-4 text-gray-500 font-bold hover:bg-gray-50 rounded-2xl transition"
                                 >
                                     İptal
