@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, Trash2, Edit, Search, LogOut, ExternalLink, RefreshCw, BarChart3, Bot, Users as UsersIcon, CheckCircle2 } from 'lucide-react';
+import { Plus, Trash2, Edit, Search, LogOut, ExternalLink, RefreshCw, BarChart3, Bot, Users as UsersIcon, CheckCircle2, AlertCircle, Zap } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 import { deleteChannel, addChannel, updateChannel, scrapeTelegramInfo, syncAllChannelsFromTelegram, approveChannel, rejectChannel, syncChannelFromTelegram, getChannelFollowers } from '@/app/actions/admin';
 import { Channel, Category } from '@/lib/types';
@@ -28,7 +28,11 @@ export default function DashboardClient() {
         image: '',
         score: 0,
         owner_id: '',
-        city: ''
+        city: '',
+        ad_start_date: '',
+        ad_end_date: '',
+        ad_type: '',
+        ad_notes: ''
     });
     const [editingId, setEditingId] = useState<string | null>(null);
     const [scraping, setScraping] = useState(false);
@@ -119,7 +123,11 @@ export default function DashboardClient() {
             image: channel.image || '',
             score: channel.score || 0,
             owner_id: channel.owner_id || '',
-            city: (channel as any).city || ''
+            city: (channel as any).city || '',
+            ad_start_date: channel.ad_start_date ? new Date(channel.ad_start_date).toISOString().split('T')[0] : '',
+            ad_end_date: channel.ad_end_date ? new Date(channel.ad_end_date).toISOString().split('T')[0] : '',
+            ad_type: channel.ad_type || '',
+            ad_notes: channel.ad_notes || ''
         });
         setEditingId(channel.id);
         setLastEditedId(channel.id);
@@ -164,7 +172,10 @@ export default function DashboardClient() {
         if (res.success) {
             alert(editingId ? 'Kanal güncellendi!' : 'Kanal eklendi!');
             setIsModalOpen(false);
-            setFormData({ name: '', description: '', join_link: '', category_id: '', image: '', score: 0, owner_id: '', city: '' });
+            setFormData({
+                name: '', description: '', join_link: '', category_id: '', image: '', score: 0, owner_id: '', city: '',
+                ad_start_date: '', ad_end_date: '', ad_type: '', ad_notes: ''
+            });
             setEditingId(null);
             fetchData();
         } else {
@@ -179,6 +190,16 @@ export default function DashboardClient() {
         if (viewStatus === 'bot') return matchesSearch && matchesCategory && c.bot_enabled;
         const matchesStatus = c.status === viewStatus || (viewStatus === 'approved' && !c.status);
         return matchesSearch && matchesCategory && matchesStatus;
+    });
+    
+    // Ads Expiring Soon Logic
+    const expiringChannels = channels.filter(c => {
+        if (!c.ad_end_date) return false;
+        const endDate = new Date(c.ad_end_date);
+        const now = new Date();
+        const diffTime = endDate.getTime() - now.getTime();
+        const diffDays = diffTime / (1000 * 60 * 60 * 24);
+        return diffDays > -1 && diffDays <= 2; // Expiring in next 48 hours or recently expired
     });
 
     const handleApprove = async (id: string) => {
@@ -249,6 +270,64 @@ export default function DashboardClient() {
                         </div>
                     </div>
                 </div>
+
+                {/* Ads Expiring Soon Alert */}
+                {expiringChannels.length > 0 && (
+                    <div className="mb-8 space-y-3">
+                        <div className="flex items-center gap-2 px-1 text-orange-600">
+                            <AlertCircle size={18} />
+                            <h2 className="text-sm font-bold uppercase tracking-wider">Reklamı Bitmek Üzere Olanlar</h2>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {expiringChannels.map(ch => {
+                                const endDate = new Date(ch.ad_end_date!);
+                                const now = new Date();
+                                const diffTime = endDate.getTime() - now.getTime();
+                                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                                
+                                let statusText = "";
+                                let statusColor = "";
+                                
+                                if (diffDays < 0) {
+                                    statusText = "Süresi Bitti";
+                                    statusColor = "bg-red-50 text-red-700 border-red-100";
+                                } else if (diffDays === 0) {
+                                    statusText = "Bugün Bitiyor";
+                                    statusColor = "bg-orange-100 text-orange-800 border-orange-200 animate-pulse";
+                                } else if (diffDays === 1) {
+                                    statusText = "1 Gün Kaldı";
+                                    statusColor = "bg-orange-50 text-orange-700 border-orange-100";
+                                } else {
+                                    statusText = `${diffDays} Gün Kaldı`;
+                                    statusColor = "bg-blue-50 text-blue-700 border-blue-100";
+                                }
+
+                                return (
+                                    <div key={ch.id} className={`p-4 rounded-xl border flex items-center justify-between gap-4 shadow-sm ${statusColor}`}>
+                                        <div className="flex items-center gap-3">
+                                            {ch.image && (
+                                                <img src={ch.image} alt="" className="w-10 h-10 rounded-lg object-cover border border-black/5" />
+                                            )}
+                                            <div className="flex flex-col">
+                                                <span className="font-bold text-sm truncate max-w-[120px]">{ch.name}</span>
+                                                <span className="text-[10px] opacity-70 font-medium uppercase tracking-tighter">{ch.ad_type || 'Reklam'}</span>
+                                            </div>
+                                        </div>
+                                        <div className="flex flex-col items-end">
+                                            <span className="text-[11px] font-black uppercase whitespace-nowrap">{statusText}</span>
+                                            <button 
+                                                onClick={() => handleEdit(ch)}
+                                                className="text-[10px] font-bold underline mt-1 opacity-80 hover:opacity-100"
+                                            >
+                                                Düzenle
+                                            </button>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                )}
 
                 {/* Actions Bar */}
                 <div className="bg-white p-4 md:p-6 rounded-2xl border border-gray-200 shadow-sm mb-8 space-y-6">
@@ -672,6 +751,50 @@ export default function DashboardClient() {
                                             <option key={p.id} value={p.id}>{p.full_name || p.email}</option>
                                         ))}
                                     </select>
+                                </div>
+                            </div>
+
+                            {/* Reklam Yönetimi Section */}
+                            <div className="p-5 bg-blue-50/50 rounded-[24px] border border-blue-100/50 space-y-4">
+                                <div className="flex items-center gap-2 mb-1">
+                                    <Zap className="text-blue-600" size={16} />
+                                    <h3 className="text-sm font-black text-blue-900 uppercase tracking-wider">REKLAM YÖNETİMİ</h3>
+                                </div>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-[10px] font-bold uppercase tracking-widest text-blue-400 mb-1.5">Reklam Türü</label>
+                                        <select 
+                                            className="w-full border-2 border-white rounded-xl p-3 focus:border-blue-500 outline-none transition bg-white text-sm" 
+                                            value={formData.ad_type} 
+                                            onChange={e => setFormData({ ...formData, ad_type: e.target.value })}
+                                        >
+                                            <option value="">Yok</option>
+                                            <option value="featured">Featured (Sponsorlu)</option>
+                                            <option value="banner">Banner</option>
+                                            <option value="story">Story</option>
+                                            <option value="verified">Onaylı Kanal</option>
+                                            <option value="vip_sponsor">VIP Sponsor</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="block text-[10px] font-bold uppercase tracking-widest text-blue-400 mb-1.5">Bitiş Tarihi</label>
+                                        <input 
+                                            type="date" 
+                                            className="w-full border-2 border-white rounded-xl p-3 focus:border-blue-500 outline-none transition bg-white text-sm" 
+                                            value={formData.ad_end_date} 
+                                            onChange={e => setFormData({ ...formData, ad_end_date: e.target.value })} 
+                                        />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-[10px] font-bold uppercase tracking-widest text-blue-400 mb-1.5">Reklam Notları</label>
+                                    <input 
+                                        className="w-full border-2 border-white rounded-xl p-3 focus:border-blue-500 outline-none transition bg-white text-sm" 
+                                        placeholder="Örn: Ödeme alındı, görsel eklendi..."
+                                        value={formData.ad_notes} 
+                                        onChange={e => setFormData({ ...formData, ad_notes: e.target.value })} 
+                                    />
+                                    <input type="hidden" value={formData.ad_start_date} />
                                 </div>
                             </div>
 

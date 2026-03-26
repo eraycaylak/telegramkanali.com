@@ -93,6 +93,10 @@ export async function addChannel(formData: FormData) {
     const image = formData.get('image') as string;
     const score = parseInt(formData.get('score') as string) || 0;
     const owner_id = formData.get('owner_id') as string;
+    const ad_start_date = formData.get('ad_start_date') as string;
+    const ad_end_date = formData.get('ad_end_date') as string;
+    const ad_type = formData.get('ad_type') as string;
+    const ad_notes = formData.get('ad_notes') as string;
 
     // Use robust slugify
     const { slugify } = await import('@/lib/utils');
@@ -131,7 +135,11 @@ export async function addChannel(formData: FormData) {
             score,
             owner_id: owner_id || null,
             verified: false,
-            featured: false
+            featured: false,
+            ad_start_date: ad_start_date || null,
+            ad_end_date: ad_end_date || null,
+            ad_type: ad_type || null,
+            ad_notes: ad_notes || null
         };
 
         // Eğer category_id boş ise, veritabanına gönderme (NULL olarak bırak)
@@ -294,6 +302,10 @@ export async function updateChannel(id: string, formData: FormData) {
     const image = formData.get('image') as string;
     const score = parseInt(formData.get('score') as string) || 0;
     const owner_id = formData.get('owner_id') as string;
+    const ad_start_date = formData.get('ad_start_date') as string;
+    const ad_end_date = formData.get('ad_end_date') as string;
+    const ad_type = formData.get('ad_type') as string;
+    const ad_notes = formData.get('ad_notes') as string;
 
     // Don't change slug on edit to preserve SEO, or handle carefully. For now, keep it.
 
@@ -308,6 +320,10 @@ export async function updateChannel(id: string, formData: FormData) {
                 score,
                 owner_id: owner_id || null,
                 image: await persistTelegramImage(image || '/images/logo.png', id),
+                ad_start_date: ad_start_date || null,
+                ad_end_date: ad_end_date || null,
+                ad_type: ad_type || null,
+                ad_notes: ad_notes || null
             })
             .eq('id', id);
 

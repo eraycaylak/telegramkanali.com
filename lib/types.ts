@@ -30,6 +30,11 @@ export interface Channel {
     telegram_chat_id?: string;
     clicks?: number;
     city?: string; // Şehir bazlı programatik SEO
+    // Advertisement fields
+    ad_start_date?: string;
+    ad_end_date?: string;
+    ad_type?: string;
+    ad_notes?: string;
     // English translations (auto-generated)
     name_en?: string;
     description_en?: string;
