@@ -96,15 +96,16 @@ export async function adminSignIn(formData: FormData) {
     if (authError) return { error: authError.message };
 
     const adminClient = getAdminClient();
-    const { data: profile } = await adminClient
+    const { data: profile, error: dbError } = await adminClient
         .from('profiles')
         .select('role')
         .eq('id', authData.user.id)
         .single();
 
     if (profile?.role !== 'admin' && profile?.role !== 'editor') {
+        const errorDetail = dbError ? dbError.message : (profile ? `Rolünüz: ${profile.role}` : 'Profil bulunamadı veya Env keys eksik');
         await supabase.auth.signOut();
-        return { error: 'Bu panele erişim yetkiniz yok.' };
+        return { error: `Bu panele erişim yetkiniz yok. (Detay: ${errorDetail})` };
     }
 
     revalidatePath('/admin/dashboard');
