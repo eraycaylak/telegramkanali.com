@@ -111,7 +111,8 @@ export async function deleteTrendCategory(id: string) {
 // ========================
 
 export async function getTrendsAdmin() {
-    const { data, error } = await adminClient
+    // Use public client — anon has full read access via RLS so service_role is not required
+    const { data, error } = await supabase
         .from('trends')
         .select('*, trend_categories(name)')
         .order('created_at', { ascending: false });

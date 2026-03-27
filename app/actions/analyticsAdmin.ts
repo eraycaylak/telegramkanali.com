@@ -1,9 +1,9 @@
 'use server';
 
-import { getAdminClient } from '@/lib/supabaseAdmin';
+// Use public anon client for reads — site_analytics and channel_stats have public RLS policies
+import { supabase } from '@/lib/supabaseClient';
 
 export async function getAnalyticsSummary(days: number = 30) {
-    const supabase = getAdminClient();
     try {
         const timeAgo = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
         const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
@@ -73,7 +73,6 @@ export async function getAnalyticsSummary(days: number = 30) {
         const categoriesAggregation: any = {};
         Object.values(pathAggregation).forEach((p: any) => {
             const segments = p.path.split('/').filter(Boolean);
-            // Only match if root-level path AND it's a real category slug
             if (segments.length === 1 && categorySlugSet.has(segments[0])) {
                 const catSlug = segments[0];
                 categoriesAggregation[catSlug] = {
@@ -84,8 +83,6 @@ export async function getAnalyticsSummary(days: number = 30) {
             }
         });
         const categoryViews = Object.values(categoriesAggregation).sort((a: any, b: any) => b.views - a.views);
-
-
 
         // 2. Get Channel Clicks
         let allClickStats: any[] = [];
@@ -110,7 +107,6 @@ export async function getAnalyticsSummary(days: number = 30) {
             }
         }
 
-        // Aggregate period clicks and daily clicks per channel
         const periodClicksMap: { [key: string]: number } = {};
         const dailyClicksMap: { [key: string]: number } = {};
 
@@ -122,13 +118,11 @@ export async function getAnalyticsSummary(days: number = 30) {
             }
         });
 
-        // Fetch channel details for the top clicked channels in this period
-        // To handle large datasets efficiently, we get channels that have stats, or just top overall channels
-        const { data: channelsData, error: channelsError } = await supabase
+        const { data: channelsData } = await supabase
             .from('channels')
             .select('id, name, slug, image, clicks')
             .order('clicks', { ascending: false })
-            .limit(500); // Fetch all channels with data
+            .limit(500);
 
         const channelClicks = channelsData?.map(c => ({
             channel: { name: c.name, image: c.image, slug: c.slug },
@@ -150,10 +144,7 @@ export async function getAnalyticsSummary(days: number = 30) {
     }
 }
 
-// Search ALL channels by name (for admin analytics search box)
-// This bypasses the top-500 limit so channels with 0 clicks can also be found
 export async function searchChannelStats(searchTerm: string, days: number = 30) {
-    const supabase = getAdminClient();
     try {
         if (!searchTerm.trim()) return [];
 
@@ -161,7 +152,6 @@ export async function searchChannelStats(searchTerm: string, days: number = 30) 
         const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
         const term = searchTerm.replace(/[%_]/g, '\\$&');
 
-        // Search channels by name, slug, or description - no limit, show all matches
         const { data: channels, error } = await supabase
             .from('channels')
             .select('id, name, slug, image, clicks')
@@ -170,7 +160,6 @@ export async function searchChannelStats(searchTerm: string, days: number = 30) 
 
         if (error || !channels || channels.length === 0) return [];
 
-        // Get click stats for these specific channels in the date range
         const channelIds = channels.map(c => c.id);
         const { data: clickStats } = await supabase
             .from('channel_stats')
@@ -201,4 +190,3 @@ export async function searchChannelStats(searchTerm: string, days: number = 30) 
         return [];
     }
 }
-

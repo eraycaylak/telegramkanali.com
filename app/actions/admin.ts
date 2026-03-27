@@ -5,7 +5,8 @@ import { revalidatePath } from 'next/cache';
 import { UserPermissions } from '@/lib/types';
 import { supabase } from '@/lib/supabaseClient'; // Client for auth check (simulated)
 
-// Initialize Service Role Client for Admin actions (Bypasses RLS)
+// NOTE: getAdminClient() is called inline at each use site (not module-level)
+// to prevent Netlify build-time env var freeze. See lib/supabaseAdmin.ts.
 const adminClient = getAdminClient();
 
 // ========================
