@@ -26,19 +26,6 @@ async function getChannelForRedirect(id: string) {
     return data;
 }
 
-async function recordClick(channelId: string) {
-    // Fire and forget click tracking via the existing RPC
-    try {
-        const cookieStore = await cookies();
-        const supabase = createServerClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL!,
-            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-            { cookies: { get: (name) => cookieStore.get(name)?.value } }
-        );
-        await supabase.rpc('increment_channel_click', { p_channel_id: channelId });
-    } catch (_) { }
-}
-
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
     const { id } = await params;
     const channel = await getChannelForRedirect(id);
@@ -47,7 +34,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     return {
         title: `${channel.name} — Telegram Kanalına Katıl | telegramkanali.com`,
         description: `${channel.name} Telegram kanalına katılmak için yönlendiriliyorsunuz.`,
-        robots: { index: false, follow: false }, // Don't index redirect pages
+        robots: { index: false, follow: false },
     };
 }
 
@@ -59,13 +46,16 @@ export default async function GoPage({ params }: PageProps) {
         notFound();
     }
 
-    // Record the click server-side
-    await recordClick(id);
+    // NOT: Tıklama artık server-side sayılmıyor.
+    // Kullanıcı "HEMEN KATIL" butonuna basınca veya geri sayım bitince
+    // CountdownRedirect client component'i trackChannelClick() çağırır.
+    // Bu sayede sayfayı ziyaret edip kapatanlar tıklama olarak sayılmaz.
 
     const categoryData = (channel as any).categories;
 
     return (
         <CountdownRedirect
+            channelId={channel.id}
             channelName={channel.name}
             channelImage={channel.image}
             joinLink={channel.join_link}

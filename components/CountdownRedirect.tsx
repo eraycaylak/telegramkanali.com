@@ -3,8 +3,10 @@
 import { useEffect, useState } from 'react';
 import { MessageCircle, ExternalLink, Shield, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
+import { trackChannelClick } from '@/app/actions/analytics';
 
 interface CountdownRedirectProps {
+    channelId: string;
     channelName: string;
     channelImage: string | null;
     joinLink: string;
@@ -17,6 +19,7 @@ interface CountdownRedirectProps {
 const WAIT_SECONDS = 10;
 
 export default function CountdownRedirect({
+    channelId,
     channelName,
     channelImage,
     joinLink,
@@ -27,18 +30,35 @@ export default function CountdownRedirect({
 }: CountdownRedirectProps) {
     const [seconds, setSeconds] = useState(WAIT_SECONDS);
     const [redirected, setRedirected] = useState(false);
+    const [clicked, setClicked] = useState(false);
 
+    // Geri sayım — sona erince sadece yönlendir, tıklama SAYMA
+    // Tıklama sadece kullanıcı butona basınca sayılır
     useEffect(() => {
         if (seconds <= 0) {
             setRedirected(true);
+            // Geri sayım bitti, otomatik yönlendirmede de tıklama say
+            // (kullanıcı sayfada bekledi, niyeti vardı)
+            if (!clicked) {
+                trackChannelClick(channelId).catch(() => {});
+                setClicked(true);
+            }
             window.location.href = joinLink;
             return;
         }
         const timer = setTimeout(() => setSeconds(s => s - 1), 1000);
         return () => clearTimeout(timer);
-    }, [seconds, joinLink]);
+    }, [seconds, joinLink, channelId, clicked]);
 
     const progress = ((WAIT_SECONDS - seconds) / WAIT_SECONDS) * 100;
+
+    // Butona tıklanınca tıklama say ve yönlendir
+    const handleJoinClick = () => {
+        if (!clicked) {
+            trackChannelClick(channelId).catch(() => {});
+            setClicked(true);
+        }
+    };
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-950 to-gray-900 flex items-center justify-center p-4">
@@ -124,11 +144,12 @@ export default function CountdownRedirect({
                             {redirected ? 'Yönlendiriliyorsunuz...' : `${seconds} saniye içinde Telegram'a yönlendirileceksiniz`}
                         </p>
 
-                        {/* CTA Button */}
+                        {/* CTA Button — tıklama burada sayılır */}
                         <a
                             href={joinLink}
                             target="_blank"
                             rel="nofollow noreferrer"
+                            onClick={handleJoinClick}
                             className="flex items-center justify-center gap-3 w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white py-4 px-6 rounded-2xl font-black text-lg shadow-xl shadow-blue-500/30 hover:shadow-blue-500/50 transition-all hover:-translate-y-0.5 mb-4"
                         >
                             <MessageCircle size={22} />

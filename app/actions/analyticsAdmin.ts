@@ -59,7 +59,16 @@ export async function getAnalyticsSummary(days: number = 30) {
             }
         });
 
-        const pageViews = Object.values(pathAggregation).sort((a: any, b: any) => b.total_views - a.total_views);
+        // /go/ redirect sayfaları = kanal tıklamaları, gerçek sayfa görüntülemesi DEĞİL — filtreliyoruz
+        const pageViews = Object.values(pathAggregation)
+            .filter((p: any) => !p.path.startsWith('/go/'))
+            .sort((a: any, b: any) => b.total_views - a.total_views);
+
+        // Toplam özet (sadece gerçek sayfalar, /go/ hariç)
+        const totalViews = pageViews.reduce((sum: number, p: any) => sum + p.total_views, 0);
+        const totalVisitors = pageViews.reduce((sum: number, p: any) => sum + p.total_visitors, 0);
+        const dailyViews = pageViews.reduce((sum: number, p: any) => sum + p.daily_views, 0);
+        const dailyVisitors = pageViews.reduce((sum: number, p: any) => sum + p.daily_visitors, 0);
 
         // Calculate Category Views from Paths — using ACTUAL category slugs from DB
         const { data: actualCategories } = await supabase
@@ -135,7 +144,14 @@ export async function getAnalyticsSummary(days: number = 30) {
         return {
             pageViews: pageViews,
             channelClicks: channelClicks,
-            categoryViews: categoryViews
+            categoryViews: categoryViews,
+            // Doğru toplam rakamlar (/go/ redirect sayfaları hariç)
+            summary: {
+                totalViews,
+                totalVisitors,
+                dailyViews,
+                dailyVisitors,
+            }
         };
 
     } catch (error) {

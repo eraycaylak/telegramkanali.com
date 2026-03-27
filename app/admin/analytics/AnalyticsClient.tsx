@@ -12,6 +12,7 @@ export default function AnalyticsClient() {
     const [pageViews, setPageViews] = useState<any[]>([]);
     const [channelClicks, setChannelClicks] = useState<any[]>([]);
     const [categoryViews, setCategoryViews] = useState<any[]>([]);
+    const [summary, setSummary] = useState({ totalViews: 0, totalVisitors: 0, dailyViews: 0, dailyVisitors: 0 });
     const [loading, setLoading] = useState(true);
 
     // Filters
@@ -78,6 +79,8 @@ export default function AnalyticsClient() {
                 setPageViews(stats.pageViews || []);
                 setChannelClicks(stats.channelClicks || []);
                 setCategoryViews(stats.categoryViews || []);
+                // summary: /go/ redirect sayfaları hariç, gerçek rakamlar
+                if (stats.summary) setSummary(stats.summary);
             }
         } catch (err) {
             console.error("Error loading analytics data:", err);
@@ -86,11 +89,12 @@ export default function AnalyticsClient() {
         }
     }
 
-    const totalViews = pageViews.reduce((acc, curr) => acc + curr.total_views, 0);
-    const totalDailyViews = pageViews.reduce((acc, curr) => acc + (curr.daily_views || 0), 0);
-    const totalVisitors = pageViews.reduce((acc, curr) => acc + curr.total_visitors, 0);
-    const totalDailyVisitors = pageViews.reduce((acc, curr) => acc + (curr.daily_visitors || 0), 0);
-    const totalPeriodClicks = channelClicks.reduce((acc, curr) => acc + (curr.period_clicks || 0), 0);
+    // Rakamlar backend'den geliyor — /go/ redirect sayfaları zaten häriç
+    const totalViews = summary.totalViews;
+    const totalDailyViews = summary.dailyViews;
+    const totalVisitors = summary.totalVisitors;
+    const totalDailyVisitors = summary.dailyVisitors;
+    const totalPeriodClicks = channelClicks.reduce((acc: number, curr: any) => acc + (curr.period_clicks || 0), 0);
 
     // When user is searching → use server-side results; otherwise → client-side sorted list
     const filteredChannels = useMemo(() => {
