@@ -17,6 +17,10 @@ export default function DashboardClient() {
     const [selectedCategory, setSelectedCategory] = useState('all');
     const [viewStatus, setViewStatus] = useState<'approved' | 'pending' | 'rejected' | 'bot'>('approved');
     const [loading, setLoading] = useState(true);
+    const [totalChannelCount, setTotalChannelCount] = useState(0);
+    const [allLoaded, setAllLoaded] = useState(false);
+    const [loadingMore, setLoadingMore] = useState(false);
+    const [profilesLoaded, setProfilesLoaded] = useState(false);
 
     // Modal State
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -43,7 +47,6 @@ export default function DashboardClient() {
     const [followers, setFollowers] = useState<any[]>([]);
     const [loadingFollowers, setLoadingFollowers] = useState(false);
 
-    // Protect Route
     useEffect(() => {
         fetchData();
     }, [router]);
@@ -51,9 +54,41 @@ export default function DashboardClient() {
     async function fetchData() {
         setLoading(true);
         try {
-            // 1000 limit aşmak için range ile tüm kanalları çek
-            let allChannels: any[] = [];
-            let from = 0;
+            // Fetch channels (first 200) and categories in PARALLEL — not sequential
+            const [channelRes, catRes] = await Promise.all([
+                supabase
+                    .from('channels')
+                    .select('*, categories(name)', { count: 'exact' })
+                    .order('created_at', { ascending: false })
+                    .range(0, 199),
+                supabase.from('categories').select('*').order('name'),
+            ]);
+
+            const fetchedChannels = (channelRes.data || []).map((d: any) => ({ ...d, categoryName: d.categories?.name })) as Channel[];
+            setChannels(fetchedChannels);
+            setTotalChannelCount(channelRes.count || 0);
+            setAllLoaded((channelRes.count || 0) <= 200);
+
+            if (catRes.data) {
+                setCategories(catRes.data as Category[]);
+                const counts: Record<string, number> = {};
+                fetchedChannels.forEach((ch: any) => {
+                    if (ch.category_id) counts[ch.category_id] = (counts[ch.category_id] || 0) + 1;
+                });
+                setCategoryCounts(counts);
+            }
+        } catch (error) {
+            console.error('Admin dashboard data fetch error:', error);
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    async function loadMoreChannels() {
+        setLoadingMore(true);
+        try {
+            let allChannels: any[] = [...channels];
+            let from = channels.length;
             const batchSize = 1000;
             while (true) {
                 const { data: batch, error } = await supabase
@@ -62,46 +97,43 @@ export default function DashboardClient() {
                     .order('created_at', { ascending: false })
                     .range(from, from + batchSize - 1);
                 if (error || !batch || batch.length === 0) break;
-                allChannels = [...allChannels, ...batch];
+                allChannels = [...allChannels, ...batch.map((d: any) => ({ ...d, categoryName: d.categories?.name }))];
                 if (batch.length < batchSize) break;
                 from += batchSize;
             }
-            setChannels(allChannels.map((d: any) => ({ ...d, categoryName: d.categories?.name })) as Channel[]);
-
-            // Fetch Categories for dropdown
-            const { data: catData } = await supabase.from('categories').select('*').order('name');
-            if (catData) {
-                setCategories(catData as Category[]);
-                // Count channels per category
-                const counts: Record<string, number> = {};
-                allChannels.forEach((ch: any) => {
-                    if (ch.category_id) {
-                        counts[ch.category_id] = (counts[ch.category_id] || 0) + 1;
-                    }
-                });
-                setCategoryCounts(counts);
-            }
-
-            // Fetch Profiles (range ile)
-            let allProfiles: any[] = [];
-            let pFrom = 0;
-            while (true) {
-                const { data: pBatch, error: pErr } = await supabase
-                    .from('profiles')
-                    .select('id, email, full_name')
-                    .range(pFrom, pFrom + 999);
-                if (pErr || !pBatch || pBatch.length === 0) break;
-                allProfiles = [...allProfiles, ...pBatch];
-                if (pBatch.length < 1000) break;
-                pFrom += 1000;
-            }
-            setProfiles(allProfiles);
+            setChannels(allChannels as Channel[]);
+            setAllLoaded(true);
+            const counts: Record<string, number> = {};
+            allChannels.forEach((ch: any) => {
+                if (ch.category_id) counts[ch.category_id] = (counts[ch.category_id] || 0) + 1;
+            });
+            setCategoryCounts(counts);
         } catch (error) {
-            console.error('Admin dashboard data fetch error:', error);
+            console.error('loadMore error:', error);
         } finally {
-            setLoading(false);
+            setLoadingMore(false);
         }
     }
+
+    // Lazy load profiles only when modal is opened (saves ~2s on initial load)
+    async function ensureProfilesLoaded() {
+        if (profilesLoaded) return;
+        let allProfiles: any[] = [];
+        let pFrom = 0;
+        while (true) {
+            const { data: pBatch, error: pErr } = await supabase
+                .from('profiles')
+                .select('id, email, full_name')
+                .range(pFrom, pFrom + 999);
+            if (pErr || !pBatch || pBatch.length === 0) break;
+            allProfiles = [...allProfiles, ...pBatch];
+            if (pBatch.length < 1000) break;
+            pFrom += 1000;
+        }
+        setProfiles(allProfiles);
+        setProfilesLoaded(true);
+    }
+
 
     const handleDelete = async (id: string) => {
         if (confirm('Bu kanalı silmek istediğinize emin misiniz?')) {
@@ -243,7 +275,7 @@ export default function DashboardClient() {
                         </div>
                         <div>
                             <div className="text-sm text-gray-500 font-medium">Toplam Kanal</div>
-                            <div className="text-2xl font-bold text-gray-900">{channels.length}</div>
+                            <div className="text-2xl font-bold text-gray-900">{allLoaded ? channels.length : `${channels.length} / ${totalChannelCount}`}</div>
                         </div>
                     </div>
                     <button
@@ -390,7 +422,7 @@ export default function DashboardClient() {
                                 {syncing ? 'Yükleniyor...' : 'Sync'}
                             </button>
                             <button
-                                onClick={() => setIsModalOpen(true)}
+                                onClick={async () => { await ensureProfilesLoaded(); setIsModalOpen(true); }}
                                 className="flex-1 xl:flex-none flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-2.5 rounded-xl text-sm font-bold hover:bg-blue-700 transition shadow-lg shadow-blue-100"
                             >
                                 <Plus size={16} />
@@ -432,6 +464,20 @@ export default function DashboardClient() {
                         </div>
                     </div>
                 </div>
+
+                {/* Load all channels banner */}
+                {!allLoaded && (
+                    <div className="mb-4 flex items-center justify-between bg-yellow-50 border border-yellow-200 rounded-xl px-5 py-3">
+                        <span className="text-sm text-yellow-800 font-medium">İlk <strong>200</strong> kanal gösteriliyor. Toplam: <strong>{totalChannelCount}</strong></span>
+                        <button
+                            onClick={loadMoreChannels}
+                            disabled={loadingMore}
+                            className="flex items-center gap-2 bg-yellow-500 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-yellow-600 transition disabled:opacity-50"
+                        >
+                            {loadingMore ? 'Yükleniyor...' : 'Tüm Kanalları Yükle'}
+                        </button>
+                    </div>
+                )}
 
                 {/* Channels List (Table on Desktop, Cards on Mobile) */}
                 <div className="bg-white md:rounded-xl shadow-sm border-y md:border border-gray-200 overflow-hidden">

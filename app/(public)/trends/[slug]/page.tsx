@@ -3,10 +3,13 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { Flame, Clock, Tag, ArrowLeft } from 'lucide-react';
 import { Metadata, ResolvingMetadata } from 'next';
+import JsonLd, { generateBreadcrumbSchema } from '@/components/JsonLd';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 export const fetchCache = 'force-no-store';
+
+const baseUrl = 'https://telegramkanali.com';
 
 export async function generateMetadata(
     { params }: { params: Promise<{ slug: string }> },
@@ -22,13 +25,26 @@ export async function generateMetadata(
     return {
         title: `${trend.title} | Günün Trendi`,
         description: strippedContent,
+        alternates: {
+            canonical: `${baseUrl}/trends/${safeSlug}`,
+        },
         openGraph: {
             title: trend.title,
             description: strippedContent,
+            url: `${baseUrl}/trends/${safeSlug}`,
+            type: 'article',
+            publishedTime: trend.created_at,
+            images: trend.image ? [{ url: trend.image, width: 1200, height: 630, alt: trend.title }] : [],
+        },
+        twitter: {
+            card: 'summary_large_image',
+            title: trend.title,
+            description: strippedContent,
             images: trend.image ? [trend.image] : [],
-        }
+        },
     };
 }
+
 
 export default async function TrendDetailPage({ params }: { params: Promise<{ slug: string }> }) {
     const resolvedParams = await params;

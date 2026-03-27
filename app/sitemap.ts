@@ -37,10 +37,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.85,
     }));
 
-    // 2. Dynamic Data from database
-    const { data: channels } = await getChannels(1, 2000);
-    const categories = await getCategories();
-    const seoPages = await getSeoPages();
+    // 3. Dynamic Data from database — fetch in parallel for speed
+    const [{ data: channels }, categories, seoPages, blogSlugs] = await Promise.all([
+        getChannels(1, 2000),
+        getCategories(),
+        getSeoPages(),
+        getAllBlogSlugs(),
+    ]);
 
     // Filter out invalid slugs
     const isValidSlug = (slug: string) => {
@@ -59,20 +62,28 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         return true;
     });
 
-    // Turkish channel URLs
+    // Dynamic priority based on member count — bigger channels get higher crawl priority
+    const getChannelPriority = (memberCount: number = 0): number => {
+        if (memberCount >= 100000) return 0.9;
+        if (memberCount >= 10000) return 0.8;
+        if (memberCount >= 1000) return 0.7;
+        return 0.5;
+    };
+
+    // Turkish channel URLs — use real updated_at date
     const channelsUrls = validChannels.map((channel) => ({
         url: `${baseUrl}/${channel.slug}`,
-        lastModified: new Date(channel.created_at ?? Date.now()),
+        lastModified: new Date((channel as any).updated_at ?? channel.created_at ?? Date.now()),
         changeFrequency: 'weekly' as const,
-        priority: 0.6,
+        priority: getChannelPriority(channel.member_count),
     }));
 
     // English channel URLs
     const channelsUrlsEn = validChannels.map((channel) => ({
         url: `${baseUrl}/en/${channel.slug}`,
-        lastModified: new Date(channel.created_at ?? Date.now()),
+        lastModified: new Date((channel as any).updated_at ?? channel.created_at ?? Date.now()),
         changeFrequency: 'weekly' as const,
-        priority: 0.5,
+        priority: Math.max(0.4, getChannelPriority(channel.member_count) - 0.1),
     }));
 
     const validCategories = categories.filter(cat => isValidSlug(cat.slug));
@@ -80,7 +91,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Turkish category URLs
     const categoriesUrls = validCategories.map((category) => ({
         url: `${baseUrl}/${category.slug}`,
-        lastModified: new Date(),
+        lastModified: new Date((category as any).updated_at ?? new Date()),
         changeFrequency: 'daily' as const,
         priority: 0.9,
     }));
@@ -88,7 +99,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // English category URLs
     const categoriesUrlsEn = validCategories.map((category) => ({
         url: `${baseUrl}/en/${category.slug}`,
-        lastModified: new Date(),
+        lastModified: new Date((category as any).updated_at ?? new Date()),
         changeFrequency: 'daily' as const,
         priority: 0.8,
     }));
@@ -100,13 +111,40 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.8,
     }));
 
-    const blogSlugs = await getAllBlogSlugs();
     const blogUrls = blogSlugs.map((slug) => ({
         url: `${baseUrl}/blog/${slug}`,
         lastModified: new Date(),
         changeFrequency: 'weekly' as const,
         priority: 0.7,
     }));
+
+    // 4. Trends pages — important for SEO, add them too
+    let trendsUrls: MetadataRoute.Sitemap = [];
+    try {
+        const { createClient } = await import('@supabase/supabase-js');
+        const supabase = createClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+        );
+        const { data: trends } = await supabase
+            .from('trends')
+            .select('slug, created_at, updated_at')
+            .eq('is_active', true)
+            .not('slug', 'is', null);
+
+        if (trends) {
+            trendsUrls = trends
+                .filter(t => t.slug && isValidSlug(t.slug))
+                .map(t => ({
+                    url: `${baseUrl}/trends/${t.slug}`,
+                    lastModified: new Date(t.updated_at ?? t.created_at ?? Date.now()),
+                    changeFrequency: 'daily' as const,
+                    priority: 0.75,
+                }));
+        }
+    } catch {
+        // Trends not critical for sitemap — skip silently if error
+    }
 
     return [
         ...staticPages,
@@ -115,6 +153,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         ...categoriesUrlsEn,
         ...seoPageUrls,
         ...blogUrls,
+        ...trendsUrls,
         ...channelsUrls,
         ...channelsUrlsEn,
     ];
