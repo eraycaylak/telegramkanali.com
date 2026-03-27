@@ -1,11 +1,9 @@
 'use server';
 
-import { getAdminClient } from '@/lib/supabaseAdmin';
+import { adminClient } from '@/lib/supabaseAdmin';
 import { revalidatePath } from 'next/cache';
 import { slugify } from '@/lib/utils';
 import { supabase } from '@/lib/supabaseClient';
-
-const adminClient = getAdminClient();
 
 // ========================
 // TREND CATEGORY ACTIONS
