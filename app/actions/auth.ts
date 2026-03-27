@@ -95,12 +95,18 @@ export async function adminSignIn(formData: FormData) {
 
     if (authError) return { error: authError.message };
 
-    const adminClient = getAdminClient();
-    const { data: profile, error: dbError } = await adminClient
-        .from('profiles')
-        .select('role')
-        .eq('id', authData.user.id)
-        .single();
+    // Eğer Vercel tarafında SUPABASE_SERVICE_ROLE_KEY ayarlanmamışsa, anonim client üzerinden kendi profiline bakılır
+    let profile, dbError;
+    if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
+        const adminClient = getAdminClient();
+        const res = await adminClient.from('profiles').select('role').eq('id', authData.user.id).single();
+        profile = res.data;
+        dbError = res.error;
+    } else {
+        const res = await supabase.from('profiles').select('role').eq('id', authData.user.id).single();
+        profile = res.data;
+        dbError = res.error;
+    }
 
     if (profile?.role !== 'admin' && profile?.role !== 'editor') {
         const errorDetail = dbError ? dbError.message : (profile ? `Rolünüz: ${profile.role}` : 'Profil bulunamadı veya Env keys eksik');
