@@ -1,9 +1,12 @@
 'use server';
 
-import { adminClient } from '@/lib/supabaseAdmin';
+import { getAdminClient } from '@/lib/supabaseAdmin';
 import { revalidatePath } from 'next/cache';
 import { UserPermissions } from '@/lib/types';
 import { supabase } from '@/lib/supabaseClient'; // Client for auth check (simulated)
+
+// Initialize Service Role Client for Admin actions (Bypasses RLS)
+const adminClient = getAdminClient();
 
 // ========================
 // PERMISSION CHECK

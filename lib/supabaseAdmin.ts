@@ -1,31 +1,28 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
+// Singleton pattern for admin/service role client
+let adminInstance: SupabaseClient | null = null;
+
 export const getAdminClient = (): SupabaseClient => {
+    if (adminInstance) return adminInstance;
+
+    // Read env vars INSIDE the function so they are evaluated at request time, not frozen at build time
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
     if (!supabaseUrl || !supabaseServiceKey) {
-        console.warn('CRITICAL: Supabase Admin Keys missing! Falling back to Anon Client for development.');
-        // Return client with ANON key to allow standard RLS reads. Do not cache this.
-        return createClient(supabaseUrl || 'https://placeholder.supabase.co', supabaseAnonKey || 'placeholder', {
+        console.error('CRITICAL: Supabase Admin Keys missing! URL:', supabaseUrl ? 'OK' : 'MISSING', 'Key:', supabaseServiceKey ? 'OK' : 'MISSING');
+        // Return dummy client to prevent crash
+        return createClient('https://placeholder.supabase.co', 'placeholder', {
             auth: { persistSession: false }
         });
     }
 
-    return createClient(supabaseUrl, supabaseServiceKey, {
+    adminInstance = createClient(supabaseUrl, supabaseServiceKey, {
         auth: {
             persistSession: false,
             autoRefreshToken: false,
         }
     });
+    return adminInstance;
 };
-
-// Export a dynamic proxy so top-level imports evaluate at runtime, solving the Netlify build cache bug
-export const adminClient = new Proxy({} as SupabaseClient, {
-    get: (target, prop) => {
-        const client = getAdminClient();
-        const value = (client as any)[prop];
-        return typeof value === 'function' ? value.bind(client) : value;
-    }
-});
