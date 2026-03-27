@@ -1,6 +1,22 @@
 'use server';
 
-import { supabase } from '@/lib/supabaseClient';
+import { createClient } from '@supabase/supabase-js';
+
+const getTrackingClient = () => {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    return createClient(supabaseUrl || 'https://placeholder.supabase.co', supabaseKey || 'placeholder', {
+        auth: { persistSession: false }
+    });
+};
+
+const getAdminClient = () => {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    return createClient(supabaseUrl || 'https://placeholder.supabase.co', supabaseKey || 'placeholder', {
+        auth: { persistSession: false }
+    });
+};
 
 export async function trackVisitorProfile(
     visitorId: string,
@@ -18,6 +34,7 @@ export async function trackVisitorProfile(
     fingerprint: string | null = null
 ) {
     try {
+        const supabase = getTrackingClient();
         const { error } = await supabase.rpc('upsert_visitor_profile', {
             p_visitor_id: visitorId,
             p_page: page,
@@ -49,6 +66,7 @@ export async function trackVisitorProfile(
 // Admin: Get visitor profile stats
 export async function getVisitorStats() {
     try {
+        const supabase = getAdminClient();
         const { data: totalVisitors } = await supabase
             .from('visitor_profiles')
             .select('id', { count: 'exact', head: true });

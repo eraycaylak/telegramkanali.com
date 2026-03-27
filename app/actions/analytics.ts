@@ -1,18 +1,25 @@
 'use server';
 
-import { supabase } from '@/lib/supabaseClient';
+import { createClient } from '@supabase/supabase-js';
 
-// Public Supabase client for analytics (RLS policies allow anonymous inserts)
+// Create a fast, stateless client for anonymous tracking
+const getTrackingClient = () => {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    return createClient(supabaseUrl || 'https://placeholder.supabase.co', supabaseKey || 'placeholder', {
+        auth: { persistSession: false }
+    });
+};
 
 export async function trackPageView(path: string, isNewVisitor: boolean = false) {
     try {
+        const supabase = getTrackingClient();
         const { error } = await supabase.rpc('increment_page_view', {
             p_path: path,
             p_is_new_visitor: isNewVisitor
         });
 
         if (error) {
-            // Silently fail if function doesn't exist yet (migration not run)
             console.warn('Analytics Error (PageView):', error.message);
             return { error: error.message };
         }
@@ -25,11 +32,11 @@ export async function trackPageView(path: string, isNewVisitor: boolean = false)
 
 export async function trackChannelClick(channelId: string) {
     try {
+        const supabase = getTrackingClient();
         const { error } = await supabase.rpc('increment_channel_click', { p_channel_id: channelId });
 
         if (error) {
             console.warn('Analytics Error (ChannelClick):', error.message);
-            // Fallback: update local count if RPC fails? No, just fail silently.
             return { error: error.message };
         }
         return { success: true };
@@ -40,6 +47,5 @@ export async function trackChannelClick(channelId: string) {
 }
 
 export async function getSiteAnalytics(days = 30) {
-    // Admin only function - implemented later or used directly in admin page
     return [];
 }
