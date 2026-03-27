@@ -1,14 +1,41 @@
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import JsonLd from '@/components/JsonLd';
+import type { Metadata } from 'next';
 
-export const metadata = {
-    title: 'Kullanım Şartları - Telegram Kanalları',
-    description: 'TelegramKanali.com sitesini kullanırken uymanız gereken kurallar ve şartlar.',
+const baseUrl = 'https://telegramkanali.com';
+
+export const metadata: Metadata = {
+    title: 'Kullanım Şartları | Telegram Kanalları',
+    description: 'TelegramKanali.com sitesini kullanırken uymanız gereken kurallar, şartlar ve sorumluluk reddi beyanı.',
+    alternates: { canonical: `${baseUrl}/kullanim-sartlari` },
+    openGraph: {
+        title: 'Kullanım Şartları | Telegram Kanalları',
+        url: `${baseUrl}/kullanim-sartlari`,
+        type: 'website',
+    },
 };
 
 export default function TermsPage() {
+    const schema = {
+        '@context': 'https://schema.org',
+        '@type': 'WebPage',
+        'name': 'Kullanım Şartları | Telegram Kanalları',
+        'url': `${baseUrl}/kullanim-sartlari`,
+        'inLanguage': 'tr-TR',
+        'dateModified': '2026-03-20',
+        'breadcrumb': {
+            '@type': 'BreadcrumbList',
+            'itemListElement': [
+                { '@type': 'ListItem', 'position': 1, 'name': 'Anasayfa', 'item': baseUrl },
+                { '@type': 'ListItem', 'position': 2, 'name': 'Kullanım Şartları', 'item': `${baseUrl}/kullanim-sartlari` },
+            ],
+        },
+    };
+
     return (
         <>
+            <JsonLd data={schema} />
             <Header />
             <main className="container mx-auto px-4 py-12 max-w-4xl">
                 <h1 className="text-4xl font-bold mb-8">Kullanım Şartları</h1>

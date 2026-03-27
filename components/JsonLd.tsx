@@ -39,15 +39,22 @@ export function generateOrganizationSchema(baseUrl: string) {
         "@context": "https://schema.org",
         "@type": "Organization",
         "name": "Telegram Kanalları",
+        "alternateName": "TelegramKanali.com",
         "url": baseUrl,
-        "logo": `${baseUrl}/logo.png`,
+        "logo": {
+            "@type": "ImageObject",
+            "url": `${baseUrl}/images/logo.png`,
+            "width": 200,
+            "height": 200
+        },
         "sameAs": [
             "https://t.me/telegramkanali"
         ],
         "contactPoint": {
             "@type": "ContactPoint",
             "contactType": "customer service",
-            "availableLanguage": "Turkish"
+            "availableLanguage": ["Turkish", "English"],
+            "areaServed": "TR"
         }
     };
 }
@@ -73,27 +80,46 @@ export function generateChannelSchema(channel: {
     member_count?: number;
     categoryName?: string;
     created_at?: string;
+    telegram_url?: string;
 }, baseUrl: string) {
     const channelUrl = `${baseUrl}/${channel.slug}`;
     return {
         "@context": "https://schema.org",
-        "@type": "SocialMediaPosting",
-        "name": channel.name,
-        "description": channel.description || `${channel.name} Telegram kanalı`,
-        "url": channelUrl,
-        "image": channel.image || `${baseUrl}/logo.png`,
-        "datePublished": channel.created_at || new Date().toISOString(),
-        "author": {
-            "@type": "Organization",
-            "name": channel.name,
-            "url": channelUrl
-        },
-        "interactionStatistic": {
-            "@type": "InteractionCounter",
-            "interactionType": "https://schema.org/FollowAction",
-            "userInteractionCount": channel.member_count || 0
-        },
-        "keywords": [channel.categoryName, "telegram", "kanal", channel.name].filter(Boolean).join(", ")
+        "@graph": [
+            {
+                "@type": "WebPage",
+                "@id": channelUrl,
+                "url": channelUrl,
+                "name": `${channel.name} Telegram Kanalı`,
+                "description": channel.description || `${channel.name} Telegram kanalına katılın. Üye sayısı: ${channel.member_count?.toLocaleString('tr-TR') || '0'}`,
+                "inLanguage": "tr-TR",
+                "image": channel.image || `${baseUrl}/images/logo.png`,
+                "datePublished": channel.created_at || new Date().toISOString(),
+                "breadcrumb": {
+                    "@type": "BreadcrumbList",
+                    "itemListElement": [
+                        { "@type": "ListItem", "position": 1, "name": "Anasayfa", "item": baseUrl },
+                        ...(channel.categoryName ? [{ "@type": "ListItem", "position": 2, "name": channel.categoryName, "item": `${baseUrl}/${channel.categoryName?.toLowerCase().replace(/ /g, '-')}` }] : []),
+                        { "@type": "ListItem", "position": channel.categoryName ? 3 : 2, "name": channel.name, "item": channelUrl },
+                    ]
+                },
+                "isPartOf": { "@id": baseUrl }
+            },
+            {
+                "@type": "Organization",
+                "@id": `${channelUrl}#organization`,
+                "name": channel.name,
+                "description": channel.description || `${channel.name} resmi Telegram kanalı`,
+                "url": channel.telegram_url || `https://t.me/${channel.slug}`,
+                "logo": channel.image || `${baseUrl}/images/logo.png`,
+                "sameAs": [channel.telegram_url || `https://t.me/${channel.slug}`],
+                "interactionStatistic": {
+                    "@type": "InteractionCounter",
+                    "interactionType": "https://schema.org/FollowAction",
+                    "userInteractionCount": channel.member_count || 0
+                }
+            }
+        ]
     };
 }
 
@@ -128,5 +154,46 @@ export function generateFAQSchema(faqs: Array<{ question: string, answer: string
                 "text": faq.answer
             }
         }))
+    };
+}
+
+export function generateCollectionPageSchema(
+    name: string,
+    description: string,
+    url: string,
+    itemCount: number,
+    baseUrl: string
+) {
+    return {
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        "name": name,
+        "description": description,
+        "url": url,
+        "inLanguage": "tr-TR",
+        "numberOfItems": itemCount,
+        "isPartOf": {
+            "@type": "WebSite",
+            "name": "Telegram Kanallar\u0131",
+            "url": baseUrl
+        }
+    };
+}
+
+export function generateSiteLinksSearchBoxSchema(baseUrl: string) {
+    return {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "url": baseUrl,
+        "potentialAction": [
+            {
+                "@type": "SearchAction",
+                "target": {
+                    "@type": "EntryPoint",
+                    "urlTemplate": `${baseUrl}/ara?q={search_term_string}`
+                },
+                "query-input": "required name=search_term_string"
+            }
+        ]
     };
 }

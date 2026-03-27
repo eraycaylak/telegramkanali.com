@@ -12,8 +12,8 @@ import { Channel, Category } from '@/lib/types';
 import { Suspense } from 'react';
 import { Metadata } from 'next';
 
-// Always dynamic so search params work correctly
-export const dynamic = 'force-dynamic';
+// Revalidate every 60 seconds for performance + freshness balance
+export const revalidate = 60;
 
 
 const faqs = [

@@ -27,10 +27,11 @@ export const metadata: Metadata = {
     template: "%s | Telegram Kanalları"
   },
   description: "En iyi Telegram kanalları, grupları ve botlarını keşfedin. Haber, Kripto, Eğitim ve İndirim kanalları listesi.",
-  keywords: ["telegram kanalları", "telegram grupları", "telegram türkiye", "telegram haber", "telegram kripto", "telegram indirim"],
-  authors: [{ name: "Telegram Kanalları" }],
+  keywords: ["telegram kanalları", "telegram grupları", "telegram türkiye", "telegram haber", "telegram kripto", "telegram indirim", "en iyi telegram kanalları", "telegram kanal listesi", "telegram 2026"],
+  authors: [{ name: "Telegram Kanalları", url: baseUrl }],
   creator: "Telegram Kanalları",
   publisher: "Telegram Kanalları",
+  category: "directory",
   robots: {
     index: true,
     follow: true,
@@ -47,10 +48,13 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: '/favicon.ico',
+    apple: '/images/logo.png',
+    shortcut: '/favicon.ico',
   },
   openGraph: {
     type: "website",
     locale: "tr_TR",
+    alternateLocale: "en_US",
     url: baseUrl,
     siteName: "Telegram Kanalları",
     title: "Telegram Kanalları | Türkiye'nin En Güncel Kanal Dizini",
@@ -60,7 +64,8 @@ export const metadata: Metadata = {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Telegram Kanalları",
+        alt: "Telegram Kanalları - Türkiye'nin En Büyük Kanal Dizini",
+        type: "image/png",
       },
     ],
   },
@@ -70,9 +75,15 @@ export const metadata: Metadata = {
     description: "En iyi Telegram kanalları, grupları ve botlarını keşfedin.",
     images: ["/og-image.png"],
     creator: "@telegramkanali",
+    site: "@telegramkanali",
   },
   alternates: {
     canonical: baseUrl,
+    languages: {
+      'tr': baseUrl,
+      'en': `${baseUrl}/en`,
+      'x-default': baseUrl,
+    },
   },
 };
 
@@ -84,14 +95,26 @@ export default function RootLayout({
   return (
     <html lang="tr">
       <head>
+        {/* Preconnect - Kritik 3. taraf kaynaklar için bağlantı ön açma */}
+        <link rel="preconnect" href="https://www.googletagmanager.com" />
+        <link rel="preconnect" href="https://www.google-analytics.com" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://t.me" />
+        <link rel="dns-prefetch" href="https://cdn4.telesco.pe" />
+        <link rel="dns-prefetch" href="https://supabase.co" />
         {/* PWA & Mobile App Meta */}
         <link rel="manifest" href="/manifest.json" />
-        <meta name="theme-color" content="#333333" />
+        <meta name="theme-color" content="#3b82f6" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="TelegramKanali" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+        {/* Apple Touch Icons */}
+        <link rel="apple-touch-icon" href="/images/logo.png" />
+        <link rel="apple-touch-icon" sizes="152x152" href="/images/logo.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/images/logo.png" />
         {/* Global Structured Data */}
         <JsonLd data={generateWebsiteSchema(baseUrl)} />
         <JsonLd data={generateOrganizationSchema(baseUrl)} />

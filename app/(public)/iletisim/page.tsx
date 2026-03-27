@@ -1,15 +1,56 @@
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import { Mail, Send, MessageCircle } from 'lucide-react';
+import JsonLd from '@/components/JsonLd';
+import { Mail, Send } from 'lucide-react';
+import type { Metadata } from 'next';
 
-export const metadata = {
-    title: 'İletişim - Telegram Kanalları',
-    description: 'Bizimle iletişime geçin. Soru, öneri ve reklam talepleriniz için buradayız.',
+const baseUrl = 'https://telegramkanali.com';
+
+export const metadata: Metadata = {
+    title: 'İletişim | Telegram Kanalları',
+    description: 'Bizimle iletişime geçin. Soru, öneri ve reklam talepleriniz için buradayız. Telegram üzerinden veya e-posta ile ulaşabilirsiniz.',
+    alternates: {
+        canonical: `${baseUrl}/iletisim`,
+    },
+    openGraph: {
+        title: 'İletişim | Telegram Kanalları',
+        description: 'Soru, öneri ve reklam talepleriniz için bizimle iletişime geçin.',
+        url: `${baseUrl}/iletisim`,
+        type: 'website',
+    },
 };
 
 export default function ContactPage() {
+    const contactSchema = {
+        '@context': 'https://schema.org',
+        '@type': 'ContactPage',
+        'name': 'İletişim | Telegram Kanalları',
+        'description': 'Soru, öneri ve reklam talepleriniz için bizimle iletişime geçin.',
+        'url': `${baseUrl}/iletisim`,
+        'inLanguage': 'tr-TR',
+        'publisher': {
+            '@type': 'Organization',
+            'name': 'Telegram Kanalları',
+            'url': baseUrl,
+            'email': 'telegramkanaliiletisim@outlook.com',
+            'sameAs': ['https://t.me/sibelliee'],
+            'logo': {
+                '@type': 'ImageObject',
+                'url': `${baseUrl}/images/logo.png`,
+            },
+        },
+        'breadcrumb': {
+            '@type': 'BreadcrumbList',
+            'itemListElement': [
+                { '@type': 'ListItem', 'position': 1, 'name': 'Anasayfa', 'item': baseUrl },
+                { '@type': 'ListItem', 'position': 2, 'name': 'İletişim', 'item': `${baseUrl}/iletisim` },
+            ],
+        },
+    };
+
     return (
         <>
+            <JsonLd data={contactSchema} />
             <Header />
             <main className="container mx-auto px-4 py-12 max-w-4xl">
                 <h1 className="text-4xl font-bold mb-8">İletişim</h1>

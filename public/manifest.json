@@ -1,17 +1,48 @@
 {
     "name": "Telegram Kanalları",
     "short_name": "TelegramKanali",
-    "description": "Türkiye'nin en güncel Telegram kanal dizini",
+    "description": "Türkiye'nin en güncel Telegram kanal dizini. En iyi kanalları, grupları ve botları keşfedin.",
     "start_url": "/",
+    "scope": "/",
     "display": "standalone",
     "background_color": "#ffffff",
-    "theme_color": "#333333",
-    "orientation": "portrait",
+    "theme_color": "#3b82f6",
+    "orientation": "portrait-primary",
+    "lang": "tr",
+    "categories": ["social", "news"],
     "icons": [
         {
+            "src": "/images/logo.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "maskable any"
+        },
+        {
+            "src": "/images/logo.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
             "src": "/favicon.ico",
-            "sizes": "max",
+            "sizes": "48x48",
             "type": "image/x-icon"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "Kanal Ekle",
+            "short_name": "Ekle",
+            "description": "Telegram kanalınızı ücretsiz ekleyin",
+            "url": "/kanal-ekle",
+            "icons": [{ "src": "/images/logo.png", "sizes": "96x96" }]
+        },
+        {
+            "name": "Blog",
+            "short_name": "Blog",
+            "description": "Telegram rehberleri ve ipucları",
+            "url": "/blog",
+            "icons": [{ "src": "/images/logo.png", "sizes": "96x96" }]
         }
     ]
 }

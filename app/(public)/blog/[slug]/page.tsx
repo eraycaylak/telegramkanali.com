@@ -2,9 +2,12 @@ import { getBlogPostBySlug, getRecentBlogPosts } from '@/lib/data';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import TwitterEmbed from '@/components/TwitterEmbed';
+import JsonLd from '@/components/JsonLd';
 import { Clock, Eye, Calendar, ArrowLeft, Tag, User, Share2, MessageCircle, Repeat2, Heart, BarChart2, BadgeCheck } from 'lucide-react';
 import type { Metadata } from 'next';
 import { convertTwitterLinksToEmbeds } from '@/lib/utils';
+
+const baseUrl = 'https://telegramkanali.com';
 
 interface BlogPostPageProps {
     params: Promise<{ slug: string }>;
@@ -19,15 +22,26 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
     return {
         title: post.meta_title || `${post.title} | Blog`,
         description: post.meta_description || post.excerpt || post.title,
+        alternates: {
+            canonical: `${baseUrl}/blog/${slug}`,
+        },
         openGraph: {
             title: post.meta_title || post.title,
             description: post.meta_description || post.excerpt || '',
-            images: post.cover_image ? [{ url: post.cover_image }] : [],
+            images: post.cover_image ? [{ url: post.cover_image, width: 1200, height: 630, alt: post.title }] : [],
             type: 'article',
             publishedTime: post.created_at,
-            modifiedTime: post.updated_at,
+            modifiedTime: post.updated_at || post.created_at,
             authors: [post.author],
             tags: post.tags,
+            siteName: 'Telegram Kanalları',
+            locale: 'tr_TR',
+        },
+        twitter: {
+            card: 'summary_large_image',
+            title: post.meta_title || post.title,
+            description: post.meta_description || post.excerpt || '',
+            images: post.cover_image ? [post.cover_image] : [],
         },
     };
 }
@@ -149,8 +163,40 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         );
     }
 
+    // BlogPosting JSON-LD Schema
+    const blogPostingSchema = {
+        '@context': 'https://schema.org',
+        '@type': 'BlogPosting',
+        'headline': post.title,
+        'description': post.meta_description || post.excerpt || '',
+        'image': post.cover_image || `${baseUrl}/images/logo.png`,
+        'datePublished': post.created_at,
+        'dateModified': post.updated_at || post.created_at,
+        'author': {
+            '@type': 'Person',
+            'name': post.author || 'Telegram Kanalları Editörü',
+        },
+        'publisher': {
+            '@type': 'Organization',
+            'name': 'Telegram Kanalları',
+            'logo': {
+                '@type': 'ImageObject',
+                'url': `${baseUrl}/images/logo.png`,
+            },
+        },
+        'mainEntityOfPage': {
+            '@type': 'WebPage',
+            '@id': `${baseUrl}/blog/${post.slug}`,
+        },
+        'url': `${baseUrl}/blog/${post.slug}`,
+        'keywords': post.tags?.join(', ') || 'telegram, kanal',
+        'wordCount': post.content?.split(' ').length || 0,
+        'inLanguage': 'tr-TR',
+    };
+
     return (
         <div className="max-w-4xl mx-auto">
+            <JsonLd data={blogPostingSchema} />
             {/* Back Link */}
             <div className="mb-6">
                 <Link href="/blog" className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-blue-600 transition font-medium">

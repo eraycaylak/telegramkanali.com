@@ -1,14 +1,41 @@
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import JsonLd from '@/components/JsonLd';
+import type { Metadata } from 'next';
 
-export const metadata = {
-    title: 'Gizlilik Politikası ve KVKK - Telegram Kanalları',
-    description: 'TelegramKanali.com gizlilik politikası, KVKK aydınlatma metni ve veri kullanımı hakkında bilgiler.',
+const baseUrl = 'https://telegramkanali.com';
+
+export const metadata: Metadata = {
+    title: 'Gizlilik Politikası ve KVKK | Telegram Kanalları',
+    description: 'TelegramKanali.com gizlilik politikası, KVKK aydınlatma metni ve kişisel veri kullanımı hakkında tüm bilgiler.',
+    alternates: { canonical: `${baseUrl}/gizlilik` },
+    openGraph: {
+        title: 'Gizlilik Politikası | Telegram Kanalları',
+        url: `${baseUrl}/gizlilik`,
+        type: 'website',
+    },
 };
 
 export default function PrivacyPage() {
+    const schema = {
+        '@context': 'https://schema.org',
+        '@type': 'WebPage',
+        'name': 'Gizlilik Politikası | Telegram Kanalları',
+        'url': `${baseUrl}/gizlilik`,
+        'inLanguage': 'tr-TR',
+        'dateModified': '2026-03-20',
+        'breadcrumb': {
+            '@type': 'BreadcrumbList',
+            'itemListElement': [
+                { '@type': 'ListItem', 'position': 1, 'name': 'Anasayfa', 'item': baseUrl },
+                { '@type': 'ListItem', 'position': 2, 'name': 'Gizlilik Politikası', 'item': `${baseUrl}/gizlilik` },
+            ],
+        },
+    };
+
     return (
         <>
+            <JsonLd data={schema} />
             <Header />
             <main className="container mx-auto px-4 py-12 max-w-4xl">
                 <h1 className="text-4xl font-bold mb-8">Gizlilik Politikası (KVKK)</h1>
