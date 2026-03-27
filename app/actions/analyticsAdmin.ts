@@ -2,9 +2,8 @@
 
 import { getAdminClient } from '@/lib/supabaseAdmin';
 
-const supabase = getAdminClient();
-
 export async function getAnalyticsSummary(days: number = 30) {
+    const supabase = getAdminClient();
     try {
         const timeAgo = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
         const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
@@ -154,6 +153,7 @@ export async function getAnalyticsSummary(days: number = 30) {
 // Search ALL channels by name (for admin analytics search box)
 // This bypasses the top-500 limit so channels with 0 clicks can also be found
 export async function searchChannelStats(searchTerm: string, days: number = 30) {
+    const supabase = getAdminClient();
     try {
         if (!searchTerm.trim()) return [];
 
