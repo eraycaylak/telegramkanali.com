@@ -61,16 +61,6 @@ const nextConfig: NextConfig = {
       },
     ];
   },
-  async redirects() {
-    return [
-      // Trailing slash redirect
-      {
-        source: '/:path+/',
-        destination: '/:path+',
-        permanent: true,
-      },
-    ];
-  },
 };
 
 export default nextConfig;
