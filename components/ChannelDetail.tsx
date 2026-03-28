@@ -180,7 +180,7 @@ export default function ChannelDetail({ channel }: ChannelDetailProps) {
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                         <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100 text-center">
                             <div className="text-blue-600 mb-1 flex justify-center"><Users size={24} /></div>
-                            <div className="font-bold text-gray-900 text-lg">{channel.member_count?.toLocaleString() || '-'}</div>
+                            <div className="font-bold text-gray-900 text-lg">{channel.member_count?.toLocaleString('tr-TR') || '-'}</div>
                             <div className="text-xs text-gray-500 uppercase font-bold tracking-wider">Abone</div>
                         </div>
                         <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100 text-center">

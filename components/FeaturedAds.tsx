@@ -70,7 +70,7 @@ export default function FeaturedAds({ adType, maxAds = 6, categoryId }: Featured
                                         {ad.channels?.name}
                                     </div>
                                     <div className="text-[11px] text-gray-500 truncate mt-0.5">
-                                        {ad.channels?.member_count?.toLocaleString() || '0'} üye
+                                        {ad.channels?.member_count?.toLocaleString('tr-TR') || '0'} üye
                                     </div>
                                 </div>
                                 <div className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -112,7 +112,7 @@ export default function FeaturedAds({ adType, maxAds = 6, categoryId }: Featured
                                         <span className="text-[10px] font-bold bg-white/20 px-2 py-0.5 rounded-full mb-1 inline-block">Sponsorlu</span>
                                         <div className="font-bold text-lg">{ad.channels?.name}</div>
                                         <p className="text-white/80 text-sm">
-                                            {ad.channels?.member_count?.toLocaleString() || '0'} üye · {ad.channels?.description?.substring(0, 60)}
+                                            {ad.channels?.member_count?.toLocaleString('tr-TR') || '0'} üye · {ad.channels?.description?.substring(0, 60)}
                                         </p>
                                     </div>
                                 </div>

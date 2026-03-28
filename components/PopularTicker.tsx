@@ -40,7 +40,7 @@ export default function PopularTicker({ channels }: PopularTickerProps) {
                         )}
                         <span className="text-sm font-bold text-gray-800 group-hover:text-blue-600">{channel.name}</span>
                         <span className="text-[10px] text-gray-400 font-medium">
-                            {channel.member_count?.toLocaleString()}
+                            {channel.member_count?.toLocaleString('tr-TR')}
                         </span>
                         <span className="mx-2 text-gray-200">|</span>
                     </Link>
