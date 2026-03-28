@@ -36,6 +36,7 @@ export async function getChannels(
     search?: string,
     categoryId?: string
 ): Promise<{ data: Channel[], count: number }> {
+    noStore();
     const from = (page - 1) * limit;
     const to = from + limit - 1;
 
@@ -58,7 +59,7 @@ export async function getChannels(
 
     // Default sorting
     query = query
-        .order('score', { ascending: false })
+        .order('trust_score', { ascending: false })
         .order('created_at', { ascending: false })
         .range(from, to);
 
