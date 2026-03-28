@@ -5,8 +5,6 @@ import { revalidatePath } from 'next/cache';
 import { slugify } from '@/lib/utils';
 import { supabase } from '@/lib/supabaseClient';
 
-const adminClient = getAdminClient();
-
 // ========================
 // TREND CATEGORY ACTIONS
 // ========================
@@ -142,7 +140,7 @@ export async function addTrend(formData: FormData) {
     let slugExists = true;
 
     while (slugExists) {
-        const { data } = await adminClient.from('trends').select('id').eq('slug', slug).single();
+        const { data } = await getAdminClient().from('trends').select('id').eq('slug', slug).single();
         if (data) {
             slug = `${baseSlug}-${counter}`;
             counter++;
@@ -160,12 +158,12 @@ export async function addTrend(formData: FormData) {
             const fileName = `trend_${slug}_${Date.now()}.${ext}`;
             const buffer = Buffer.from(await imageFile.arrayBuffer());
 
-            const { error: uploadError } = await adminClient.storage
+            const { error: uploadError } = await getAdminClient().storage
                 .from('assets')
                 .upload(fileName, buffer, { contentType: imageFile.type, upsert: true });
 
             if (!uploadError) {
-                const { data: urlData } = adminClient.storage.from('assets').getPublicUrl(fileName);
+                const { data: urlData } = getAdminClient().storage.from('assets').getPublicUrl(fileName);
                 image = urlData.publicUrl;
             }
         } else {
@@ -216,12 +214,12 @@ export async function updateTrend(id: string, formData: FormData) {
             const fileName = `trend_${id}_${Date.now()}.${ext}`;
             const buffer = Buffer.from(await imageFile.arrayBuffer());
 
-            const { error: uploadError } = await adminClient.storage
+            const { error: uploadError } = await getAdminClient().storage
                 .from('assets')
                 .upload(fileName, buffer, { contentType: imageFile.type, upsert: true });
 
             if (!uploadError) {
-                const { data: urlData } = adminClient.storage.from('assets').getPublicUrl(fileName);
+                const { data: urlData } = getAdminClient().storage.from('assets').getPublicUrl(fileName);
                 image = urlData.publicUrl;
             }
         }

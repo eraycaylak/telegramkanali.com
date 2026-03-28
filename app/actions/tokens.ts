@@ -5,8 +5,6 @@ import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
 
-const adminClient = getAdminClient();
-
 // Helper: Get authenticated user ID from server-side session
 async function getAuthUserId(): Promise<string | null> {
     const cookieStore = await cookies();
@@ -106,7 +104,7 @@ export async function purchaseTokens(packageId: string) {
     }
 
     // Log transaction
-    await adminClient.from('token_transactions').insert({
+    await getAdminClient().from('token_transactions').insert({
         user_id: userId,
         type: 'purchase',
         amount: pkg.tokens,
@@ -150,7 +148,7 @@ export async function createAdCampaign(data: {
     if (!pricing) return { error: 'Fiyatlandırma bulunamadı.' };
 
     // Atomik olarak jetonları düş ve kampanyayı oluştur (TOCTOU race condition önleme)
-    const { data: campaignId, error: rpcError } = await adminClient.rpc('create_ad_campaign_atomic', {
+    const { data: campaignId, error: rpcError } = await getAdminClient().rpc('create_ad_campaign_atomic', {
         p_user_id: userId,
         p_channel_id: data.channelId,
         p_ad_type: data.adType,
@@ -281,7 +279,7 @@ export async function deleteAdCampaign(campaignId: string) {
     const userId = await getAuthUserId();
     if (!userId) return { error: 'Oturum açmanız gerekiyor.' };
 
-    const { error: rpcError } = await adminClient.rpc('delete_ad_campaign_atomic', {
+    const { error: rpcError } = await getAdminClient().rpc('delete_ad_campaign_atomic', {
         p_campaign_id: campaignId,
         p_user_id: userId
     });
@@ -372,7 +370,7 @@ export async function adminUpdateCampaignStatus(campaignId: string, newStatus: s
             .single();
 
         if (campaign && campaign.status === 'pending') {
-            const { error: rpcError } = await adminClient.rpc('refund_ad_campaign_atomic', {
+            const { error: rpcError } = await getAdminClient().rpc('refund_ad_campaign_atomic', {
                 p_campaign_id: campaignId,
                 p_user_id: campaign.user_id
             });

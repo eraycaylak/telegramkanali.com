@@ -5,8 +5,6 @@ import { supabase as publicClient } from '@/lib/supabaseClient';
 import { revalidatePath } from 'next/cache';
 
 // Admin client for writes
-const adminClient = getAdminClient();
-
 export async function getSetting(key: string): Promise<string | null> {
     try {
         const { data, error } = await publicClient

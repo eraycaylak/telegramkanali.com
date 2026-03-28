@@ -7,8 +7,6 @@ import { supabase } from '@/lib/supabaseClient'; // Client for auth check (simul
 
 // NOTE: getAdminClient() is called inline at each use site (not module-level)
 // to prevent Netlify build-time env var freeze. See lib/supabaseAdmin.ts.
-const adminClient = getAdminClient();
-
 // ========================
 // PERMISSION CHECK
 // ========================
@@ -391,7 +389,7 @@ export async function uploadLogo(formData: FormData) {
         const buffer = Buffer.from(await file.arrayBuffer());
 
         // Upload to Supabase Storage
-        const { data, error } = await adminClient.storage
+        const { data, error } = await getAdminClient().storage
             .from('assets')
             .upload(fileName, buffer, {
                 contentType: file.type,
@@ -409,7 +407,7 @@ export async function uploadLogo(formData: FormData) {
         }
 
         // Get public URL
-        const { data: urlData } = adminClient.storage
+        const { data: urlData } = getAdminClient().storage
             .from('assets')
             .getPublicUrl(fileName);
 
@@ -440,13 +438,13 @@ async function persistTelegramImage(url: string, slug: string): Promise<string> 
         const ext = contentType.split('/').pop() || 'jpg';
         const fileName = `channel_${slug}_${Date.now()}.${ext}`;
 
-        const { error } = await adminClient.storage
+        const { error } = await getAdminClient().storage
             .from('assets')
             .upload(fileName, buffer, { contentType, upsert: true });
 
         if (error) throw error;
 
-        const { data: urlData } = adminClient.storage
+        const { data: urlData } = getAdminClient().storage
             .from('assets')
             .getPublicUrl(fileName);
 
@@ -764,7 +762,7 @@ export async function addChannelByUrl(url: string, categoryId: string, userId?: 
             featured: false
         };
 
-        const { error } = await adminClient.from('channels').insert(insertData);
+        const { error } = await getAdminClient().from('channels').insert(insertData);
 
         if (error) throw error;
 
@@ -995,7 +993,7 @@ export async function uploadBlogImage(formData: FormData) {
         const fileName = `blog/${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`;
         const buffer = Buffer.from(await file.arrayBuffer());
 
-        const { data, error } = await adminClient.storage
+        const { data, error } = await getAdminClient().storage
             .from('assets')
             .upload(fileName, buffer, {
                 contentType: file.type,
@@ -1008,7 +1006,7 @@ export async function uploadBlogImage(formData: FormData) {
             return { error: error.message };
         }
 
-        const { data: urlData } = adminClient.storage
+        const { data: urlData } = getAdminClient().storage
             .from('assets')
             .getPublicUrl(data.path);
 
