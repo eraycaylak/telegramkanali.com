@@ -36,7 +36,8 @@ export default function DashboardClient() {
         ad_start_date: '',
         ad_end_date: '',
         ad_type: '',
-        ad_notes: ''
+        ad_notes: '',
+        featured: false
     });
     const [editingId, setEditingId] = useState<string | null>(null);
     const [scraping, setScraping] = useState(false);
@@ -159,7 +160,8 @@ export default function DashboardClient() {
             ad_start_date: channel.ad_start_date ? new Date(channel.ad_start_date).toISOString().split('T')[0] : '',
             ad_end_date: channel.ad_end_date ? new Date(channel.ad_end_date).toISOString().split('T')[0] : '',
             ad_type: channel.ad_type || '',
-            ad_notes: channel.ad_notes || ''
+            ad_notes: channel.ad_notes || '',
+            featured: channel.featured || false
         });
         setEditingId(channel.id);
         setLastEditedId(channel.id);
@@ -206,7 +208,7 @@ export default function DashboardClient() {
             setIsModalOpen(false);
             setFormData({
                 name: '', description: '', join_link: '', category_id: '', image: '', score: 0, owner_id: '', city: '',
-                ad_start_date: '', ad_end_date: '', ad_type: '', ad_notes: ''
+                ad_start_date: '', ad_end_date: '', ad_type: '', ad_notes: '', featured: false
             });
             setEditingId(null);
             fetchData();
@@ -843,6 +845,16 @@ export default function DashboardClient() {
                                     <input type="hidden" value={formData.ad_start_date} />
                                 </div>
                             </div>
+
+                            <label className="flex items-center gap-3 cursor-pointer bg-blue-50/50 p-4 rounded-2xl border-2 border-blue-100/50 hover:border-blue-200 transition">
+                                <input 
+                                    type="checkbox" 
+                                    className="w-5 h-5 rounded text-blue-600 border-gray-300 focus:ring-blue-500" 
+                                    checked={formData.featured}
+                                    onChange={e => setFormData({ ...formData, featured: e.target.checked })}
+                                />
+                                <span className="text-sm font-bold text-blue-900">VIP / Premium (Öne Çıkanlar) Olarak İşaretle</span>
+                            </label>
 
                             <div>
                                 <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Görsel URL</label>

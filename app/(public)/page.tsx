@@ -8,6 +8,7 @@ import PopularTicker from '@/components/PopularTicker';
 import Pagination from '@/components/Pagination';
 import JsonLd, { generateFAQSchema, generateItemListSchema } from '@/components/JsonLd';
 import FeaturedAds from '@/components/FeaturedAds';
+import FeaturedPremium from '@/components/FeaturedPremium';
 import { Channel, Category } from '@/lib/types';
 import { Suspense } from 'react';
 import { Metadata } from 'next';
@@ -178,6 +179,9 @@ export default async function Home({ searchParams }: HomeProps) {
         <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-1">Telegram Kanalları ve Grupları (2026)</h1>
         <p className="text-gray-500 text-sm tracking-wide">Güncel ve Aktif Telegram Kanalları - Mart 2026</p>
       </div>
+
+      {/* Featured / VIP Channels */}
+      <FeaturedPremium channels={featuredChannels} />
 
       {/* Banner Grid (Dynamic from DB - Only show if no search) */}
       {!search && !categoryId && <BannerGrid />}

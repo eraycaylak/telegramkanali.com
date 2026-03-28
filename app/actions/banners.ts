@@ -156,3 +156,29 @@ export async function reorderBanners(items: { id: string; display_order: number 
         return { success: false, error: error.message };
     }
 }
+
+export async function getGlobalBannerStatus(): Promise<boolean> {
+    const { data } = await publicSupabase
+        .from('settings')
+        .select('value')
+        .eq('key', 'banners_active')
+        .single();
+    if (data && data.value !== null) {
+        return (data.value === 'true' || data.value === true);
+    }
+    return true;
+}
+
+export async function toggleGlobalBannerStatus(currentState: boolean) {
+    const supabaseAdmin = getAdminClient();
+    const { error } = await supabaseAdmin
+        .from('settings')
+        .upsert({ key: 'banners_active', value: (!currentState).toString() });
+
+    if (error) return { success: false, error: error.message };
+    
+    revalidatePath('/');
+    revalidatePath('/[slug]', 'page');
+    revalidatePath('/admin/banners');
+    return { success: true };
+}

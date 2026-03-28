@@ -1,6 +1,7 @@
 import { supabase } from './supabaseClient';
 import { Channel, Category, SeoPage, BlogPost } from './types';
 import { getActiveAds } from '@/app/actions/tokens';
+import { unstable_noStore as noStore } from 'next/cache';
 
 // Helper: Get IDs of channels with active featured campaigns
 async function getSponsoredChannelIds(categoryId?: string): Promise<string[]> {
@@ -70,11 +71,26 @@ export async function getChannels(
 
     let mappedData = data.map((d: any) => ({
         ...d,
+        featured: d.is_featured,
         categoryName: d.categories?.name,
     })) as Channel[];
 
     // Boost sponsored channels to top (only on first page)
     if (page === 1) {
+        // --- RANDOM CIRCULATION FOR TOP 5 ---
+        // Top 5 highest scored channels shuffle to give a dynamic feel on homepage & categories
+        if (mappedData.length >= 2) {
+            const shuffleCount = Math.min(5, mappedData.length);
+            const topChannels = mappedData.slice(0, shuffleCount);
+            const restChannels = mappedData.slice(shuffleCount);
+
+            for (let i = topChannels.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [topChannels[i], topChannels[j]] = [topChannels[j], topChannels[i]];
+            }
+            mappedData = [...topChannels, ...restChannels];
+        }
+
         const sponsoredIds = await getSponsoredChannelIds(categoryId);
         if (sponsoredIds.length > 0) {
             const sponsored = mappedData.filter(ch => sponsoredIds.includes(ch.id));
@@ -169,10 +185,11 @@ export async function getPopularChannels(limit: number = 5): Promise<Channel[]> 
 
 // Helpers
 export async function getFeaturedChannels(): Promise<Channel[]> {
+    noStore();
     const { data, error } = await supabase
         .from('channels')
         .select('*, categories(name, slug)')
-        .eq('featured', true)
+        .eq('is_featured', true)
         .eq('status', 'approved');
 
     if (error) return [];
