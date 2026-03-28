@@ -44,6 +44,11 @@ export async function signUp(formData: FormData) {
     const email = formData.get('email') as string;
     const password = formData.get('password') as string;
     const fullName = formData.get('full_name') as string;
+    const legalTerms = formData.get('legal_terms') === 'on';
+
+    if (!legalTerms) {
+        return { error: 'Kullanıcı Sözleşmesini kabul etmeniz zorunludur.' };
+    }
 
     // Admin client ile kullanıcı oluştur — email rate limit yok, otomatik onaylı
     const adminClient = getAdminClient();
@@ -51,7 +56,11 @@ export async function signUp(formData: FormData) {
         email,
         password,
         email_confirm: true, // Email onayını otomatik geçir
-        user_metadata: { full_name: fullName },
+        user_metadata: { 
+            full_name: fullName,
+            legal_terms_accepted: true,
+            legal_terms_accepted_at: new Date().toISOString()
+        },
     });
 
     if (createError) return { error: createError.message };

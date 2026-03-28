@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Category } from '@/lib/types';
 import { submitChannel } from '@/app/actions/submit';
 import { Send, CheckCircle2, AlertCircle } from 'lucide-react';
+import LegalTermsModal from '@/components/LegalTermsModal';
 
 interface Props {
     categories: Category[];
@@ -12,6 +13,7 @@ interface Props {
 export default function KanalEkleClient({ categories }: Props) {
     const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
     const [errorMessage, setErrorMessage] = useState('');
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -145,7 +147,14 @@ export default function KanalEkleClient({ categories }: Props) {
                             className="mt-1 w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                         />
                         <span className="text-sm text-gray-700">
-                            <a href="/kullanim-sartlari" target="_blank" className="font-bold text-blue-600 hover:underline">Kullanım Şartları</a>'nı okudum, içeriğimin T.C. yasalarına (kumar, bahis, müstehcenlik vb.) aykırı olmadığını taahhüt ederim.
+                            <button 
+                                type="button" 
+                                onClick={() => setIsModalOpen(true)} 
+                                className="font-bold text-blue-600 hover:text-blue-700 hover:underline"
+                            >
+                                Kullanım Şartları
+                            </button>
+                            'nı okudum, içeriğimin T.C. yasalarına (kumar, bahis, müstehcenlik vb.) aykırı olmadığını taahhüt ederim.
                         </span>
                     </label>
 
@@ -190,6 +199,11 @@ export default function KanalEkleClient({ categories }: Props) {
                     <br />işlemleriniz IP adresi ve cihaz bilgileri ile birlikte kayıt altına alınmaktadır.
                 </p>
             </form>
+
+            <LegalTermsModal 
+                isOpen={isModalOpen} 
+                onClose={() => setIsModalOpen(false)} 
+            />
         </div>
     );
 }

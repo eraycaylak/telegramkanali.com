@@ -4,11 +4,13 @@ import { useState } from 'react';
 import { signUp } from '@/app/actions/auth';
 import Link from 'next/link';
 import { Mail, Lock, UserPlus, AlertCircle, User, CheckCircle2 } from 'lucide-react';
+import LegalTermsModal from '@/components/LegalTermsModal';
 
 export default function RegisterPage() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
@@ -100,6 +102,33 @@ export default function RegisterPage() {
                         </div>
                     )}
 
+                    <div className="flex items-start space-x-3 mt-4 bg-gray-50 p-3 rounded-xl border border-gray-100">
+                        <div className="flex items-center h-5 mt-0.5">
+                            <input
+                                id="legal_terms"
+                                name="legal_terms"
+                                type="checkbox"
+                                required
+                                className="w-4 h-4 text-blue-600 bg-white border-gray-300 rounded focus:ring-blue-500 focus:ring-2 cursor-pointer transition-colors"
+                            />
+                        </div>
+                        <div className="text-sm">
+                            <label htmlFor="legal_terms" className="font-medium text-gray-700 cursor-pointer">
+                                <button
+                                    type="button"
+                                    onClick={() => setIsModalOpen(true)}
+                                    className="text-blue-600 hover:text-blue-700 hover:underline font-semibold"
+                                >
+                                    Kullanıcı Sözleşmesi
+                                </button>
+                                'ni okudum, TCK ve Yer Sağlayıcı koşullarını kabul ediyorum.
+                            </label>
+                            <p className="text-gray-500 text-xs mt-1 leading-relaxed">
+                                Müstehcenlik, kumar ve yasadışı bahis içeren kanallar eklenemez. İhlal durumunda 5651, 7258 sayılı kanunlar ve TCK 226, 228 bağlamında adli makamlarla IP paylaşımı yapılacağını beyan ederim.
+                            </p>
+                        </div>
+                    </div>
+
                     <div>
                         <button
                             type="submit"
@@ -116,6 +145,11 @@ export default function RegisterPage() {
                     </div>
                 </form>
             </div>
+            
+            <LegalTermsModal 
+                isOpen={isModalOpen} 
+                onClose={() => setIsModalOpen(false)} 
+            />
         </div>
     );
 }
