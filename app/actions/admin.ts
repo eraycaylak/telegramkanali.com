@@ -1,6 +1,16 @@
 'use server';
 
 import { getAdminClient } from '@/lib/supabaseAdmin';
+
+// Dynamically instantiate the client per-request to avoid Vercel build-time caching placeholders
+const adminClient = new Proxy({} as any, {
+    get: (target, prop) => {
+        const client = getAdminClient();
+        return client[prop as keyof typeof client];
+    }
+});
+
+
 import { revalidatePath } from 'next/cache';
 import { UserPermissions } from '@/lib/types';
 import { supabase } from '@/lib/supabaseClient'; // Client for auth check (simulated)
