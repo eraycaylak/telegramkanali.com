@@ -873,7 +873,7 @@ export default function DashboardClient() {
                                         setFormData({ 
                                             name: '', description: '', join_link: '', category_id: '', image: '', 
                                             score: 0, owner_id: '', city: '', 
-                                            ad_start_date: '', ad_end_date: '', ad_type: '', ad_notes: '' 
+                                            ad_start_date: '', ad_end_date: '', ad_type: '', ad_notes: '', featured: false 
                                         }); 
                                     }}
                                     className="order-2 sm:order-1 px-8 py-4 text-gray-500 font-bold hover:bg-gray-50 rounded-2xl transition"
