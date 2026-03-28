@@ -227,7 +227,7 @@ export default function ChannelCard({ channel, compact = false }: ChannelCardPro
                         <div className="flex items-center gap-1 font-medium text-gray-700">
                             <Users size={12} className="text-blue-500" />
                             {channel.member_count ? (
-                                new Intl.NumberFormat('en-US', { notation: "compact", maximumFractionDigits: 1 }).format(channel.member_count)
+                                new Intl.NumberFormat('tr-TR', { notation: "compact", maximumFractionDigits: 1 }).format(channel.member_count)
                             ) : (
                                 channel.stats.subscribers
                             )}

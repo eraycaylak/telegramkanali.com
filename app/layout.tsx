@@ -93,7 +93,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="tr">
+    <html lang="tr" suppressHydrationWarning>
       <head>
         {/* Preconnect - Kritik 3. taraf kaynaklar için bağlantı ön açma */}
         <link rel="preconnect" href="https://www.googletagmanager.com" />
@@ -121,6 +121,7 @@ export default function RootLayout({
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col bg-white text-gray-900 overflow-x-hidden w-full max-w-[100vw]`}
+        suppressHydrationWarning
       >
         {/* Google Analytics */}
         <GoogleAnalytics gaId="G-N9BJQBE7BB" />
