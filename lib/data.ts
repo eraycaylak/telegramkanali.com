@@ -78,20 +78,6 @@ export async function getChannels(
 
     // Boost sponsored channels to top (only on first page)
     if (page === 1) {
-        // --- RANDOM CIRCULATION FOR TOP 5 ---
-        // Top 5 highest scored channels shuffle to give a dynamic feel on homepage & categories
-        if (mappedData.length >= 2) {
-            const shuffleCount = Math.min(5, mappedData.length);
-            const topChannels = mappedData.slice(0, shuffleCount);
-            const restChannels = mappedData.slice(shuffleCount);
-
-            for (let i = topChannels.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [topChannels[i], topChannels[j]] = [topChannels[j], topChannels[i]];
-            }
-            mappedData = [...topChannels, ...restChannels];
-        }
-
         const sponsoredIds = await getSponsoredChannelIds(categoryId);
         if (sponsoredIds.length > 0) {
             const sponsored = mappedData.filter(ch => sponsoredIds.includes(ch.id));
@@ -118,7 +104,7 @@ export async function getAllCities(): Promise<string[]> {
 
     if (error || !data) return [];
 
-    const uniqueCities = [...new Set(data.map((d: any) => d.city).filter(Boolean))];
+    const uniqueCities = [...new Set(data.map((d: any) => d.city as string).filter(Boolean))] as string[];
     return uniqueCities.sort();
 }
 
