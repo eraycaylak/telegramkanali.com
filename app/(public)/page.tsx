@@ -135,10 +135,10 @@ export default async function Home({ searchParams }: HomeProps) {
         <AlertCircle className="text-red-500 w-12 h-12 mb-4" />
         <h2 className="text-xl font-bold text-red-700 mb-2">Bir Hata Oluştu</h2>
         <p className="text-red-600 mb-6">{errorMsg}</p>
-        <button onClick={() => { }} className="flex items-center gap-2 bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition">
+        <a href="/" className="flex items-center gap-2 bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition">
           <RefreshCw size={18} />
           Lütfen Sayfayı Yenileyin
-        </button>
+        </a>
       </div>
     );
   }
@@ -294,12 +294,12 @@ export default async function Home({ searchParams }: HomeProps) {
         </h2>
         <div className="grid gap-4 max-w-3xl mx-auto">
           {faqs.map((faq, i) => (
-            <details key={i} className="group bg-white border border-gray-200 rounded-xl overflow-hidden cursor-pointer transition-shadow hover:shadow-md">
-              <summary className="flex items-center justify-between p-5 font-medium text-gray-800 list-none">
+            <details key={i} suppressHydrationWarning className="group bg-white border border-gray-200 rounded-xl overflow-hidden cursor-pointer transition-shadow hover:shadow-md">
+              <summary suppressHydrationWarning className="flex items-center justify-between p-5 font-medium text-gray-800 list-none">
                 {faq.question}
                 <span className="text-gray-400 group-open:rotate-180 transition-transform">▼</span>
               </summary>
-              <div className="px-5 pb-5 text-gray-600 leading-relaxed border-t border-gray-100 pt-3">
+              <div suppressHydrationWarning className="px-5 pb-5 text-gray-600 leading-relaxed border-t border-gray-100 pt-3">
                 {faq.answer}
                 {faq.link && (
                   <div className="mt-2">
