@@ -227,9 +227,14 @@ export default function ChannelCard({ channel, compact = false }: ChannelCardPro
                         <div className="flex items-center gap-1 font-medium text-gray-700">
                             <Users size={12} className="text-blue-500" />
                             {channel.member_count ? (
-                                new Intl.NumberFormat('tr-TR', { notation: "compact", maximumFractionDigits: 1 }).format(channel.member_count)
+                                (() => {
+                                    const num = channel.member_count;
+                                    if (num >= 1000000) return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+                                    if (num >= 1000) return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'B';
+                                    return num.toString();
+                                })()
                             ) : (
-                                channel.stats.subscribers
+                                channel.stats?.subscribers
                             )}
                         </div>
                     </div>

@@ -102,9 +102,7 @@ export default async function EnglishDynamicPage({ params, searchParams }: PageP
                     { name: nameEn, url: `${baseUrl}/en/${category.slug}` }
                 ])} />
                 {/* hreflang */}
-                <link rel="alternate" hrefLang="tr" href={`${baseUrl}/${category.slug}`} />
-                <link rel="alternate" hrefLang="en" href={`${baseUrl}/en/${category.slug}`} />
-                <link rel="alternate" hrefLang="x-default" href={`${baseUrl}/${category.slug}`} />
+                {/* Removed inline link rel="alternate" tags to prevent React Hydration #418 error */}
 
                 <Header />
                 <main className="container mx-auto px-4 py-8 space-y-8">
@@ -318,9 +316,7 @@ export default async function EnglishDynamicPage({ params, searchParams }: PageP
                     { name: nameEn, url: `${baseUrl}/en/${channel.slug}` }
                 ])} />
                 {/* hreflang */}
-                <link rel="alternate" hrefLang="tr" href={`${baseUrl}/${channel.slug}`} />
-                <link rel="alternate" hrefLang="en" href={`${baseUrl}/en/${channel.slug}`} />
-                <link rel="alternate" hrefLang="x-default" href={`${baseUrl}/${channel.slug}`} />
+                {/* Removed inline link rel="alternate" tags to prevent React Hydration #418 error */}
 
                 <Header />
                 <main className="container mx-auto px-4 py-8 max-w-6xl">

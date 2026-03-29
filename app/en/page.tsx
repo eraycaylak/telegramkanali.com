@@ -82,9 +82,7 @@ export default async function EnHome({ searchParams }: EnHomeProps) {
     return (
         <>
             {/* hreflang */}
-            <link rel="alternate" hrefLang="tr" href={baseUrl} />
-            <link rel="alternate" hrefLang="en" href={`${baseUrl}/en`} />
-            <link rel="alternate" hrefLang="x-default" href={baseUrl} />
+            {/* Removed inline link rel="alternate" tags to prevent React Hydration #418 error */}
 
             {allChannels.length > 0 && (
                 <JsonLd data={generateItemListSchema(

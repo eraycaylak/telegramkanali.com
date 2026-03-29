@@ -40,14 +40,15 @@ export default function PopularTicker({ channels }: PopularTickerProps) {
                         )}
                         <span className="text-sm font-bold text-gray-800 group-hover:text-blue-600">{channel.name}</span>
                         <span className="text-[10px] text-gray-400 font-medium">
-                            {channel.member_count?.toLocaleString('tr-TR')}
+                            {channel.member_count ? channel.member_count.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") : ''}
                         </span>
                         <span className="mx-2 text-gray-200">|</span>
                     </Link>
                 ))}
             </div>
 
-            <style jsx>{`
+            <style dangerouslySetInnerHTML={{
+                __html: `
                 @keyframes ticker {
                     0% { transform: translateX(0); }
                     100% { transform: translateX(-33.33%); }
@@ -56,7 +57,7 @@ export default function PopularTicker({ channels }: PopularTickerProps) {
                     display: inline-flex;
                     animation: ticker 30s linear infinite;
                 }
-            `}</style>
+            `}} />
         </div>
     );
 }

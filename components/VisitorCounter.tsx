@@ -29,7 +29,7 @@ export default function VisitorCounter() {
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
             </div>
             <span className="text-xs font-medium text-white/90 whitespace-nowrap">
-                <span className="font-bold text-white">{count.toLocaleString('tr-TR')}</span> kişi şuan sitede
+                <span className="font-bold text-white">{count ? count.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") : '0'}</span> kişi şuan sitede
             </span>
         </div>
     );

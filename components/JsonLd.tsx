@@ -5,10 +5,12 @@ interface JsonLdProps {
 }
 
 export default function JsonLd({ data }: JsonLdProps) {
+    // Escape < to \u003c to prevent XSS and HTML mismatch from </script> tags in text
+    const safeData = JSON.stringify(data).replace(/</g, '\\u003c');
     return (
         <script
             type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
+            dangerouslySetInnerHTML={{ __html: safeData }}
         />
     );
 }
@@ -91,7 +93,7 @@ export function generateChannelSchema(channel: {
                 "@id": channelUrl,
                 "url": channelUrl,
                 "name": `${channel.name} Telegram Kanalı`,
-                "description": channel.description || `${channel.name} Telegram kanalına katılın. Üye sayısı: ${channel.member_count?.toLocaleString('tr-TR') || '0'}`,
+                "description": channel.description || `${channel.name} Telegram kanalına katılın. Üye sayısı: ${channel.member_count ? channel.member_count.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") : '0'}`,
                 "inLanguage": "tr-TR",
                 "image": channel.image || `${baseUrl}/images/logo.png`,
                 "datePublished": channel.created_at || new Date().toISOString(),

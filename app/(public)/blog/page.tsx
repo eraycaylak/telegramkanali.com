@@ -44,9 +44,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
 
     return (
         <div className="max-w-6xl mx-auto space-y-8">
-            {/* SEO Pagination Tags (Next.js Hoisting) */}
-            {page > 1 && <link rel="prev" href={buildPageUrl(page - 1)} />}
-            {page < totalPages && <link rel="next" href={buildPageUrl(page + 1)} />}
+            {/* Removed inline link tags to prevent hydration #418 error */}
             {/* Hero */}
             <div className="text-center pt-4 pb-2">
                 <h1 className="text-3xl md:text-4xl font-black text-gray-900">Blog</h1>
