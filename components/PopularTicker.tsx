@@ -19,7 +19,7 @@ export default function PopularTicker({ channels }: PopularTickerProps) {
             <div className="absolute inset-y-0 left-0 w-12 bg-gradient-to-r from-white to-transparent z-10"></div>
             <div className="absolute inset-y-0 right-0 w-12 bg-gradient-to-l from-white to-transparent z-10"></div>
 
-            <div className="ticker-scroll flex whitespace-nowrap hover:[animation-play-state:paused]">
+            <div className="flex whitespace-nowrap animate-ticker hover:[animation-play-state:paused]">
                 {displayChannels.map((channel, idx) => (
                     <Link
                         key={`${channel.id}-${idx}`}
@@ -40,12 +40,23 @@ export default function PopularTicker({ channels }: PopularTickerProps) {
                         )}
                         <span className="text-sm font-bold text-gray-800 group-hover:text-blue-600">{channel.name}</span>
                         <span className="text-[10px] text-gray-400 font-medium">
-                            {channel.member_count ? channel.member_count.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") : ''}
+                            {channel.member_count?.toLocaleString()}
                         </span>
                         <span className="mx-2 text-gray-200">|</span>
                     </Link>
                 ))}
             </div>
+
+            <style jsx>{`
+                @keyframes ticker {
+                    0% { transform: translateX(0); }
+                    100% { transform: translateX(-33.33%); }
+                }
+                .animate-ticker {
+                    display: inline-flex;
+                    animation: ticker 30s linear infinite;
+                }
+            `}</style>
         </div>
     );
 }

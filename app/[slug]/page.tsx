@@ -612,7 +612,7 @@ export default async function DynamicPage({ params, searchParams }: PageProps) {
                       )}
                       <div className="flex-1 min-w-0">
                         <h4 className="font-bold text-sm text-gray-900 group-hover:text-blue-600 truncate">{featured.name}</h4>
-                        <p className="text-xs text-gray-500 truncate">{featured.member_count ? featured.member_count.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") : '0'} abone</p>
+                        <p className="text-xs text-gray-500 truncate">{featured.member_count?.toLocaleString()} abone</p>
                       </div>
                     </Link>
                   ))}

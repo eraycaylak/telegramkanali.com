@@ -108,7 +108,7 @@ export default function CountdownRedirect({
                                 📂 {categoryName}
                             </Link>
                             {memberCount && memberCount > 0 && (
-                                <p className="text-sm text-gray-500 mt-1">{memberCount ? memberCount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") : '0'} üye</p>
+                                <p className="text-sm text-gray-500 mt-1">{memberCount.toLocaleString('tr-TR')} üye</p>
                             )}
                         </div>
 

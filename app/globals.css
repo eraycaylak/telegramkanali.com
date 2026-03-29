@@ -46,28 +46,6 @@ html {
   display: none;
 }
 
-/* Popular Ticker Animation */
-@keyframes ticker {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-33.33%); }
-}
-.ticker-scroll {
-  display: inline-flex;
-  animation: ticker 30s linear infinite;
-}
-.ticker-scroll:hover {
-  animation-play-state: paused;
-}
-
-/* Cookie Consent Slide Up Animation */
-@keyframes slideUp {
-  from { transform: translateY(100%); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
-.animate-slideUp {
-  animation: slideUp 0.4s ease-out;
-}
-
 /* Safe area padding for bottom nav (iPhone notch etc.) */
 .pb-safe {
   padding-bottom: env(safe-area-inset-bottom, 0px);

@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, Trash2, GripVertical, Image as ImageIcon, Layout, Layers, ChevronUp, ChevronDown, Check, X } from 'lucide-react';
-import { Banner, getBanners, saveBanner, deleteBanner, toggleBannerActive, reorderBanners, getGlobalBannerStatus, toggleGlobalBannerStatus } from '@/app/actions/banners';
+import { Plus, Trash2, GripVertical, Image as ImageIcon, Layout, Layers, ChevronUp, ChevronDown } from 'lucide-react';
+import { Banner, getBanners, saveBanner, deleteBanner, toggleBannerActive, reorderBanners } from '@/app/actions/banners';
 import { getCategories } from '@/lib/data';
 import { Category } from '@/lib/types';
 
@@ -18,20 +18,13 @@ export default function BannersClient() {
     const [selectedCategoryId, setSelectedCategoryId] = useState<string>('');
 
     const [editingBanner, setEditingBanner] = useState<Partial<Banner> | null>(null);
-    const [globalActive, setGlobalActive] = useState(true);
 
     // Initial data load
     useEffect(() => {
         checkPermission();
         loadBanners();
         loadCategories();
-        loadGlobalStatus();
     }, [activeTab, selectedCategoryId]);
-
-    async function loadGlobalStatus() {
-        const active = await getGlobalBannerStatus();
-        setGlobalActive(active);
-    }
 
     const checkPermission = async () => {
         const { data: { session } } = await supabase.auth.getSession();
@@ -191,43 +184,14 @@ export default function BannersClient() {
         await reorderBanners(itemsToUpdate);
     };
 
-    const handleGlobalToggle = async () => {
-        const newState = !globalActive;
-        // Optimistic update
-        setGlobalActive(newState);
-        const res = await toggleGlobalBannerStatus(!newState);
-        if (!res.success) {
-            setGlobalActive(!newState);
-            alert('Banner genel durumu güncellenemedi: ' + res.error);
-        }
-    };
-
     // ...
 
     return (
         <div className="space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
+            <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-800">Banner Yönetimi</h1>
                     <p className="text-gray-500 text-sm mt-1">Anasayfa ve kategori sayfaları için bannerları yönetin</p>
-                </div>
-                
-                <div className="flex flex-col items-center sm:items-end justify-center bg-gray-50 px-5 py-3 rounded-xl border border-gray-200">
-                    <span className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Sistem Geneli Banner Aktifliği</span>
-                    <button 
-                        onClick={handleGlobalToggle}
-                        className={`relative inline-flex h-8 w-16 items-center rounded-full transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${globalActive ? 'bg-green-500' : 'bg-red-500'}`}
-                    >
-                        <span className="sr-only">Toggle global banners</span>
-                        <span 
-                            className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform duration-300 flex items-center justify-center ${globalActive ? 'translate-x-9' : 'translate-x-1'}`}
-                        >
-                            {globalActive ? <Check size={14} className="text-green-500" /> : <X size={14} className="text-red-500" />}
-                        </span>
-                    </button>
-                    <span className={`text-sm font-bold mt-1.5 ${globalActive ? 'text-green-600' : 'text-red-600'}`}>
-                        {globalActive ? 'Bannerlar Açık 🔥' : 'Bannerlar Kapalı ⛔'}
-                    </span>
                 </div>
             </div>
 

@@ -34,7 +34,9 @@ export default function Pagination({ currentPage, totalPages, searchParams }: Pa
 
     return (
         <div className="flex flex-col items-center">
-            {/* Removed inline link tags to prevent React Hydration #418 Error */}
+            {/* SEO Pagination Tags (Hoisted by Next.js automatically) */}
+            {currentPage > 1 && <link rel="prev" href={getPageUrl(currentPage - 1)} />}
+            {currentPage < totalPages && <link rel="next" href={getPageUrl(currentPage + 1)} />}
 
             <div className="flex justify-center items-center space-x-2 mt-8">
                 {/* Previous Button */}

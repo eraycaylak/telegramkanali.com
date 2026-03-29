@@ -1,7 +1,6 @@
 import { supabase } from './supabaseClient';
 import { Channel, Category, SeoPage, BlogPost } from './types';
 import { getActiveAds } from '@/app/actions/tokens';
-import { unstable_noStore as noStore } from 'next/cache';
 
 // Helper: Get IDs of channels with active featured campaigns
 async function getSponsoredChannelIds(categoryId?: string): Promise<string[]> {
@@ -36,7 +35,6 @@ export async function getChannels(
     search?: string,
     categoryId?: string
 ): Promise<{ data: Channel[], count: number }> {
-    noStore();
     const from = (page - 1) * limit;
     const to = from + limit - 1;
 
@@ -59,7 +57,7 @@ export async function getChannels(
 
     // Default sorting
     query = query
-        .order('trust_score', { ascending: false })
+        .order('score', { ascending: false })
         .order('created_at', { ascending: false })
         .range(from, to);
 
@@ -72,7 +70,6 @@ export async function getChannels(
 
     let mappedData = data.map((d: any) => ({
         ...d,
-        featured: d.is_featured,
         categoryName: d.categories?.name,
     })) as Channel[];
 
@@ -104,7 +101,7 @@ export async function getAllCities(): Promise<string[]> {
 
     if (error || !data) return [];
 
-    const uniqueCities = [...new Set(data.map((d: any) => d.city as string).filter(Boolean))] as string[];
+    const uniqueCities = [...new Set(data.map((d: any) => d.city).filter(Boolean))];
     return uniqueCities.sort();
 }
 
@@ -172,11 +169,10 @@ export async function getPopularChannels(limit: number = 5): Promise<Channel[]> 
 
 // Helpers
 export async function getFeaturedChannels(): Promise<Channel[]> {
-    noStore();
     const { data, error } = await supabase
         .from('channels')
         .select('*, categories(name, slug)')
-        .eq('is_featured', true)
+        .eq('featured', true)
         .eq('status', 'approved');
 
     if (error) return [];

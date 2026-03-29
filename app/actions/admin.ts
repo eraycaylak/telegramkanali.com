@@ -106,7 +106,6 @@ export async function addChannel(formData: FormData) {
     const ad_end_date = formData.get('ad_end_date') as string;
     const ad_type = formData.get('ad_type') as string;
     const ad_notes = formData.get('ad_notes') as string;
-    const featured = formData.get('featured') === 'true';
 
     // Use robust slugify
     const { slugify } = await import('@/lib/utils');
@@ -145,7 +144,7 @@ export async function addChannel(formData: FormData) {
             score,
             owner_id: owner_id || null,
             verified: false,
-            is_featured: featured,
+            featured: false,
             ad_start_date: ad_start_date || null,
             ad_end_date: ad_end_date || null,
             ad_type: ad_type || null,
@@ -316,7 +315,6 @@ export async function updateChannel(id: string, formData: FormData) {
     const ad_end_date = formData.get('ad_end_date') as string;
     const ad_type = formData.get('ad_type') as string;
     const ad_notes = formData.get('ad_notes') as string;
-    const featured = formData.get('featured') === 'true';
 
     // Don't change slug on edit to preserve SEO, or handle carefully. For now, keep it.
 
@@ -331,7 +329,6 @@ export async function updateChannel(id: string, formData: FormData) {
                 score,
                 owner_id: owner_id || null,
                 image: await persistTelegramImage(image || '/images/logo.png', id),
-                is_featured: featured,
                 ad_start_date: ad_start_date || null,
                 ad_end_date: ad_end_date || null,
                 ad_type: ad_type || null,

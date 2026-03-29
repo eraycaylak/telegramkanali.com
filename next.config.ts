@@ -59,13 +59,6 @@ const nextConfig: NextConfig = {
           { key: 'Cache-Control', value: 'public, max-age=86400' },
         ],
       },
-      // JS/CSS chunks - always revalidate to prevent stale builds
-      {
-        source: '/_next/static/chunks/(.*)',
-        headers: [
-          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
-        ],
-      },
     ];
   },
 };

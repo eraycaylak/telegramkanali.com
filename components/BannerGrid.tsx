@@ -1,4 +1,4 @@
-import { getBanners, getGlobalBannerStatus, BannerType } from '@/app/actions/banners';
+import { getBanners, BannerType } from '@/app/actions/banners';
 import { Banner } from '@/lib/types';
 import Image from 'next/image';
 
@@ -10,9 +10,6 @@ interface BannerGridProps {
 export default async function BannerGrid({ type = 'homepage', categoryId }: BannerGridProps) {
     let banners: Banner[] = [];
     try {
-        const isGlobalActive = await getGlobalBannerStatus();
-        if (!isGlobalActive) return null;
-        
         banners = await getBanners(type, categoryId, true);
     } catch (e) {
         console.error('Banner fetch failed', e);
