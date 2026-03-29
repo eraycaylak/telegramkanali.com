@@ -27,6 +27,16 @@ export async function getCategories(): Promise<Category[]> {
     return (data || []) as Category[];
 }
 
+// Fisher-Yates shuffle helper
+function shuffleArray<T>(arr: T[]): T[] {
+    const shuffled = [...arr];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+}
+
 // Fetch Channels
 // Fetch Channels with Pagination & Filtering
 export async function getChannels(
@@ -85,6 +95,20 @@ export async function getChannels(
         }
     }
 
+    // Shuffle first 5 non-sponsored channels on page 1 only
+    if (page === 1 && !search) {
+        const sponsored = mappedData.filter(ch => (ch as any).is_sponsored);
+        const nonSponsored = mappedData.filter(ch => !(ch as any).is_sponsored);
+
+        if (nonSponsored.length > 5) {
+            const first5 = shuffleArray(nonSponsored.slice(0, 5));
+            const rest = nonSponsored.slice(5);
+            mappedData = [...sponsored, ...first5, ...rest];
+        } else if (nonSponsored.length > 0) {
+            mappedData = [...sponsored, ...shuffleArray(nonSponsored)];
+        }
+    }
+
     return { data: mappedData, count: count || 0 };
 }
 
@@ -101,7 +125,7 @@ export async function getAllCities(): Promise<string[]> {
 
     if (error || !data) return [];
 
-    const uniqueCities = [...new Set(data.map((d: any) => d.city).filter(Boolean))];
+    const uniqueCities = [...new Set(data.map((d: any) => d.city).filter(Boolean))] as string[];
     return uniqueCities.sort();
 }
 
@@ -232,6 +256,18 @@ export async function getChannelsByCategory(categoryId: string): Promise<Channel
         const regular = channels.filter(ch => !sponsoredIds.includes(ch.id));
         sponsored.forEach(ch => { (ch as any).is_sponsored = true; });
         channels = [...sponsored, ...regular];
+    }
+
+    // Shuffle first 5 non-sponsored channels
+    const sponsoredChs = channels.filter(ch => (ch as any).is_sponsored);
+    const nonSponsoredChs = channels.filter(ch => !(ch as any).is_sponsored);
+
+    if (nonSponsoredChs.length > 5) {
+        const first5 = shuffleArray(nonSponsoredChs.slice(0, 5));
+        const rest = nonSponsoredChs.slice(5);
+        channels = [...sponsoredChs, ...first5, ...rest];
+    } else if (nonSponsoredChs.length > 0) {
+        channels = [...sponsoredChs, ...shuffleArray(nonSponsoredChs)];
     }
 
     return channels;

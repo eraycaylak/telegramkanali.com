@@ -8,12 +8,13 @@ import PopularTicker from '@/components/PopularTicker';
 import Pagination from '@/components/Pagination';
 import JsonLd, { generateFAQSchema, generateItemListSchema } from '@/components/JsonLd';
 import FeaturedAds from '@/components/FeaturedAds';
+import PromotedChannels from '@/components/PromotedChannels';
 import { Channel, Category } from '@/lib/types';
 import { Suspense } from 'react';
 import { Metadata } from 'next';
 
-// Revalidate every 60 seconds for performance + freshness balance
-export const revalidate = 60;
+// No caching - fresh data on every request for randomized channel order
+export const revalidate = 0;
 
 
 const faqs = [
@@ -178,6 +179,9 @@ export default async function Home({ searchParams }: HomeProps) {
         <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-1">Telegram Kanalları ve Grupları (2026)</h1>
         <p className="text-gray-500 text-sm tracking-wide">Güncel ve Aktif Telegram Kanalları - Mart 2026</p>
       </div>
+
+      {/* Promoted Channels (Çok Tıklananlar) */}
+      <PromotedChannels />
 
       {/* Banner Grid (Dynamic from DB - Only show if no search) */}
       {!search && !categoryId && <BannerGrid />}

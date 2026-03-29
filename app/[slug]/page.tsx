@@ -3,6 +3,7 @@ import ChannelCard from '@/components/ChannelCard';
 import ChannelDetail from '@/components/ChannelDetail';
 import BannerGrid from '@/components/BannerGrid';
 import FeaturedAds from '@/components/FeaturedAds';
+import PromotedChannels from '@/components/PromotedChannels';
 import TwitterFeed from '@/components/TwitterFeed';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -16,7 +17,7 @@ import { Clock, Eye, AlertCircle } from 'lucide-react';
 
 const baseUrl = 'https://telegramkanali.com';
 
-export const revalidate = 60;
+export const revalidate = 0;
 export const dynamic = 'force-dynamic';
 
 // ====== Şehir Bazlı Programatik SEO Verileri ======
@@ -385,6 +386,9 @@ export default async function DynamicPage({ params, searchParams }: PageProps) {
               </p>
             </div>
           )}
+
+          {/* Promoted Channels (Çok Tıklananlar) */}
+          <PromotedChannels categoryId={category.id} />
 
           {/* Banner Grid */}
           <BannerGrid type="category" categoryId={category.id} />

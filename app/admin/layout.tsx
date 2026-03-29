@@ -2,7 +2,7 @@
 
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { LayoutDashboard, FolderTree, FileText, Users, Settings, LogOut, Menu, Image, Shield, BarChart, Send, BookOpen, Zap, Star, MessageSquare } from 'lucide-react';
+import { LayoutDashboard, FolderTree, FileText, Users, Settings, LogOut, Menu, Image, Shield, BarChart, Send, BookOpen, Zap, Star, MessageSquare, TrendingUp } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { UserProfile } from '@/lib/types';
@@ -78,6 +78,7 @@ export default function AdminLayout({
         { name: 'Kategoriler', href: '/admin/categories', icon: FolderTree, perm: 'manage_categories' },
         { name: 'Trend Yönetimi', href: '/admin/trends', icon: Zap, perm: 'manage_blog' },
         { name: 'Bannerlar', href: '/admin/banners', icon: Image, perm: 'manage_banners' },
+        { name: 'Öne Çıkanlar', href: '/admin/promoted', icon: TrendingUp, perm: 'manage_banners' },
         { name: 'Analitik', href: '/admin/analytics', icon: BarChart, perm: 'view_analytics' },
         { name: 'Ziyaretçi Profilleri', href: '/admin/visitors', icon: Users, perm: 'view_analytics' },
         { name: 'Ödemeler', href: '/admin/deposits', icon: Shield, perm: 'manage_users' }, // Re-using Shield or similar

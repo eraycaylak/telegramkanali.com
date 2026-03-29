@@ -1,5 +1,6 @@
 import { getBanners, BannerType } from '@/app/actions/banners';
 import { Banner } from '@/lib/types';
+import { getSetting } from '@/app/actions/settings';
 import Image from 'next/image';
 
 interface BannerGridProps {
@@ -8,6 +9,14 @@ interface BannerGridProps {
 }
 
 export default async function BannerGrid({ type = 'homepage', categoryId }: BannerGridProps) {
+    // Check global banner toggle
+    try {
+        const bannersEnabled = await getSetting('banners_enabled');
+        if (bannersEnabled === 'false') return null;
+    } catch {
+        // If setting doesn't exist, default to enabled
+    }
+
     let banners: Banner[] = [];
     try {
         banners = await getBanners(type, categoryId, true);

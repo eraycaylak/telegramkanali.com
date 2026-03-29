@@ -1,10 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, Trash2, GripVertical, Image as ImageIcon, Layout, Layers, ChevronUp, ChevronDown } from 'lucide-react';
+import { Plus, Trash2, GripVertical, Image as ImageIcon, Layout, Layers, ChevronUp, ChevronDown, Power } from 'lucide-react';
 import { Banner, getBanners, saveBanner, deleteBanner, toggleBannerActive, reorderBanners } from '@/app/actions/banners';
 import { getCategories } from '@/lib/data';
 import { Category } from '@/lib/types';
+import { getSetting, saveSetting } from '@/app/actions/settings';
 
 import { supabase } from '@/lib/supabaseClient';
 
@@ -12,6 +13,8 @@ export default function BannersClient() {
     const [banners, setBanners] = useState<Banner[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
     const [loading, setLoading] = useState(true);
+    const [bannersEnabled, setBannersEnabled] = useState(true);
+    const [togglingGlobal, setTogglingGlobal] = useState(false);
 
     // Tab state: 'homepage' or 'category'
     const [activeTab, setActiveTab] = useState<'homepage' | 'category'>('homepage');
@@ -24,6 +27,7 @@ export default function BannersClient() {
         checkPermission();
         loadBanners();
         loadCategories();
+        loadGlobalSetting();
     }, [activeTab, selectedCategoryId]);
 
     const checkPermission = async () => {
@@ -54,6 +58,30 @@ export default function BannersClient() {
         // Default to first category if none selected and in category tab
         if (activeTab === 'category' && !selectedCategoryId && cats.length > 0) {
             setSelectedCategoryId(cats[0].id);
+        }
+    }
+
+    async function loadGlobalSetting() {
+        try {
+            const val = await getSetting('banners_enabled');
+            setBannersEnabled(val !== 'false');
+        } catch {
+            setBannersEnabled(true);
+        }
+    }
+
+    async function handleGlobalToggle() {
+        setTogglingGlobal(true);
+        const newValue = !bannersEnabled;
+        setBannersEnabled(newValue);
+        try {
+            await saveSetting('banners_enabled', newValue ? 'true' : 'false');
+        } catch (err) {
+            console.error('Global toggle error:', err);
+            setBannersEnabled(!newValue);
+            alert('Ayar kaydedilemedi!');
+        } finally {
+            setTogglingGlobal(false);
         }
     }
 
@@ -193,6 +221,30 @@ export default function BannersClient() {
                     <h1 className="text-2xl font-bold text-gray-800">Banner Yönetimi</h1>
                     <p className="text-gray-500 text-sm mt-1">Anasayfa ve kategori sayfaları için bannerları yönetin</p>
                 </div>
+            </div>
+
+            {/* Global Banner Toggle */}
+            <div className={`flex items-center justify-between p-4 rounded-xl border-2 transition-all ${bannersEnabled ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+                <div className="flex items-center gap-3">
+                    <Power size={24} className={bannersEnabled ? 'text-green-600' : 'text-red-500'} />
+                    <div>
+                        <h3 className="font-bold text-gray-800">
+                            Tüm Bannerlar: {bannersEnabled ? 'AKTİF' : 'PASİF'}
+                        </h3>
+                        <p className="text-xs text-gray-500">
+                            {bannersEnabled
+                                ? 'Bannerlar anasayfa ve kategori sayfalarında görüntüleniyor.'
+                                : 'Bannerlar tüm sayfalarda gizlendi.'}
+                        </p>
+                    </div>
+                </div>
+                <button
+                    onClick={handleGlobalToggle}
+                    disabled={togglingGlobal}
+                    className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 ${bannersEnabled ? 'bg-green-500 focus:ring-green-500' : 'bg-red-400 focus:ring-red-400'} ${togglingGlobal ? 'opacity-50' : ''}`}
+                >
+                    <span className={`inline-block h-6 w-6 transform rounded-full bg-white shadow-lg transition-transform ${bannersEnabled ? 'translate-x-7' : 'translate-x-1'}`} />
+                </button>
             </div>
 
             {/* Tabs */}
