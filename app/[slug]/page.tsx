@@ -4,6 +4,7 @@ import ChannelDetail from '@/components/ChannelDetail';
 import BannerGrid from '@/components/BannerGrid';
 import FeaturedAds from '@/components/FeaturedAds';
 import PromotedChannels from '@/components/PromotedChannels';
+import BotNotificationCard from '@/components/BotNotificationCard';
 import TwitterFeed from '@/components/TwitterFeed';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -398,6 +399,9 @@ export default async function DynamicPage({ params, searchParams }: PageProps) {
 
           {/* Sponsored Featured Channels */}
           <FeaturedAds adType="featured" maxAds={6} categoryId={category.id} />
+
+          {/* Bot Bildirim Kartı */}
+          <BotNotificationCard categoryName={category.name} categorySlug={category.slug} />
 
           {/* Channels Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
