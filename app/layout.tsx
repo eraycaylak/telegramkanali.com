@@ -85,6 +85,14 @@ export const metadata: Metadata = {
       'x-default': baseUrl,
     },
   },
+  other: {
+    'theme-color': '#3b82f6',
+    'apple-mobile-web-app-capable': 'yes',
+    'apple-mobile-web-app-status-bar-style': 'black-translucent',
+    'apple-mobile-web-app-title': 'TelegramKanali',
+    'mobile-web-app-capable': 'yes',
+  },
+  manifest: '/manifest.json',
 };
 
 export default function RootLayout({
@@ -94,31 +102,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="tr" suppressHydrationWarning>
-      <head>
-        {/* Preconnect - Kritik 3. taraf kaynaklar için bağlantı ön açma */}
-        <link rel="preconnect" href="https://www.googletagmanager.com" />
-        <link rel="preconnect" href="https://www.google-analytics.com" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link rel="dns-prefetch" href="https://t.me" />
-        <link rel="dns-prefetch" href="https://cdn4.telesco.pe" />
-        <link rel="dns-prefetch" href="https://supabase.co" />
-        {/* PWA & Mobile App Meta */}
-        <link rel="manifest" href="/manifest.json" />
-        <meta name="theme-color" content="#3b82f6" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        <meta name="apple-mobile-web-app-title" content="TelegramKanali" />
-        <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-        {/* Apple Touch Icons */}
-        <link rel="apple-touch-icon" href="/images/logo.png" />
-        <link rel="apple-touch-icon" sizes="152x152" href="/images/logo.png" />
-        <link rel="apple-touch-icon" sizes="180x180" href="/images/logo.png" />
-        {/* Global Structured Data */}
-        <JsonLd data={generateWebsiteSchema(baseUrl)} />
-        <JsonLd data={generateOrganizationSchema(baseUrl)} />
-      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col bg-white text-gray-900 overflow-x-hidden w-full max-w-[100vw]`}
         suppressHydrationWarning
@@ -132,6 +115,9 @@ export default function RootLayout({
 
         {children}
 
+        {/* Global Structured Data - placed in body (valid HTML5) */}
+        <JsonLd data={generateWebsiteSchema(baseUrl)} />
+        <JsonLd data={generateOrganizationSchema(baseUrl)} />
       </body>
     </html>
   );
