@@ -62,27 +62,35 @@ export async function submitChannel(formData: FormData) {
     const baseSlug = slugify(name) || 'channel';
     const slug = `${baseSlug}-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
 
-    // Use admin client for insert to bypass RLS, but set owner_id from the authenticated user
-    const { getAdminClient } = await import('@/lib/supabaseAdmin');
-    const adminClient = getAdminClient();
-
     // Generate a unique bot token for this channel at creation time
     const botToken = 'TK_' + Math.random().toString(36).substring(2, 10).toUpperCase();
 
-    const { error } = await adminClient.from('channels').insert({
+    const channelData = {
         name,
         description,
         join_link,
         category_id,
         contact_info,
         slug,
-        owner_id: user.id, // Server-side authenticated user ID - always reliable
+        owner_id: user.id,
         status: 'pending',
-        bot_token: botToken, // Auto-generated unique token, ready to use immediately
-    });
+        bot_token: botToken,
+    };
 
-    if (error) {
-        console.error('Submission error:', error);
+    // Service role key varsa admin client kullan (RLS bypass), yoksa user client ile dene
+    let insertError;
+    if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
+        const { getAdminClient } = await import('@/lib/supabaseAdmin');
+        const adminClient = getAdminClient();
+        const { error } = await adminClient.from('channels').insert(channelData);
+        insertError = error;
+    } else {
+        const { error } = await supabase.from('channels').insert(channelData);
+        insertError = error;
+    }
+
+    if (insertError) {
+        console.error('Submission error:', insertError);
         return { error: 'Başvuru sırasında bir hata oluştu. Lütfen tekrar deneyin.' };
     }
 

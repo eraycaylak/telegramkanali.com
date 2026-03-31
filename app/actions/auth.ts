@@ -6,6 +6,25 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { getAdminClient } from '@/lib/supabaseAdmin';
 
+// Supabase hata mesajlarını Türkçeleştir
+function translateError(msg: string): string {
+    const map: Record<string, string> = {
+        'This endpoint requires a valid Bearer token': 'Sunucu yapılandırma hatası. Lütfen site yöneticisiyle iletişime geçin.',
+        'User already registered': 'Bu e-posta adresi zaten kayıtlı.',
+        'Password should be at least 6 characters': 'Şifre en az 6 karakter olmalıdır.',
+        'Invalid login credentials': 'E-posta veya şifre hatalı.',
+        'Email not confirmed': 'E-posta adresiniz henüz doğrulanmamış.',
+        'Signup requires a valid password': 'Geçerli bir şifre giriniz.',
+        'Unable to validate email address: invalid format': 'Geçersiz e-posta formatı.',
+        'Email rate limit exceeded': 'Çok fazla deneme yaptınız. Lütfen biraz bekleyin.',
+        'For security purposes, you can only request this after': 'Güvenlik nedeniyle lütfen biraz bekleyip tekrar deneyin.',
+    };
+    for (const [en, tr] of Object.entries(map)) {
+        if (msg.includes(en)) return tr;
+    }
+    return msg;
+}
+
 async function createClient() {
     const cookieStore = await cookies();
 
@@ -50,25 +69,47 @@ export async function signUp(formData: FormData) {
         return { error: 'Kullanıcı Sözleşmesini kabul etmeniz zorunludur.' };
     }
 
-    // Admin client ile kullanıcı oluştur — email rate limit yok, otomatik onaylı
-    const adminClient = getAdminClient();
-    const { data: createdUser, error: createError } = await adminClient.auth.admin.createUser({
-        email,
-        password,
-        email_confirm: true, // Email onayını otomatik geçir
-        user_metadata: { 
-            full_name: fullName,
-            legal_terms_accepted: true,
-            legal_terms_accepted_at: new Date().toISOString()
-        },
-    });
+    const metadata = {
+        full_name: fullName,
+        legal_terms_accepted: true,
+        legal_terms_accepted_at: new Date().toISOString()
+    };
 
-    if (createError) return { error: createError.message };
-
-    // Kullanıcıyı hemen oturum açtır
     const supabase = await createClient();
-    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
-    if (signInError) return { error: signInError.message };
+
+    // Service role key varsa admin API kullan (email onayı otomatik, rate limit yok)
+    if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
+        const adminClient = getAdminClient();
+        const { error: createError } = await adminClient.auth.admin.createUser({
+            email,
+            password,
+            email_confirm: true,
+            user_metadata: metadata,
+        });
+
+        if (createError) return { error: translateError(createError.message) };
+
+        // Kullanıcıyı hemen oturum açtır
+        const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+        if (signInError) return { error: translateError(signInError.message) };
+    } else {
+        // Service role key yoksa standart signUp kullan (anon key ile çalışır)
+        const { data, error: signUpError } = await supabase.auth.signUp({
+            email,
+            password,
+            options: {
+                data: metadata,
+                emailRedirectTo: 'https://telegramkanali.com/login',
+            },
+        });
+
+        if (signUpError) return { error: translateError(signUpError.message) };
+
+        // Eğer email doğrulaması gerekiyorsa kullanıcıyı bilgilendir
+        if (data?.user?.identities?.length === 0) {
+            return { error: 'Bu e-posta adresi zaten kayıtlı.' };
+        }
+    }
 
     revalidatePath('/');
     return { success: true };
@@ -85,7 +126,7 @@ export async function signIn(formData: FormData) {
         password,
     });
 
-    if (error) return { error: error.message };
+    if (error) return { error: translateError(error.message) };
 
     revalidatePath('/dashboard');
     return { success: true };
