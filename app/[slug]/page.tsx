@@ -1,4 +1,5 @@
-import { getCategoryBySlug, getChannelsByCategory, getCategories, getChannelBySlug, getFeaturedChannels, getChannels, getBlogPosts, getRedirect, getChannelsByCity, getPopularChannelsByCategory } from '@/lib/data';
+import { getCategoryBySlug, getChannelsByCategory, getCategories, getChannelBySlug, getFeaturedChannels, getChannels, getBlogPosts, getRedirect, getChannelsByCity } from '@/lib/data';
+import { getPromotedChannels } from '@/app/actions/promoted';
 import ChannelCard from '@/components/ChannelCard';
 import ChannelDetail from '@/components/ChannelDetail';
 import BannerGrid from '@/components/BannerGrid';
@@ -291,7 +292,17 @@ export default async function DynamicPage({ params, searchParams }: PageProps) {
     const allCategories = await getCategories();
     const { data: channels, count: totalCount } = await getChannels(page, LIMIT, undefined, category.id);
     const totalPages = Math.ceil(totalCount / LIMIT);
-    const popularChannels = page === 1 ? await getPopularChannelsByCategory(category.id, 4) : [];
+    const promotedData = page === 1 ? await getPromotedChannels(category.id) : [];
+    const popularChannels = promotedData.filter(p => p.channel).map(p => ({
+      id: p.channel!.id,
+      name: p.channel!.name,
+      slug: p.channel!.slug,
+      image: p.channel!.image,
+      description: p.channel!.description,
+      member_count: p.channel!.member_count,
+      category_id: p.channel!.category_id,
+      categoryName: p.channel!.categories?.name,
+    } as any)).slice(0, 4);
 
     const { data: blogPosts } = await getBlogPosts(1, 6, category.slug);
 
@@ -346,17 +357,7 @@ export default async function DynamicPage({ params, searchParams }: PageProps) {
               </h1>
               <p className="text-gray-500 text-sm mt-1">{category.description}</p>
             </div>
-            <div className="flex items-center gap-4 text-sm">
-              <div className="flex items-center gap-1.5 bg-blue-50 text-blue-700 px-3 py-1.5 rounded-full font-bold">
-                <span>{totalCount}</span> <span className="text-blue-500 font-normal">kanal</span>
-              </div>
-              <div className="flex items-center gap-1.5 bg-green-50 text-green-700 px-3 py-1.5 rounded-full font-bold text-xs">
-                ✓ Doğrulanmış
-              </div>
-              <div className="hidden md:flex items-center gap-1.5 bg-purple-50 text-purple-700 px-3 py-1.5 rounded-full font-bold text-xs">
-                2026 Güncel
-              </div>
-            </div>
+
           </div>
 
           {/* 🔥 Çok Tıklananlar — Above the Fold (Only on page 1) */}
