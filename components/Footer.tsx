@@ -85,8 +85,11 @@ export default async function Footer() {
                     </div>
                 </div>
 
-                <div className="mt-12 border-t border-gray-100 pt-8 text-center text-sm text-gray-500">
-                    <p>&copy; {new Date().getFullYear()} TelegramKanali.com. Tüm hakları saklıdır. Telegram, Telegram FZ-LLC'nin ticari markasıdır.</p>
+                <div className="mt-12 border-t border-gray-100 pt-6 space-y-4 text-center text-sm text-gray-500">
+                    <p className="text-xs text-gray-400 leading-relaxed max-w-3xl mx-auto">
+                        ⚠️ Sitemizde listelenen Telegram kanalları ve grupları topluluk tarafından paylaşılmaktadır. 5651 sayılı kanun kapsamında &quot;Yer Sağlayıcı&quot; olarak hizmet vermekteyiz. İçerikler kanal yöneticilerinin sorumluluğundadır. Detaylı bilgi için <a href="/kullanim-sartlari" className="underline hover:text-blue-600">Kullanım Şartları</a> ve <a href="/gizlilik" className="underline hover:text-blue-600">Gizlilik Politikası</a> sayfalarımızı inceleyebilirsiniz.
+                    </p>
+                    <p>&copy; {new Date().getFullYear()} TelegramKanali.com. Tüm hakları saklıdır. Telegram, Telegram FZ-LLC&apos;nin ticari markasıdır.</p>
                 </div>
             </div>
         </footer>

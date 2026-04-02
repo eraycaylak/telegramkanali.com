@@ -191,6 +191,28 @@ export async function getPopularChannels(limit: number = 5): Promise<Channel[]> 
 }
 
 
+// Fetch Popular Channels by Category (for "Çok Tıklananlar" section)
+export async function getPopularChannelsByCategory(categoryId: string, limit: number = 4): Promise<Channel[]> {
+    const { data, error } = await supabase
+        .from('channels')
+        .select('*, categories(name, slug)')
+        .eq('status', 'approved')
+        .eq('category_id', categoryId)
+        .order('clicks', { ascending: false, nullsFirst: false })
+        .order('score', { ascending: false })
+        .limit(limit);
+
+    if (error) {
+        console.error('Error fetching popular channels by category:', error);
+        return [];
+    }
+
+    return (data || []).map((d: any) => ({
+        ...d,
+        categoryName: d.categories?.name,
+    })) as Channel[];
+}
+
 // Helpers
 export async function getFeaturedChannels(): Promise<Channel[]> {
     const { data, error } = await supabase

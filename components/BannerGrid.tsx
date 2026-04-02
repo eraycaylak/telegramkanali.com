@@ -1,22 +1,15 @@
 import { getBanners, BannerType } from '@/app/actions/banners';
 import { Banner } from '@/lib/types';
-import { getSetting } from '@/app/actions/settings';
 import Image from 'next/image';
 
 interface BannerGridProps {
     type?: BannerType;
     categoryId?: string;
+    maxBanners?: number;
+    offset?: number;
 }
 
-export default async function BannerGrid({ type = 'homepage', categoryId }: BannerGridProps) {
-    // Check global banner toggle
-    try {
-        const bannersEnabled = await getSetting('banners_enabled');
-        if (bannersEnabled === 'false') return null;
-    } catch {
-        // If setting doesn't exist, default to enabled
-    }
-
+export default async function BannerGrid({ type = 'homepage', categoryId, maxBanners, offset = 0 }: BannerGridProps) {
     let banners: Banner[] = [];
     try {
         banners = await getBanners(type, categoryId, true);
@@ -26,9 +19,20 @@ export default async function BannerGrid({ type = 'homepage', categoryId }: Bann
 
     if (!banners || banners.length === 0) return null;
 
+    // Apply offset and maxBanners slicing
+    let displayBanners = banners;
+    if (offset > 0) {
+        displayBanners = displayBanners.slice(offset);
+    }
+    if (maxBanners && maxBanners > 0) {
+        displayBanners = displayBanners.slice(0, maxBanners);
+    }
+
+    if (displayBanners.length === 0) return null;
+
     return (
         <section className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-5 my-4">
-            {banners.map((banner) => (
+            {displayBanners.map((banner) => (
                 <a
                     key={banner.id}
                     href={banner.link_url || '#'}

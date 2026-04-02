@@ -9,6 +9,7 @@ import { useState, useEffect } from 'react';
 interface ChannelCardProps {
     channel: Channel;
     compact?: boolean;
+    miniCompact?: boolean;
 }
 
 // Generate a simple browser fingerprint
@@ -40,7 +41,7 @@ function generateFingerprint(): string {
     return Math.abs(hash).toString(36);
 }
 
-export default function ChannelCard({ channel, compact = false }: ChannelCardProps) {
+export default function ChannelCard({ channel, compact = false, miniCompact = false }: ChannelCardProps) {
     const categoryName = channel.categoryName || 'Kategori Yok';
     const [score, setScore] = useState(channel.score || 0);
     const [userVote, setUserVote] = useState<number | null>(null);
@@ -97,6 +98,49 @@ export default function ChannelCard({ channel, compact = false }: ChannelCardPro
             setLoading(false);
         }
     };
+
+    // MINI COMPACT MODE (For "Çok Tıklananlar" 2x2 grid)
+    if (miniCompact) {
+        return (
+            <div className="group relative flex items-center gap-2.5 rounded-xl border border-gray-100 bg-white p-2.5 shadow-sm transition-all hover:shadow-md hover:border-blue-200 h-full">
+                <Link href={`/${channel.slug}`} aria-label={channel.name} className="absolute inset-0 z-10" />
+
+                <div className="relative flex-shrink-0">
+                    {channel.image && channel.image !== '/images/logo.png' && !imageError ? (
+                        <Image
+                            src={channel.image}
+                            alt={channel.name}
+                            width={40}
+                            height={40}
+                            onError={() => setImageError(true)}
+                            className="h-10 w-10 rounded-full object-cover border border-gray-100 group-hover:scale-105 transition-transform"
+                        />
+                    ) : (
+                        <div className="h-10 w-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 font-bold text-sm border border-blue-100">
+                            {channel.name.charAt(0)}
+                        </div>
+                    )}
+                </div>
+
+                <div className="flex-1 min-w-0">
+                    <h3 className="font-bold text-gray-900 text-xs leading-tight truncate group-hover:text-blue-600 transition-colors">
+                        {channel.name}
+                    </h3>
+                    <div className="flex items-center gap-1 mt-0.5">
+                        <Users size={10} className="text-blue-500 flex-shrink-0" />
+                        <span className="text-[10px] text-gray-500 font-medium">
+                            {channel.member_count ? new Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 1 }).format(channel.member_count) : '---'}
+                        </span>
+                        {channel.verified && <BadgeCheck className="h-3 w-3 text-blue-500 flex-shrink-0" />}
+                    </div>
+                </div>
+
+                <div className="flex-shrink-0 z-20">
+                    <span className="text-[9px] font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded-md">→</span>
+                </div>
+            </div>
+        );
+    }
 
     // COMPACT MODE (For Popular Channels)
     if (compact) {

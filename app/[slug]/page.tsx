@@ -1,10 +1,8 @@
-import { getCategoryBySlug, getChannelsByCategory, getCategories, getChannelBySlug, getFeaturedChannels, getChannels, getBlogPosts, getRedirect, getChannelsByCity } from '@/lib/data';
+import { getCategoryBySlug, getChannelsByCategory, getCategories, getChannelBySlug, getFeaturedChannels, getChannels, getBlogPosts, getRedirect, getChannelsByCity, getPopularChannelsByCategory } from '@/lib/data';
 import ChannelCard from '@/components/ChannelCard';
 import ChannelDetail from '@/components/ChannelDetail';
 import BannerGrid from '@/components/BannerGrid';
 import FeaturedAds from '@/components/FeaturedAds';
-import PromotedChannels from '@/components/PromotedChannels';
-import BotNotificationCard from '@/components/BotNotificationCard';
 import TwitterFeed from '@/components/TwitterFeed';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -14,7 +12,7 @@ import { notFound, redirect } from 'next/navigation';
 import { Metadata } from 'next';
 import Pagination from '@/components/Pagination';
 import Comments from '@/components/Comments';
-import { Clock, Eye, AlertCircle } from 'lucide-react';
+import { Clock, Eye, AlertCircle, TrendingUp } from 'lucide-react';
 
 const baseUrl = 'https://telegramkanali.com';
 
@@ -293,11 +291,16 @@ export default async function DynamicPage({ params, searchParams }: PageProps) {
     const allCategories = await getCategories();
     const { data: channels, count: totalCount } = await getChannels(page, LIMIT, undefined, category.id);
     const totalPages = Math.ceil(totalCount / LIMIT);
+    const popularChannels = page === 1 ? await getPopularChannelsByCategory(category.id, 4) : [];
 
     const { data: blogPosts } = await getBlogPosts(1, 6, category.slug);
 
     const catNameLower = category.name.toLowerCase();
     const isRestrictedCategory = catNameLower.includes('18') || catNameLower.includes('iddaa') || catNameLower.includes('kripto');
+
+    // Split channels into batches for interleaving with banners
+    const firstBatch = channels.slice(0, 6);
+    const remainingChannels = channels.slice(6);
 
     return (
       <>
@@ -334,79 +337,56 @@ export default async function DynamicPage({ params, searchParams }: PageProps) {
         }} />
 
         <Header />
-        <main className="container mx-auto px-4 py-8 space-y-8">
-          {/* Category Header with SEO Intro */}
-          <div className="bg-gradient-to-br from-gray-50 to-white border rounded-xl p-8 shadow-sm">
-            <div className="text-center mb-6">
-              <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
-                🔥 {category.name} Telegram Kanalları (2026)
+        <main className="container mx-auto px-4 py-6 space-y-6">
+          {/* Compact Hero Header */}
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+              <h1 className="text-2xl md:text-3xl font-black text-gray-900">
+                {category.name} Telegram Kanalları
               </h1>
-              <p className="text-gray-600 max-w-2xl mx-auto text-lg">{category.description}</p>
+              <p className="text-gray-500 text-sm mt-1">{category.description}</p>
             </div>
-
-            {/* SEO Intro Section */}
-            {category.seo_intro ? (
-              <div className="mt-6 pt-6 border-t border-gray-100 prose prose-blue max-w-none">
-                <div className="text-gray-700 leading-relaxed" dangerouslySetInnerHTML={{ __html: category.seo_intro }} />
+            <div className="flex items-center gap-4 text-sm">
+              <div className="flex items-center gap-1.5 bg-blue-50 text-blue-700 px-3 py-1.5 rounded-full font-bold">
+                <span>{totalCount}</span> <span className="text-blue-500 font-normal">kanal</span>
               </div>
-            ) : (
-              <div className="mt-6 pt-6 border-t border-gray-100">
-                <p className="text-gray-600 leading-relaxed">
-                  {category.name} kategorisinde Türkiye'nin en popüler ve güvenilir Telegram kanallarını keşfedin.
-                  Her kanal editörlerimiz tarafından incelenmiş ve onaylanmıştır. Tek tıkla katılın!
-                </p>
+              <div className="flex items-center gap-1.5 bg-green-50 text-green-700 px-3 py-1.5 rounded-full font-bold text-xs">
+                ✓ Doğrulanmış
               </div>
-            )}
-
-            {/* Quick Stats */}
-            <div className="mt-6 flex justify-center gap-6 text-sm">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">{totalCount}</div>
-                <div className="text-gray-500">Kanal</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-green-600">✓</div>
-                <div className="text-gray-500">Doğrulanmış</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-purple-600">2026</div>
-                <div className="text-gray-500">Güncel</div>
+              <div className="hidden md:flex items-center gap-1.5 bg-purple-50 text-purple-700 px-3 py-1.5 rounded-full font-bold text-xs">
+                2026 Güncel
               </div>
             </div>
           </div>
 
-          {/* Legal Disclaimer for Restricted Categories */}
-          {isRestrictedCategory && (
-            <div className="bg-orange-50 border border-orange-200 p-6 rounded-xl shadow-sm">
-              <h3 className="text-orange-900 font-bold text-lg mb-2 flex items-center gap-2">
-                <AlertCircle className="w-6 h-6" /> 
-                Yasal Sorumluluk Reddi (Disclaimer)
-              </h3>
-              <p className="text-orange-800 text-sm leading-relaxed">
-                Bu kategoride (<strong>{category.name}</strong>) listelenen Telegram kanalları topluluk tarafından eklenmektedir. Türkiye Cumhuriyeti kanunlarına göre 18 yaşından küçüklerin şans oyunları, bahis veya müstehcenlik içeren kanallara erişimi yasaktır. Ayrıca kanallarda paylaşılan tüm finansal ve kripto bilgileri tamamen o kanalın kendi sorumluluğunda olup, borsalardaki işlemler kesinlikle <em>yatırım tavsiyesi değildir</em>. <strong>Siteyi kullanarak doğabilecek tüm hukuki ve maddi sorumluluğun size ait olduğunu kabul etmiş olursunuz.</strong> Sitemiz 5651 sayılı kanun kapsamında "Yer Sağlayıcı" olarak hizmet vermekte olup, içeriklere müdahale etmez; şikayetler <a href="/kullanim-sartlari" className="underline font-bold">Uyar-Kaldır</a> prensibiyle işlenir.
-              </p>
-            </div>
+          {/* 🔥 Çok Tıklananlar — Above the Fold (Only on page 1) */}
+          {page === 1 && popularChannels.length > 0 && (
+            <section>
+              <div className="flex items-center gap-2 mb-3">
+                <TrendingUp className="w-4 h-4 text-orange-500" />
+                <h2 className="text-sm font-bold text-gray-700 uppercase tracking-wider">Çok Tıklananlar</h2>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                {popularChannels.map((channel) => (
+                  <ChannelCard key={channel.id} channel={channel} miniCompact />
+                ))}
+              </div>
+            </section>
           )}
-
-          {/* Promoted Channels (Çok Tıklananlar) */}
-          <PromotedChannels categoryId={category.id} />
-
-          {/* Banner Grid */}
-          <BannerGrid type="category" categoryId={category.id} />
-
-          {/* Sponsored Banner Ads */}
-          <FeaturedAds adType="banner" maxAds={1} categoryId={category.id} />
 
           {/* Sponsored Featured Channels */}
           <FeaturedAds adType="featured" maxAds={6} categoryId={category.id} />
 
-          {/* Bot Bildirim Kartı */}
-          <BotNotificationCard categoryName={category.name} categorySlug={category.slug} />
+          {/* First 2 Banners */}
+          <BannerGrid type="category" categoryId={category.id} maxBanners={2} />
 
-          {/* Channels Grid */}
+          {/* Sponsored Banner Ad */}
+          <FeaturedAds adType="banner" maxAds={1} categoryId={category.id} />
+
+          {/* First Batch of Channels (6) */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
-            {channels.length > 0 ? (
-              channels.map((channel) => (
+            {firstBatch.length > 0 ? (
+              firstBatch.map((channel) => (
                 <ChannelCard key={channel.id} channel={channel} />
               ))
             ) : (
@@ -415,6 +395,20 @@ export default async function DynamicPage({ params, searchParams }: PageProps) {
               </div>
             )}
           </div>
+
+          {/* Remaining Banners (after 6th channel) */}
+          {remainingChannels.length > 0 && (
+            <BannerGrid type="category" categoryId={category.id} offset={2} />
+          )}
+
+          {/* Remaining Channels */}
+          {remainingChannels.length > 0 && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
+              {remainingChannels.map((channel) => (
+                <ChannelCard key={channel.id} channel={channel} />
+              ))}
+            </div>
+          )}
 
           {/* Pagination */}
           {totalPages > 1 && (
@@ -488,9 +482,16 @@ export default async function DynamicPage({ params, searchParams }: PageProps) {
             </div>
           )}
 
-          {/* SEO Content Section */}
+          {/* SEO Content Section — Below Channels */}
           <section className="grid gap-12 lg:grid-cols-3 pt-12 border-t border-gray-100">
             <div className="lg:col-span-2 space-y-8 text-gray-700 leading-relaxed">
+              {/* SEO Intro (moved from hero) */}
+              {category.seo_intro && (
+                <div className="prose prose-blue max-w-none">
+                  <div className="text-gray-700 leading-relaxed" dangerouslySetInnerHTML={{ __html: category.seo_intro }} />
+                </div>
+              )}
+
               <article className="prose prose-blue max-w-none">
                 <h2 className="text-3xl font-black text-gray-900 mb-6">
                   {category.name} Telegram Kanallarına Katılın
@@ -512,9 +513,6 @@ export default async function DynamicPage({ params, searchParams }: PageProps) {
                 </div>
                 <p className="mb-4">
                   Bu kategoride bulunan grup yöneticileri ve kullanıcılar, {category.name.toLowerCase()} hakkında genel veya özel tavsiyeler verir, güncel haberler ve bilgiler anlık olarak paylaşılır. Siz de kendi kanalınızı tanıtmak isterseniz <Link href="/kanal-ekle" className="text-blue-600 hover:underline font-bold">ücretsiz kanal ekle</Link> sayfamızı ziyaret edebilirsiniz.
-                </p>
-                <p className="text-sm text-gray-500 mt-6 p-6 bg-red-50 rounded-xl border border-red-100">
-                  <strong className="text-red-700">Yasal Uyarı:</strong> Sitemizde bulunan Telegram grubu veya kanalları içerisindeki paylaşımlardan site yönetimimiz mesul değildir. Herhangi bir mağduriyette sorumluluk kabul etmemektedir. Tüm Telegram kanalları ve gruplarına karşı dikkatli olunuz ve kişisel bilgilerinizi paylaşmayınız.
                 </p>
               </article>
 
@@ -560,6 +558,15 @@ export default async function DynamicPage({ params, searchParams }: PageProps) {
               </div>
             </div>
           </section>
+
+          {/* Disclaimer — Compact, at the very bottom */}
+          {isRestrictedCategory && (
+            <aside className="mt-8 pt-6 border-t border-gray-100">
+              <p className="text-xs text-gray-400 leading-relaxed">
+                <strong className="text-gray-500">⚠️ Yasal Uyarı:</strong> Bu kategoride (<strong>{category.name}</strong>) listelenen Telegram kanalları topluluk tarafından eklenmektedir. 18 yaşından küçüklerin şans oyunları, bahis veya müstehcenlik içeren kanallara erişimi yasaktır. Finansal ve kripto bilgileri yatırım tavsiyesi niteliği taşımaz. Sitemiz 5651 sayılı kanun kapsamında "Yer Sağlayıcı" olarak hizmet vermektedir. Detaylar için <Link href="/kullanim-sartlari" className="underline text-gray-500 hover:text-blue-600">Kullanım Şartları</Link> sayfamızı inceleyebilirsiniz.
+              </p>
+            </aside>
+          )}
         </main>
         <Footer />
       </>
