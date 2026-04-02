@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ShieldCheck, Zap, Globe, HelpCircle, AlertCircle, RefreshCw } from 'lucide-react';
+import { Globe, HelpCircle, AlertCircle, RefreshCw } from 'lucide-react';
 import { getCategories, getChannels, getFeaturedChannels, getPopularChannels } from '@/lib/data';
 import ChannelCard from '@/components/ChannelCard';
 import BannerGrid from '@/components/BannerGrid';
@@ -117,6 +117,10 @@ export default async function Home({ searchParams }: HomeProps) {
 
   const totalPages = Math.ceil(totalCount / LIMIT);
 
+  // Split channels into batches for interleaving with banners
+  const firstBatch = allChannels.slice(0, 6);
+  const remainingChannels = allChannels.slice(6);
+
   // Sayfalama (Pagination) SEO URL Builder
   const buildPageUrl = (targetPage: number) => {
     const params = new URLSearchParams();
@@ -146,7 +150,7 @@ export default async function Home({ searchParams }: HomeProps) {
   return (
     <div className="space-y-6">
 
-      {/* Dynamic ItemList Schema (GÖREV 3) */}
+      {/* Dynamic ItemList Schema */}
       {allChannels.length > 0 && (
         <JsonLd data={generateItemListSchema(
           allChannels.map((ch, i) => ({ name: ch.name, url: `https://telegramkanali.com/${ch.slug}`, position: i + 1 })),
@@ -154,7 +158,7 @@ export default async function Home({ searchParams }: HomeProps) {
         )} />
       )}
 
-      {/* Breadcrumb Schema (GÖREV 3) */}
+      {/* Breadcrumb Schema */}
       <JsonLd data={{
         "@context": "https://schema.org",
         "@type": "BreadcrumbList",
@@ -174,47 +178,63 @@ export default async function Home({ searchParams }: HomeProps) {
       {/* Story Ads */}
       <FeaturedAds adType="story" maxAds={10} />
 
-      {/* SEO H1 Hierarchy (Main Page Title) */}
-      <div className="text-center pb-2 pt-4">
-        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-1">Telegram Kanalları ve Grupları (2026)</h1>
-        <p className="text-gray-500 text-sm tracking-wide">Güncel ve Aktif Telegram Kanalları - Mart 2026</p>
+      {/* Compact Hero Header */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-black text-gray-900">
+            Telegram Kanalları ve Grupları
+          </h1>
+          <p className="text-gray-500 text-sm mt-1">Güncel ve aktif Telegram kanalları dizini</p>
+        </div>
       </div>
 
-      {/* Promoted Channels (Çok Tıklananlar) */}
+      {/* 🔥 Öne Çıkanlar — Above the Fold */}
       <PromotedChannels />
 
-      {/* Banner Grid (Dynamic from DB - Only show if no search) */}
-      {!search && !categoryId && <BannerGrid />}
-
-      {/* Banner Ads */}
-      <FeaturedAds adType="banner" maxAds={100} />
+      {/* First 2 Banners */}
+      {!search && !categoryId && <BannerGrid maxBanners={2} />}
 
       {/* Sponsored Featured Channels */}
-      <FeaturedAds adType="featured" maxAds={100} />
+      <FeaturedAds adType="featured" maxAds={6} />
 
-      {/* MASSIVE Channels Grid */}
+      {/* Sponsored Banner Ads */}
+      <FeaturedAds adType="banner" maxAds={1} />
+
+      {/* First Batch of Channels (6) */}
       <section id="channels-list" className="scroll-mt-20">
         <h2 className="sr-only">Kanal Listesi</h2>
-        <div className="flex justify-between items-center mb-4">
-          <span className="text-sm text-gray-500 font-medium">Toplam {totalCount} kanal listeleniyor</span>
-        </div>
 
         {allChannels.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
-            {allChannels.map((channel, index) => (
-              <div key={channel.id} className="contents">
-                <ChannelCard channel={channel} />
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
+              {firstBatch.map((channel) => (
+                <ChannelCard key={channel.id} channel={channel} />
+              ))}
+            </div>
 
-                {/* Ad Placeholder after 6th item */}
-                {index === 5 && (
-                  <div className="col-span-1 sm:col-span-2 lg:col-span-3 my-4 p-4 border-2 border-dashed border-gray-200 rounded-xl bg-gray-50 flex flex-col items-center justify-center min-h-[120px] relative overflow-hidden">
-                    <span className="text-gray-400 font-bold tracking-widest text-sm z-10">REKLAM ALANI</span>
-                    <div className="absolute inset-0 bg-[url('/pattern.svg')] opacity-5"></div>
-                  </div>
-                )}
+            {/* Remaining Banners */}
+            {remainingChannels.length > 0 && !search && !categoryId && (
+              <div className="my-6">
+                <BannerGrid offset={2} />
               </div>
-            ))}
-          </div>
+            )}
+
+            {/* Remaining Banner Ads */}
+            {remainingChannels.length > 0 && (
+              <div className="my-6">
+                <FeaturedAds adType="banner" maxAds={2} />
+              </div>
+            )}
+
+            {/* Remaining Channels */}
+            {remainingChannels.length > 0 && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6 mt-6">
+                {remainingChannels.map((channel) => (
+                  <ChannelCard key={channel.id} channel={channel} />
+                ))}
+              </div>
+            )}
+          </>
         ) : (
           <div className="text-center py-20 bg-gray-50 rounded-xl border border-dashed border-gray-300">
             <p className="text-gray-500 text-lg">Aradığınız kriterlere uygun kanal bulunamadı.</p>
@@ -223,16 +243,17 @@ export default async function Home({ searchParams }: HomeProps) {
         )}
 
         {/* Pagination */}
-        <div className="mt-12 flex justify-center">
-          <Pagination totalPages={totalPages} currentPage={page} searchParams={resolvedSearchParams} />
-        </div>
+        {totalPages > 1 && (
+          <div className="mt-12 flex justify-center">
+            <Pagination totalPages={totalPages} currentPage={page} searchParams={resolvedSearchParams} />
+          </div>
+        )}
       </section>
 
-      {/* SEO / Blog Content Section */}
+      {/* SEO Content Section — Below Channels */}
       <section className="grid gap-12 lg:grid-cols-3 pt-12 border-t border-gray-100 mt-12">
         <div className="lg:col-span-2 space-y-8 text-gray-700 leading-relaxed">
           <article className="prose prose-blue max-w-none">
-            {/* Changed from H3 to H2 */}
             <h2 className="text-3xl font-bold text-gray-900 mb-4 flex items-center gap-2">
               <span className="text-blue-500">Telegram</span> Kanalları (2026)
             </h2>
@@ -240,7 +261,6 @@ export default async function Home({ searchParams }: HomeProps) {
               Telegram, güvenli ve hızlı mesajlaşma deneyimi sunan popüler bir uygulamadır. Sitemizdeki <Link href="/teknoloji" className="text-blue-600 font-bold hover:underline">Teknoloji Telegram kanalları</Link> listesi ile ilgi alanlarınıza uygun toplulukları kolayca keşfedebilirsiniz. Aktif olarak güncellenen dizinimiz sayesinde binlerce farklı kategoride en kaliteli gruplara ulaşmak artık çok daha kolay.
             </p>
 
-            {/* Changed from H4 to H3 */}
             <h3 className="text-2xl font-bold text-gray-800 mt-8 mb-3">Popüler Telegram Kanalları ve Kategorileri</h3>
             <p className="mb-4">
               Kullanıcılarımızın ilgi alanlarına göre özenle listelediğimiz kategoriler sayesinde, aradığınız içeriğe hızlıca ulaşabilirsiniz. Örneğin, internet dünyasındaki son gelişmeleri takip etmek ve yeni bilgiler öğrenmek isterseniz <Link href="/teknoloji" className="text-blue-600 font-bold hover:underline">Teknoloji Kanalları</Link> kategorimizi inceleyebilirsiniz. Yatırım araçları, borsa ve dijital varlıklarla ilgilenen kullanıcılarımız içinse özel olarak derlenmiş <Link href="/kripto-para" className="text-blue-600 font-bold hover:underline">Kripto Para Kanalları</Link> bölümümüz oldukça yoğun ilgi görmektedir.
@@ -252,33 +272,41 @@ export default async function Home({ searchParams }: HomeProps) {
             <div className="bg-blue-50 p-6 rounded-xl border border-blue-100 my-6 flex items-start gap-4">
               <Globe className="text-blue-500 flex-shrink-0 mt-1" size={32} />
               <div>
-                {/* Changed from H4 to H3 */}
                 <h3 className="font-bold text-gray-900 text-lg mb-2">Telegram Kanallarına Nasıl Katılınır?</h3>
                 <p className="text-sm">
                   Sitemiz üzerinden "Kanala Git" veya "Katıl" butonlarına tıklayarak doğrudan Telegram uygulamasına yönlendirilirsiniz. Öncesinde bir hesaba ihtiyacınız varsa uygulamasını indirip kısa sürede kullanmaya başlayabilirsiniz.
                 </p>
               </div>
             </div>
-
-            <p className="text-xs text-gray-500 leading-relaxed mt-4">
-              * Not: Sitemizde yer alan listeler topluluk paylaşımlarıyla oluşturulmaktadır. Herhangi bir kanala/gruba katılırken platform kurallarına uymayı unutmayınız.
-            </p>
           </article>
         </div>
 
         {/* Sidebar */}
         <div className="space-y-8">
-          <div className="bg-gray-50 rounded-xl p-6 border border-gray-100">
-            <h3 className="font-bold text-gray-900 mb-4 text-lg">Kategoriler</h3>
-            <ul className="space-y-3">
+          <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+            <h3 className="font-bold text-gray-900 mb-4 text-lg border-b pb-2">Kategoriler</h3>
+            <ul className="space-y-1">
               {categories.map((c) => (
                 <li key={c.id}>
-                  <Link href={`/${c.slug}`} className="flex items-center justify-between text-gray-600 hover:text-blue-600 hover:pl-2 transition-all">
-                    <span>{c.name}</span>
+                  <Link
+                    href={`/${c.slug}`}
+                    className="block px-3 py-2.5 rounded-xl transition-all text-sm text-gray-600 hover:bg-gray-50 hover:text-blue-600"
+                  >
+                    {c.name}
                   </Link>
                 </li>
               ))}
             </ul>
+          </div>
+
+          <div className="bg-gradient-to-br from-purple-500 to-blue-600 rounded-2xl p-6 text-white shadow-xl shadow-purple-500/20">
+            <h3 className="font-extrabold mb-2 text-lg">Kanalınızı Öne Çıkarın</h3>
+            <p className="text-sm text-purple-100 mb-6 opacity-90">
+              Jeton satın alarak kanalınızı en üst sıraya taşıyın ve binlerce yeni abone kazanın.
+            </p>
+            <Link href="/dashboard/ads" className="block w-full bg-white text-purple-600 text-center font-black py-3 rounded-xl hover:bg-purple-50 transition-colors">
+              HEMEN BAŞLA
+            </Link>
           </div>
         </div>
       </section>
