@@ -911,7 +911,7 @@ export default async function DynamicPage({ params, searchParams }: PageProps) {
                         )}
                         <div className="flex-1 min-w-0">
                           <h4 className="font-bold text-sm text-gray-900 group-hover:text-blue-600 truncate">{sc.name}</h4>
-                          <p className="text-xs text-gray-500 truncate">{sc.member_count?.toLocaleString()} abone</p>
+                          <p className="text-xs text-gray-500 truncate">{(sc.member_count || (sc as any).stats?.subscribers) ? `${(sc.member_count || (sc as any).stats?.subscribers)?.toLocaleString()} abone` : sc.categoryName}</p>
                         </div>
                       </Link>
                     ))}
@@ -935,7 +935,7 @@ export default async function DynamicPage({ params, searchParams }: PageProps) {
                       )}
                       <div className="flex-1 min-w-0">
                         <h4 className="font-bold text-sm text-gray-900 group-hover:text-blue-600 truncate">{featured.name}</h4>
-                        <p className="text-xs text-gray-500 truncate">{featured.member_count?.toLocaleString()} abone</p>
+                        <p className="text-xs text-gray-500 truncate">{(featured.member_count || (featured as any).stats?.subscribers) ? `${(featured.member_count || (featured as any).stats?.subscribers)?.toLocaleString()} abone` : featured.categoryName}</p>
                       </div>
                     </Link>
                   ))}
