@@ -118,9 +118,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.7,
     }));
 
+    // İfşa programatik SEO sayfaları
+    const ifsaPages = [
+        'telegram-ifsa-kanallari',
+        'telegram-unlu-ifsa-kanallari',
+        'telegram-18-ifsa-kanallari',
+        'telegram-turk-ifsa-kanallari',
+        'telegram-ifsa',
+    ].map(slug => ({
+        url: `${baseUrl}/${slug}`,
+        lastModified: new Date(),
+        changeFrequency: 'daily' as const,
+        priority: 0.9,
+    }));
+
     return [
         ...staticPages,
         ...cityPages,
+        ...ifsaPages,
         ...categoriesUrls,
         ...categoriesUrlsEn,
         ...seoPageUrls,
