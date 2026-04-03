@@ -895,15 +895,43 @@ export default async function DynamicPage({ params, searchParams }: PageProps) {
 
             {/* Sidebar */}
             <div className="space-y-6">
-              <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm sticky top-4">
-                <h3 className="font-bold text-gray-900 mb-4 border-b pb-2">Öne Çıkan Kanallar</h3>
-                <div className="space-y-4">
-                  {featuredChannels.map(featured => (
+              {/* İlgili Kanallar (same category) */}
+              {similarChannels.length > 0 && (
+                <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+                  <h3 className="font-bold text-gray-900 mb-4 border-b pb-2 text-sm uppercase tracking-wider">
+                    📺 Benzer {channel.categoryName} Kanalları
+                  </h3>
+                  <div className="space-y-3">
+                    {similarChannels.slice(0, 5).map(sc => (
+                      <Link key={sc.id} href={`/${sc.slug}`} className="flex items-center gap-3 group">
+                        {sc.image ? (
+                          <img src={sc.image} alt={sc.name} className="w-10 h-10 rounded-lg object-cover border" />
+                        ) : (
+                          <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-sm">{sc.name[0]}</div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-bold text-sm text-gray-900 group-hover:text-blue-600 truncate">{sc.name}</h4>
+                          <p className="text-xs text-gray-500 truncate">{sc.member_count?.toLocaleString()} abone</p>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                  <Link href={`/${(channel as any).categories?.slug}`} className="block mt-4 text-center text-blue-600 hover:text-blue-800 text-sm font-bold">
+                    Tüm {channel.categoryName} Kanalları →
+                  </Link>
+                </div>
+              )}
+
+              {/* Öne Çıkan Kanallar */}
+              <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+                <h3 className="font-bold text-gray-900 mb-4 border-b pb-2 text-sm uppercase tracking-wider">⭐ Öne Çıkan Kanallar</h3>
+                <div className="space-y-3">
+                  {featuredChannels.slice(0, 4).map(featured => (
                     <Link key={featured.id} href={`/${featured.slug}`} className="flex items-center gap-3 group">
                       {featured.image ? (
                         <img src={featured.image} alt={featured.name} className="w-10 h-10 rounded-lg object-cover border" />
                       ) : (
-                        <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600 font-bold">{featured.name[0]}</div>
+                        <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-sm">{featured.name[0]}</div>
                       )}
                       <div className="flex-1 min-w-0">
                         <h4 className="font-bold text-sm text-gray-900 group-hover:text-blue-600 truncate">{featured.name}</h4>
@@ -914,17 +942,44 @@ export default async function DynamicPage({ params, searchParams }: PageProps) {
                 </div>
               </div>
 
-              {/* Internal Link Block */}
-              <div className="bg-blue-50 p-6 rounded-xl border border-blue-100">
-                <h3 className="font-bold text-blue-900 mb-3 text-sm">Popüler Kategoriler</h3>
+              {/* İfşa Sayfaları - sadece +18 kanalları için */}
+              {channel.category_id === '18' && (
+                <div className="bg-red-50 p-5 rounded-xl border border-red-100">
+                  <h3 className="font-bold text-red-900 mb-3 text-sm uppercase tracking-wider">🔥 İlgili Sayfalar</h3>
+                  <ul className="space-y-2">
+                    <li><Link href="/telegram-ifsa-kanallari" className="text-red-700 hover:text-red-900 hover:underline text-sm">→ Telegram İfşa Kanalları 2026</Link></li>
+                    <li><Link href="/telegram-unlu-ifsa-kanallari" className="text-red-700 hover:text-red-900 hover:underline text-sm">→ Ünlü İfşa Kanalları</Link></li>
+                    <li><Link href="/telegram-turk-ifsa-kanallari" className="text-red-700 hover:text-red-900 hover:underline text-sm">→ Türk İfşa Kanalları</Link></li>
+                    <li><Link href="/telegram-18-ifsa-kanallari" className="text-red-700 hover:text-red-900 hover:underline text-sm">→ +18 İfşa Kanalları</Link></li>
+                    <li><Link href="/18" className="text-red-700 hover:text-red-900 hover:underline text-sm font-bold">→ Tüm +18 Kanalları</Link></li>
+                  </ul>
+                </div>
+              )}
+
+              {/* Banner Alanı */}
+              <BannerGrid type="category" categoryId={channel.category_id || ''} maxBanners={1} />
+
+              {/* Kategori Linkleri */}
+              <div className="bg-blue-50 p-5 rounded-xl border border-blue-100">
+                <h3 className="font-bold text-blue-900 mb-3 text-sm uppercase tracking-wider">📂 Popüler Kategoriler</h3>
                 <div className="flex flex-wrap gap-2">
-                                    <Link href="/teknoloji" className="text-xs bg-white text-blue-700 px-3 py-1.5 rounded-full border border-blue-200 hover:bg-blue-600 hover:text-white transition-all">Teknoloji</Link>
-                                    <Link href="/kripto-para" className="text-xs bg-white text-blue-700 px-3 py-1.5 rounded-full border border-blue-200 hover:bg-blue-600 hover:text-white transition-all">Kripto Para</Link>
-                                    <Link href="/egitim-ders" className="text-xs bg-white text-blue-700 px-3 py-1.5 rounded-full border border-blue-200 hover:bg-blue-600 hover:text-white transition-all">Eğitim</Link>
-                                    <Link href="/haber" className="text-xs bg-white text-blue-700 px-3 py-1.5 rounded-full border border-blue-200 hover:bg-blue-600 hover:text-white transition-all">Haber</Link>
-                                    <Link href="/spor" className="text-xs bg-white text-blue-700 px-3 py-1.5 rounded-full border border-blue-200 hover:bg-blue-600 hover:text-white transition-all">Spor</Link>
-                                    <Link href="/sohbet" className="text-xs bg-white text-blue-700 px-3 py-1.5 rounded-full border border-blue-200 hover:bg-blue-600 hover:text-white transition-all">Sohbet</Link>
-                                </div>
+                  <Link href="/teknoloji" className="text-xs bg-white text-blue-700 px-3 py-1.5 rounded-full border border-blue-200 hover:bg-blue-600 hover:text-white transition-all">Teknoloji</Link>
+                  <Link href="/kripto-para" className="text-xs bg-white text-blue-700 px-3 py-1.5 rounded-full border border-blue-200 hover:bg-blue-600 hover:text-white transition-all">Kripto Para</Link>
+                  <Link href="/egitim-ders" className="text-xs bg-white text-blue-700 px-3 py-1.5 rounded-full border border-blue-200 hover:bg-blue-600 hover:text-white transition-all">Eğitim</Link>
+                  <Link href="/haber" className="text-xs bg-white text-blue-700 px-3 py-1.5 rounded-full border border-blue-200 hover:bg-blue-600 hover:text-white transition-all">Haber</Link>
+                  <Link href="/spor" className="text-xs bg-white text-blue-700 px-3 py-1.5 rounded-full border border-blue-200 hover:bg-blue-600 hover:text-white transition-all">Spor</Link>
+                  <Link href="/sohbet" className="text-xs bg-white text-blue-700 px-3 py-1.5 rounded-full border border-blue-200 hover:bg-blue-600 hover:text-white transition-all">Sohbet</Link>
+                  <Link href="/18" className="text-xs bg-white text-blue-700 px-3 py-1.5 rounded-full border border-blue-200 hover:bg-blue-600 hover:text-white transition-all">+18</Link>
+                </div>
+              </div>
+
+              {/* Kanal Ekle CTA */}
+              <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl p-5 text-white">
+                <h3 className="font-bold text-lg mb-2">🚀 Kanalınızı Ekleyin</h3>
+                <p className="text-blue-100 text-sm mb-4">Telegram kanalınızı binlerce kullanıcıya tanıtın.</p>
+                <Link href="/kanal-ekle" className="block w-full bg-white text-blue-600 text-center font-black py-2.5 rounded-xl hover:bg-blue-50 transition text-sm">
+                  ÜCRETSİZ EKLE
+                </Link>
               </div>
             </div>
           </div>
