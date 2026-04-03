@@ -201,22 +201,24 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   // 2. Try Channel
   const channel = await getChannelBySlug(slug);
   if (channel) {
+    const ch = channel as any;
+    const metaDesc = ch.seo_description || `${channel.name} Telegram kanalına katılın. ${channel.description?.slice(0, 150)}... En güncel ${channel.categoryName || 'Telegram'} kanalları.`;
     return {
       title: `${channel.name} Telegram Kanalı - Katıl (2026)`,
-      description: `${channel.name} Telegram kanalına katılın. ${channel.description?.slice(0, 150)}... En güncel ${channel.categoryName || 'Telegram'} kanalları.`,
+      description: metaDesc,
       alternates: {
         canonical: `${baseUrl}/${channel.slug}`,
       },
       openGraph: {
         title: `${channel.name} Telegram Kanalı - Katıl (2026)`,
-        description: `${channel.name} Telegram kanalına katılın. ${channel.description?.slice(0, 150)}...`,
+        description: metaDesc,
         url: `${baseUrl}/${channel.slug}`,
         images: channel.image ? [{ url: channel.image }] : undefined,
         type: 'article',
       },
       twitter: {
         title: `${channel.name} Telegram Kanalı - Katıl (2026)`,
-        description: `${channel.name} Telegram kanalına katılın.`,
+        description: metaDesc,
         images: channel.image ? [channel.image] : undefined,
       }
     };
