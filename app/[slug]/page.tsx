@@ -161,24 +161,6 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   // 1. Try Category
   const category = await getCategoryBySlug(slug);
   if (category) {
-    // +18 özel meta — ifşa kelimelerini ekle
-    if (category.slug === '18') {
-      return {
-        title: '+18 Telegram Kanalları ve İfşa Grupları (2026) | Güncel Liste',
-        description: '+18 Telegram kanalları, ifşa grupları ve yetişkin sohbet kanalları 2026 güncel listesi. En popüler Telegram ifşa kanallarına göz atın.',
-        alternates: { canonical: `${baseUrl}/18` },
-        openGraph: {
-          title: '+18 Telegram Kanalları ve İfşa Grupları (2026)',
-          description: '+18 Telegram kanalları, ifşa grupları ve yetişkin sohbet kanalları 2026 güncel listesi.',
-          url: `${baseUrl}/18`,
-          type: 'website',
-        },
-        twitter: {
-          title: '+18 Telegram Kanalları ve İfşa Grupları (2026)',
-          description: 'En popüler +18 Telegram ifşa kanalları ve yetişkin grupları.',
-        },
-      };
-    }
     return {
       title: `${category.name} Telegram Kanalları - 2026`,
       description: `${category.name} kategorisindeki en iyi ve popüler Telegram kanallarını keşfedin. Güvenilir ${category.name} grupları ve listeleri.`,
