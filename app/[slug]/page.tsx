@@ -841,7 +841,7 @@ export default async function DynamicPage({ params, searchParams }: PageProps) {
   // === RENDER CHANNEL VIEW ===
   if (channel) {
     // Fetch related/featured channels for sidebar or bottom
-    const featuredChannels = await getFeaturedChannels();
+    const featuredChannels = await getFeaturedChannels(false);
 
     // Fetch similar channels (same category)
     const similarChannels = channel.category_id

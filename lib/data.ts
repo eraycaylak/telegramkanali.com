@@ -2,6 +2,9 @@ import { supabase } from './supabaseClient';
 import { Channel, Category, SeoPage, BlogPost } from './types';
 import { getActiveAds } from '@/app/actions/tokens';
 
+// Anasayfada gösterilmeyecek kategoriler (+18, İDDAA)
+const EXCLUDED_HOMEPAGE_CATEGORIES = ['18', 'iddaa'];
+
 // Helper: Get IDs of channels with active featured campaigns
 async function getSponsoredChannelIds(categoryId?: string): Promise<string[]> {
     try {
@@ -52,6 +55,13 @@ export async function getChannels(
         .from('channels')
         .select('*, categories(name, slug)', { count: 'exact' })
         .eq('status', 'approved');
+
+    // Anasayfada (kategori filtresi yokken) +18 ve iddaa kanallarını hariç tut
+    if (!categoryId || categoryId === 'all') {
+        EXCLUDED_HOMEPAGE_CATEGORIES.forEach(cat => {
+            query = query.neq('category_id', cat);
+        });
+    }
 
     if (search) {
         const term = search.replace(/[%_]/g, '\\$&'); // escape special chars
@@ -172,11 +182,16 @@ export async function getChannelsByCity(
 // Fetch Popular Channels (High Score)
 // Fetch Popular Channels (High Score)
 export async function getPopularChannels(limit: number = 5): Promise<Channel[]> {
-    const { data, error } = await supabase
+    let query = supabase
         .from('channels')
         .select('*, categories(name, slug)')
-        .eq('status', 'approved')
-        .order('score', { ascending: false }) // Highest score first
+        .eq('status', 'approved');
+    // Anasayfadaki popüler kanallardan +18 ve iddaa'yı hariç tut
+    EXCLUDED_HOMEPAGE_CATEGORIES.forEach(cat => {
+        query = query.neq('category_id', cat);
+    });
+    const { data, error } = await query
+        .order('score', { ascending: false })
         .limit(limit);
 
     if (error) {
@@ -214,12 +229,19 @@ export async function getPopularChannelsByCategory(categoryId: string, limit: nu
 }
 
 // Helpers
-export async function getFeaturedChannels(): Promise<Channel[]> {
-    const { data, error } = await supabase
+export async function getFeaturedChannels(excludeAdult: boolean = true): Promise<Channel[]> {
+    let query = supabase
         .from('channels')
         .select('*, categories(name, slug)')
         .eq('featured', true)
         .eq('status', 'approved');
+    // excludeAdult true ise +18 ve iddaa kanallarını hariç tut (anasayfa için)
+    if (excludeAdult) {
+        EXCLUDED_HOMEPAGE_CATEGORIES.forEach(cat => {
+            query = query.neq('category_id', cat);
+        });
+    }
+    const { data, error } = await query;
 
     if (error) return [];
     return (data || []).map((d: any) => ({ ...d, category: d.category_id, categoryName: d.categories?.name })) as Channel[];
