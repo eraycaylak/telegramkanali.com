@@ -972,7 +972,6 @@ export default async function DynamicPage({ params, searchParams }: PageProps) {
             {page === 1 && (
               <SponsoredChannelSlot
                 categoryId={category.id}
-                rotationSeed={Math.floor(Date.now() / 60000)}
               />
             )}
             {firstBatch.length > 0 ? (

@@ -207,7 +207,7 @@ export default async function Home({ searchParams }: HomeProps) {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
               {/* 1. Pozisyon: Rotating Featured Ad (sadece page 1, filtre yoksa) */}
               {page === 1 && !search && !categoryId && (
-                <SponsoredChannelSlot rotationSeed={Math.floor(Date.now() / 60000)} />
+                <SponsoredChannelSlot />
               )}
               {firstBatch.map((channel) => (
                 <ChannelCard key={channel.id} channel={channel} />

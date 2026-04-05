@@ -207,13 +207,13 @@ export default function DashboardOverviewClient({
                         <p className="text-white font-bold text-sm">Destek & İletişim</p>
                         <p className="text-slate-400 text-xs mt-1 mb-4">Soru ve sorunlarınız için 7/24 ulaşın.</p>
                         <a
-                            href="https://t.me/sibelliee"
+                            href="https://t.me/comtelegramkanali"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="flex items-center gap-2 justify-center bg-sky-500/20 border border-sky-500/30 text-sky-300 text-xs font-bold py-2.5 px-4 rounded-xl hover:bg-sky-500/30 transition-all w-full"
                         >
                             <Phone size={13} />
-                            @sibelliee ile Konuş
+                            @comtelegramkanali ile Konuş
                         </a>
                     </div>
                 </div>

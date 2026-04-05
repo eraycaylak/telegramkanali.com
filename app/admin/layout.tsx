@@ -79,6 +79,7 @@ export default function AdminLayout({
         { name: 'Trend Yönetimi', href: '/admin/trends', icon: Zap, perm: 'manage_blog' },
         { name: 'Bannerlar', href: '/admin/banners', icon: Image, perm: 'manage_banners' },
         { name: 'Öne Çıkanlar', href: '/admin/promoted', icon: TrendingUp, perm: 'manage_banners' },
+        { name: 'Sponsor Yönetimi', href: '/admin/sponsor', icon: Zap, perm: 'manage_banners' },
         { name: 'Analitik', href: '/admin/analytics', icon: BarChart, perm: 'view_analytics' },
         { name: 'Ziyaretçi Profilleri', href: '/admin/visitors', icon: Users, perm: 'view_analytics' },
         { name: 'Ödemeler', href: '/admin/deposits', icon: Shield, perm: 'manage_users' }, // Re-using Shield or similar
