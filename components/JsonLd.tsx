@@ -21,13 +21,13 @@ export function generateWebsiteSchema(baseUrl: string) {
         "name": "Telegram Kanalları",
         "alternateName": "TelegramKanali.com",
         "url": baseUrl,
-        "description": "Türkiye'nin en kapsamlı Telegram kanal dizini. Haber, kripto, eğitim ve indirim kanallarını keşfedin.",
+        "description": "Türkiye'nin en kapsamlı Telegram kanal dizini. Haber, kripto, +18, eğitim ve indirim kanallarını keşfedin.",
         "inLanguage": "tr-TR",
         "potentialAction": {
             "@type": "SearchAction",
             "target": {
                 "@type": "EntryPoint",
-                "urlTemplate": `${baseUrl}/ara?q={search_term_string}`
+                "urlTemplate": `${baseUrl}/?q={search_term_string}`
             },
             "query-input": "required name=search_term_string"
         }
@@ -69,6 +69,36 @@ export function generateBreadcrumbSchema(items: Array<{ name: string, url: strin
             "name": item.name,
             "item": item.url
         }))
+    };
+}
+
+export function generateCollectionPageSchema(
+    name: string,
+    description: string,
+    url: string,
+    itemCount: number,
+    baseUrl: string
+) {
+    return {
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        "name": name,
+        "description": description,
+        "url": url,
+        "inLanguage": "tr-TR",
+        "numberOfItems": itemCount,
+        "publisher": {
+            "@type": "Organization",
+            "name": "TelegramKanali.com",
+            "url": baseUrl,
+        },
+        "breadcrumb": {
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+                { "@type": "ListItem", "position": 1, "name": "Anasayfa", "item": baseUrl },
+                { "@type": "ListItem", "position": 2, "name": name, "item": url }
+            ]
+        }
     };
 }
 
@@ -157,28 +187,7 @@ export function generateFAQSchema(faqs: Array<{ question: string, answer: string
     };
 }
 
-export function generateCollectionPageSchema(
-    name: string,
-    description: string,
-    url: string,
-    itemCount: number,
-    baseUrl: string
-) {
-    return {
-        "@context": "https://schema.org",
-        "@type": "CollectionPage",
-        "name": name,
-        "description": description,
-        "url": url,
-        "inLanguage": "tr-TR",
-        "numberOfItems": itemCount,
-        "isPartOf": {
-            "@type": "WebSite",
-            "name": "Telegram Kanallar\u0131",
-            "url": baseUrl
-        }
-    };
-}
+
 
 export function generateSiteLinksSearchBoxSchema(baseUrl: string) {
     return {
@@ -190,10 +199,38 @@ export function generateSiteLinksSearchBoxSchema(baseUrl: string) {
                 "@type": "SearchAction",
                 "target": {
                     "@type": "EntryPoint",
-                    "urlTemplate": `${baseUrl}/ara?q={search_term_string}`
+                    "urlTemplate": `${baseUrl}/?q={search_term_string}`
                 },
                 "query-input": "required name=search_term_string"
             }
         ]
+    };
+}
+
+export function generateAggregateRatingSchema(channel: {
+    name: string;
+    slug: string;
+    description?: string;
+    score?: number;
+    voteCount?: number;
+}, baseUrl: string) {
+    const rating = channel.score !== undefined
+        ? Math.min(5, Math.max(1, 3 + (channel.score / 20))).toFixed(1)
+        : '4.0';
+    const count = Math.max(channel.voteCount || 1, 5);
+
+    return {
+        "@context": "https://schema.org",
+        "@type": "Product",
+        "name": `${channel.name} Telegram Kanalı`,
+        "description": channel.description || `${channel.name} Telegram kanalı`,
+        "url": `${baseUrl}/${channel.slug}`,
+        "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": rating,
+            "bestRating": "5",
+            "worstRating": "1",
+            "ratingCount": count
+        }
     };
 }

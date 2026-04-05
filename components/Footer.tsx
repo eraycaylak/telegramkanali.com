@@ -11,7 +11,7 @@ export default async function Footer() {
 
                 {/* Sponsor links have been removed due to SEO policy */}
 
-                <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-5">
+                <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-6">
 
                     {/* Brand & Description */}
                     <div className="space-y-4">
@@ -59,6 +59,19 @@ export default async function Footer() {
                             <li><Link href="/sohbet" className="hover:text-blue-600">Sohbet Telegram Kanalları</Link></li>
                         </ul>
                     </div>
+
+                    {/* SEO - +18 Sayfaları */}
+                    <div>
+                        <h3 className="mb-4 text-sm font-semibold text-gray-900">+18 Sayfaları</h3>
+                        <ul className="space-y-2 text-sm text-gray-600">
+                            <li><Link href="/18" className="hover:text-red-600 font-medium transition-colors">+18 Telegram Kanalları</Link></li>
+                            <li><Link href="/telegram-18-kanallari" className="hover:text-red-600 transition-colors">Telegram +18 Kanalları</Link></li>
+                            <li><Link href="/18-telegram-kanallari" className="hover:text-red-600 transition-colors">+18 Telegram Kanalları Listesi</Link></li>
+                            <li><Link href="/18-telegram" className="hover:text-red-600 transition-colors">+18 Telegram</Link></li>
+                            <li><Link href="/telegram-ifsa-kanallari" className="hover:text-red-600 transition-colors">Telegram İfşa Kanalları</Link></li>
+                        </ul>
+                    </div>
+
 
                     {/* Quick Links */}
                     <div>

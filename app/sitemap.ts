@@ -118,6 +118,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.7,
     }));
 
+    // +18 Ana Keyword Hedef Sayfaları (telegram +18 kanalları, +18 telegram kanalları, +18 telegram)
+    const keyword18Pages = [
+        'telegram-18-kanallari',      // → "telegram +18 kanalları" (ANA HEDEF)
+        '18-telegram-kanallari',       // → "+18 telegram kanalları" (ANA HEDEF)
+        '18-telegram',                 // → "+18 telegram" (ANA HEDEF)
+        'turk-18-telegram-kanallari',  // → "türk +18 telegram kanalları"
+        'ucretsiz-18-telegram-kanallari', // → "ücretsiz +18 telegram"
+    ].map(slug => ({
+        url: `${baseUrl}/${slug}`,
+        lastModified: new Date(),
+        changeFrequency: 'daily' as const,
+        priority: 0.95,
+    }));
+
     // İfşa programatik SEO sayfaları
     const ifsaPages = [
         'telegram-ifsa-kanallari',
@@ -135,6 +149,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     return [
         ...staticPages,
         ...cityPages,
+        ...keyword18Pages,
         ...ifsaPages,
         ...categoriesUrls,
         ...categoriesUrlsEn,

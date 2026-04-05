@@ -26,8 +26,14 @@ export const metadata: Metadata = {
     default: "Telegram Kanalları | Türkiye'nin En Güncel Kanal Dizini",
     template: "%s | Telegram Kanalları"
   },
-  description: "En iyi Telegram kanalları, grupları ve botlarını keşfedin. Haber, Kripto, Eğitim ve İndirim kanalları listesi.",
-  keywords: ["telegram kanalları", "telegram grupları", "telegram türkiye", "telegram haber", "telegram kripto", "telegram indirim", "en iyi telegram kanalları", "telegram kanal listesi", "telegram 2026"],
+  description: "En iyi Telegram kanalları, grupları ve botlarını keşfedin. Telegram +18 kanalları, Haber, Kripto, Eğitim ve İndirim kanal listesi. 2026 güncel rehber.",
+  keywords: [
+    "telegram kanalları", "telegram grupları", "telegram türkiye",
+    "telegram +18 kanalları", "+18 telegram kanalları", "+18 telegram",
+    "telegram 18 kanalları", "telegram haber", "telegram kripto",
+    "telegram indirim", "en iyi telegram kanalları", "telegram kanal listesi",
+    "telegram 2026", "telegram ifşa kanalları", "yetişkin telegram kanalları"
+  ],
   authors: [{ name: "Telegram Kanalları", url: baseUrl }],
   creator: "Telegram Kanalları",
   publisher: "Telegram Kanalları",

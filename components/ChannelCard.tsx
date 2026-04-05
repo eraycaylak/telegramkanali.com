@@ -10,6 +10,7 @@ interface ChannelCardProps {
     channel: Channel;
     compact?: boolean;
     miniCompact?: boolean;
+    priority?: boolean; // Üstteki kartlar için preload (LCP optimizasyonu)
 }
 
 // Generate a simple browser fingerprint
@@ -41,7 +42,7 @@ function generateFingerprint(): string {
     return Math.abs(hash).toString(36);
 }
 
-export default function ChannelCard({ channel, compact = false, miniCompact = false }: ChannelCardProps) {
+export default function ChannelCard({ channel, compact = false, miniCompact = false, priority = false }: ChannelCardProps) {
     const categoryName = channel.categoryName || 'Kategori Yok';
     const [score, setScore] = useState(channel.score || 0);
     const [userVote, setUserVote] = useState<number | null>(null);
@@ -112,6 +113,8 @@ export default function ChannelCard({ channel, compact = false, miniCompact = fa
                             alt={channel.name}
                             width={40}
                             height={40}
+                            loading={priority ? 'eager' : 'lazy'}
+                            priority={priority}
                             onError={() => setImageError(true)}
                             className="h-10 w-10 rounded-full object-cover border border-gray-100 group-hover:scale-105 transition-transform"
                         />
@@ -155,6 +158,8 @@ export default function ChannelCard({ channel, compact = false, miniCompact = fa
                             alt={channel.name}
                             width={64}
                             height={64}
+                            loading={priority ? 'eager' : 'lazy'}
+                            priority={priority}
                             onError={() => setImageError(true)}
                             className="h-16 w-16 rounded-full object-cover border border-gray-100 shadow-sm group-hover:scale-105 transition-transform"
                         />
@@ -235,6 +240,8 @@ export default function ChannelCard({ channel, compact = false, miniCompact = fa
                         alt={channel.name}
                         width={80}
                         height={80}
+                        loading={priority ? 'eager' : 'lazy'}
+                        priority={priority}
                         onError={() => setImageError(true)}
                         className="h-12 w-12 md:h-20 md:w-20 flex-shrink-0 rounded-full object-cover border border-gray-200 shadow-sm"
                     />
