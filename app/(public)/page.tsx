@@ -9,6 +9,7 @@ import Pagination from '@/components/Pagination';
 import JsonLd, { generateFAQSchema, generateItemListSchema } from '@/components/JsonLd';
 import FeaturedAds from '@/components/FeaturedAds';
 import PromotedChannels from '@/components/PromotedChannels';
+import SponsoredChannelSlot from '@/components/SponsoredChannelSlot';
 import { Channel, Category } from '@/lib/types';
 import { Suspense } from 'react';
 import { Metadata } from 'next';
@@ -194,19 +195,20 @@ export default async function Home({ searchParams }: HomeProps) {
       {/* First 2 Banners */}
       {!search && !categoryId && <BannerGrid maxBanners={2} />}
 
-      {/* Sponsored Featured Channels */}
-      <FeaturedAds adType="featured" maxAds={6} />
-
       {/* Sponsored Banner Ads */}
       <FeaturedAds adType="banner" maxAds={1} />
 
-      {/* First Batch of Channels (6) */}
+      {/* First Batch of Channels (6) — 1. sıraya featured reklam eklendi */}
       <section id="channels-list" className="scroll-mt-20">
         <h2 className="sr-only">Kanal Listesi</h2>
 
         {allChannels.length > 0 ? (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
+              {/* 1. Pozisyon: Rotating Featured Ad (sadece page 1, filtre yoksa) */}
+              {page === 1 && !search && !categoryId && (
+                <SponsoredChannelSlot rotationSeed={Math.floor(Date.now() / 60000)} />
+              )}
               {firstBatch.map((channel) => (
                 <ChannelCard key={channel.id} channel={channel} />
               ))}

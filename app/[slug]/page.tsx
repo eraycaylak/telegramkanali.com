@@ -4,6 +4,7 @@ import ChannelCard from '@/components/ChannelCard';
 import ChannelDetail from '@/components/ChannelDetail';
 import BannerGrid from '@/components/BannerGrid';
 import FeaturedAds from '@/components/FeaturedAds';
+import SponsoredChannelSlot from '@/components/SponsoredChannelSlot';
 import TwitterFeed from '@/components/TwitterFeed';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -957,7 +958,7 @@ export default async function DynamicPage({ params, searchParams }: PageProps) {
           )}
 
           {/* Sponsored Featured Channels */}
-          <FeaturedAds adType="featured" maxAds={6} categoryId={category.id} />
+          {page === 1 && <FeaturedAds adType="featured" maxAds={3} categoryId={category.id} />}
 
           {/* First 2 Banners */}
           <BannerGrid type="category" categoryId={category.id} maxBanners={2} />
@@ -965,8 +966,15 @@ export default async function DynamicPage({ params, searchParams }: PageProps) {
           {/* Sponsored Banner Ad */}
           <FeaturedAds adType="banner" maxAds={1} categoryId={category.id} />
 
-          {/* First Batch of Channels (6) */}
+          {/* Kanal Listesi — 1. sıraya featured reklam (round-robin rotasyon) */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
+            {/* 1. Pozisyon: Rotating Featured Ad (sadece page 1) */}
+            {page === 1 && (
+              <SponsoredChannelSlot
+                categoryId={category.id}
+                rotationSeed={Math.floor(Date.now() / 60000)}
+              />
+            )}
             {firstBatch.length > 0 ? (
               firstBatch.map((channel) => (
                 <ChannelCard key={channel.id} channel={channel} />

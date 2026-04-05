@@ -24,35 +24,33 @@ export default async function DashboardOverview() {
 
     const adminClient = getAdminClient();
 
-    // Profil (token_balance)
-    const { data: profile } = await adminClient
-        .from('profiles')
-        .select('token_balance')
-        .eq('id', user.id)
-        .single();
+    // Paralel veri çekimi
+    const [profileRes, channelsRes, activeCampaignsRes, pendingCampaignsRes, totalViewsRes] = await Promise.all([
+        adminClient.from('profiles').select('token_balance').eq('id', user.id).single(),
+        adminClient.from('channels').select('member_count').eq('owner_id', user.id),
+        adminClient.from('ad_campaigns')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', user.id).eq('status', 'active'),
+        adminClient.from('ad_campaigns')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', user.id).eq('status', 'pending'),
+        adminClient.from('ad_campaigns')
+            .select('current_views')
+            .eq('user_id', user.id),
+    ]);
 
-    // Kullanıcının kanalları
-    const { data: channels } = await adminClient
-        .from('channels')
-        .select('member_count')
-        .eq('owner_id', user.id);
-
-    const channelCount = channels?.length || 0;
-    const totalMembers = channels?.reduce((acc, c) => acc + (c.member_count || 0), 0) || 0;
-
-    // Aktif reklam sayısı
-    const { count: activeAdCount } = await adminClient
-        .from('ad_campaigns')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', user.id)
-        .eq('status', 'active');
+    const channelCount = channelsRes.data?.length || 0;
+    const totalMembers = channelsRes.data?.reduce((acc: number, c: any) => acc + (c.member_count || 0), 0) || 0;
+    const totalViews = totalViewsRes.data?.reduce((acc: number, c: any) => acc + (c.current_views || 0), 0) || 0;
 
     return (
         <DashboardOverviewClient
             channels={channelCount}
-            balance={profile?.token_balance || 0}
+            balance={profileRes.data?.token_balance || 0}
             totalMembers={totalMembers}
-            activeAds={activeAdCount || 0}
+            activeAds={activeCampaignsRes.count || 0}
+            pendingAds={pendingCampaignsRes.count || 0}
+            totalViews={totalViews}
         />
     );
 }
