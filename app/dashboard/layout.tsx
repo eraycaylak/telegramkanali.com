@@ -5,16 +5,13 @@ import { usePathname } from 'next/navigation';
 import {
     LayoutDashboard,
     Tv,
-    CreditCard,
     Settings,
     PieChart,
     LogOut,
     Menu,
     X,
-    PlusCircle,
     TrendingUp,
     MessageCircle,
-    Coins,
     Zap,
     ChevronRight,
     Phone,
@@ -30,7 +27,6 @@ interface DashboardLayoutProps {
 const menuItems = [
     { name: 'Genel Bakış', href: '/dashboard', icon: LayoutDashboard, desc: 'Özet ve istatistikler' },
     { name: 'Kanallarım', href: '/dashboard/channels', icon: Tv, desc: 'Kanal yönetimi' },
-    { name: 'Jeton & Ödeme', href: '/dashboard/billing', icon: CreditCard, desc: 'Bakiye ve satın alma', badge: 'YENİ' },
     { name: 'Reklamlarım', href: '/dashboard/ads', icon: TrendingUp, desc: 'Kampanya yönetimi' },
     { name: 'Bot Ayarları', href: '/dashboard/bot', icon: Settings, desc: 'Telegram bot entegrasyonu' },
     { name: 'İstatistikler', href: '/dashboard/stats', icon: PieChart, desc: 'Kanal analizleri' },
@@ -101,11 +97,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2">
                                         <span>{item.name}</span>
-                                        {item.badge && (
-                                            <span className="text-[9px] font-bold bg-amber-500 text-white px-1.5 py-0.5 rounded-full">
-                                                {item.badge}
-                                            </span>
-                                        )}
                                     </div>
                                     {!active && (
                                         <div className="text-[10px] text-slate-500 font-normal truncate mt-0.5 group-hover:text-slate-400 transition-colors">
@@ -195,18 +186,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                         </a>
 
                         <Link
-                            href="/dashboard/billing"
-                            className="flex items-center gap-1.5 text-xs font-bold text-violet-300 bg-violet-600/20 px-3 py-2 rounded-lg border border-violet-500/20 hover:bg-violet-600/30 transition-all"
-                        >
-                            <Coins size={14} />
-                            <span className="hidden sm:inline">Jeton Yükle</span>
-                        </Link>
-
-                        <Link
                             href="/dashboard/kanal-ekle"
                             className="flex items-center gap-1.5 text-xs font-bold text-white bg-violet-600 px-3 py-2 rounded-lg hover:bg-violet-700 transition-all shadow-lg shadow-violet-900/30"
                         >
-                            <PlusCircle size={14} />
+                            <Zap size={14} />
                             <span className="hidden sm:inline">Kanal Ekle</span>
                         </Link>
                     </div>

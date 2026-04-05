@@ -2,403 +2,377 @@ import Link from 'next/link';
 import { Metadata } from 'next';
 import { getAdminClient } from '@/lib/supabaseAdmin';
 import {
-    Zap, Eye, TrendingUp, Star, Wallet, CheckCircle2,
-    ArrowRight, MessageCircle, Shield, Users, BarChart2
+    Zap, CheckCircle2, ArrowRight, MessageCircle,
+    Shield, Users, BarChart2, Star, Wallet
 } from 'lucide-react';
 
 export const metadata: Metadata = {
-    title: 'Telegram Kanal Reklamı Ver — Öne Çıkarma Paketleri | TelegramKanali.com',
-    description: '290.000+ aylık ziyaretçiye Telegram kanalınızı tanıtın. Reklam vermek için bizimle iletişime geçin.',
+    title: 'Telegram Kanal Reklamı Ver — NEON · PRIME · APEX | TelegramKanali.com',
+    description: '650.000+ aylık ziyaretçiye Telegram kanalınızı tanıtın. Kategori Banner, Anasayfa Banner ve Kategori Listeleme paketleri. Telegram Yıldız veya USDT ile öde.',
 };
 
-export const revalidate = 3600;
+export const dynamic = 'force-dynamic';
 
 const TELEGRAM_CONTACT = 'https://t.me/comtelegramkanali';
 
 async function getStats() {
     try {
         const db = getAdminClient();
-        const [channelRes, viewRes] = await Promise.all([
-            db.from('channels').select('*', { count: 'exact', head: true }).eq('status', 'approved'),
-            db.from('site_analytics').select('page_views').limit(500),
-        ]);
-        const totalViews = viewRes.data?.reduce((acc: number, r: any) => acc + (r.page_views || 0), 0) || 290000;
-        return { channels: channelRes.count || 1468, views: totalViews };
+        const channelRes = await db
+            .from('channels')
+            .select('*', { count: 'exact', head: true })
+            .eq('status', 'approved');
+        return { channels: channelRes.count || 1468 };
     } catch {
-        return { channels: 1468, views: 290000 };
+        return { channels: 1468 };
     }
 }
 
+// ─── Paketler ────────────────────────────────────────────────────────────────
 const PACKAGES = [
     {
-        label: 'Başlangıç',
-        views: '10.000',
+        id: 'neon',
+        name: 'NEON',
+        tagline: 'Kategori Reklamı',
+        emoji: '⚡',
+        desc: 'Kanalınız tam hedef kategorisinde öne çıkar. Kategoriye giren her ziyaretçi sizi görür.',
+        feature: 'Kategori sayfası üst banner alanı',
+        stars: '3.500',
+        usdt: '$57.50',
+        color: {
+            gradient: 'linear-gradient(135deg, rgba(139,92,246,0.25), rgba(109,40,217,0.08))',
+            border: 'rgba(139,92,246,0.45)',
+            glow: 'rgba(139,92,246,0.3)',
+            badge: '#7c3aed',
+            accent: '#a78bfa',
+            starBg: 'rgba(245,158,11,0.1)',
+            starBorder: 'rgba(245,158,11,0.25)',
+            usdtBg: 'rgba(16,185,129,0.1)',
+            usdtBorder: 'rgba(16,185,129,0.25)',
+        },
+    },
+    {
+        id: 'prime',
+        name: 'PRIME',
+        tagline: 'Kategori Listeleme',
+        emoji: '👑',
+        desc: 'Kanalınız seçilen kategorinin kanal listesinin 1. pozisyonuna pin\'lenir. Kimse aşağı kaydırmadan sizi görür.',
+        feature: 'Listenin 1. sırası — PIN konumu',
+        stars: '1.000',
         usdt: '$15',
-        stars: '250⭐',
-        desc: 'Kanalınızı test etmek için ideal giriş paketi.',
-        popular: false,
+        color: {
+            gradient: 'linear-gradient(135deg, rgba(14,165,233,0.25), rgba(2,132,199,0.08))',
+            border: 'rgba(14,165,233,0.45)',
+            glow: 'rgba(14,165,233,0.25)',
+            badge: '#0284c7',
+            accent: '#7dd3fc',
+            starBg: 'rgba(245,158,11,0.1)',
+            starBorder: 'rgba(245,158,11,0.25)',
+            usdtBg: 'rgba(16,185,129,0.1)',
+            usdtBorder: 'rgba(16,185,129,0.25)',
+        },
     },
     {
-        label: 'Büyüme',
-        views: '35.000',
-        usdt: '$40',
-        stars: '700⭐',
-        desc: 'Hedef kitlenize ulaşmaya başlayın.',
-        popular: false,
-    },
-    {
-        label: 'Pro',
-        views: '100.000',
-        usdt: '$90',
-        stars: '1.500⭐',
-        desc: 'Ciddi büyüme için en çok tercih edilen.',
-        popular: true,
-    },
-    {
-        label: 'Elite',
-        views: '300.000',
+        id: 'apex',
+        name: 'APEX',
+        tagline: 'Anasayfa Banner',
+        emoji: '🔱',
+        desc: 'Siteye giren her ziyaretçinin ilk gördüğü yer. Tüm kategorilerden gelen 650K+ trafik tek bir noktada.',
+        feature: 'Anasayfa üst banner — maksimum erişim',
+        stars: '9.000',
         usdt: '$200',
-        stars: '3.500⭐',
-        desc: 'Maksimum erişim ve marka bilinirliği.',
-        popular: false,
-    },
-    {
-        label: 'Ultra',
-        views: '1.000.000',
-        usdt: '$450',
-        stars: '8.000⭐',
-        desc: 'Sınırsız görünürlük, tam hâkimiyet.',
-        popular: false,
         highlight: true,
+        color: {
+            gradient: 'linear-gradient(135deg, rgba(245,158,11,0.22), rgba(217,119,6,0.08))',
+            border: 'rgba(245,158,11,0.5)',
+            glow: 'rgba(245,158,11,0.3)',
+            badge: '#d97706',
+            accent: '#fbbf24',
+            starBg: 'rgba(245,158,11,0.12)',
+            starBorder: 'rgba(245,158,11,0.3)',
+            usdtBg: 'rgba(16,185,129,0.1)',
+            usdtBorder: 'rgba(16,185,129,0.25)',
+        },
     },
 ];
 
-const AD_TYPES = [
-    {
-        icon: Zap,
-        label: '⚡ Öne Çıkarma',
-        desc: 'Kanalınız kanal listesinin 1. pozisyonuna yerleşir. Her ziyaretçi ilk sizin kanalınızı görür.',
-        gradient: 'from-violet-500/20 to-purple-500/10',
-        border: 'border-violet-500/30',
-        icon_color: 'text-violet-400',
-        icon_bg: 'bg-violet-500/15',
-    },
-    {
-        icon: Eye,
-        label: '🖼 Banner Reklam',
-        desc: 'Kategori sayfaları ve anasayfada büyük görsel banner alanı. Yüksek tıklanma oranı.',
-        gradient: 'from-sky-500/20 to-blue-500/10',
-        border: 'border-sky-500/30',
-        icon_color: 'text-sky-400',
-        icon_bg: 'bg-sky-500/15',
-    },
-    {
-        icon: TrendingUp,
-        label: '🎬 Hikaye Reklamı',
-        desc: 'Sayfanın üstünde story dairesi olarak görünürsünüz. 24 saat - 7 gün seçenekleri.',
-        gradient: 'from-pink-500/20 to-rose-500/10',
-        border: 'border-pink-500/30',
-        icon_color: 'text-pink-400',
-        icon_bg: 'bg-pink-500/15',
-    },
+// ─── Karşılaştırma ────────────────────────────────────────────────────────────
+const COMPARE = [
+    { label: 'Hedef Kitlenize Özel', neon: true, prime: true, apex: false },
+    { label: 'Kategori Sayfası Banner', neon: true, prime: false, apex: false },
+    { label: 'Listenin 1. Sırası (PIN)', neon: false, prime: true, apex: false },
+    { label: 'Anasayfa Görünüm', neon: false, prime: false, apex: true },
+    { label: 'Tüm Trafiğe Erişim', neon: false, prime: false, apex: true },
+    { label: 'Görüntülenme Sayacı', neon: true, prime: true, apex: true },
 ];
 
 export default async function ReklamPage() {
     const stats = await getStats();
-    const viewsFormatted =
-        stats.views >= 1000000
-            ? `${(stats.views / 1000000).toFixed(1)}M+`
-            : stats.views >= 1000
-                ? `${Math.floor(stats.views / 1000)}K+`
-                : stats.views.toLocaleString();
 
     return (
-        <div className="min-h-screen" style={{ background: 'linear-gradient(135deg, #0a0a14 0%, #0d0d1f 50%, #0a0a14 100%)' }}>
+        <div className="min-h-screen" style={{ background: 'linear-gradient(160deg, #06060f 0%, #0d0d1f 50%, #06060f 100%)' }}>
 
-            {/* ── HERO ─────────────────────────────────────── */}
+            {/* ── HERO ─────────────────────────────────────────── */}
             <section className="relative overflow-hidden px-4 pt-24 pb-28">
-                {/* Ambient BG */}
+                {/* Ambient */}
                 <div className="pointer-events-none absolute inset-0">
-                    <div className="absolute left-1/2 top-0 h-[600px] w-[900px] -translate-x-1/2 rounded-full opacity-20"
+                    <div className="absolute left-1/2 top-0 h-[500px] w-[800px] -translate-x-1/2 rounded-full opacity-25"
                         style={{ background: 'radial-gradient(ellipse, #7c3aed 0%, transparent 70%)' }} />
-                    <div className="absolute right-0 top-1/3 h-64 w-64 rounded-full opacity-10"
-                        style={{ background: 'radial-gradient(circle, #a855f7, transparent)' }} />
-                    <div className="absolute left-0 bottom-0 h-48 w-48 rounded-full opacity-10"
-                        style={{ background: 'radial-gradient(circle, #6366f1, transparent)' }} />
+                    <div className="absolute right-0 top-1/2 h-64 w-96 rounded-full opacity-10"
+                        style={{ background: 'radial-gradient(circle, #0ea5e9, transparent)' }} />
+                    <div className="absolute bottom-0 left-0 h-48 w-64 rounded-full opacity-10"
+                        style={{ background: 'radial-gradient(circle, #f59e0b, transparent)' }} />
                 </div>
 
                 <div className="relative z-10 mx-auto max-w-4xl text-center">
-
-                    {/* Badge */}
-                    <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-violet-500/30 bg-violet-500/10 px-5 py-2 text-xs font-bold uppercase tracking-widest text-violet-300 backdrop-blur-sm">
-                        <Zap size={12} className="fill-violet-400 text-violet-400" />
-                        {viewsFormatted} Aylık Organik Ziyaretçi
+                    <div className="mb-8 inline-flex items-center gap-2 rounded-full border px-5 py-2 text-xs font-bold uppercase tracking-widest backdrop-blur-sm"
+                        style={{ borderColor: 'rgba(139,92,246,0.35)', background: 'rgba(139,92,246,0.12)', color: '#c4b5fd' }}>
+                        <Zap size={12} style={{ fill: '#a78bfa', color: '#a78bfa' }} />
+                        650.000+ Aylık Organik Ziyaretçi
                     </div>
 
-                    {/* H1 */}
-                    <h1 className="mb-6 text-5xl font-black leading-[1.1] tracking-tight text-white md:text-7xl">
+                    <h1 className="mb-6 text-5xl font-black leading-[1.08] tracking-tight text-white md:text-7xl">
                         Telegram Kanalınızı<br />
                         <span style={{
-                            background: 'linear-gradient(135deg, #a78bfa 0%, #8b5cf6 40%, #ec4899 100%)',
+                            background: 'linear-gradient(135deg, #a78bfa 0%, #8b5cf6 35%, #f59e0b 80%)',
                             WebkitBackgroundClip: 'text',
                             WebkitTextFillColor: 'transparent',
                         }}>
-                            1. Sıraya Taşıyın
+                            Görünür Kılın
                         </span>
                     </h1>
 
                     <p className="mx-auto mb-10 max-w-2xl text-lg leading-relaxed text-slate-400 md:text-xl">
-                        Türkiye&apos;nin en büyük Telegram dizininde <strong className="text-white">görünürlük bazlı reklam verin.</strong><br />
-                        Aylık <strong className="text-violet-300">{viewsFormatted} gerçek ziyaretçiye</strong> doğrudan ulaşın.
+                        Türkiye&apos;nin en büyük Telegram dizininde reklam verin.<br />
+                        <strong className="text-white">3 özel paket</strong> — doğru konumda, doğru kişilere.
                     </p>
 
-                    {/* Primary CTA */}
                     <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-                        <a
-                            href={TELEGRAM_CONTACT}
-                            target="_blank"
-                            rel="noopener noreferrer"
+                        <a href={TELEGRAM_CONTACT} target="_blank" rel="noopener noreferrer"
                             className="group relative flex items-center gap-3 overflow-hidden rounded-2xl px-8 py-4 text-base font-black text-white shadow-2xl transition-all hover:scale-105"
-                            style={{ background: 'linear-gradient(135deg, #7c3aed, #6d28d9)' }}
-                        >
-                            <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity group-hover:opacity-100"
-                                style={{ background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)' }} />
+                            style={{ background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', boxShadow: '0 20px 50px rgba(124,58,237,0.4)' }}>
                             <MessageCircle size={20} className="relative z-10" />
-                            <span className="relative z-10">Reklam Almak İstiyorum</span>
+                            <span className="relative z-10">Paket Almak İstiyorum</span>
                             <ArrowRight size={18} className="relative z-10 transition-transform group-hover:translate-x-1" />
                         </a>
-
-                        <a
-                            href={TELEGRAM_CONTACT}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-2 rounded-2xl border border-slate-700 px-6 py-4 text-sm font-bold text-slate-300 transition-all hover:border-slate-600 hover:text-white"
-                        >
-                            <MessageCircle size={16} />
-                            @comtelegramkanali
+                        <a href="#paketler"
+                            className="flex items-center gap-2 rounded-2xl border px-6 py-4 text-sm font-bold text-slate-300 transition-all hover:text-white"
+                            style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
+                            Paketleri İncele ↓
                         </a>
                     </div>
                 </div>
             </section>
 
-            {/* ── STATS BAR ───────────────────────────────── */}
-            <div className="border-y border-white/5 bg-white/[0.02] backdrop-blur-sm">
+            {/* ── STATS ────────────────────────────────────────── */}
+            <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', borderBottom: '1px solid rgba(255,255,255,0.05)', background: 'rgba(255,255,255,0.02)' }}>
                 <div className="mx-auto grid max-w-4xl grid-cols-2 gap-8 px-4 py-10 md:grid-cols-4">
                     {[
-                        { val: viewsFormatted, label: 'Aylık Görüntülenme' },
+                        { val: '650K+', label: 'Aylık Görüntülenme' },
                         { val: `${stats.channels}+`, label: 'Kayıtlı Kanal' },
-                        { val: '1. Sıra', label: 'Garanti Konum' },
+                        { val: '3', label: 'Reklam Paketi' },
                         { val: '7/24', label: 'Destek Hattı' },
                     ].map(s => (
                         <div key={s.label} className="text-center">
-                            <div className="text-3xl font-black text-violet-400 md:text-4xl">{s.val}</div>
-                            <div className="mt-1 text-xs font-medium text-slate-500">{s.label}</div>
+                            <div className="text-3xl font-black md:text-4xl" style={{ color: '#a78bfa' }}>{s.val}</div>
+                            <div className="mt-1 text-xs font-medium" style={{ color: 'rgba(148,163,184,0.7)' }}>{s.label}</div>
                         </div>
                     ))}
                 </div>
             </div>
 
-            {/* ── REKLAM TİPLERİ ──────────────────────────── */}
-            <section className="px-4 py-20">
-                <div className="mx-auto max-w-4xl">
-                    <h2 className="mb-3 text-center text-4xl font-black text-white">Reklam Formatları</h2>
-                    <p className="mb-12 text-center text-slate-400">İhtiyacınıza göre 3 farklı reklam pozisyonu</p>
-
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                        {AD_TYPES.map(t => (
-                            <div
-                                key={t.label}
-                                className={`rounded-3xl border bg-gradient-to-b p-6 ${t.gradient} ${t.border}`}
-                            >
-                                <div className={`mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl ${t.icon_bg}`}>
-                                    <t.icon size={24} className={t.icon_color} />
-                                </div>
-                                <h3 className="mb-2 text-lg font-black text-white">{t.label}</h3>
-                                <p className="text-sm leading-relaxed text-slate-400">{t.desc}</p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
-            {/* ── PAKETLER ────────────────────────────────── */}
-            <section className="px-4 py-20" style={{ background: 'rgba(255,255,255,0.02)' }}>
-                <div className="mx-auto max-w-4xl">
-                    <h2 className="mb-3 text-center text-4xl font-black text-white">Fiyat Paketleri</h2>
-                    <p className="mb-12 text-center text-slate-400">
-                        ⭐ Telegram Yıldız veya 💎 USDT — fiyat ve detaylar için iletişime geçin.
+            {/* ── PAKETLER ─────────────────────────────────────── */}
+            <section id="paketler" className="px-4 py-24">
+                <div className="mx-auto max-w-5xl">
+                    <h2 className="mb-3 text-center text-4xl font-black text-white md:text-5xl">3 Güçlü Paket</h2>
+                    <p className="mb-16 text-center text-slate-400">
+                        Her bütçeye ve hedefe uygun. Hepsi ⭐ Telegram Yıldız veya 💎 USDT ile satın alınır.
                     </p>
 
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
                         {PACKAGES.map(pkg => (
                             <div
-                                key={pkg.label}
-                                className="relative flex flex-col overflow-hidden rounded-3xl border p-6 transition-all hover:scale-[1.02]"
+                                key={pkg.id}
+                                className="relative flex flex-col overflow-hidden rounded-3xl p-7 transition-all hover:-translate-y-1"
                                 style={{
-                                    background: pkg.popular
-                                        ? 'linear-gradient(135deg, rgba(124,58,237,0.25), rgba(109,40,217,0.10))'
-                                        : pkg.highlight
-                                            ? 'linear-gradient(135deg, rgba(245,158,11,0.15), rgba(10,10,20,0.8))'
-                                            : 'rgba(255,255,255,0.03)',
-                                    borderColor: pkg.popular
-                                        ? 'rgba(139,92,246,0.5)'
-                                        : pkg.highlight
-                                            ? 'rgba(245,158,11,0.4)'
-                                            : 'rgba(255,255,255,0.07)',
+                                    background: pkg.color.gradient,
+                                    border: `1px solid ${pkg.color.border}`,
+                                    boxShadow: pkg.highlight ? `0 0 40px ${pkg.color.glow}` : 'none',
                                 }}
                             >
-                                {pkg.popular && (
-                                    <div className="absolute -top-px left-1/2 -translate-x-1/2 rounded-b-xl bg-violet-600 px-4 py-1 text-[10px] font-black uppercase tracking-widest text-white shadow-lg shadow-violet-900/50">
-                                        En Popüler
-                                    </div>
-                                )}
-                                {pkg.highlight && (
-                                    <div className="absolute -top-px left-1/2 -translate-x-1/2 rounded-b-xl bg-amber-500 px-4 py-1 text-[10px] font-black uppercase tracking-widest text-amber-950 shadow-lg shadow-amber-900/50">
-                                        🔥 Maksimum
-                                    </div>
-                                )}
-
-                                <div className="mb-1 text-xl font-black text-white">{pkg.label}</div>
-                                <div className="mb-4 text-sm text-slate-400">{pkg.desc}</div>
-
-                                {/* Stats */}
-                                <div className="mb-5 space-y-2 rounded-2xl p-3" style={{ background: 'rgba(255,255,255,0.05)' }}>
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-xs text-slate-400">Gösterim</span>
-                                        <span className="font-black text-white">👁 {pkg.views}</span>
-                                    </div>
+                                {/* Package badge */}
+                                <div className="absolute -top-px left-1/2 -translate-x-1/2 rounded-b-xl px-5 py-1.5 text-[10px] font-black uppercase tracking-widest text-white shadow-lg"
+                                    style={{ background: pkg.color.badge }}>
+                                    {pkg.emoji} {pkg.name}
                                 </div>
 
-                                {/* Prices */}
-                                <div className="mt-auto space-y-2">
-                                    <div className="flex items-center justify-between rounded-xl border border-amber-500/20 bg-amber-500/8 px-3 py-2"
-                                        style={{ background: 'rgba(245,158,11,0.08)' }}>
-                                        <span className="text-xs font-bold text-amber-400">⭐ Telegram Yıldız</span>
-                                        <span className="font-black text-amber-400">{pkg.stars}</span>
+                                <div className="mt-5">
+                                    <div className="mb-1 text-2xl font-black text-white">{pkg.tagline}</div>
+                                    <div className="mb-5 text-sm leading-relaxed" style={{ color: 'rgba(203,213,225,0.7)' }}>{pkg.desc}</div>
+
+                                    {/* Feature highlight */}
+                                    <div className="mb-5 flex items-start gap-2 rounded-xl px-3 py-2.5 text-xs font-bold"
+                                        style={{ background: 'rgba(255,255,255,0.06)', color: pkg.color.accent }}>
+                                        <Zap size={13} className="mt-0.5 shrink-0" style={{ fill: 'currentColor' }} />
+                                        {pkg.feature}
                                     </div>
-                                    <div className="flex items-center justify-between rounded-xl border border-emerald-500/20 px-3 py-2"
-                                        style={{ background: 'rgba(16,185,129,0.08)' }}>
-                                        <span className="text-xs font-bold text-emerald-400">💎 USDT</span>
-                                        <span className="font-black text-emerald-400">{pkg.usdt}</span>
+
+                                    {/* Prices */}
+                                    <div className="mt-auto space-y-2.5">
+                                        <div className="flex items-center justify-between rounded-xl px-4 py-3"
+                                            style={{ background: pkg.color.starBg, border: `1px solid ${pkg.color.starBorder}` }}>
+                                            <div className="flex items-center gap-2 text-sm font-bold" style={{ color: '#fbbf24' }}>
+                                                <Star size={14} style={{ fill: '#fbbf24' }} />
+                                                Telegram Yıldız
+                                            </div>
+                                            <span className="text-lg font-black" style={{ color: '#fcd34d' }}>{pkg.stars}⭐</span>
+                                        </div>
+                                        <div className="flex items-center justify-between rounded-xl px-4 py-3"
+                                            style={{ background: pkg.color.usdtBg, border: `1px solid ${pkg.color.usdtBorder}` }}>
+                                            <div className="flex items-center gap-2 text-sm font-bold" style={{ color: '#34d399' }}>
+                                                <Wallet size={14} />
+                                                USDT
+                                            </div>
+                                            <span className="text-lg font-black" style={{ color: '#6ee7b7' }}>{pkg.usdt}</span>
+                                        </div>
+
+                                        <a href={TELEGRAM_CONTACT} target="_blank" rel="noopener noreferrer"
+                                            className="mt-1 flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-black text-white transition-all hover:opacity-90"
+                                            style={{ background: pkg.color.badge, boxShadow: `0 8px 24px ${pkg.color.glow}` }}>
+                                            <MessageCircle size={16} />
+                                            {pkg.name} Paketi Al
+                                        </a>
                                     </div>
                                 </div>
                             </div>
                         ))}
                     </div>
+                </div>
+            </section>
 
-                    {/* CTA under packages */}
-                    <div className="mt-10 text-center">
-                        <a
-                            href={TELEGRAM_CONTACT}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="group inline-flex items-center gap-3 rounded-2xl px-10 py-5 text-base font-black text-white shadow-2xl transition-all hover:scale-105"
-                            style={{ background: 'linear-gradient(135deg, #7c3aed, #6d28d9)' }}
-                        >
-                            <MessageCircle size={20} />
-                            Paket Seçmek İçin Yazın
-                            <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
-                        </a>
+            {/* ── KARŞILAŞTIRMA TABLOSU ────────────────────────── */}
+            <section className="px-4 pb-20">
+                <div className="mx-auto max-w-3xl">
+                    <h2 className="mb-10 text-center text-3xl font-black text-white">Paket Karşılaştırması</h2>
+
+                    <div className="overflow-hidden rounded-3xl" style={{ border: '1px solid rgba(255,255,255,0.07)', background: 'rgba(255,255,255,0.03)' }}>
+                        {/* Header */}
+                        <div className="grid grid-cols-4 gap-0 border-b px-6 py-4" style={{ borderColor: 'rgba(255,255,255,0.07)' }}>
+                            <div className="text-xs font-bold uppercase text-slate-500">Özellik</div>
+                            {[
+                                { name: 'NEON', color: '#a78bfa' },
+                                { name: 'PRIME', color: '#7dd3fc' },
+                                { name: 'APEX', color: '#fbbf24' },
+                            ].map(p => (
+                                <div key={p.name} className="text-center text-xs font-black" style={{ color: p.color }}>{p.name}</div>
+                            ))}
+                        </div>
+
+                        {COMPARE.map((row, i) => (
+                            <div key={row.label}
+                                className="grid grid-cols-4 gap-0 px-6 py-3.5"
+                                style={{
+                                    borderBottom: i < COMPARE.length - 1 ? '1px solid rgba(255,255,255,0.05)' : undefined,
+                                    background: i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.02)',
+                                }}>
+                                <div className="text-xs text-slate-400 flex items-center">{row.label}</div>
+                                {[row.neon, row.prime, row.apex].map((has, idx) => (
+                                    <div key={idx} className="flex justify-center">
+                                        {has
+                                            ? <CheckCircle2 size={16} className="text-emerald-400" />
+                                            : <span className="text-slate-700 text-lg leading-none">—</span>
+                                        }
+                                    </div>
+                                ))}
+                            </div>
+                        ))}
                     </div>
                 </div>
             </section>
 
-            {/* ── ÖDEME YÖNTEMLERİ ────────────────────────── */}
+            {/* ── ÖDEME YÖNTEMLERİ ─────────────────────────────── */}
+            <section className="px-4 py-16" style={{ background: 'rgba(255,255,255,0.02)' }}>
+                <div className="mx-auto max-w-4xl">
+                    <h2 className="mb-10 text-center text-3xl font-black text-white">Ödeme Yöntemleri</h2>
+                    <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+
+                        <div className="rounded-3xl p-7"
+                            style={{ background: 'linear-gradient(135deg, rgba(245,158,11,0.13), rgba(6,6,15,0.8))', border: '1px solid rgba(245,158,11,0.25)' }}>
+                            <div className="mb-4 flex items-center gap-4">
+                                <div className="flex h-14 w-14 items-center justify-center rounded-2xl text-2xl" style={{ background: 'rgba(245,158,11,0.2)' }}>⭐</div>
+                                <div>
+                                    <div className="text-lg font-black text-white">Telegram Yıldız</div>
+                                    <div className="text-xs" style={{ color: 'rgba(251,191,36,0.7)' }}>Telegram üzerinden doğrudan</div>
+                                </div>
+                            </div>
+                            <div className="space-y-2">
+                                {['Telegram uygulamasından güvenli ödeme', 'Anonim & hızlı işlem', 'Anında onay bildirimi'].map(f => (
+                                    <div key={f} className="flex items-center gap-2 text-xs text-slate-300">
+                                        <CheckCircle2 size={13} className="text-amber-400 shrink-0" /> {f}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="rounded-3xl p-7"
+                            style={{ background: 'linear-gradient(135deg, rgba(16,185,129,0.13), rgba(6,6,15,0.8))', border: '1px solid rgba(16,185,129,0.25)' }}>
+                            <div className="mb-4 flex items-center gap-4">
+                                <div className="flex h-14 w-14 items-center justify-center rounded-2xl text-2xl" style={{ background: 'rgba(16,185,129,0.2)' }}>💎</div>
+                                <div>
+                                    <div className="text-lg font-black text-white">USDT Kripto</div>
+                                    <div className="text-xs" style={{ color: 'rgba(52,211,153,0.7)' }}>TRC-20 veya BEP-20</div>
+                                </div>
+                            </div>
+                            <div className="space-y-2">
+                                {['TRC-20 (Tron) & BEP-20 (BSC) destekli', 'Kripto cüzdandan direkt transfer', '1 iş günü içinde aktifleşir'].map(f => (
+                                    <div key={f} className="flex items-center gap-2 text-xs text-slate-300">
+                                        <CheckCircle2 size={13} className="text-emerald-400 shrink-0" /> {f}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* ── NASIL ÇALIŞIR ────────────────────────────────── */}
             <section className="px-4 py-20">
                 <div className="mx-auto max-w-4xl">
-                    <h2 className="mb-12 text-center text-4xl font-black text-white">Ödeme Yöntemleri</h2>
-                    <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-                        <div className="rounded-3xl border p-8"
-                            style={{ background: 'linear-gradient(135deg, rgba(245,158,11,0.12), rgba(10,10,20,0.8))', borderColor: 'rgba(245,158,11,0.25)' }}>
-                            <div className="mb-4 flex items-center gap-4">
-                                <div className="flex h-14 w-14 items-center justify-center rounded-2xl text-2xl"
-                                    style={{ background: 'rgba(245,158,11,0.2)' }}>
-                                    ⭐
-                                </div>
-                                <div>
-                                    <div className="font-black text-white text-lg">Telegram Yıldız</div>
-                                    <div className="text-xs text-amber-400/70">Telegram üzerinden doğrudan</div>
-                                </div>
-                            </div>
-                            <p className="mb-5 text-sm leading-relaxed text-slate-400">
-                                Telegram uygulamanız üzerinden yıldız göndererek ödeme yapın.
-                                Güvenli, hızlı ve tamamen Telegram ekosistemi içinde.
-                            </p>
-                            <div className="space-y-2">
-                                {['Telegram üzerinden güvenli', 'Anonim işlem', 'Anında onay bildirimi'].map(f => (
-                                    <div key={f} className="flex items-center gap-2 text-xs text-slate-300">
-                                        <CheckCircle2 size={13} className="text-amber-400" /> {f}
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-
-                        <div className="rounded-3xl border p-8"
-                            style={{ background: 'linear-gradient(135deg, rgba(16,185,129,0.12), rgba(10,10,20,0.8))', borderColor: 'rgba(16,185,129,0.25)' }}>
-                            <div className="mb-4 flex items-center gap-4">
-                                <div className="flex h-14 w-14 items-center justify-center rounded-2xl text-2xl"
-                                    style={{ background: 'rgba(16,185,129,0.2)' }}>
-                                    💎
-                                </div>
-                                <div>
-                                    <div className="font-black text-white text-lg">USDT Kripto</div>
-                                    <div className="text-xs text-emerald-400/70">TRC-20 veya BEP-20</div>
-                                </div>
-                            </div>
-                            <p className="mb-5 text-sm leading-relaxed text-slate-400">
-                                USDT stablecoin ile kripto ödeme yapın.
-                                Tron (TRC-20) veya BNB Chain (BEP-20) ağları desteklenmektedir.
-                            </p>
-                            <div className="space-y-2">
-                                {['TRC-20 & BEP-20 ağları', 'Kripto cüzdandan transfer', '1 iş günü onay'].map(f => (
-                                    <div key={f} className="flex items-center gap-2 text-xs text-slate-300">
-                                        <CheckCircle2 size={13} className="text-emerald-400" /> {f}
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* ── NASIL ÇALIŞIR ───────────────────────────── */}
-            <section className="px-4 py-20" style={{ background: 'rgba(255,255,255,0.02)' }}>
-                <div className="mx-auto max-w-4xl">
-                    <h2 className="mb-12 text-center text-4xl font-black text-white">Nasıl Çalışır?</h2>
+                    <h2 className="mb-12 text-center text-3xl font-black text-white">Nasıl Satın Alırsınız?</h2>
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4">
                         {[
-                            { n: '01', icon: MessageCircle, label: 'İletişime Geçin', desc: 'Telegram kanalımıza yazın, paket seçin.' },
-                            { n: '02', icon: Wallet, label: 'Ödeme Yapın', desc: 'Yıldız veya USDT ile ödemenizi gönderin.' },
-                            { n: '03', icon: Zap, label: 'Aktive Edilir', desc: '1 iş günü içinde kanalınız öne çıkarılır.' },
-                            { n: '04', icon: BarChart2, label: 'Büyüyün', desc: 'Binlerce ziyaretçi kanalınızı görür.' },
+                            { n: '01', icon: MessageCircle, label: 'Telegram\'dan Yazın', desc: '@comtelegramkanali kanalına yazın, hangi paketi istediğinizi belirtin.' },
+                            { n: '02', icon: Star, label: 'Ödeme Yapın', desc: 'Yıldız veya USDT ile ödemenizi gönderin. Talimatlar kanalda mevcut.' },
+                            { n: '03', icon: Zap, label: 'Aktive Edilir', desc: 'Ödemeniz onaylanır ve kanalınız 1 iş günü içinde öne çıkarılır.' },
+                            { n: '04', icon: BarChart2, label: 'Büyüyün', desc: '650K+ ziyaretçi arasından tam hedef kitleniz sizi görür.' },
                         ].map(s => (
                             <div key={s.n} className="text-center">
-                                <div className="mb-3 inline-flex h-14 w-14 items-center justify-center rounded-2xl border border-violet-500/20"
-                                    style={{ background: 'rgba(124,58,237,0.1)' }}>
-                                    <s.icon size={24} className="text-violet-400" />
+                                <div className="mb-3 inline-flex h-14 w-14 items-center justify-center rounded-2xl"
+                                    style={{ background: 'rgba(124,58,237,0.12)', border: '1px solid rgba(124,58,237,0.2)' }}>
+                                    <s.icon size={24} style={{ color: '#a78bfa' }} />
                                 </div>
-                                <div className="mb-1 text-[10px] font-black uppercase tracking-widest text-violet-500">{s.n}</div>
-                                <div className="mb-1 font-black text-white">{s.label}</div>
-                                <div className="text-xs text-slate-500">{s.desc}</div>
+                                <div className="mb-1 text-[10px] font-black uppercase tracking-widest" style={{ color: 'rgba(124,58,237,0.8)' }}>{s.n}</div>
+                                <div className="mb-1 font-black text-white text-sm">{s.label}</div>
+                                <div className="text-xs leading-relaxed" style={{ color: 'rgba(148,163,184,0.7)' }}>{s.desc}</div>
                             </div>
                         ))}
                     </div>
                 </div>
             </section>
 
-            {/* ── GÜVENCE ─────────────────────────────────── */}
-            <section className="px-4 py-16">
-                <div className="mx-auto max-w-3xl rounded-3xl border p-8 md:p-10"
-                    style={{ background: 'rgba(255,255,255,0.03)', borderColor: 'rgba(255,255,255,0.07)' }}>
+            {/* ── GÜVENCE ──────────────────────────────────────── */}
+            <section className="px-4 pb-16">
+                <div className="mx-auto max-w-3xl rounded-3xl p-8 md:p-10"
+                    style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}>
                     <div className="mb-6 flex items-center gap-3">
-                        <Shield size={22} className="text-violet-400" />
+                        <Shield size={22} style={{ color: '#a78bfa' }} />
                         <h3 className="text-xl font-black text-white">Neden Güvenilir?</h3>
                     </div>
-                    <div className="grid grid-cols-1 gap-3 text-sm text-slate-400 sm:grid-cols-2">
+                    <div className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2" style={{ color: 'rgba(148,163,184,0.8)' }}>
                         {[
-                            '290K+ aylık doğrulanmış ziyaretçi',
+                            '650K+ aylık organik ziyaretçi',
                             '1.400+ kayıtlı Telegram kanalı',
-                            'Görüntülenme bazlı — adil ve şeffaf',
+                            'Gösterim bazlı — adil ve şeffaf',
                             'Manuel onay ile güvenli ödeme',
                             '7/24 Telegram destek hattı',
                             'İptal durumunda tam iade garantisi',
@@ -412,30 +386,28 @@ export default async function ReklamPage() {
                 </div>
             </section>
 
-            {/* ── FINAL CTA ───────────────────────────────── */}
-            <section className="px-4 py-24 text-center">
-                <div className="pointer-events-none absolute left-1/2 -translate-x-1/2 h-64 w-[600px] rounded-full opacity-15 blur-3xl"
-                    style={{ background: 'radial-gradient(ellipse, #7c3aed, transparent)' }} />
+            {/* ── FINAL CTA ────────────────────────────────────── */}
+            <section className="relative px-4 py-24 text-center">
+                <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                    <div className="h-64 w-[600px] rounded-full opacity-15 blur-3xl"
+                        style={{ background: 'radial-gradient(ellipse, #7c3aed, transparent)' }} />
+                </div>
                 <div className="relative z-10">
                     <h2 className="mb-4 text-4xl font-black text-white md:text-5xl">
-                        Kanalınızı Öne Çıkarmaya<br />Hazır mısınız?
+                        Kanalınız Fark Yaratmaya<br />Hazır mı?
                     </h2>
                     <p className="mx-auto mb-10 max-w-md text-slate-400">
-                        {viewsFormatted} aylık ziyaretçiye kanalınızı tanıtın.<br />
-                        Hemen yazın, birlikte en iyi paketi seçelim.
+                        NEON, PRIME veya APEX — hangisi sizin için uygun?<br />
+                        Hemen yazın, birlikte karar verelim.
                     </p>
-                    <a
-                        href={TELEGRAM_CONTACT}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="group inline-flex items-center gap-3 rounded-2xl px-10 py-5 text-lg font-black text-white shadow-2xl transition-all hover:scale-105"
-                        style={{ background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', boxShadow: '0 20px 60px rgba(124,58,237,0.4)' }}
-                    >
+                    <a href={TELEGRAM_CONTACT} target="_blank" rel="noopener noreferrer"
+                        className="group inline-flex items-center gap-3 rounded-2xl px-10 py-5 text-lg font-black text-white transition-all hover:scale-105"
+                        style={{ background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', boxShadow: '0 20px 60px rgba(124,58,237,0.4)' }}>
                         <MessageCircle size={22} />
                         Telegram&apos;dan Yazın
                         <ArrowRight size={20} className="transition-transform group-hover:translate-x-1" />
                     </a>
-                    <div className="mt-4 flex items-center justify-center gap-2 text-xs text-slate-500">
+                    <div className="mt-4 flex items-center justify-center gap-2 text-xs" style={{ color: 'rgba(100,116,139,0.8)' }}>
                         <Users size={12} />
                         @comtelegramkanali
                     </div>
