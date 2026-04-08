@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { createClient } from '@supabase/supabase-js';
+// Singleton istemci — birden fazla GoTrueClient instance'ı oluşturmamak için
+import { supabase } from '@/lib/supabaseClient';
 import Link from 'next/link';
 import {
     DollarSign, Plus, Trash2, Eye, ExternalLink, CheckCircle2,
@@ -82,11 +83,7 @@ export default function KanalSatClient({ userId, userProfile, myChannels, myList
     const [deletingId, setDeletingId] = useState<string | null>(null);
     const [listings, setListings] = useState(myListings);
 
-    const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    );
-
+    // Singleton paylaşımlı istemci — zaten import edildi
     function updateForm(key: string, value: any) {
         setForm(f => ({ ...f, [key]: value }));
     }

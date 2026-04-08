@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { createClient } from '@supabase/supabase-js';
+// Singleton istemci — birden fazla GoTrueClient instance'ı oluşturmamak için
+import { supabase } from '@/lib/supabaseClient';
 import { MessageCircle, Send, LogIn, DollarSign, Loader2, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -72,12 +73,7 @@ export default function ListingContactForm({ listingId, sellerId, isLoggedIn, us
         setError('');
 
         try {
-            const supabase = createClient(
-                process.env.NEXT_PUBLIC_SUPABASE_URL!,
-                process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-            );
-
-            // Session al
+            // Session al — singleton istemciСden
             const { data: { session } } = await supabase.auth.getSession();
             if (!session) {
                 router.push(`/login?redirect=/marketplace/${listingId}`);
