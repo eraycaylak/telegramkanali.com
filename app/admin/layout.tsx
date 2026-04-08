@@ -48,6 +48,7 @@ const MENU_GROUPS: MenuGroup[] = [
             { name: 'Kampanya Onayları', href: '/admin/campaigns', icon: Shield, perm: 'manage_banners' },
             { name: 'Reklam Paketleri', href: '/admin/ads', icon: CreditCard, perm: 'manage_banners' },
             { name: 'Ödemeler', href: '/admin/deposits', icon: CreditCard, perm: 'manage_users' },
+            { name: 'Marketplace Sohbetleri', href: '/admin/marketplace', icon: MessageSquare, perm: 'manage_banners' },
         ],
     },
     {
