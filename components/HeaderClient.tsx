@@ -277,6 +277,9 @@ export default function HeaderClient({ categories, logo, user: initialUser, rece
                         <Link href="/webmaster" className="hover:text-gray-300 transition-colors whitespace-nowrap">
                             WEBMASTER
                         </Link>
+                        <Link href="/marketplace" className="hover:text-emerald-400 text-emerald-400 transition-colors whitespace-nowrap font-black">
+                            💰 KANAL AL-SAT
+                        </Link>
                         <Link href="/reklam" className="hover:text-yellow-400 text-yellow-500 transition-colors whitespace-nowrap font-black">
                             REKLAM VER
                         </Link>
@@ -318,6 +321,10 @@ export default function HeaderClient({ categories, logo, user: initialUser, rece
 
                             <Link href="/reklam" onClick={() => setMenuOpen(false)} className="py-2 px-3 bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 rounded-lg text-sm font-bold text-center">
                                 REKLAM VER / İLAN
+                            </Link>
+
+                            <Link href="/marketplace" onClick={() => setMenuOpen(false)} className="py-2 px-3 bg-emerald-600/15 text-emerald-400 border border-emerald-500/25 rounded-lg text-sm font-bold text-center">
+                                💰 KANAL AL-SAT
                             </Link>
 
                             {user ? (

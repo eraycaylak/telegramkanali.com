@@ -1,5 +1,6 @@
 import { MetadataRoute } from 'next';
 import { getChannels, getCategories, getSeoPages, getAllBlogSlugs } from '@/lib/data';
+import { getAdminClient } from '@/lib/supabaseAdmin';
 
 export const baseUrl = 'https://telegramkanali.com';
 
@@ -19,11 +20,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         '/kanal-ekle',
         '/trends',
         '/populer',
+        '/marketplace',
     ].map(route => ({
         url: `${baseUrl}${route}`,
         lastModified: new Date(),
         changeFrequency: 'daily' as const,
-        priority: route === '' ? 1 : 0.7,
+        priority: route === '' ? 1 : route === '/marketplace' ? 0.95 : 0.7,
     }));
 
     // 2. Şehir bazlı SEO sayfaları
@@ -41,6 +43,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const { data: channels } = await getChannels(1, 2000);
     const categories = await getCategories();
     const seoPages = await getSeoPages();
+
+    // 3. Marketplace aktif ilanlar
+    const { data: marketplaceListings } = await getAdminClient()
+        .from('channel_listings')
+        .select('id, updated_at, created_at')
+        .eq('status', 'active');
+
+    const marketplaceUrls = (marketplaceListings || []).map((listing: { id: string; updated_at: string | null; created_at: string | null }) => ({
+        url: `${baseUrl}/marketplace/${listing.id}`,
+        lastModified: new Date(listing.updated_at ?? listing.created_at ?? Date.now()),
+        changeFrequency: 'daily' as const,
+        priority: 0.85,
+    }));
+
 
     // Filter out invalid slugs
     const isValidSlug = (slug: string) => {
@@ -151,6 +167,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         ...cityPages,
         ...keyword18Pages,
         ...ifsaPages,
+        ...marketplaceUrls,
         ...categoriesUrls,
         ...categoriesUrlsEn,
         ...seoPageUrls,

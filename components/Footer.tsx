@@ -81,6 +81,11 @@ export default async function Footer() {
                             <li><Link href="/one-cikanlar" className="hover:text-blue-600">Öne Çıkanlar</Link></li>
                             <li><Link href="/blog" className="hover:text-blue-600">Blog & İpuçları</Link></li>
                             <li><Link href="/kanal-ekle" className="hover:text-blue-600">Kanal Ekle</Link></li>
+                            <li>
+                                <Link href="/marketplace" className="hover:text-emerald-600 font-semibold text-emerald-700 transition-colors">
+                                    💰 Kanal Al-Sat Marketplace
+                                </Link>
+                            </li>
                         </ul>
                     </div>
 

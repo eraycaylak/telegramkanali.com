@@ -15,6 +15,7 @@ import {
     Zap,
     ChevronRight,
     Phone,
+    DollarSign,
 } from 'lucide-react';
 import { useState } from 'react';
 import { signOut } from '@/app/actions/auth';
@@ -28,6 +29,7 @@ const menuItems = [
     { name: 'Genel Bakış', href: '/dashboard', icon: LayoutDashboard, desc: 'Özet ve istatistikler' },
     { name: 'Kanallarım', href: '/dashboard/channels', icon: Tv, desc: 'Kanal yönetimi' },
     { name: 'Reklamlarım', href: '/dashboard/ads', icon: TrendingUp, desc: 'Kampanya yönetimi' },
+    { name: 'Kanalımı Sat', href: '/dashboard/kanal-sat', icon: DollarSign, desc: 'Kanal alım-satım ilanları' },
     { name: 'Bot Ayarları', href: '/dashboard/bot', icon: Settings, desc: 'Telegram bot entegrasyonu' },
     { name: 'İstatistikler', href: '/dashboard/stats', icon: PieChart, desc: 'Kanal analizleri' },
 ];
