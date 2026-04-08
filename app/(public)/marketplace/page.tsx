@@ -91,6 +91,7 @@ export default async function MarketplacePage() {
     return (
         <>
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+            <HoverStyles />
 
             {/* Tam ekran wrapper — parent container'ı geç */}
             <div style={{ margin: '0 -12px', minHeight: '100vh', background: '#f8fafc' }}>
@@ -341,27 +342,21 @@ function ListingCard({ listing }: { listing: any }) {
     const price = formatPrice(listing.asking_price, listing.currency);
 
     return (
-        <Link href={`/marketplace/${listing.id}`} style={{ textDecoration: 'none' }}>
-            <div style={{
-                background: '#fff',
-                border: isFeatured ? `2px solid #10b981` : '1px solid #e2e8f0',
-                borderRadius: 14,
-                padding: '16px',
-                display: 'flex', flexDirection: 'column', gap: 12,
-                height: '100%', cursor: 'pointer',
-                boxShadow: isFeatured ? '0 4px 20px rgba(16,185,129,0.12)' : '0 1px 4px rgba(0,0,0,0.04)',
-                transition: 'box-shadow 0.15s, transform 0.15s',
-                position: 'relative',
-            }}
-                onMouseEnter={e => {
-                    (e.currentTarget as HTMLDivElement).style.boxShadow = '0 8px 28px rgba(0,0,0,0.1)';
-                    (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-2px)';
-                }}
-                onMouseLeave={e => {
-                    (e.currentTarget as HTMLDivElement).style.boxShadow = isFeatured ? '0 4px 20px rgba(16,185,129,0.12)' : '0 1px 4px rgba(0,0,0,0.04)';
-                    (e.currentTarget as HTMLDivElement).style.transform = 'none';
-                }}
-            >
+        <Link href={`/marketplace/${listing.id}`} className="listing-card-link" style={{ textDecoration: 'none', display: 'block', height: '100%' }}>
+            <div
+                className="listing-card"
+                style={{
+                    background: '#fff',
+                    border: isFeatured ? `2px solid #10b981` : '1px solid #e2e8f0',
+                    borderRadius: 14,
+                    padding: '16px',
+                    display: 'flex', flexDirection: 'column', gap: 12,
+                    height: '100%',
+                    boxShadow: isFeatured ? '0 4px 20px rgba(16,185,129,0.12)' : '0 1px 4px rgba(0,0,0,0.04)',
+                    transition: 'box-shadow 0.15s, transform 0.15s',
+                    position: 'relative',
+                }}>
+
                 {/* Featured badge */}
                 {isFeatured && (
                     <div style={{
@@ -441,6 +436,19 @@ function ListingCard({ listing }: { listing: any }) {
                 </div>
             </div>
         </Link>
+    );
+}
+
+// Global hover CSS injected once
+function HoverStyles() {
+    return (
+        <style>{`
+            .listing-card { cursor: pointer; }
+            .listing-card-link:hover .listing-card {
+                box-shadow: 0 8px 28px rgba(0,0,0,0.10) !important;
+                transform: translateY(-2px);
+            }
+        `}</style>
     );
 }
 
