@@ -1,7 +1,7 @@
 // Telegram Bot API utility
 // Tüm Telegram işlemleri (bot mesajları + kanal bilgisi) bu dosya üzerinden yapılır
 
-const TOKEN = process.env.TELEGRAM_BOT_TOKEN!;
+const TOKEN = process.env.ESCROW_BOT_TOKEN!;
 const API = `https://api.telegram.org/bot${TOKEN}`;
 
 export const ADMIN_ID = parseInt(process.env.TELEGRAM_ADMIN_CHAT_ID || '1248286205', 10);
@@ -86,7 +86,7 @@ export async function fetchTelegramChannelInfo(joinLink: string): Promise<Telegr
 }
 
 export async function fetchChannelInfoViaBot(chatId: string): Promise<TelegramChannelInfo | null> {
-    if (!process.env.TELEGRAM_BOT_TOKEN) return null;
+    if (!process.env.ESCROW_BOT_TOKEN) return null;
     try {
         const chatRes = await fetch(`${API}/getChat?chat_id=${chatId}`);
         const chatData = await chatRes.json();

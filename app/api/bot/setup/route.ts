@@ -8,7 +8,7 @@ export async function GET(req: NextRequest) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const token = process.env.TELEGRAM_BOT_TOKEN;
+    const token = process.env.ESCROW_BOT_TOKEN;
     if (!token) return NextResponse.json({ error: 'BOT_TOKEN missing' }, { status: 500 });
 
     const webhookUrl = `https://telegramkanali.com/api/bot/webhook`;
