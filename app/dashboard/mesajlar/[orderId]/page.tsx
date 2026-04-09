@@ -8,7 +8,8 @@ import type { Metadata } from 'next';
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Sohbet | TelegramKanali.com' };
 
-export default async function ChatPage({ params }: { params: { orderId: string } }) {
+export default async function ChatPage({ params }: { params: Promise<{ orderId: string }> }) {
+    const { orderId } = await params;
     const cookieStore = await cookies();
     const supabase = createServerClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -16,7 +17,7 @@ export default async function ChatPage({ params }: { params: { orderId: string }
         { cookies: { getAll: () => cookieStore.getAll() } }
     );
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) redirect(`/login?redirect=/dashboard/mesajlar/${params.orderId}`);
+    if (!user) redirect(`/login?redirect=/dashboard/mesajlar/${orderId}`);
 
     const db = getAdminClient();
 
@@ -29,7 +30,7 @@ export default async function ChatPage({ params }: { params: { orderId: string }
             buyer:profiles!marketplace_orders_buyer_id_fkey ( id, full_name, email, telegram_username ),
             seller:profiles!marketplace_orders_seller_id_fkey ( id, full_name, email, telegram_username )
         `)
-        .eq('id', params.orderId)
+        .eq('id', orderId)
         .single();
 
     if (!order) notFound();
@@ -44,14 +45,14 @@ export default async function ChatPage({ params }: { params: { orderId: string }
     const { data: messages } = await db
         .from('marketplace_messages')
         .select('*')
-        .eq('order_id', params.orderId)
+        .eq('order_id', orderId)
         .order('created_at', { ascending: true });
 
     // Okunmamış mesajları oku
     await db
         .from('marketplace_messages')
         .update({ is_read: true })
-        .eq('order_id', params.orderId)
+        .eq('order_id', orderId)
         .eq('receiver_id', user.id)
         .eq('is_read', false);
 
