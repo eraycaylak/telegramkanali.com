@@ -172,7 +172,11 @@ export async function addTrend(formData: FormData) {
                 .from('assets')
                 .upload(fileName, buffer, { contentType: imageFile.type, upsert: true });
 
-            if (!uploadError) {
+            if (uploadError) {
+                console.error('[TREND] Image upload error:', uploadError.message);
+                // Sessizce devam etme — hata döndür
+                return { error: `Resim yüklenemedi: ${uploadError.message}` };
+            } else {
                 const { data: urlData } = getAdminClient().storage.from('assets').getPublicUrl(fileName);
                 image = urlData.publicUrl;
             }
@@ -228,7 +232,10 @@ export async function updateTrend(id: string, formData: FormData) {
                 .from('assets')
                 .upload(fileName, buffer, { contentType: imageFile.type, upsert: true });
 
-            if (!uploadError) {
+            if (uploadError) {
+                console.error('[TREND] Image upload error:', uploadError.message);
+                return { error: `Resim yüklenemedi: ${uploadError.message}` };
+            } else {
                 const { data: urlData } = getAdminClient().storage.from('assets').getPublicUrl(fileName);
                 image = urlData.publicUrl;
             }
