@@ -6,7 +6,7 @@ import { notFound } from 'next/navigation';
 import {
     Shield, ArrowLeft, Users, Calendar, DollarSign, TrendingUp,
     CheckCircle2, Lock, MessageCircle, BarChart3, BadgeCheck,
-    AlertTriangle, Star, Clock, ChevronRight, Zap
+    AlertTriangle, Clock, ChevronRight
 } from 'lucide-react';
 import type { Metadata } from 'next';
 import ListingContactForm from './ListingContactForm';
@@ -32,22 +32,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const { id } = await params;
     const listing = await getListing(id);
     if (!listing) return { title: 'İlan Bulunamadı' };
-
     const title = listing.channel_name || listing.title;
-    const price = listing.currency === 'STARS'
-        ? `${listing.asking_price} ⭐ Yıldız`
-        : `$${listing.asking_price} USDT`;
-
+    const price = listing.currency === 'STARS' ? `${listing.asking_price} ⭐` : `$${listing.asking_price} USDT`;
     return {
         title: `${title} — Satılık Telegram Kanalı ${price} | TelegramKanali.com`,
-        description: `${listing.member_count?.toLocaleString('tr-TR') || '?'} üyeli ${title} kanalı satışta. ${price} fiyatıyla escrow güvenceli satın al. Telegram kanal alım satım platformu.`,
-        openGraph: {
-            title: `Satılık: ${title} — ${price}`,
-            description: `${listing.member_count?.toLocaleString('tr-TR') || '?'} üyeli Telegram kanalı escrow güvenceli satışta.`,
-        },
-        alternates: {
-            canonical: `https://telegramkanali.com/marketplace/${id}`,
-        },
+        description: `${listing.member_count?.toLocaleString('tr-TR') || '?'} üyeli ${title} kanalı escrow güvencesiyle satışta. ${price} fiyatla hemen teklif ver.`,
+        alternates: { canonical: `https://telegramkanali.com/marketplace/${id}` },
     };
 }
 
@@ -66,26 +56,23 @@ function formatMembers(count: number) {
 export default async function MarketplaceDetailPage({ params }: Props) {
     const { id } = await params;
     const listing = await getListing(id);
-
     if (!listing) notFound();
 
-    // Mevcut kullanıcıyı al
     const cookieStore = await cookies();
     const supabase = createServerClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        { cookies: { get: (name) => cookieStore.get(name)?.value } }
+        { cookies: { getAll: () => cookieStore.getAll() } }
     );
     const { data: { user } } = await supabase.auth.getUser();
 
-    // View sayısını artır (fire-and-forget)
+    // View sayısını artır
     const db = getAdminClient();
     db.from('channel_listings').update({ views: (listing.views || 0) + 1 }).eq('id', id).then(() => { });
 
     const displayName = listing.channel_name || listing.title;
     const priceStr = formatPrice(listing.asking_price, listing.currency);
 
-    // JSON-LD
     const jsonLd = {
         '@context': 'https://schema.org',
         '@graph': [
@@ -99,11 +86,7 @@ export default async function MarketplaceDetailPage({ params }: Props) {
                     price: listing.asking_price,
                     priceCurrency: listing.currency === 'STARS' ? 'XTR' : 'USD',
                     availability: 'https://schema.org/InStock',
-                    seller: {
-                        '@type': 'Organization',
-                        name: 'TelegramKanali.com',
-                        url: 'https://telegramkanali.com',
-                    },
+                    seller: { '@type': 'Organization', name: 'TelegramKanali.com', url: 'https://telegramkanali.com' },
                 },
             },
             {
@@ -119,151 +102,114 @@ export default async function MarketplaceDetailPage({ params }: Props) {
 
     return (
         <>
-            <script
-                type="application/ld+json"
-                dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-            />
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
-            <div className="min-h-screen" style={{ background: 'linear-gradient(160deg, #05050f 0%, #0b0b1e 60%, #05050f 100%)' }}>
-                <div className="mx-auto max-w-5xl px-4 py-10">
+            {/* Full-width beyaz container */}
+            <div style={{ margin: '0 -12px', background: '#f8fafc', minHeight: '100vh' }}>
+                <div style={{ maxWidth: 1100, margin: '0 auto', padding: '20px 24px 60px' }}>
 
                     {/* Breadcrumb */}
-                    <nav className="mb-6 flex items-center gap-2 text-xs text-slate-500">
-                        <Link href="/" className="hover:text-white transition-colors">Ana Sayfa</Link>
+                    <nav style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#94a3b8', marginBottom: 20 }}>
+                        <Link href="/" style={{ color: '#94a3b8', textDecoration: 'none' }}>Ana Sayfa</Link>
                         <ChevronRight size={12} />
-                        <Link href="/marketplace" className="hover:text-white transition-colors">Marketplace</Link>
+                        <Link href="/marketplace" style={{ color: '#94a3b8', textDecoration: 'none' }}>Marketplace</Link>
                         <ChevronRight size={12} />
-                        <span className="text-slate-400 truncate max-w-[200px]">{displayName}</span>
+                        <span style={{ color: '#475569', fontWeight: 600 }}>{displayName}</span>
                     </nav>
 
-                    <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+                    {/* 2 Sütun Grid */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: 24, alignItems: 'start' }}>
 
                         {/* ── Sol: İlan Detayları ── */}
-                        <div className="lg:col-span-2 space-y-6">
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
-                            {/* Kanal başlık kartı */}
-                            <div className="rounded-3xl p-7"
-                                style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
-                                <div className="flex items-start gap-5">
+                            {/* Başlık Kartı */}
+                            <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 16, padding: 24 }}>
+                                <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
                                     {listing.channel_image ? (
-                                        <img
-                                            src={listing.channel_image}
-                                            alt={displayName}
-                                            className="h-20 w-20 rounded-2xl object-cover shrink-0"
-                                            style={{ border: '1px solid rgba(255,255,255,0.1)' }}
-                                        />
+                                        <img src={listing.channel_image} alt={displayName}
+                                            style={{ width: 72, height: 72, borderRadius: 14, objectFit: 'cover', border: '1px solid #e2e8f0', flexShrink: 0 }} />
                                     ) : (
-                                        <div className="h-20 w-20 rounded-2xl flex items-center justify-center text-3xl font-black shrink-0"
-                                            style={{ background: 'rgba(16,185,129,0.15)', border: '1px solid rgba(16,185,129,0.25)', color: '#34d399' }}>
+                                        <div style={{
+                                            width: 72, height: 72, borderRadius: 14, flexShrink: 0,
+                                            background: '#f0fdf4', border: '1px solid #bbf7d0',
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                            fontSize: 28, fontWeight: 900, color: '#059669',
+                                        }}>
                                             {(displayName || 'T')[0].toUpperCase()}
                                         </div>
                                     )}
-                                    <div className="flex-1 min-w-0">
-                                        <div className="flex items-center gap-2 flex-wrap mb-1">
-                                            <h1 className="text-2xl font-black text-white leading-tight">{displayName}</h1>
+                                    <div style={{ flex: 1, minWidth: 0 }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 4 }}>
+                                            <h1 style={{ fontSize: 22, fontWeight: 900, color: '#0f172a', margin: 0 }}>{displayName}</h1>
                                             {listing.featured && (
-                                                <span className="rounded-full px-2.5 py-1 text-[10px] font-black uppercase"
-                                                    style={{ background: 'rgba(16,185,129,0.2)', color: '#34d399', border: '1px solid rgba(16,185,129,0.3)' }}>
-                                                    ⭐ Öne Çıkan
-                                                </span>
+                                                <span style={{ background: '#ecfdf5', color: '#059669', border: '1px solid #a7f3d0', borderRadius: 100, padding: '2px 10px', fontSize: 10, fontWeight: 800 }}>⭐ Öne Çıkan</span>
                                             )}
                                         </div>
                                         {listing.channel_username && (
-                                            <div className="text-sm text-slate-500 mb-2">@{listing.channel_username}</div>
+                                            <div style={{ fontSize: 13, color: '#94a3b8', marginBottom: 8 }}>@{listing.channel_username}</div>
                                         )}
-                                        {listing.category && (
-                                            <span className="inline-block rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider"
-                                                style={{ background: 'rgba(139,92,246,0.12)', color: '#a78bfa', border: '1px solid rgba(139,92,246,0.25)' }}>
-                                                {listing.category}
+                                        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                                            {listing.category && (
+                                                <span style={{ background: '#faf5ff', color: '#7c3aed', border: '1px solid #e9d5ff', borderRadius: 100, padding: '3px 12px', fontSize: 11, fontWeight: 700 }}>
+                                                    {listing.category}
+                                                </span>
+                                            )}
+                                            <span style={{ background: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0', borderRadius: 100, padding: '3px 12px', fontSize: 11, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 4 }}>
+                                                <Shield size={10} /> Escrow Güvenceli
                                             </span>
-                                        )}
+                                        </div>
                                     </div>
                                 </div>
 
                                 {listing.description && (
-                                    <div className="mt-5 pt-5 border-t text-sm leading-relaxed text-slate-400"
-                                        style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
+                                    <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid #f1f5f9', fontSize: 14, color: '#475569', lineHeight: 1.7 }}>
                                         {listing.description}
                                     </div>
-                                )}
-                                {listing.niche && (
-                                    <div className="mt-3 text-xs italic text-slate-500">{listing.niche}</div>
                                 )}
                             </div>
 
                             {/* İstatistikler */}
-                            <div className="rounded-3xl p-7"
-                                style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
-                                <h2 className="mb-5 font-black text-white flex items-center gap-2">
-                                    <BarChart3 size={18} className="text-emerald-400" />
-                                    Kanal İstatistikleri
+                            <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 16, padding: 24 }}>
+                                <h2 style={{ fontSize: 15, fontWeight: 900, color: '#0f172a', margin: '0 0 16px', display: 'flex', alignItems: 'center', gap: 8 }}>
+                                    <BarChart3 size={16} color="#059669" /> Kanal İstatistikleri
                                 </h2>
-                                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: 10 }}>
                                     {[
-                                        {
-                                            show: listing.member_count > 0,
-                                            icon: Users,
-                                            color: '#38bdf8',
-                                            bg: 'rgba(14,165,233,0.1)',
-                                            border: 'rgba(14,165,233,0.2)',
-                                            val: formatMembers(listing.member_count),
-                                            label: 'Üye Sayısı',
-                                        },
-                                        {
-                                            show: listing.age_months != null,
-                                            icon: Calendar,
-                                            color: '#a78bfa',
-                                            bg: 'rgba(139,92,246,0.1)',
-                                            border: 'rgba(139,92,246,0.2)',
-                                            val: `${listing.age_months} ay`,
-                                            label: 'Kanal Yaşı',
-                                        },
-                                        {
-                                            show: listing.monthly_income_est != null,
-                                            icon: DollarSign,
-                                            color: '#34d399',
-                                            bg: 'rgba(16,185,129,0.1)',
-                                            border: 'rgba(16,185,129,0.2)',
-                                            val: `$${listing.monthly_income_est?.toLocaleString('tr-TR')}`,
-                                            label: 'Tahmini Aylık Gelir',
-                                        },
-                                        {
-                                            show: listing.engagement_rate != null,
-                                            icon: TrendingUp,
-                                            color: '#fbbf24',
-                                            bg: 'rgba(245,158,11,0.1)',
-                                            border: 'rgba(245,158,11,0.2)',
-                                            val: `%${listing.engagement_rate}`,
-                                            label: 'Etkileşim Oranı',
-                                        },
+                                        { show: listing.member_count > 0, icon: Users, color: '#0284c7', bg: '#f0f9ff', border: '#bae6fd', val: formatMembers(listing.member_count), label: 'Üye Sayısı' },
+                                        { show: listing.age_months != null, icon: Calendar, color: '#7c3aed', bg: '#faf5ff', border: '#e9d5ff', val: `${listing.age_months} ay`, label: 'Kanal Yaşı' },
+                                        { show: listing.monthly_income_est != null, icon: DollarSign, color: '#059669', bg: '#f0fdf4', border: '#bbf7d0', val: `$${listing.monthly_income_est}`, label: 'Aylık Gelir' },
+                                        { show: listing.engagement_rate != null, icon: TrendingUp, color: '#d97706', bg: '#fffbeb', border: '#fde68a', val: `%${listing.engagement_rate}`, label: 'Etkileşim' },
                                     ].filter(s => s.show).map((s, i) => (
-                                        <div key={i} className="rounded-2xl p-4 text-center"
-                                            style={{ background: s.bg, border: `1px solid ${s.border}` }}>
-                                            <s.icon size={20} style={{ color: s.color }} className="mx-auto mb-2" />
-                                            <div className="text-lg font-black text-white">{s.val}</div>
-                                            <div className="text-[10px] text-slate-500 mt-0.5">{s.label}</div>
+                                        <div key={i} style={{ textAlign: 'center', padding: '12px 8px', borderRadius: 12, background: s.bg, border: `1px solid ${s.border}` }}>
+                                            <s.icon size={18} style={{ color: s.color, margin: '0 auto 6px' }} />
+                                            <div style={{ fontWeight: 900, fontSize: 16, color: '#0f172a' }}>{s.val}</div>
+                                            <div style={{ fontSize: 10, color: '#64748b', marginTop: 2 }}>{s.label}</div>
                                         </div>
                                     ))}
                                 </div>
                             </div>
 
-                            {/* Transfer bilgisi */}
-                            <div className="rounded-3xl p-7"
-                                style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)' }}>
-                                <h2 className="mb-4 font-black text-white flex items-center gap-2">
-                                    <Lock size={18} className="text-emerald-400" />
-                                    Transfer & Escrow Süreci
+                            {/* Escrow Süreci */}
+                            <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 16, padding: 24 }}>
+                                <h2 style={{ fontSize: 15, fontWeight: 900, color: '#0f172a', margin: '0 0 14px', display: 'flex', alignItems: 'center', gap: 8 }}>
+                                    <Lock size={16} color="#059669" /> Transfer & Escrow Süreci
                                 </h2>
-                                <div className="space-y-3 text-sm text-slate-400">
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                                     {[
-                                        { icon: CheckCircle2, text: 'Anlaşma sağlandıktan sonra ödemeyi platformumuza (escrow) gönderirsiniz' },
-                                        { icon: CheckCircle2, text: 'Satıcı kanal admin haklarını size devreder ve kanaldan ayrılır' },
-                                        { icon: CheckCircle2, text: 'Transfer doğrulandıktan sonra fonlar satıcıya aktarılır' },
-                                        { icon: CheckCircle2, text: '%5 platform komisyonu satış fiyatından düşülür' },
-                                    ].map((item, i) => (
-                                        <div key={i} className="flex items-start gap-3">
-                                            <item.icon size={15} className="text-emerald-400 shrink-0 mt-0.5" />
-                                            <span>{item.text}</span>
+                                        'Teklif gönderin, satıcıyla sohbet başlatın',
+                                        'Anlaşma sağlandıktan sonra ödemeyi escrow hesabımıza gönderin',
+                                        'Satıcı kanal admin haklarını devreder, kanaldan ayrılır',
+                                        'Transfer doğrulandıktan sonra fonlar satıcıya aktarılır (%5 komisyon düşülür)',
+                                    ].map((text, i) => (
+                                        <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                                            <div style={{
+                                                flexShrink: 0, width: 22, height: 22, borderRadius: '50%',
+                                                background: '#f0fdf4', border: '1px solid #bbf7d0',
+                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                fontSize: 11, fontWeight: 900, color: '#059669',
+                                            }}>{i + 1}</div>
+                                            <span style={{ fontSize: 13, color: '#475569', lineHeight: 1.6, paddingTop: 2 }}>{text}</span>
                                         </div>
                                     ))}
                                 </div>
@@ -271,91 +217,84 @@ export default async function MarketplaceDetailPage({ params }: Props) {
                         </div>
 
                         {/* ── Sağ: Fiyat & İletişim ── */}
-                        <div className="space-y-5">
+                        <div style={{ position: 'sticky', top: 20, display: 'flex', flexDirection: 'column', gap: 12 }}>
 
-                            {/* Fiyat kartı */}
-                            <div className="sticky top-6 rounded-3xl p-6 space-y-4"
-                                style={{
-                                    background: 'linear-gradient(135deg, rgba(16,185,129,0.12), rgba(5,150,105,0.04))',
-                                    border: '1px solid rgba(16,185,129,0.3)',
-                                    boxShadow: '0 0 40px rgba(16,185,129,0.08)',
-                                }}>
-
-                                <div>
-                                    <div className="text-xs font-bold uppercase tracking-widest text-emerald-400 mb-1">Satış Fiyatı</div>
-                                    <div className="text-3xl font-black text-white">{priceStr}</div>
-                                    {listing.price_negotiable && (
-                                        <div className="mt-1 text-xs text-emerald-400 font-bold">✓ Pazarlık yapılabilir</div>
-                                    )}
-                                </div>
+                            {/* Fiyat kutusu */}
+                            <div style={{
+                                background: '#fff', border: '2px solid #10b981', borderRadius: 16, padding: 20,
+                                boxShadow: '0 4px 24px rgba(16,185,129,0.12)',
+                            }}>
+                                <div style={{ fontSize: 10, fontWeight: 800, color: '#059669', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>Satış Fiyatı</div>
+                                <div style={{ fontSize: 28, fontWeight: 900, color: '#0f172a', marginBottom: 4 }}>{priceStr}</div>
+                                {listing.price_negotiable && (
+                                    <div style={{ fontSize: 11, color: '#059669', fontWeight: 700, marginBottom: 12 }}>✓ Pazarlık yapılabilir</div>
+                                )}
 
                                 {/* Komisyon hesabı */}
                                 {listing.currency !== 'STARS' && (
-                                    <div className="rounded-xl p-4 space-y-2 text-xs"
-                                        style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.06)' }}>
-                                        <div className="flex justify-between text-slate-400">
+                                    <div style={{
+                                        borderRadius: 10, padding: '10px 12px', marginBottom: 12,
+                                        background: '#f8fafc', border: '1px solid #e2e8f0', fontSize: 11,
+                                    }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', color: '#475569', marginBottom: 4 }}>
                                             <span>Satış fiyatı</span>
-                                            <span className="font-bold text-white">${listing.asking_price.toLocaleString('tr-TR')} USDT</span>
+                                            <span style={{ fontWeight: 700 }}>${listing.asking_price} USDT</span>
                                         </div>
-                                        <div className="flex justify-between text-slate-500">
-                                            <span>Platform komisyonu (%5)</span>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', color: '#94a3b8', marginBottom: 6 }}>
+                                            <span>Komisyon (%5)</span>
                                             <span>-${(listing.asking_price * 0.05).toFixed(2)}</span>
                                         </div>
-                                        <div className="flex justify-between font-bold pt-1 border-t" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
-                                            <span className="text-emerald-400">Satıcı alır</span>
-                                            <span className="text-emerald-300">${(listing.asking_price * 0.95).toFixed(2)} USDT</span>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 800, paddingTop: 6, borderTop: '1px solid #e2e8f0' }}>
+                                            <span style={{ color: '#059669' }}>Satıcı alır</span>
+                                            <span style={{ color: '#059669' }}>${(listing.asking_price * 0.95).toFixed(2)}</span>
                                         </div>
                                     </div>
                                 )}
 
-                                {/* Escrow badge */}
-                                <div className="flex items-center gap-2 rounded-xl px-4 py-3 text-xs font-bold"
-                                    style={{ background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.2)', color: '#34d399' }}>
-                                    <Shield size={14} />
-                                    Bu işlem Escrow güvencesindedir
-                                </div>
-
-                                {/* İletişim formu */}
+                                {/* Teklif formu */}
                                 <ListingContactForm
                                     listingId={listing.id}
                                     sellerId={listing.seller_id}
                                     isLoggedIn={!!user}
                                     userId={user?.id}
+                                    askingPrice={listing.asking_price}
+                                    currency={listing.currency}
                                 />
-
-                                {/* Destek */}
-                                <a href="https://t.me/comtelegramkanali" target="_blank" rel="noopener noreferrer"
-                                    className="flex items-center justify-center gap-2 rounded-xl py-3 text-xs font-bold transition-all hover:text-white w-full"
-                                    style={{ border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(148,163,184,0.7)' }}>
-                                    <MessageCircle size={14} />
-                                    Sorun mu var? Desteğe yaz
-                                </a>
                             </div>
 
                             {/* Güven bilgisi */}
-                            <div className="rounded-2xl p-5 space-y-3"
-                                style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}>
-                                <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">
+                            <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 12, padding: 16 }}>
+                                <div style={{ fontSize: 10, fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>
                                     Neden Güvenli?
                                 </div>
-                                {[
-                                    { icon: Lock, text: 'Escrow ile ödeme korunması' },
-                                    { icon: BadgeCheck, text: 'Platform garantili transfer' },
-                                    { icon: Clock, text: '7/24 destek ekibi' },
-                                    { icon: AlertTriangle, text: 'Anlaşmazlıkta admin müdahalesi' },
-                                ].map((item, i) => (
-                                    <div key={i} className="flex items-center gap-2 text-xs text-slate-500">
-                                        <item.icon size={13} className="text-emerald-400 shrink-0" />
-                                        {item.text}
-                                    </div>
-                                ))}
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                                    {[
+                                        { icon: Lock, text: 'Escrow ile ödeme koruması' },
+                                        { icon: BadgeCheck, text: 'Platform garantili transfer' },
+                                        { icon: Clock, text: '7/24 destek ekibi' },
+                                        { icon: AlertTriangle, text: 'Anlaşmazlıkta admin müdahalesi' },
+                                    ].map((item, i) => (
+                                        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: '#475569' }}>
+                                            <item.icon size={13} color="#10b981" />
+                                            {item.text}
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
 
-                            {/* Geri dön */}
-                            <Link href="/marketplace"
-                                className="flex items-center gap-2 text-xs text-slate-600 hover:text-slate-400 transition-colors">
-                                <ArrowLeft size={13} />
-                                Tüm İlanlara Dön
+                            {/* Destek */}
+                            <a href="https://t.me/comtelegramkanali" target="_blank" rel="noopener noreferrer"
+                                style={{
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                                    border: '1px solid #e2e8f0', borderRadius: 10, padding: '10px',
+                                    fontSize: 12, fontWeight: 700, color: '#64748b', textDecoration: 'none',
+                                    background: '#fff',
+                                }}>
+                                <MessageCircle size={14} color="#7c3aed" /> Sorun mu var? Desteğe yaz
+                            </a>
+
+                            <Link href="/marketplace" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#94a3b8', textDecoration: 'none' }}>
+                                <ArrowLeft size={13} /> Tüm İlanlara Dön
                             </Link>
                         </div>
                     </div>
