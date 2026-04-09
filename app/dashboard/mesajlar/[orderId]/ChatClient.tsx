@@ -162,6 +162,10 @@ export default function ChatClient({ order, initialMessages, userId, isBuyer, is
                     flex-shrink: 0;
                     background: transparent;
                 }
+                /* Dashboard'daki fixed menü butonunu geç — lg:hidden yani <1024px */
+                @media (max-width: 1023px) {
+                    .chat-input-form { padding-bottom: 84px; }
+                }
                 .chat-input {
                     flex: 1;
                     padding: 11px 14px;
