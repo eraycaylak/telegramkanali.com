@@ -40,7 +40,25 @@ export default function TrendsAdminClient({ initialTrends, initialCategories }: 
             Object.entries(trendForm).forEach(([key, value]) => {
                 data.append(key, value.toString());
             });
-            if (trendImageFile) data.append('imageFile', trendImageFile);
+
+            // Resim varsa ÖNCE ayrı olarak yükle, URL'yi forma ekle
+            if (trendImageFile) {
+                const uploadFd = new FormData();
+                uploadFd.append('file', trendImageFile);
+
+                const uploadRes = await fetch('/api/upload-image', {
+                    method: 'POST',
+                    body: uploadFd,
+                });
+
+                if (!uploadRes.ok) {
+                    const errData = await uploadRes.json().catch(() => ({}));
+                    throw new Error(errData.error || 'Resim yüklenemedi');
+                }
+
+                const { url } = await uploadRes.json();
+                data.set('image', url); // URL'yi forma ekle, dosyayı değil
+            }
 
             const res = editingTrendId
                 ? await updateTrend(editingTrendId, data)

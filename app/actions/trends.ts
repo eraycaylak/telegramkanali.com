@@ -160,29 +160,8 @@ export async function addTrend(formData: FormData) {
     }
 
     try {
-        // Handle Image upload if any
-        let image = '';
-        const imageFile = formData.get('imageFile') as File;
-        if (imageFile && imageFile.size > 0) {
-            const ext = imageFile.name.split('.').pop() || 'jpg';
-            const fileName = `trend_${slug}_${Date.now()}.${ext}`;
-            const buffer = Buffer.from(await imageFile.arrayBuffer());
-
-            const { error: uploadError } = await getAdminClient().storage
-                .from('assets')
-                .upload(fileName, buffer, { contentType: imageFile.type, upsert: true });
-
-            if (uploadError) {
-                console.error('[TREND] Image upload error:', uploadError.message);
-                // Sessizce devam etme — hata döndür
-                return { error: `Resim yüklenemedi: ${uploadError.message}` };
-            } else {
-                const { data: urlData } = getAdminClient().storage.from('assets').getPublicUrl(fileName);
-                image = urlData.publicUrl;
-            }
-        } else {
-            image = formData.get('image') as string || '';
-        }
+        // Resim URL’si client tarafından önceden yüklendi (/api/upload-image aracılığıyla)
+        const image = (formData.get('image') as string) || '';
 
         const { data, error } = await adminClient
             .from('trends')
@@ -220,26 +199,8 @@ export async function updateTrend(id: string, formData: FormData) {
     }
 
     try {
-        // Handle Image upload if any
-        let image = formData.get('image') as string || '';
-        const imageFile = formData.get('imageFile') as File;
-        if (imageFile && imageFile.size > 0) {
-            const ext = imageFile.name.split('.').pop() || 'jpg';
-            const fileName = `trend_${id}_${Date.now()}.${ext}`;
-            const buffer = Buffer.from(await imageFile.arrayBuffer());
-
-            const { error: uploadError } = await getAdminClient().storage
-                .from('assets')
-                .upload(fileName, buffer, { contentType: imageFile.type, upsert: true });
-
-            if (uploadError) {
-                console.error('[TREND] Image upload error:', uploadError.message);
-                return { error: `Resim yüklenemedi: ${uploadError.message}` };
-            } else {
-                const { data: urlData } = getAdminClient().storage.from('assets').getPublicUrl(fileName);
-                image = urlData.publicUrl;
-            }
-        }
+        // Resim URL’si client tarafından önceden yüklendi (/api/upload-image aracılığıyla)
+        let image = (formData.get('image') as string) || '';
 
         const { data, error } = await adminClient
             .from('trends')
