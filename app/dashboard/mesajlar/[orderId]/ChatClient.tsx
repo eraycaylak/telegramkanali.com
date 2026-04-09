@@ -24,6 +24,8 @@ interface Message {
 interface Props {
     order: any; initialMessages: Message[]; userId: string;
     isBuyer: boolean; isSeller: boolean; isAdmin: boolean; otherParty: any;
+    hasTelegramLinked: boolean;
+    botUsername: string;
 }
 
 function formatTime(iso: string) {
@@ -33,7 +35,7 @@ function formatTime(iso: string) {
     return d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
 }
 
-export default function ChatClient({ order, initialMessages, userId, isBuyer, isSeller, isAdmin, otherParty }: Props) {
+export default function ChatClient({ order, initialMessages, userId, isBuyer, isSeller, isAdmin, otherParty, hasTelegramLinked, botUsername }: Props) {
     const [messages, setMessages] = useState<Message[]>(initialMessages);
     const [text, setText] = useState('');
     const [sending, setSending] = useState(false);
@@ -100,6 +102,15 @@ export default function ChatClient({ order, initialMessages, userId, isBuyer, is
                 content: systemMsg, is_system: true,
             });
             setOrderStatus(newStatus);
+
+            // Teklif kabul edilince alıcıya bot bildirimi gönder
+            if (newStatus === 'accepted') {
+                fetch('/api/escrow/notify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ orderId: order.id }),
+                }).catch(console.error);
+            }
         } finally { setUpdatingStatus(false); }
     }
 
@@ -265,10 +276,29 @@ export default function ChatClient({ order, initialMessages, userId, isBuyer, is
                     </div>
                 )}
 
-                {/* Escrow rehberi */}
+                {/* Telegram bağlama uyarısı — sadece TG bağlı değilse */}
+                {!hasTelegramLinked && !isAdmin && (
+                    <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 10, padding: '10px 12px', marginBottom: 10, flexShrink: 0, display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ fontSize: 12, fontWeight: 800, color: '#92400e' }}>🔔 Bot bildirimlerini aç</div>
+                            <div style={{ fontSize: 11, color: '#78716c', marginTop: 1 }}>Ödeme talimatları ve transfer adımları için Telegram'ı bağlayın</div>
+                        </div>
+                        {botUsername && (
+                            <a href={`https://t.me/${botUsername}?start=link_${userId}`} target="_blank" rel="noopener"
+                                style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: '#f59e0b', color: '#fff', fontWeight: 800, fontSize: 11, padding: '6px 10px', borderRadius: 8, textDecoration: 'none', flexShrink: 0 }}>
+                                Bağla ›
+                            </a>
+                        )}
+                    </div>
+                )}
+
+                {/* Escrow kabul edildi rehberi */}
                 {orderStatus === 'accepted' && isBuyer && (
-                    <div style={{ background: '#f0f9ff', border: '1px solid #bae6fd', borderRadius: 10, padding: '10px 12px', marginBottom: 10, flexShrink: 0, fontSize: 12, color: '#0369a1' }}>
-                        🎉 Teklif kabul edildi! <a href="https://t.me/comtelegramkanali" target="_blank" rel="noopener" style={{ color: '#7c3aed', fontWeight: 700 }}>Telegram'dan escrow ödemesi için bize yazın →</a>
+                    <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 10, padding: '10px 12px', marginBottom: 10, flexShrink: 0, fontSize: 12, color: '#166534' }}>
+                        {hasTelegramLinked
+                            ? <>🤖 <b>Bot size ödeme talimatını Telegram'dan gönderdi.</b> Kontrol edin!</>
+                            : <>🎉 Teklif kabul edildi! <a href="https://t.me/comtelegramkanali" target="_blank" rel="noopener" style={{ color: '#7c3aed', fontWeight: 700 }}>Telegram'dan escrow ödemesi için yazın →</a></>
+                        }
                     </div>
                 )}
 

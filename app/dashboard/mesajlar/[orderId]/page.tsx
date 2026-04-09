@@ -60,6 +60,11 @@ export default async function ChatPage({ params }: { params: Promise<{ orderId: 
     const isSeller = order.seller_id === user.id;
     const otherParty = isBuyer ? order.seller : order.buyer;
 
+    // Kullanıcının Telegram bağlı olup olmadığını kontrol et
+    const { data: myProfile } = await db.from('profiles').select('telegram_id').eq('id', user.id).single();
+    const hasTelegramLinked = Boolean(myProfile?.telegram_id);
+    const botUsername = process.env.TELEGRAM_BOT_USERNAME || '';
+
     return (
         <ChatClient
             order={order}
@@ -69,6 +74,8 @@ export default async function ChatPage({ params }: { params: Promise<{ orderId: 
             isSeller={isSeller}
             isAdmin={isAdmin}
             otherParty={otherParty}
+            hasTelegramLinked={hasTelegramLinked}
+            botUsername={botUsername}
         />
     );
 }

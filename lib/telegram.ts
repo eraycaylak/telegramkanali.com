@@ -1,8 +1,63 @@
-/**
- * Telegram API Utilities
- * Kanal bilgilerini Telegram'dan otomatik çeker
- * NOT: Bu fonksiyonlar sadece server-side'da çalışır (admin.ts içinden çağrılır)
- */
+// Telegram Bot API utility
+// Tüm Telegram işlemleri (bot mesajları + kanal bilgisi) bu dosya üzerinden yapılır
+
+const TOKEN = process.env.TELEGRAM_BOT_TOKEN!;
+const API = `https://api.telegram.org/bot${TOKEN}`;
+
+export const ADMIN_ID = parseInt(process.env.TELEGRAM_ADMIN_CHAT_ID || '1248286205', 10);
+export const USDT_ADDRESS = process.env.USDT_TRC20_ADDRESS || 'USDT_ADRESINIZI_BURAYA_GIRIN';
+export const BOT_USERNAME = process.env.TELEGRAM_BOT_USERNAME || '';
+
+// ─── Temel mesaj gönderme ────────────────────────────────────────────────────
+
+export async function sendMessage(
+    chatId: number | string,
+    text: string,
+    inline_keyboard?: { text: string; callback_data?: string; url?: string }[][]
+): Promise<{ ok: boolean; result?: { message_id: number } }> {
+    const body: any = {
+        chat_id: chatId,
+        text,
+        parse_mode: 'HTML',
+        disable_web_page_preview: true,
+    };
+    if (inline_keyboard) {
+        body.reply_markup = { inline_keyboard };
+    }
+    const res = await fetch(`${API}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    });
+    return res.json();
+}
+
+export async function answerCallbackQuery(id: string, text?: string, show_alert = false) {
+    await fetch(`${API}/answerCallbackQuery`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ callback_query_id: id, text, show_alert }),
+    });
+}
+
+// ─── Buton yardımcıları ──────────────────────────────────────────────────────
+
+export function btn(text: string, callback_data: string) {
+    return { text, callback_data };
+}
+
+export function linkBtn(text: string, url: string) {
+    return { text, url };
+}
+
+// ─── Fiyat formatlayıcı ──────────────────────────────────────────────────────
+
+export function fmtPrice(amount: number, currency: string) {
+    if (currency === 'STARS') return `${amount} ⭐ Yıldız`;
+    return `$${parseFloat(String(amount)).toFixed(2)} USDT`;
+}
+
+// ─── Kanal bilgisi çekme (eski fonksiyonlar — admin.ts tarafından kullanılır) ─
 
 interface TelegramChannelInfo {
     title: string;
@@ -12,229 +67,81 @@ interface TelegramChannelInfo {
     username: string;
 }
 
-/**
- * Telegram kanal/grup username'inden bilgileri çeker
- * t.me/username veya @username formatını kabul eder
- */
 export async function fetchTelegramChannelInfo(joinLink: string): Promise<TelegramChannelInfo | null> {
     try {
-        // Username'i link'ten çıkar
         let username = extractUsername(joinLink);
-        if (!username) {
-            console.log('[TELEGRAM] Username bulunamadı:', joinLink);
-            return null;
-        }
+        if (!username) return null;
 
-        console.log('[TELEGRAM] Fetching info for:', username);
-
-        // Telegram Widget API kullanarak bilgi çek (public kanallar için)
-        // Bu API resmi olmasa da çalışır
-        const widgetUrl = `https://t.me/${username}`;
-
-        const response = await fetch(widgetUrl, {
-            headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-                'Accept': 'text/html'
-            },
-            cache: 'no-store' // Her seferinde taze veri çek
+        const response = await fetch(`https://t.me/${username}`, {
+            headers: { 'User-Agent': 'Mozilla/5.0', 'Accept': 'text/html' },
+            cache: 'no-store',
         });
-
-        if (!response.ok) {
-            console.log('[TELEGRAM] Fetch failed:', response.status);
-            return null;
-        }
+        if (!response.ok) return null;
 
         const html = await response.text();
-
-        // HTML'den bilgileri parse et
-        const info = parseChannelHTML(html, username);
-
-        console.log('[TELEGRAM] Parsed info:', info);
-        return info;
-
-    } catch (error) {
-        console.error('[TELEGRAM] Error fetching channel info:', error);
+        return parseChannelHTML(html, username);
+    } catch {
         return null;
     }
 }
 
-/**
- * Join link'ten username'i çıkarır
- */
-function extractUsername(joinLink: string): string | null {
-    // Desteklenen formatlar:
-    // https://t.me/username
-    // https://telegram.me/username
-    // t.me/username
-    // @username
-    // +invite_hash (joinchat)
-
-    if (!joinLink) return null;
-
-    // @ ile başlıyorsa direkt username
-    if (joinLink.startsWith('@')) {
-        return joinLink.slice(1);
-    }
-
-    // Private link (joinchat) - bu durumda bilgi çekemeyiz
-    if (joinLink.includes('joinchat') || joinLink.includes('+')) {
-        console.log('[TELEGRAM] Private channel, cannot fetch info');
-        return null;
-    }
-
-    // t.me/username formatı
-    const tmeMatch = joinLink.match(/(?:https?:\/\/)?(?:t|telegram)\.me\/([a-zA-Z0-9_]+)/);
-    if (tmeMatch) {
-        return tmeMatch[1];
-    }
-
-    return null;
-}
-
-/**
- * Telegram HTML sayfasından kanal bilgilerini parse eder
- */
-function parseChannelHTML(html: string, username: string): TelegramChannelInfo {
-    let title = '';
-    let description = '';
-    let photo_url: string | null = null;
-    let member_count = 0;
-
-    // Başlık (og:title veya tgme_page_title)
-    const titleMatch = html.match(/<meta property="og:title" content="([^"]+)"/);
-    if (titleMatch) {
-        title = decodeHTMLEntities(titleMatch[1]);
-    }
-
-    // Açıklama (og:description veya tgme_page_description)
-    const descMatch = html.match(/<meta property="og:description" content="([^"]+)"/);
-    if (descMatch) {
-        description = decodeHTMLEntities(descMatch[1]);
-    }
-
-    // Fotoğraf URL (og:image)
-    const imageMatch = html.match(/<meta property="og:image" content="([^"]+)"/);
-    if (imageMatch) {
-        photo_url = imageMatch[1];
-        // Telegram bazen placeholder resim döner, kontrol et
-        if (photo_url.includes('telegram-placeholder') || photo_url.includes('default')) {
-            photo_url = null;
-        }
-    }
-
-    // Üye sayısı (tgme_page_extra veya subscribers)
-    // Örnek: "15 234 members" veya "12K subscribers"
-    const memberMatch = html.match(/(\d[\d\s,\.]*(?:K|M)?)\s*(?:members|subscribers|üye|abone)/i);
-    if (memberMatch) {
-        member_count = parseSubscriberCount(memberMatch[1]);
-    }
-
-    // Alternatif: tgme_page_extra class içinden
-    const extraMatch = html.match(/class="tgme_page_extra">([^<]+)</);
-    if (extraMatch && member_count === 0) {
-        member_count = parseSubscriberCount(extraMatch[1]);
-    }
-
-    return {
-        title: title || username,
-        description,
-        photo_url,
-        member_count,
-        username
-    };
-}
-
-/**
- * "15K", "1.2M", "15 234" gibi formatları sayıya çevirir
- */
-function parseSubscriberCount(str: string): number {
-    if (!str) return 0;
-
-    // Boşluk ve virgülleri temizle
-    let clean = str.replace(/[\s,]/g, '');
-
-    // K ve M suffix'lerini işle
-    if (clean.includes('K') || clean.includes('k')) {
-        const num = parseFloat(clean.replace(/[Kk]/g, ''));
-        return Math.round(num * 1000);
-    }
-
-    if (clean.includes('M') || clean.includes('m')) {
-        const num = parseFloat(clean.replace(/[Mm]/g, ''));
-        return Math.round(num * 1000000);
-    }
-
-    // Noktalı sayılar (Türkçe format: 15.234)
-    clean = clean.replace(/\./g, '');
-
-    return parseInt(clean) || 0;
-}
-
-/**
- * HTML entities'leri decode eder
- */
-function decodeHTMLEntities(text: string): string {
-    const entities: Record<string, string> = {
-        '&amp;': '&',
-        '&lt;': '<',
-        '&gt;': '>',
-        '&quot;': '"',
-        '&#39;': "'",
-        '&nbsp;': ' '
-    };
-
-    return text.replace(/&[^;]+;/g, (match) => entities[match] || match);
-}
-
-/**
- * Telegram Bot API'sini kullanarak resmi verileri çeker
- * Bot yönetici olduğunda scraping'den çok daha güvenilirdir.
- */
 export async function fetchChannelInfoViaBot(chatId: string): Promise<TelegramChannelInfo | null> {
-    const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-    if (!BOT_TOKEN) {
-        console.error('[BOT] TELEGRAM_BOT_TOKEN environment variable is missing');
-        return null;
-    }
-
+    if (!process.env.TELEGRAM_BOT_TOKEN) return null;
     try {
-        console.log('[BOT] Fetching official info for chat:', chatId);
-
-        // 1. Get Chat Info (title, description, image file_id)
-        const chatRes = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getChat?chat_id=${chatId}`);
+        const chatRes = await fetch(`${API}/getChat?chat_id=${chatId}`);
         const chatData = await chatRes.json();
-
-        if (!chatData.ok) {
-            console.error('[BOT] getChat error:', chatData.description);
-            return null;
-        }
+        if (!chatData.ok) return null;
 
         const chat = chatData.result;
-
-        // 2. Get Member Count
-        const countRes = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getChatMemberCount?chat_id=${chatId}`);
+        const countRes = await fetch(`${API}/getChatMemberCount?chat_id=${chatId}`);
         const countData = await countRes.json();
         const member_count = countData.ok ? countData.result : 0;
 
-        // 3. Get Photo URL if exists
         let photo_url: string | null = null;
         if (chat.photo?.big_file_id) {
-            const fileRes = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getFile?file_id=${chat.photo.big_file_id}`);
+            const fileRes = await fetch(`${API}/getFile?file_id=${chat.photo.big_file_id}`);
             const fileData = await fileRes.json();
-            if (fileData.ok) {
-                photo_url = `https://api.telegram.org/file/bot${BOT_TOKEN}/${fileData.result.file_path}`;
-            }
+            if (fileData.ok) photo_url = `https://api.telegram.org/file/bot${process.env.TELEGRAM_BOT_TOKEN}/${fileData.result.file_path}`;
         }
 
-        return {
-            title: chat.title || chat.username || 'Kanal',
-            description: chat.description || '',
-            photo_url,
-            member_count,
-            username: chat.username || ''
-        };
-    } catch (err) {
-        console.error('[BOT] API Error:', err);
+        return { title: chat.title || chat.username || 'Kanal', description: chat.description || '', photo_url, member_count, username: chat.username || '' };
+    } catch {
         return null;
     }
 }
+
+function extractUsername(joinLink: string): string | null {
+    if (!joinLink) return null;
+    if (joinLink.startsWith('@')) return joinLink.slice(1);
+    if (joinLink.includes('joinchat') || joinLink.includes('+')) return null;
+    const m = joinLink.match(/(?:https?:\/\/)?(?:t|telegram)\.me\/([a-zA-Z0-9_]+)/);
+    return m ? m[1] : null;
+}
+
+function parseChannelHTML(html: string, username: string): TelegramChannelInfo {
+    const titleMatch = html.match(/<meta property="og:title" content="([^"]+)"/);
+    const descMatch = html.match(/<meta property="og:description" content="([^"]+)"/);
+    const imageMatch = html.match(/<meta property="og:image" content="([^"]+)"/);
+    const memberMatch = html.match(/(\d[\d\s,\.]*(?:K|M)?)\s*(?:members|subscribers|üye|abone)/i);
+
+    const title = titleMatch ? decodeHTMLEntities(titleMatch[1]) : username;
+    const description = descMatch ? decodeHTMLEntities(descMatch[1]) : '';
+    let photo_url = imageMatch ? imageMatch[1] : null;
+    if (photo_url?.includes('placeholder')) photo_url = null;
+
+    return { title, description, photo_url, member_count: memberMatch ? parseSubscriberCount(memberMatch[1]) : 0, username };
+}
+
+function parseSubscriberCount(str: string): number {
+    if (!str) return 0;
+    const clean = str.replace(/[\s,]/g, '');
+    if (/[Kk]/.test(clean)) return Math.round(parseFloat(clean) * 1000);
+    if (/[Mm]/.test(clean)) return Math.round(parseFloat(clean) * 1000000);
+    return parseInt(clean.replace(/\./g, '')) || 0;
+}
+
+function decodeHTMLEntities(text: string): string {
+    const e: Record<string, string> = { '&amp;': '&', '&lt;': '<', '&gt;': '>', '&quot;': '"', '&#39;': "'", '&nbsp;': ' ' };
+    return text.replace(/&[^;]+;/g, m => e[m] || m);
+}
+
