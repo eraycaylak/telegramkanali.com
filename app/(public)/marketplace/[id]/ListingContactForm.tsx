@@ -128,8 +128,8 @@ export default function ListingContactForm({ listingId, sellerId, isLoggedIn, us
                 <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#64748b', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
                     Teklif Fiyatı (Opsiyonel)
                 </label>
-                <div style={{ display: 'flex', gap: 6 }}>
-                    <div style={{ position: 'relative', flex: 1 }}>
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                    <div style={{ position: 'relative', flex: '1 1 120px', minWidth: 0 }}>
                         <DollarSign size={13} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
                         <input
                             type="number"
@@ -137,11 +137,12 @@ export default function ListingContactForm({ listingId, sellerId, isLoggedIn, us
                             onChange={e => setOfferPrice(e.target.value)}
                             placeholder={askingPrice ? `İstenen: ${askingPrice}` : 'Fiyat girin...'}
                             min={0}
+                            inputMode="decimal"
                             style={{
                                 width: '100%', paddingLeft: 32, paddingRight: 12,
-                                paddingTop: 9, paddingBottom: 9,
+                                paddingTop: 10, paddingBottom: 10,
                                 border: '1px solid #e2e8f0', borderRadius: 8,
-                                fontSize: 13, outline: 'none', boxSizing: 'border-box',
+                                fontSize: 16, outline: 'none', boxSizing: 'border-box',
                                 background: '#f8fafc', color: '#0f172a',
                             }}
                         />
@@ -150,8 +151,9 @@ export default function ListingContactForm({ listingId, sellerId, isLoggedIn, us
                         value={offerCurrency}
                         onChange={e => setOfferCurrency(e.target.value)}
                         style={{
-                            border: '1px solid #e2e8f0', borderRadius: 8, padding: '9px 10px',
-                            fontSize: 12, fontWeight: 700, background: '#f8fafc', color: '#0f172a', outline: 'none',
+                            border: '1px solid #e2e8f0', borderRadius: 8, padding: '10px 10px',
+                            fontSize: 15, fontWeight: 700, background: '#f8fafc', color: '#0f172a', outline: 'none',
+                            flex: '0 0 auto',
                         }}
                     >
                         <option value="USDT">USDT</option>
@@ -168,12 +170,12 @@ export default function ListingContactForm({ listingId, sellerId, isLoggedIn, us
                 <textarea
                     value={message}
                     onChange={e => setMessage(e.target.value)}
-                    placeholder="Kendinizi tanıtın, satın alma amacınızı ve bütçenizi kısaca belirtin..."
+                    placeholder="Kendinizi tanıtın, bütçenizi ve satın alma amacınızı kısaca belirtin..."
                     rows={3}
                     style={{
                         width: '100%', padding: 12, boxSizing: 'border-box',
                         border: error ? '1px solid #fca5a5' : '1px solid #e2e8f0',
-                        borderRadius: 8, fontSize: 13, resize: 'none', outline: 'none',
+                        borderRadius: 8, fontSize: 16, resize: 'none', outline: 'none',
                         background: '#f8fafc', color: '#0f172a', lineHeight: 1.5,
                     }}
                 />
