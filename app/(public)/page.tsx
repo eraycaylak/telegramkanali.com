@@ -228,6 +228,60 @@ export default async function Home({ searchParams }: HomeProps) {
               </div>
             )}
 
+            {/* 🛒 Marketplace Promo Strip */}
+            {!search && !categoryId && page === 1 && (
+              <Link
+                href="/marketplace"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: 16,
+                  margin: '20px 0',
+                  padding: '14px 20px',
+                  background: 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 50%, #4f46e5 100%)',
+                  borderRadius: 14,
+                  textDecoration: 'none',
+                  overflow: 'hidden',
+                  position: 'relative',
+                  boxShadow: '0 4px 24px rgba(124,58,237,0.25)',
+                }}
+              >
+                {/* Dekoratif arka plan daireler */}
+                <div style={{ position: 'absolute', top: -20, right: -20, width: 80, height: 80, borderRadius: '50%', background: 'rgba(255,255,255,0.08)' }} />
+                <div style={{ position: 'absolute', bottom: -30, left: '40%', width: 100, height: 100, borderRadius: '50%', background: 'rgba(255,255,255,0.05)' }} />
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0, position: 'relative', zIndex: 1 }}>
+                  <span style={{ fontSize: 26, flexShrink: 0 }}>🛒</span>
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontWeight: 900, fontSize: 14, color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      Telegram Kanal Alım & Satım
+                    </div>
+                    <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.75)', marginTop: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      Escrow güvencesiyle güvenli kanal ticareti
+                    </div>
+                  </div>
+                </div>
+
+                <span style={{
+                  flexShrink: 0,
+                  background: 'rgba(255,255,255,0.2)',
+                  backdropFilter: 'blur(4px)',
+                  color: '#fff',
+                  fontWeight: 800,
+                  fontSize: 12,
+                  padding: '7px 16px',
+                  borderRadius: 8,
+                  border: '1px solid rgba(255,255,255,0.25)',
+                  position: 'relative',
+                  zIndex: 1,
+                  whiteSpace: 'nowrap',
+                }}>
+                  Marketplace →
+                </span>
+              </Link>
+            )}
+
             {/* Remaining Channels */}
             {remainingChannels.length > 0 && (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6 mt-6">
