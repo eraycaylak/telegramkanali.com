@@ -239,12 +239,12 @@ export default async function Home({ searchParams }: HomeProps) {
                   gap: 16,
                   margin: '20px 0',
                   padding: '14px 20px',
-                  background: 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 50%, #4f46e5 100%)',
+                  background: 'linear-gradient(135deg, #059669 0%, #047857 50%, #10b981 100%)',
                   borderRadius: 14,
                   textDecoration: 'none',
                   overflow: 'hidden',
                   position: 'relative',
-                  boxShadow: '0 4px 24px rgba(124,58,237,0.25)',
+                  boxShadow: '0 4px 24px rgba(5,150,105,0.25)',
                 }}
               >
                 {/* Dekoratif arka plan daireler */}
