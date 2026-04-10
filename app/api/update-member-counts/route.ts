@@ -6,6 +6,38 @@ import { getAdminClient } from '@/lib/supabaseAdmin';
 
 const telegramBotToken = process.env.TELEGRAM_BOT_TOKEN;
 
+function isTelegramCdn(url: string | null): boolean {
+    if (!url) return false;
+    return url.includes('telesco.pe') || url.includes('telegram-cdn') || (url.includes('cdn') && url.includes('telegram'));
+}
+
+async function persistImage(url: string, channelId: string): Promise<string | null> {
+    try {
+        const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
+        if (!res.ok) return null;
+
+        const buffer = Buffer.from(await res.arrayBuffer());
+        const contentType = res.headers.get('content-type') || 'image/jpeg';
+        const ext = contentType.split('/').pop() || 'jpg';
+        const fileName = `channel_${channelId}_${Date.now()}.${ext}`;
+
+        const supabase = getAdminClient();
+        const { error } = await supabase.storage
+            .from('assets')
+            .upload(fileName, buffer, { contentType, upsert: true });
+
+        if (error) return null;
+
+        const { data: urlData } = supabase.storage
+            .from('assets')
+            .getPublicUrl(fileName);
+
+        return urlData.publicUrl;
+    } catch {
+        return null;
+    }
+}
+
 async function getChannelMemberCount(username: string): Promise<number | null> {
     if (!telegramBotToken) return null;
 
@@ -42,10 +74,10 @@ export async function GET(request: NextRequest) {
     try {
         const supabase = getAdminClient();
 
-        // Get all channels with their usernames
+        // Get all channels with their usernames + image
         const { data: channels, error: fetchError } = await supabase
             .from('channels')
-            .select('id, name, join_link')
+            .select('id, name, join_link, image')
             .order('created_at', { ascending: false });
 
         if (fetchError) {
@@ -57,6 +89,7 @@ export async function GET(request: NextRequest) {
 
         let updated = 0;
         let failed = 0;
+        let imagesMigrated = 0;
         const results = [];
 
         for (const channel of channels || []) {
@@ -74,13 +107,29 @@ export async function GET(request: NextRequest) {
 
             const memberCount = await getChannelMemberCount(username);
 
+            // Build update payload
+            const updatePayload: any = {};
+
             if (memberCount !== null) {
+                updatePayload.member_count = memberCount;
+                updatePayload.updated_at = new Date().toISOString();
+            }
+
+            // Persist Telegram CDN image to Supabase Storage
+            if (isTelegramCdn(channel.image)) {
+                const persistedUrl = await persistImage(channel.image, channel.id);
+                if (persistedUrl) {
+                    updatePayload.image = persistedUrl;
+                    imagesMigrated++;
+                    console.log(`[IMAGE_PERSIST] ${channel.name}: migrated`);
+                }
+            }
+
+            // Apply update if there's anything to update
+            if (Object.keys(updatePayload).length > 0) {
                 const { error: updateError } = await supabase
                     .from('channels')
-                    .update({
-                        member_count: memberCount,
-                        updated_at: new Date().toISOString()
-                    })
+                    .update(updatePayload)
                     .eq('id', channel.id);
 
                 if (!updateError) {
@@ -88,7 +137,7 @@ export async function GET(request: NextRequest) {
                     results.push({ name: channel.name, status: 'updated', count: memberCount });
                 } else {
                     failed++;
-                    results.push({ name: channel.name, status: 'failed_db_update', error: updateError });
+                    results.push({ name: channel.name, status: 'failed_db_update' });
                 }
             } else {
                 failed++;
@@ -103,6 +152,7 @@ export async function GET(request: NextRequest) {
             success: true,
             updated,
             failed,
+            imagesMigrated,
             total: channels?.length || 0,
             results
         });
