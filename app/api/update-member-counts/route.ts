@@ -93,11 +93,13 @@ export async function GET(request: NextRequest) {
     try {
         const supabase = getAdminClient();
 
-        // Get all channels with their usernames + image
+        // Sadece 25 kanalı seç (Serverless fonksiyon timeout süresini aşmamak için)
+        // En eski güncellenenleri (updated_at ASC) seçiyoruz ki sırayla hepsi güncellensin
         const { data: channels, error: fetchError } = await supabase
             .from('channels')
             .select('id, name, join_link, image')
-            .order('created_at', { ascending: false });
+            .order('updated_at', { ascending: true, nullsFirst: true })
+            .limit(25);
 
         if (fetchError) {
             console.error('Supabase Fetch Error:', fetchError);
