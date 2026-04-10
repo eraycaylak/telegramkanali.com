@@ -38,31 +38,50 @@ async function persistImage(url: string, channelId: string): Promise<string | nu
     }
 }
 
-async function getChannelMemberCount(username: string): Promise<number | null> {
-    if (!telegramBotToken) return null;
+export const dynamic = 'force-dynamic';
+export const maxDuration = 60;
+
+async function getChannelData(username: string): Promise<{ memberCount: number | null, photoUrl: string | null }> {
+    if (!telegramBotToken) return { memberCount: null, photoUrl: null };
 
     try {
-        // Remove @ or https://t.me/ if present
         const cleanUsername = username
             .replace('@', '')
             .replace('https://t.me/', '')
             .replace('http://t.me/', '');
 
-        const response = await fetch(
-            `https://api.telegram.org/bot${telegramBotToken}/getChatMemberCount?chat_id=@${cleanUsername}`
+        // 1. Get Chat details (includes profile photo)
+        const chatRes = await fetch(
+            `https://api.telegram.org/bot${telegramBotToken}/getChat?chat_id=@${cleanUsername}`
         );
-
-        const data = await response.json();
-
-        if (data.ok && typeof data.result === 'number') {
-            return data.result;
+        const chatData = await chatRes.json();
+        
+        let photoUrl: string | null = null;
+        if (chatData.ok && chatData.result?.photo?.big_file_id) {
+            const fileRes = await fetch(
+                `https://api.telegram.org/bot${telegramBotToken}/getFile?file_id=${chatData.result.photo.big_file_id}`
+            );
+            const fileData = await fileRes.json();
+            if (fileData.ok && fileData.result?.file_path) {
+                photoUrl = `https://api.telegram.org/file/bot${telegramBotToken}/${fileData.result.file_path}`;
+            }
         }
 
-        console.log(`[MEMBER_COUNT] Failed for @${cleanUsername}:`, data.description);
-        return null;
+        // 2. Get Member Count
+        const countRes = await fetch(
+            `https://api.telegram.org/bot${telegramBotToken}/getChatMemberCount?chat_id=@${cleanUsername}`
+        );
+        const countData = await countRes.json();
+
+        let memberCount: number | null = null;
+        if (countData.ok && typeof countData.result === 'number') {
+            memberCount = countData.result;
+        }
+
+        return { memberCount, photoUrl };
     } catch (error) {
-        console.error(`[MEMBER_COUNT] Error for ${username}:`, error);
-        return null;
+        console.error(`[GET_DATA] Error for ${username}:`, error);
+        return { memberCount: null, photoUrl: null };
     }
 }
 
@@ -105,7 +124,7 @@ export async function GET(request: NextRequest) {
                 continue;
             }
 
-            const memberCount = await getChannelMemberCount(username);
+            const { memberCount, photoUrl } = await getChannelData(username);
 
             // Build update payload
             const updatePayload: any = {};
@@ -116,12 +135,21 @@ export async function GET(request: NextRequest) {
             }
 
             // Persist Telegram CDN image to Supabase Storage
-            if (isTelegramCdn(channel.image)) {
+            if (photoUrl) {
+                // Her zaman taze fotoğrafı çekip kaydetmeyi dene
+                const persistedUrl = await persistImage(photoUrl, channel.id);
+                if (persistedUrl && persistedUrl !== channel.image) {
+                    updatePayload.image = persistedUrl;
+                    imagesMigrated++;
+                    console.log(`[IMAGE_UPDATE] ${channel.name}: photo updated`);
+                }
+            } else if (isTelegramCdn(channel.image)) {
+                // Taze fotoğraf alınamadıysa ama mevcut olan CDN linkiyse, onu kurtarmayı dene
                 const persistedUrl = await persistImage(channel.image, channel.id);
                 if (persistedUrl) {
                     updatePayload.image = persistedUrl;
                     imagesMigrated++;
-                    console.log(`[IMAGE_PERSIST] ${channel.name}: migrated`);
+                    console.log(`[IMAGE_PERSIST] ${channel.name}: old cdn migrated`);
                 }
             }
 
