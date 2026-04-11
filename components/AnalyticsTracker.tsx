@@ -2,8 +2,36 @@
 
 import { useEffect, useRef } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
-import { trackPageView } from '@/app/actions/analytics';
 import { trackVisitorProfile } from '@/app/actions/visitorProfile';
+
+// ============ Bot Detection ============
+function isBot(): boolean {
+    if (typeof navigator === 'undefined') return true;
+    const ua = navigator.userAgent;
+
+    // Known bots/crawlers
+    const botPatterns = [
+        /bot/i, /crawl/i, /spider/i, /slurp/i, /mediapartners/i,
+        /Googlebot/i, /Bingbot/i, /Yandex/i, /Baiduspider/i,
+        /facebookexternalhit/i, /Twitterbot/i, /rogerbot/i,
+        /linkedinbot/i, /embedly/i, /showyoubot/i, /outbrain/i,
+        /pinterest/i, /developers\.google/i, /redditbot/i,
+        /Applebot/i, /WhatsApp/i, /Slackbot/i, /Discordbot/i,
+        /TelegramBot/i, /AhrefsBot/i, /SemrushBot/i, /DotBot/i,
+        /MJ12bot/i, /PetalBot/i, /AspiegelBot/i, /Yahoo/i,
+        /headless/i, /PhantomJS/i, /Selenium/i, /puppeteer/i,
+        /prerender/i, /Lighthouse/i, /PTST/i, /GTmetrix/i,
+        /Chrome-Lighthouse/i, /Google Page Speed/i,
+    ];
+
+    if (botPatterns.some(p => p.test(ua))) return true;
+
+    // Headless browser detection
+    if ((navigator as any).webdriver) return true;
+    if (!navigator.languages || navigator.languages.length === 0) return true;
+
+    return false;
+}
 
 // ============ Cookie Helpers ============
 function getCookie(name: string): string | null {
@@ -167,10 +195,17 @@ export default function AnalyticsTracker() {
     // Main tracking
     useEffect(() => {
         const track = async () => {
+            // Skip admin and API routes
             if (pathname.startsWith('/admin') || pathname.startsWith('/api')) return;
+
+            // ─── BOT FILTERING ─────────────────────────────────────────
+            if (isBot()) return;
 
             const consent = getCookie('tk_consent');
             let isNewVisitor = false;
+
+            // Get fingerprint early — used in both modes
+            const fingerprint = getFingerprint();
 
             if (consent === '1') {
                 // === FULL COOKIE MODE ===
@@ -183,7 +218,7 @@ export default function AnalyticsTracker() {
                     isNewVisitor = true;
                 }
 
-                // 2. Daily unique check
+                // 2. Daily unique check (per day, not per session)
                 const today = new Date().toISOString().split('T')[0];
                 const lastDay = getCookie('tk_day');
                 if (!lastDay || lastDay !== today) {
@@ -212,7 +247,6 @@ export default function AnalyticsTracker() {
                 const browser = getBrowser();
                 const os = getOS();
                 const screenRes = getScreenResolution();
-                const fingerprint = getFingerprint();
                 const referrer = document.referrer || null;
 
                 // 6. Send to server (non-blocking)
@@ -233,15 +267,45 @@ export default function AnalyticsTracker() {
                 ).catch(() => {});
 
             } else {
-                // === FALLBACK: sessionStorage ===
-                const key = `tk_visited_${pathname}`;
-                if (!sessionStorage.getItem(key)) {
+                // === COOKIELESS MODE (no consent) ===
+                // Use fingerprint + date combo for daily unique check
+                // This is privacy-friendly — no personal data stored client-side
+                const today = new Date().toISOString().split('T')[0];
+                const dailyKey = `tk_fp_${today}`;
+
+                // Check if this fingerprint was already seen today (sessionStorage)
+                const seenToday = sessionStorage.getItem(dailyKey);
+                if (!seenToday) {
                     isNewVisitor = true;
-                    sessionStorage.setItem(key, 'true');
+                    sessionStorage.setItem(dailyKey, '1');
                 }
+
+                // Also prevent double-counting same page in same session
+                const pageKey = `tk_p_${pathname}`;
+                if (sessionStorage.getItem(pageKey)) {
+                    // Same page already tracked in this session — count view but NOT as new visitor
+                    isNewVisitor = false;
+                }
+                sessionStorage.setItem(pageKey, '1');
             }
 
-            await trackPageView(pathname, isNewVisitor);
+            // ─── SERVER-SIDE DEDUP TRACKING ────────────────────────────
+            // Send to server-side dedup endpoint instead of direct RPC
+            // Server will use fingerprint+IP+date to deduplicate
+            try {
+                await fetch('/api/track', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        path: pathname,
+                        fingerprint,
+                        isNewVisitor,
+                    }),
+                    keepalive: true,
+                });
+            } catch {
+                // Silently fail — analytics should never break the user experience
+            }
         };
 
         track();
