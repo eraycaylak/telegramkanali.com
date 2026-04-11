@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
 import AnalyticsTracker from "@/components/AnalyticsTracker";
 import CookieConsent from "@/components/CookieConsent";
+import LivePresenceTracker from "@/components/LivePresenceTracker";
 
 import JsonLd, { generateWebsiteSchema, generateOrganizationSchema } from "@/components/JsonLd";
 import "./globals.css";
@@ -134,6 +135,7 @@ export default function RootLayout({
           <AnalyticsTracker />
         </Suspense>
         <CookieConsent />
+        <LivePresenceTracker />
 
         {children}
 

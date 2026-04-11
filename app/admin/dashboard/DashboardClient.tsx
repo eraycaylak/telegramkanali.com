@@ -21,6 +21,7 @@ export default function DashboardClient() {
     const [allLoaded, setAllLoaded] = useState(false);
     const [loadingMore, setLoadingMore] = useState(false);
     const [profilesLoaded, setProfilesLoaded] = useState(false);
+    const [liveVisitors, setLiveVisitors] = useState(0);
 
     // Modal State
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -49,6 +50,20 @@ export default function DashboardClient() {
 
     useEffect(() => {
         fetchData();
+
+        // 🟢 Live Visitor Tracking Subscription
+        const channel = supabase.channel('site_presence');
+        channel
+            .on('presence', { event: 'sync' }, () => {
+                const state = channel.presenceState();
+                const count = Object.keys(state).length;
+                setLiveVisitors(count);
+            })
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
     }, [router]);
 
     async function fetchData() {
@@ -268,7 +283,7 @@ export default function DashboardClient() {
 
             <div className="container mx-auto">
                 {/* Stats Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                     <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex items-center gap-4">
                         <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center">
                             <BarChart3 size={24} />
@@ -299,6 +314,20 @@ export default function DashboardClient() {
                             <div className="text-2xl font-bold text-gray-900">
                                 {new Intl.NumberFormat('tr-TR').format(channels.reduce((sum, c) => sum + (c.member_count || 0), 0))}
                             </div>
+                        </div>
+                    </div>
+                    <div className="bg-gradient-to-br from-indigo-500 to-purple-600 p-6 rounded-xl border border-indigo-400 shadow-lg shadow-indigo-200 flex items-center gap-4 text-white relative overflow-hidden group">
+                        {/* Pulse effect */}
+                        <div className="absolute top-0 left-0 w-full h-full bg-white/10 animate-pulse opacity-50"></div>
+                        <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-lg flex items-center justify-center relative z-10 shadow-inner">
+                            <Zap size={24} className="text-yellow-300 drop-shadow-md" />
+                        </div>
+                        <div className="relative z-10">
+                            <div className="text-sm text-indigo-100 font-medium">Sitede Canlı İzleyici</div>
+                            <div className="text-3xl font-black">{liveVisitors}</div>
+                        </div>
+                        <div className="absolute -right-4 -bottom-4 opacity-20 transform group-hover:scale-110 transition-transform duration-500">
+                            <Zap size={100} />
                         </div>
                     </div>
                 </div>
