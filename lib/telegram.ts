@@ -68,21 +68,71 @@ interface TelegramChannelInfo {
 }
 
 export async function fetchTelegramChannelInfo(joinLink: string): Promise<TelegramChannelInfo | null> {
-    try {
-        let username = extractUsername(joinLink);
-        if (!username) return null;
-
-        const response = await fetch(`https://t.me/${username}`, {
-            headers: { 'User-Agent': 'Mozilla/5.0', 'Accept': 'text/html' },
-            cache: 'no-store',
-        });
-        if (!response.ok) return null;
-
-        const html = await response.text();
-        return parseChannelHTML(html, username);
-    } catch {
+    let username = extractUsername(joinLink);
+    if (!username) {
+        console.warn('[TELEGRAM] Could not extract username from:', joinLink);
         return null;
     }
+
+    // Try multiple URLs in order: t.me/username, then t.me/s/username (preview)
+    const urls = [
+        `https://t.me/${username}`,
+        `https://t.me/s/${username}`,
+    ];
+
+    for (const url of urls) {
+        // Retry up to 3 times per URL with 1s delay
+        for (let attempt = 1; attempt <= 3; attempt++) {
+            try {
+                console.log(`[TELEGRAM] Fetching ${url} (attempt ${attempt}/3)`);
+                const response = await fetch(url, {
+                    headers: {
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                        'Accept': 'text/html,application/xhtml+xml',
+                        'Accept-Language': 'en-US,en;q=0.9',
+                    },
+                    cache: 'no-store',
+                    signal: AbortSignal.timeout(10000), // 10s timeout
+                });
+
+                if (response.status === 429) {
+                    console.warn(`[TELEGRAM] Rate limited (429) on ${url}, waiting ${attempt * 2}s...`);
+                    await new Promise(r => setTimeout(r, attempt * 2000));
+                    continue;
+                }
+
+                if (!response.ok) {
+                    console.warn(`[TELEGRAM] HTTP ${response.status} for ${url}`);
+                    break; // Try next URL
+                }
+
+                const html = await response.text();
+                const result = parseChannelHTML(html, username);
+
+                // Validate: if we got a meaningful title, return it
+                if (result && result.title && result.title !== username) {
+                    console.log(`[TELEGRAM] Success: ${result.title} (${result.member_count} members)`);
+                    return result;
+                }
+
+                // If title equals username, the data might be minimal — still return it
+                if (result) {
+                    console.log(`[TELEGRAM] Partial data for ${username}`);
+                    return result;
+                }
+            } catch (err: any) {
+                const isTimeout = err?.name === 'AbortError' || err?.name === 'TimeoutError';
+                console.warn(`[TELEGRAM] ${isTimeout ? 'Timeout' : 'Error'} on ${url} attempt ${attempt}:`, err?.message || err);
+
+                if (attempt < 3) {
+                    await new Promise(r => setTimeout(r, 1000 * attempt));
+                }
+            }
+        }
+    }
+
+    console.error(`[TELEGRAM] All attempts failed for: ${joinLink}`);
+    return null;
 }
 
 export async function fetchChannelInfoViaBot(chatId: string): Promise<TelegramChannelInfo | null> {

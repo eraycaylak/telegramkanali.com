@@ -382,7 +382,7 @@ export async function scrapeTelegramInfo(url: string) {
         };
     } catch (error) {
         console.error('Scrape error:', error);
-        return { error: 'Telegram verisi çekilemedi' };
+        return { error: 'Telegram verisi çekilemedi. Lütfen linki kontrol edin ve tekrar deneyin.' };
     }
 }
 
@@ -606,7 +606,7 @@ export async function syncChannelFromTelegram(channelId: string) {
         }
 
         if (!telegramInfo) {
-            return { error: 'Telegram\'dan bilgi alınamadı' };
+            return { error: 'Telegram\'dan bilgi alınamadı. Kanal gizli/private olabilir veya Telegram geçici olarak erişilemiyor. Birkaç saniye sonra tekrar deneyin.' };
         }
 
         // Güncelle

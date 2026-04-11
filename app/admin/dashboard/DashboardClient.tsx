@@ -161,7 +161,8 @@ export default function DashboardClient() {
         }
     };
 
-    const handleEdit = (channel: Channel) => {
+    const handleEdit = async (channel: Channel) => {
+        await ensureProfilesLoaded();
         setFormData({
             name: channel.name,
             description: channel.description || '',
