@@ -88,18 +88,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         };
     });
 
-    // English channel URLs
-    const channelsUrlsEn = validChannels.map((channel) => {
-        const score = (channel as any).score || 0;
-        const priority = score >= 100 ? 0.7 : score >= 50 ? 0.6 : 0.5;
-        const lastMod = (channel as any).updated_at || channel.created_at;
-        return {
-            url: `${baseUrl}/en/${channel.slug}`,
-            lastModified: new Date(lastMod ?? Date.now()),
-            changeFrequency: 'weekly' as const,
-            priority,
-        };
-    });
+    // English channel URLs — REMOVED: /en/ pages now have noindex to save crawl budget
 
     const validCategories = categories.filter(cat => isValidSlug(cat.slug));
 
@@ -111,13 +100,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.9,
     }));
 
-    // English category URLs
-    const categoriesUrlsEn = validCategories.map((category) => ({
-        url: `${baseUrl}/en/${category.slug}`,
-        lastModified: new Date(),
-        changeFrequency: 'daily' as const,
-        priority: 0.8,
-    }));
+    // English category URLs — REMOVED: /en/ pages now have noindex to save crawl budget
 
     const seoPageUrls = seoPages.map((page) => ({
         url: `${baseUrl}/rehber/${page.slug}`,
@@ -169,10 +152,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         ...ifsaPages,
         ...marketplaceUrls,
         ...categoriesUrls,
-        ...categoriesUrlsEn,
         ...seoPageUrls,
         ...blogUrls,
         ...channelsUrls,
-        ...channelsUrlsEn,
     ];
 }

@@ -43,6 +43,10 @@ interface EnHomeProps {
 export const metadata: Metadata = {
     title: 'Telegram Channels & Groups (2026) — Best Turkish Telegram Directory',
     description: 'Discover the best and most popular Telegram channels and groups. Browse by category: Crypto, News, Education, Entertainment and more.',
+    robots: {
+        index: false,
+        follow: true,
+    },
     alternates: {
         canonical: `${baseUrl}/en`,
         languages: { 'tr': baseUrl, 'x-default': baseUrl }

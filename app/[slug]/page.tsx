@@ -257,12 +257,17 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   // 1. Try Category
   const category = await getCategoryBySlug(slug);
   if (category) {
+    // Resolve page parameter for pagination SEO
+    const resolvedParams = await params;
+    // Note: searchParams may need resolving too, but category metadata doesn't depend on it
+    // We need to handle pagination in the main function instead
+
     // Özel /18 sayfası için exact keyword match metadata
     if (category.slug === '18') {
       return {
         title: 'Telegram +18 Kanalları 2026 | En İyi +18 Telegram Grupları',
         description: 'Telegram +18 kanalları 2026 güncel listesi. En popüler +18 telegram grupları, yetişkin içerik kanalları ve aktif topluluklara katılın. Türkiye\'nin en büyük +18 telegram kanal dizini.',
-        keywords: ['telegram +18 kanalları', '+18 telegram kanalları', '+18 telegram', 'telegram 18 kanalları', 'yetişkin telegram kanalları', '+18 telegram grupları'],
+        keywords: ['telegram +18 kanalları', '+18 telegram kanalları', '+18 telegram', 'telegram 18 kanalları', 'yetişkin telegram kanalları', '+18 telegram grupları', 'türk ifşa telegram', 'telegram ifşa kanalları'],
         alternates: { canonical: `${baseUrl}/18` },
         openGraph: {
           title: 'Telegram +18 Kanalları 2026 | En İyi +18 Telegram Grupları',
@@ -898,7 +903,48 @@ export default async function DynamicPage({ params, searchParams }: PageProps) {
         <JsonLd data={{
           "@context": "https://schema.org",
           "@type": "FAQPage",
-          "mainEntity": [
+          "mainEntity": category.slug === '18' ? [
+            {
+              "@type": "Question",
+              "name": "Telegram +18 kanalları nedir?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Telegram +18 kanalları, yalnızca 18 yaş ve üzeri kullanıcılara yönelik özel içeriklerin paylaşıldığı Telegram kanallarıdır. Bu kanallara katılmak için Telegram uygulamasının yüklü olması yeterlidir. telegramkanali.com/18 adresinden en güncel listeye ulaşabilirsiniz."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Telegram +18 kanallarına nasıl katılınır?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "telegramkanali.com/18 adresindeki listeden ilginizi çeken kanalı seçin ve 'Kanala Git' butonuna tıklayın. Telegram uygulaması otomatik açılacak ve 'Katıl' butonuyla anında kanala erişim sağlayabilirsiniz. Katılım tamamen ücretsizdir."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Telegram +18 kanalları güvenli mi?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Evet, Telegram uçtan uca şifreleme teknolojisi kullanan güvenli bir mesajlaşma uygulamasıdır. +18 kanallara katıldığınızda telefon numaranız diğer üyeler tarafından görülmez. Gizlilik ayarlarınızı Telegram uygulama ayarlarından kontrol edebilirsiniz."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Telegram +18 kanalları ücretsiz mi?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Listelenen Telegram +18 kanallarının büyük çoğunluğuna ücretsiz katılabilirsiniz. Bazı VIP kanallarda premium içerik için ücret talep edilebilir, ancak bu tamamen isteğe bağlıdır."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "En aktif +18 Telegram kanalları hangileri?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "En aktif +18 Telegram kanalları telegramkanali.com/18 adresinde üye sayısı ve aktivite skoruna göre sıralanmaktadır. Listede üst sıralarda yer alan kanallar en aktif ve en çok takipçiye sahip kanallardır. Liste düzenli olarak güncellenmektedir."
+              }
+            }
+          ] : [
             {
               "@type": "Question",
               "name": `${category.name} Telegram kanalları güvenli mi?`,
@@ -1082,24 +1128,83 @@ export default async function DynamicPage({ params, searchParams }: PageProps) {
               )}
 
               <article className="prose prose-blue max-w-none">
-                <h2 className="text-3xl font-black text-gray-900 mb-6">
-                  {category.name} Telegram Kanallarına Katılın
-                </h2>
-                <p className="mb-4 text-lg">
-                  Her gün milyonlarca insanın kullandığı Telegram; yemek, spor, ekonomi, eğitim ve eğlence gibi onlarca farklı konuda toplu mesaj yayınlayabilmek ve kullanıcılarına geniş bilgi yelpazesi sunabilmek için kanal ve grup imkanı sunar. <strong>{category.name}</strong> kategorisindeki Telegram kanalları da güncelliği ve zengin içeriğiyle yoğun ilgi görmektedir.
-                </p>
-                <p className="mb-4">
-                  Popüler <strong>{category.name.toLowerCase()}</strong> toplulukları, kullanıcıların ilgi duydukları alanlarda anlık bildirim almalarını, güncel gelişmeleri takip etmelerini ve benzer ilgi alanlarına sahip binlerce kişiyle aynı paydada buluşmalarını sağlar. Diziniimizde yer alan tüm kanallar, aktiflik ve içerik kalitesi açısından düzenli olarak kontrol edilmektedir.
-                </p>
-                <div className="bg-blue-50 p-6 rounded-2xl border border-blue-100 my-8">
-                  <h3 className="font-bold text-blue-900 mb-3 uppercase tracking-wider text-sm">Neden Bu Kanalları Takip Etmelisiniz?</h3>
-                  <ul className="grid sm:grid-cols-2 gap-4 text-sm font-medium text-blue-800">
-                    <li className="flex items-center gap-2">🔹 Anlık ve Ücretsiz Bilgi</li>
-                    <li className="flex items-center gap-2">🔹 Güvenilir İçerik Kaynakları</li>
-                    <li className="flex items-center gap-2">🔹 Niş Topluluklara Erişim</li>
-                    <li className="flex items-center gap-2">🔹 Reklamsız ve Temiz Yayınlar</li>
-                  </ul>
-                </div>
+                {category.slug === '18' ? (
+                  <>
+                    <h2 className="text-3xl font-black text-gray-900 mb-6">
+                      Telegram +18 Kanalları 2026 — En Kapsamlı Rehber
+                    </h2>
+                    <p className="mb-4 text-lg">
+                      <strong>Telegram +18 kanalları</strong>, yetişkinlere yönelik özel içeriklerin paylaşıldığı ve yalnızca 18 yaş üstü kullanıcılara açık olan popüler Telegram topluluklarıdır. 2026 yılında güncellenen bu kapsamlı listemizde, Türkiye&apos;nin en aktif ve en çok tercih edilen <strong>+18 Telegram kanallarını</strong> bulabilirsiniz. Her kanal düzenli olarak kontrol edilmekte, aktif olmayan kanallar listeden çıkarılmaktadır.
+                    </p>
+                    <p className="mb-4">
+                      <strong>+18 Telegram grupları</strong> ve kanalları, Telegram&apos;ın sunduğu güçlü gizlilik altyapısı sayesinde kullanıcı kimliklerini korurken zengin içerik deneyimi sunar. Telegramkanali.com olarak, en popüler <Link href="/telegram-ifsa-kanallari" className="text-red-600 hover:underline font-bold">Telegram ifşa kanalları</Link>, <Link href="/telegram-turk-ifsa-kanallari" className="text-red-600 hover:underline font-bold">Türk ifşa kanalları</Link> ve <Link href="/telegram-unlu-ifsa-kanallari" className="text-red-600 hover:underline font-bold">ünlü ifşa kanalları</Link> dahil tüm yetişkin kategorileri tek çatı altında listeliyoruz.
+                    </p>
+
+                    <div className="bg-red-50 p-6 rounded-2xl border border-red-100 my-8">
+                      <h3 className="font-bold text-red-900 mb-3 uppercase tracking-wider text-sm">+18 Telegram Kanallarının Özellikleri</h3>
+                      <ul className="grid sm:grid-cols-2 gap-4 text-sm font-medium text-red-800">
+                        <li className="flex items-center gap-2">🔞 Yalnızca 18+ Kullanıcılara Açık</li>
+                        <li className="flex items-center gap-2">🔒 Telegram Şifreli Altyapı</li>
+                        <li className="flex items-center gap-2">⚡ Günlük Güncellenen İçerikler</li>
+                        <li className="flex items-center gap-2">✅ Aktiflik Kontrolü Yapılmış</li>
+                        <li className="flex items-center gap-2">🆓 Çoğu Kanala Ücretsiz Katılım</li>
+                        <li className="flex items-center gap-2">📱 Mobil Uyumlu Erişim</li>
+                      </ul>
+                    </div>
+
+                    <h3 className="text-2xl font-bold text-gray-800 mt-8 mb-3">Telegram +18 Kanallarına Nasıl Katılınır?</h3>
+                    <p className="mb-4">
+                      <strong>Telegram +18 kanallarına</strong> katılmak oldukça basittir. Aşağıdaki adımları takip ederek saniyeler içinde istediğiniz kanala ücretsiz erişim sağlayabilirsiniz:
+                    </p>
+                    <ol className="list-decimal pl-6 mb-6 space-y-2">
+                      <li>Telefonunuza <strong>Telegram uygulamasını</strong> indirin ve hesap oluşturun</li>
+                      <li>Bu sayfadaki listeden ilginizi çeken <strong>+18 kanalını</strong> seçin</li>
+                      <li>&quot;Kanala Git&quot; butonuna tıklayın — doğrudan Telegram açılacaktır</li>
+                      <li>Açılan sayfada &quot;Katıl&quot; butonuna basarak kanala anında erişin</li>
+                    </ol>
+
+                    <h3 className="text-2xl font-bold text-gray-800 mt-8 mb-3">En Popüler +18 Telegram Kanal Türleri</h3>
+                    <p className="mb-4">
+                      Telegram platformunda yetişkinlere yönelik birçok <strong>+18 kanal türü</strong> bulunmaktadır. İşte en çok tercih edilenler:
+                    </p>
+                    <ul className="list-disc pl-6 mb-6 space-y-1">
+                      <li><Link href="/telegram-ifsa-kanallari" className="text-red-600 hover:underline">Telegram İfşa Kanalları</Link> — En yoğun ilgi gören kategori</li>
+                      <li><Link href="/telegram-turk-ifsa-kanallari" className="text-red-600 hover:underline">Türk İfşa Kanalları</Link> — Türkçe yetişkin içerik</li>
+                      <li><Link href="/telegram-unlu-ifsa-kanallari" className="text-red-600 hover:underline">Ünlü İfşa Kanalları</Link> — Tanınmış isimlerle ilgili içerikler</li>
+                      <li><Link href="/turk-18-telegram-kanallari" className="text-red-600 hover:underline">Türk +18 Telegram Kanalları</Link> — Türk kullanıcılara yönelik</li>
+                      <li><Link href="/ucretsiz-18-telegram-kanallari" className="text-red-600 hover:underline">Ücretsiz +18 Telegram Kanalları</Link> — Bedava erişim</li>
+                    </ul>
+
+                    <h3 className="text-2xl font-bold text-gray-800 mt-8 mb-3">Telegram +18 Kanalları Güvenli mi?</h3>
+                    <p className="mb-4">
+                      <strong>Telegram</strong>, uçtan uca şifreleme teknolojisi kullanan dünyanın en güvenli mesajlaşma uygulamalarından biridir. +18 Telegram kanallarına katıldığınızda telefon numaranız diğer üyeler tarafından görülmez. Gizlilik ayarlarınızı Telegram uygulama ayarlarından detaylı şekilde kontrol edebilirsiniz.
+                    </p>
+                    <p className="mb-4">
+                      Daha fazla bilgi için <Link href="/rehber/en-iyi-telegram-kanallari" className="text-blue-600 hover:underline font-bold">en iyi Telegram kanalları rehberimizi</Link> ve <Link href="/rehber/turk-telegram-kanallari" className="text-blue-600 hover:underline font-bold">Türk Telegram kanalları listemizi</Link> inceleyebilirsiniz. Ayrıca <Link href="/rehber/aktif-telegram-kanallari" className="text-blue-600 hover:underline font-bold">aktif Telegram kanalları</Link> sayfamızdan tüm kategorilerdeki en aktif toplulukları keşfedebilirsiniz.
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <h2 className="text-3xl font-black text-gray-900 mb-6">
+                      {category.name} Telegram Kanallarına Katılın
+                    </h2>
+                    <p className="mb-4 text-lg">
+                      Her gün milyonlarca insanın kullandığı Telegram; yemek, spor, ekonomi, eğitim ve eğlence gibi onlarca farklı konuda toplu mesaj yayınlayabilmek ve kullanıcılarına geniş bilgi yelpazesi sunabilmek için kanal ve grup imkanı sunar. <strong>{category.name}</strong> kategorisindeki Telegram kanalları da güncelliği ve zengin içeriğiyle yoğun ilgi görmektedir.
+                    </p>
+                    <p className="mb-4">
+                      Popüler <strong>{category.name.toLowerCase()}</strong> toplulukları, kullanıcıların ilgi duydukları alanlarda anlık bildirim almalarını, güncel gelişmeleri takip etmelerini ve benzer ilgi alanlarına sahip binlerce kişiyle aynı paydada buluşmalarını sağlar. Diziniimizde yer alan tüm kanallar, aktiflik ve içerik kalitesi açısından düzenli olarak kontrol edilmektedir.
+                    </p>
+                    <div className="bg-blue-50 p-6 rounded-2xl border border-blue-100 my-8">
+                      <h3 className="font-bold text-blue-900 mb-3 uppercase tracking-wider text-sm">Neden Bu Kanalları Takip Etmelisiniz?</h3>
+                      <ul className="grid sm:grid-cols-2 gap-4 text-sm font-medium text-blue-800">
+                        <li className="flex items-center gap-2">🔹 Anlık ve Ücretsiz Bilgi</li>
+                        <li className="flex items-center gap-2">🔹 Güvenilir İçerik Kaynakları</li>
+                        <li className="flex items-center gap-2">🔹 Niş Topluluklara Erişim</li>
+                        <li className="flex items-center gap-2">🔹 Reklamsız ve Temiz Yayınlar</li>
+                      </ul>
+                    </div>
+                  </>
+                )}
                 <p className="mb-4">
                   Bu kategoride bulunan grup yöneticileri ve kullanıcılar, {category.name.toLowerCase()} hakkında genel veya özel tavsiyeler verir, güncel haberler ve bilgiler anlık olarak paylaşılır. Siz de kendi kanalınızı tanıtmak isterseniz <Link href="/kanal-ekle" className="text-blue-600 hover:underline font-bold">ücretsiz kanal ekle</Link> sayfamızı ziyaret edebilirsiniz.
                 </p>

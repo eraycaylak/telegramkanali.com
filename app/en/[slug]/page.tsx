@@ -34,6 +34,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         return {
             title: `${nameEn} Telegram Channels - ${new Date().getFullYear()}`,
             description: `Discover the best and most popular Telegram channels in the ${nameEn} category. Trusted ${nameEn} groups and lists.`,
+            robots: {
+                index: false,
+                follow: true,
+            },
             alternates: {
                 canonical: `${baseUrl}/en/${category.slug}`,
                 languages: { 'tr': `${baseUrl}/${category.slug}`, 'x-default': `${baseUrl}/${category.slug}` }
@@ -54,6 +58,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         return {
             title: `${nameEn} Telegram Channel - Join (${new Date().getFullYear()})`,
             description: `Join the ${nameEn} Telegram channel. ${descEn?.slice(0, 150)}... Top ${channel.categoryName || 'Telegram'} channels.`,
+            robots: {
+                index: false,
+                follow: true,
+            },
             alternates: {
                 canonical: `${baseUrl}/en/${channel.slug}`,
                 languages: { 'tr': `${baseUrl}/${channel.slug}`, 'x-default': `${baseUrl}/${channel.slug}` }

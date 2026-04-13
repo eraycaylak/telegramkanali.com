@@ -47,6 +47,7 @@ interface HomeProps {
 export async function generateMetadata({ searchParams }: HomeProps): Promise<Metadata> {
   const sp = await searchParams;
   const { q: search, category: categoryId, page: pageParam } = sp || {};
+  const page = pageParam ? parseInt(pageParam as string) : 1;
 
   if (search) {
     return {
@@ -56,7 +57,6 @@ export async function generateMetadata({ searchParams }: HomeProps): Promise<Met
   }
 
   if (categoryId) {
-    // Determine category metadata dynamically if possible, or provide a robust fallback
     return {
       title: `Telegram Kanalları | Kategori Filtresi`,
       description: `Seçili kategorideki en popüler Telegram kanallarını keşfedin.`,
@@ -64,6 +64,21 @@ export async function generateMetadata({ searchParams }: HomeProps): Promise<Met
         title: `Telegram Kanalları | Kategori Filtresi`,
         description: `Seçili kategorideki en popüler Telegram kanallarını keşfedin.`,
       }
+    };
+  }
+
+  // Pagination: unique title/desc for each page
+  if (page > 1) {
+    return {
+      title: `Telegram Kanalları ve Grupları — Sayfa ${page} (2026)`,
+      description: `Telegram kanalları ve grupları listesi sayfa ${page}. En iyi ve en aktif Telegram topluluklarını keşfedin.`,
+      alternates: {
+        canonical: `https://telegramkanali.com/?page=${page}`,
+      },
+      openGraph: {
+        title: `Telegram Kanalları — Sayfa ${page}`,
+        description: `Telegram kanalları listesi sayfa ${page}. En aktif kanalları keşfedin.`,
+      },
     };
   }
 
