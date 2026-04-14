@@ -54,9 +54,11 @@ export const metadata: Metadata = {
     google: "20wFKvwbMw7FX5yNiIFQTHkMU20H9EG57RtYbRIhgJQ",
   },
   icons: {
-    icon: '/favicon.ico',
-    apple: '/images/logo.png',
-    shortcut: '/favicon.ico',
+    icon: [
+      { url: '/icon.png', type: 'image/png', sizes: '512x512' },
+    ],
+    apple: '/apple-icon.png',
+    shortcut: '/icon.png',
   },
   openGraph: {
     type: "website",
@@ -119,9 +121,9 @@ export default function RootLayout({
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
         {/* Apple Touch Icons */}
-        <link rel="apple-touch-icon" href="/images/logo.png" />
-        <link rel="apple-touch-icon" sizes="152x152" href="/images/logo.png" />
-        <link rel="apple-touch-icon" sizes="180x180" href="/images/logo.png" />
+        <link rel="apple-touch-icon" href="/apple-icon.png" />
+        <link rel="apple-touch-icon" sizes="152x152" href="/apple-icon.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon.png" />
         {/* Global Structured Data */}
         <JsonLd data={generateWebsiteSchema(baseUrl)} />
         <JsonLd data={generateOrganizationSchema(baseUrl)} />
