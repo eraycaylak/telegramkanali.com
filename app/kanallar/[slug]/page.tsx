@@ -17,9 +17,27 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     const channel = await getChannelBySlug(slug);
     if (!channel) return {};
 
+    const name = channel?.name || '';
+    // Sırayla dene: uzun → kısa suffix → sadece isim → kelime sınırında kes (asla ortada kesmez)
+    const titleCandidates = [
+      `${name} Telegram Kanalı - Katıl`,
+      `${name} Telegram Kanalı`,
+      `${name} | Telegram`,
+      name,
+    ];
+    let pageTitle = titleCandidates.find(t => t.length <= 60) ?? (() => {
+      const words = name.split(' ');
+      let res = '';
+      for (const w of words) {
+        const next = res ? `${res} ${w}` : w;
+        if ((next + '… | Telegram').length > 60) break;
+        res = next;
+      }
+      return `${res || name.slice(0, 50)}… | Telegram`;
+    })();
     return {
-        title: `${channel?.name || ''} Telegram Kanalı Linki - Abone Sayısı`,
-        description: `${channel?.name || ''} Telegram kanalına katılın. ${channel?.description?.substring(0, 150)}...`,
+        title: pageTitle,
+        description: `${name} Telegram kanalına katılın. ${channel?.description?.substring(0, 150)}...`,
     };
 }
 

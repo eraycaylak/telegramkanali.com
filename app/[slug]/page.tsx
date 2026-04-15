@@ -18,6 +18,34 @@ import { Clock, Eye, AlertCircle, TrendingUp } from 'lucide-react';
 
 const baseUrl = 'https://telegramkanali.com';
 
+/**
+ * SEO title üret: 60 karakter limitini aşmadan en anlamlı başlığı oluştur.
+ * Sırayla dener: uzun suffix → kısa suffix → sadece isim → kelime sınırında kes
+ * Kelime ORTASINDA KEsme yapılmaz.
+ */
+function buildChannelTitle(name: string): string {
+  const candidates = [
+    `${name} Telegram Kanalı - Katıl`,   // ideal
+    `${name} Telegram Kanalı`,            // kısa
+    `${name} | Telegram`,                 // minimal
+    name,                                 // sadece isim
+  ];
+
+  for (const title of candidates) {
+    if (title.length <= 60) return title;
+  }
+
+  // Hepsi 60'ı aştıysa (isim >56 chr): kelime sınırında kes, "…" ekle
+  const words = name.split(' ');
+  let result = '';
+  for (const word of words) {
+    const next = result ? `${result} ${word}` : word;
+    if ((next + '… | Telegram').length > 60) break;
+    result = next;
+  }
+  return `${result || name.slice(0, 50)}… | Telegram`;
+}
+
 export const revalidate = 0;
 export const dynamic = 'force-dynamic';
 
@@ -308,21 +336,22 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (channel) {
     const ch = channel as any;
     const metaDesc = ch.seo_description || `${channel.name} Telegram kanalına katılın. ${channel.description?.slice(0, 150)}... En güncel ${channel.categoryName || 'Telegram'} kanalları.`;
+    const pageTitle = buildChannelTitle(channel.name);
     return {
-      title: `${channel.name} Telegram Kanalı - Katıl (2026)`,
+      title: pageTitle,
       description: metaDesc,
       alternates: {
         canonical: `${baseUrl}/${channel.slug}`,
       },
       openGraph: {
-        title: `${channel.name} Telegram Kanalı - Katıl (2026)`,
+        title: pageTitle,
         description: metaDesc,
         url: `${baseUrl}/${channel.slug}`,
         images: channel.image ? [{ url: channel.image }] : undefined,
         type: 'article',
       },
       twitter: {
-        title: `${channel.name} Telegram Kanalı - Katıl (2026)`,
+        title: pageTitle,
         description: metaDesc,
         images: channel.image ? [channel.image] : undefined,
       }
