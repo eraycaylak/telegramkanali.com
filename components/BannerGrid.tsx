@@ -19,9 +19,29 @@ export default async function BannerGrid({ type = 'homepage', categoryId, maxBan
 
     if (!banners || banners.length === 0) return null;
 
-    // Use stable display_order from DB (no shuffle — shuffle causes duplicates
-    // when multiple BannerGrid instances split the same list via offset/maxBanners)
-    let displayBanners = [...banners];
+    // Deterministic seeded shuffle: same seed → same order across all BannerGrid
+    // instances on the same page. Seed changes daily for fair advertiser rotation.
+    const today = new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
+    const seedKey = `${today}-${type}-${categoryId || 'home'}`;
+    let seed = 0;
+    for (let i = 0; i < seedKey.length; i++) {
+        seed = ((seed << 5) - seed + seedKey.charCodeAt(i)) | 0;
+    }
+    // Simple seeded PRNG (mulberry32)
+    const seededRandom = () => {
+        seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+        let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+    // Fisher-Yates with seeded PRNG
+    const shuffled = [...banners];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(seededRandom() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+
+    let displayBanners = shuffled;
     if (offset > 0) {
         displayBanners = displayBanners.slice(offset);
     }
