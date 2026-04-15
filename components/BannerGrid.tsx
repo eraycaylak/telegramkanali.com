@@ -19,15 +19,9 @@ export default async function BannerGrid({ type = 'homepage', categoryId, maxBan
 
     if (!banners || banners.length === 0) return null;
 
-    // Shuffle banners (Fisher-Yates) for fair rotation on every page load
-    const shuffled = [...banners];
-    for (let i = shuffled.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-    }
-
-    // Apply offset and maxBanners slicing
-    let displayBanners = shuffled;
+    // Use stable display_order from DB (no shuffle — shuffle causes duplicates
+    // when multiple BannerGrid instances split the same list via offset/maxBanners)
+    let displayBanners = [...banners];
     if (offset > 0) {
         displayBanners = displayBanners.slice(offset);
     }
