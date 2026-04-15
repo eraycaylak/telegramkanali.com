@@ -1,5 +1,6 @@
 import { getCategoryBySlug, getChannelsByCategory, getCategories, getChannelBySlug, getFeaturedChannels, getChannels, getBlogPosts, getRedirect, getChannelsByCity } from '@/lib/data';
 import { getPromotedChannels } from '@/app/actions/promoted';
+import { getBanners } from '@/app/actions/banners';
 import ChannelCard from '@/components/ChannelCard';
 import ChannelDetail from '@/components/ChannelDetail';
 import BannerGrid from '@/components/BannerGrid';
@@ -902,6 +903,13 @@ export default async function DynamicPage({ params, searchParams }: PageProps) {
     const catNameLower = category.name.toLowerCase();
     const isRestrictedCategory = catNameLower.includes('18') || catNameLower.includes('iddaa') || catNameLower.includes('kripto');
 
+    // Fetch banners ONCE, shuffle ONCE — share across all BannerGrid instances
+    let categoryBanners = await getBanners('category', category.id, true);
+    for (let i = categoryBanners.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [categoryBanners[i], categoryBanners[j]] = [categoryBanners[j], categoryBanners[i]];
+    }
+
     // Split channels into batches for interleaving with banners
     const firstBatch = channels.slice(0, 6);
     const remainingChannels = channels.slice(6);
@@ -1036,7 +1044,7 @@ export default async function DynamicPage({ params, searchParams }: PageProps) {
           {page === 1 && <FeaturedAds adType="featured" maxAds={3} categoryId={category.id} />}
 
           {/* First 2 Banners */}
-          <BannerGrid type="category" categoryId={category.id} maxBanners={2} />
+          <BannerGrid banners={categoryBanners} maxBanners={2} />
 
           {/* Sponsored Banner Ad */}
           <FeaturedAds adType="banner" maxAds={1} categoryId={category.id} />
@@ -1062,7 +1070,7 @@ export default async function DynamicPage({ params, searchParams }: PageProps) {
 
           {/* Remaining Banners (after 6th channel) */}
           {remainingChannels.length > 0 && (
-            <BannerGrid type="category" categoryId={category.id} offset={2} />
+            <BannerGrid banners={categoryBanners} offset={2} />
           )}
 
           {/* Remaining Channels */}
