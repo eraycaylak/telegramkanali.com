@@ -63,9 +63,7 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
-      // Eski/yanlış slug → doğru slug 301 redirect (SEO link equity koruması)
-      { source: '/haber-gundem', destination: '/haber', permanent: true },
-      { source: '/egitim', destination: '/egitim-ders', permanent: true },
+      // /kategori/slug → /slug pattern redirect (eski URL yapısı)
       { source: '/kategori/:slug', destination: '/:slug', permanent: true },
     ];
   },
