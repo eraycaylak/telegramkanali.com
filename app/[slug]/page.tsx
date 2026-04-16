@@ -139,7 +139,13 @@ function getCityFromSlug(slug: string): { key: string; city: typeof CITIES[strin
 }
 
 
-export default async function DynamicPage({ params, searchParams }: PageProps) {
+export default async function DynamicPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ slug: string }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const { slug } = await params;
   const resolvedSearchParams = searchParams ? await searchParams : {};
   const pageParam = resolvedSearchParams?.page;
