@@ -2,6 +2,8 @@
 
 # dependencies
 /node_modules
+seo-crawler/node_modules
+seo-crawler/reports
 /.pnp
 .pnp.*
 .yarn/*
