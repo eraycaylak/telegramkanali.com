@@ -131,6 +131,11 @@ const KEYWORD_18_PAGES: Record<string, { h1: string; title: string; description:
 
 type Keyword18PageType = typeof KEYWORD_18_PAGES[string];
 
+function getKeyword18PageFromSlug(slug: string): { key: string; page: Keyword18PageType } | null {
+  const page = KEYWORD_18_PAGES[slug];
+  return page ? { key: slug, page } : null;
+}
+
 function getCityFromSlug(slug: string): { key: string; city: typeof CITIES[string] } | null {
   if (!slug.endsWith('-telegram-gruplari')) return null;
   const key = slug.replace('-telegram-gruplari', '');
