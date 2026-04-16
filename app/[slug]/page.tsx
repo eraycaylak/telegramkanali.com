@@ -127,6 +127,20 @@ const KEYWORD_18_PAGES: Record<string, { h1: string; title: string; description:
       { question: 'Ücretsiz ve ücretli +18 Telegram kanalları arasındaki fark nedir?', answer: 'Ücretsiz kanallar herkese açıkken, bazı VIP kanallar premium içerik için ücret talep edebilir. Listemizde her iki türde kanalı bulabilirsiniz.' },
     ],
   },
+  '18': {
+    h1: '+18 Telegram Kanalları (2026) — Yetişkin İçerik Rehberi',
+    title: '+18 Telegram Kanalları 2026 | Yetişkin Telegram Kanal Listesi',
+    description: '+18 Telegram kanalları 2026 güncel ve kapsamlı listesi. Yetişkinlere yönelik Telegram kanalları, grupları ve toplulukları. Türkiye\'nin en büyük +18 Telegram rehberi.',
+    keywords: ['+18 telegram', '+18 telegram kanalları', 'telegram 18 kanalları', 'yetişkin telegram kanalları', 'türk +18 telegram'],
+    intro: '+18 Telegram kanalları kategorisi; yalnızca 18 yaş ve üzeri kullanıcılara yönelik Telegram topluluklarını bir araya getirir. Bu sayfada Türkiye\'nin en kapsamlı +18 Telegram kanal rehberini bulabilirsiniz. Sitemizde yer alan tüm kanallar topluluğun önerileriyle oluşturulmakta, şikayet bildirimleri doğrultusunda güncellenmektedir. Tüm kanallar yalnızca 18 yaş üstü kullanıcılara açıktır.',
+    faqs: [
+      { question: '+18 Telegram kanalları nedir?', answer: '+18 Telegram kanalları, yalnızca 18 yaş ve üzeri yetişkinlere yönelik içeriklerin paylaşıldığı Telegram topluluklarıdır. Bu kanallara katılmak için Telegram uygulamasının yüklü ve kullanıcının 18 yaşını doldurmuş olması gerekmektedir.' },
+      { question: '+18 Telegram kanallarına nasıl katılınır?', answer: 'Listemizden ilginizi çeken kanalı seçin, kanal sayfasını açın ve "Kanala Git" butonuna tıklayın. Telegram uygulaması açılarak sizi doğrudan ilgili kanala yönlendirecektir.' },
+      { question: '+18 Telegram kanalları güvenli mi?', answer: 'Telegram, uçtan uca şifreleme kullanan güvenli bir mesajlaşma platformudur. Kanallara katıldığınızda telefon numaranız diğer üyeler tarafından görülmez.' },
+      { question: '+18 Telegram kanallarını nasıl şikayet edebilirim?', answer: 'Herhangi bir kanalı şikayet etmek için kanal sayfasındaki "Şikayet Et" butonunu kullanabilir ya da telegramkanaliiletisim@outlook.com adresine e-posta gönderebilirsiniz. Tüm şikayetler incelenerek gerekli işlem yapılır.' },
+      { question: 'Kanal bulunamıyorsa ne yapmalıyım?', answer: 'Telegram kanalları zaman zaman silinebilir veya özel hale gelebilir. Listemiz düzenli güncellense de bazı kanallar aktif olmayabilir. Alternatif kanalları listemizde bulabilirsiniz.' },
+    ],
+  },
 };
 
 type Keyword18PageType = typeof KEYWORD_18_PAGES[string];
