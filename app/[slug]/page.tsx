@@ -498,6 +498,99 @@ export default async function DynamicPage({
     );
   }
 
-  // 4. Fallback to 404
+  // ====== KATEGORİ SAYFASI RENDER ======
+  const category = await getCategoryBySlug(slug);
+  if (category) {
+    const [channelsData, categories, banners] = await Promise.all([
+      getChannels(page, LIMIT, undefined, category.id),
+      getCategories(),
+      getBanners(),
+    ]);
+    const { data: channels, count: totalCount } = channelsData;
+    const totalPages = Math.ceil((totalCount || 0) / LIMIT);
+
+    return (
+      <>
+        <JsonLd data={generateBreadcrumbSchema([
+          { name: 'Anasayfa', url: baseUrl },
+          { name: `${category.name} Telegram Kanalları`, url: `${baseUrl}/${slug}` }
+        ])} />
+        {channels.length > 0 && (
+          <JsonLd data={generateItemListSchema(
+            channels.map((ch, i) => ({ name: ch.name, url: `${baseUrl}/kanallar/${ch.slug}`, position: i + 1 })),
+            `${category.name} Telegram Kanalları`
+          )} />
+        )}
+        <Header />
+        <main className="container mx-auto px-4 py-8 space-y-8 max-w-7xl">
+          {/* Hero */}
+          <div className="bg-gradient-to-br from-blue-600 to-blue-800 rounded-2xl p-8 text-white text-center shadow-xl">
+            <div className="text-5xl mb-3">📡</div>
+            <h1 className="text-3xl md:text-4xl font-black mb-3">{category.name} Telegram Kanalları (2026)</h1>
+            <p className="text-blue-100 text-lg max-w-2xl mx-auto">
+              {category.name} kategorisindeki en güncel ve aktif Telegram kanalları. {totalCount} kanal listeleniyor.
+            </p>
+            <div className="mt-6 flex justify-center gap-6 text-sm">
+              <div className="text-center"><div className="text-3xl font-black">{totalCount}</div><div className="text-blue-200">Kanal</div></div>
+              <div className="text-center"><div className="text-3xl font-black">✓</div><div className="text-blue-200">Onaylı</div></div>
+              <div className="text-center"><div className="text-3xl font-black">2026</div><div className="text-blue-200">Güncel</div></div>
+            </div>
+          </div>
+
+          <div className="grid lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2 space-y-6">
+              {channels.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {channels.map(channel => <ChannelCard key={channel.id} channel={channel} />)}
+                </div>
+              ) : (
+                <div className="text-center py-20 bg-gray-50 rounded-xl border border-dashed border-gray-300">
+                  <div className="text-5xl mb-4">📭</div>
+                  <h2 className="text-xl font-bold text-gray-700 mb-2">{category.name} için henüz kanal eklenmemiş</h2>
+                  <p className="text-gray-500 mb-6">Bu kategoriye ait bir kanalınızı ekleyebilirsiniz.</p>
+                  <Link href="/kanal-ekle" className="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-700 transition">Kanal Ekle</Link>
+                </div>
+              )}
+              {totalPages > 1 && (
+                <div className="mt-8 flex justify-center">
+                  <Pagination totalPages={totalPages} currentPage={page} searchParams={resolvedSearchParams} />
+                </div>
+              )}
+              <BannerGrid type="category" categoryId={category.id} maxBanners={2} banners={banners} />
+              <div className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm">
+                <h2 className="text-2xl font-black text-gray-900 mb-4">{category.name} Telegram Kanalları Hakkında</h2>
+                <p className="text-gray-600 leading-relaxed">
+                  {category.name} kategorisindeki Telegram kanalları, bu alanda içerik üreten ve paylaşan toplulukları bir araya getirmektedir.
+                  Güncel ve aktif kanalları keşfetmek için listemizi inceleyebilirsiniz.
+                </p>
+              </div>
+            </div>
+
+            {/* Sidebar */}
+            <div className="space-y-6">
+              <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+                <h3 className="font-bold text-gray-900 mb-4">📂 Tüm Kategoriler</h3>
+                <div className="flex flex-wrap gap-2">
+                  {categories.map(cat => (
+                    <Link key={cat.id} href={`/${cat.slug}`} className={`text-xs px-3 py-1.5 rounded-full transition border ${cat.id === category.id ? 'bg-blue-600 text-white border-blue-600' : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-blue-600 hover:text-white'}`}>
+                      {cat.name}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+              <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl p-6 text-white">
+                <h3 className="font-bold text-lg mb-2">🚀 Kanalınızı Ekleyin</h3>
+                <p className="text-blue-100 text-sm mb-4">{category.name} kanalınızı ücretsiz ekleyin.</p>
+                <Link href="/kanal-ekle" className="block w-full bg-white text-blue-600 text-center font-black py-2.5 rounded-xl hover:bg-blue-50 transition text-sm">ÜCRETSİZ EKLE</Link>
+              </div>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </>
+    );
+  }
+
+  // Fallback to 404
   notFound();
 }
