@@ -484,11 +484,6 @@ export default async function DynamicPage({
     );
   }
 
-  // ====== İFŞA PROGRAMATIK SAYFA RENDER ======
-  if (rdr) {
-    redirect(rdr.new_path);
-  }
-
   // 4. Fallback to 404
   notFound();
 }
