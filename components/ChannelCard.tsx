@@ -11,6 +11,7 @@ interface ChannelCardProps {
     compact?: boolean;
     miniCompact?: boolean;
     priority?: boolean; // Üstteki kartlar için preload (LCP optimizasyonu)
+    isAdult?: boolean;  // +18 blur overlay etkinleştir
 }
 
 // Generate a simple browser fingerprint
@@ -42,7 +43,7 @@ function generateFingerprint(): string {
     return Math.abs(hash).toString(36);
 }
 
-export default function ChannelCard({ channel, compact = false, miniCompact = false, priority = false }: ChannelCardProps) {
+export default function ChannelCard({ channel, compact = false, miniCompact = false, priority = false, isAdult = false }: ChannelCardProps) {
     const categoryName = channel.categoryName || 'Kategori Yok';
     const [score, setScore] = useState(channel.score || 0);
     const [userVote, setUserVote] = useState<number | null>(null);
@@ -50,10 +51,10 @@ export default function ChannelCard({ channel, compact = false, miniCompact = fa
     const [fingerprint, setFingerprint] = useState<string>('');
     const [hasVoted, setHasVoted] = useState(false);
     const [imageError, setImageError] = useState(false);
-    // const compact = ... removed
+    // +18 blur: localStorage'dan daha önce onaydı mı kontrol et
+    const [adultRevealed, setAdultRevealed] = useState(false);
 
     useEffect(() => {
-        // ... (keep existing useEffect)
         const fp = generateFingerprint();
         setFingerprint(fp);
 
@@ -62,7 +63,12 @@ export default function ChannelCard({ channel, compact = false, miniCompact = fa
             setHasVoted(true);
             setUserVote(votedChannels[channel.id]);
         }
-    }, [channel.id]);
+
+        // +18 onayı daha önce verilmişse blur'u kaldır
+        if (isAdult && localStorage.getItem('age_verified_18') === 'true') {
+            setAdultRevealed(true);
+        }
+    }, [channel.id, isAdult]);
 
     const handleVote = async (type: 1 | -1) => {
         // ... (keep existing handleVote)
@@ -233,23 +239,46 @@ export default function ChannelCard({ channel, compact = false, miniCompact = fa
 
             {/* Mobile View / Main Content Container */}
             <div className="flex flex-row flex-1 gap-3 md:gap-5 p-3 pr-14 md:p-5 md:pl-16 md:pr-5 items-center md:items-start text-left">
-                {/* Logo */}
-                {channel.image && channel.image !== '/images/logo.png' && !imageError ? (
-                    <Image
-                        src={channel.image}
-                        alt={channel.name}
-                        width={80}
-                        height={80}
-                        loading={priority ? 'eager' : 'lazy'}
-                        priority={priority}
-                        onError={() => setImageError(true)}
-                        className="h-12 w-12 md:h-20 md:w-20 flex-shrink-0 rounded-full object-cover border border-gray-200 shadow-sm"
-                    />
-                ) : (
-                    <div className="h-12 w-12 md:h-20 md:w-20 flex-shrink-0 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 font-bold text-xl md:text-3xl border border-blue-100 shadow-sm">
-                        {channel.name.charAt(0)}
-                    </div>
-                )}
+                {/* Logo — +18 ise blur overlay */}
+                <div className="relative flex-shrink-0">
+                    {channel.image && channel.image !== '/images/logo.png' && !imageError ? (
+                        <Image
+                            src={channel.image}
+                            alt={channel.name}
+                            width={80}
+                            height={80}
+                            loading={priority ? 'eager' : 'lazy'}
+                            priority={priority}
+                            onError={() => setImageError(true)}
+                            className={`h-12 w-12 md:h-20 md:w-20 rounded-full object-cover border border-gray-200 shadow-sm transition-all duration-300 ${
+                                isAdult && !adultRevealed ? 'blur-md' : ''
+                            }`}
+                        />
+                    ) : (
+                        <div className={`h-12 w-12 md:h-20 md:w-20 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 font-bold text-xl md:text-3xl border border-blue-100 shadow-sm transition-all duration-300 ${
+                            isAdult && !adultRevealed ? 'blur-md' : ''
+                        }`}>
+                            {channel.name.charAt(0)}
+                        </div>
+                    )}
+                    {/* +18 Göster Butonu */}
+                    {isAdult && !adultRevealed && (
+                        <button
+                            onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                localStorage.setItem('age_verified_18', 'true');
+                                setAdultRevealed(true);
+                            }}
+                            className="absolute inset-0 flex items-center justify-center bg-black/30 rounded-full z-20 hover:bg-black/40 transition"
+                            title="18 yaşından büyüğüm, göster"
+                        >
+                            <span className="bg-blue-600 hover:bg-blue-500 text-white text-[9px] md:text-xs font-bold px-1.5 md:px-2.5 py-0.5 md:py-1 rounded-full shadow-lg whitespace-nowrap">
+                                Göster 18+
+                            </span>
+                        </button>
+                    )}
+                </div>
 
                 {/* Info Text */}
                 <div className="flex flex-col gap-0.5 md:gap-1 w-full relative z-20 min-w-0 justify-center">

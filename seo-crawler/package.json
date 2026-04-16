@@ -1,0 +1,16 @@
+{
+  "name": "telegramkanali-seo-crawler",
+  "version": "1.0.0",
+  "description": "Screaming Frog tarzı SEO Crawler - telegramkanali.com için özel",
+  "type": "module",
+  "scripts": {
+    "crawl": "node crawler.js",
+    "crawl:quick": "node crawler.js --quick",
+    "crawl:full": "node crawler.js --full"
+  },
+  "dependencies": {
+    "cheerio": "^1.0.0",
+    "cli-progress": "^3.12.0",
+    "chalk": "^5.3.0"
+  }
+}

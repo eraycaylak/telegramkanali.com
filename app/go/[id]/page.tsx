@@ -3,6 +3,7 @@ import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import CountdownRedirect from '@/components/CountdownRedirect';
 import { Metadata } from 'next';
+import { checkAgeVerification } from '@/app/actions/age-verification';
 
 interface PageProps {
     params: { id: string };
@@ -38,6 +39,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     };
 }
 
+// +18 kategori ID'si — tcK 226/7 kapsamında yaş doğrulama zorunluluğu
+const ADULT_CATEGORY_ID = '18';
+
 export default async function GoPage({ params }: PageProps) {
     const { id } = await params;
     const channel = await getChannelForRedirect(id);
@@ -46,10 +50,13 @@ export default async function GoPage({ params }: PageProps) {
         notFound();
     }
 
-    // NOT: Tıklama artık server-side sayılmıyor.
-    // Kullanıcı "HEMEN KATIL" butonuna basınca veya geri sayım bitince
-    // CountdownRedirect client component'i trackChannelClick() çağırır.
-    // Bu sayede sayfayı ziyaret edip kapatanlar tıklama olarak sayılmaz.
+    // +18 kanalı mı?
+    const requiresAgeVerification = channel.category_id === ADULT_CATEGORY_ID;
+
+    // Kullanıcının önceden onay verip vermediğini kontrol et (IP bazlı)
+    const isAgeVerified = requiresAgeVerification
+        ? await checkAgeVerification()
+        : true;
 
     const categoryData = (channel as any).categories;
 
@@ -63,6 +70,8 @@ export default async function GoPage({ params }: PageProps) {
             categorySlug={categoryData?.slug || ''}
             channelSlug={channel.slug}
             memberCount={channel.member_count}
+            requiresAgeVerification={requiresAgeVerification}
+            isAgeVerified={isAgeVerified}
         />
     );
 }

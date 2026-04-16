@@ -65,6 +65,17 @@ const nextConfig: NextConfig = {
     return [
       // /kategori/slug → /slug pattern redirect (eski URL yapısı)
       { source: '/kategori/:slug', destination: '/:slug', permanent: true },
+
+      // ================================================================
+      // İFŞA URL'LERİ — 301 Kalıcı Yönlendirme (TCK 134/2 uyumluluk)
+      // Bu URL'ler artık silinmiştir. SEO juice /telegram-18-kanallari'ya aktarılır.
+      // Tarih: 2026-04-17
+      // ================================================================
+      { source: '/telegram-ifsa-kanallari',       destination: '/telegram-18-kanallari', permanent: true },
+      { source: '/telegram-unlu-ifsa-kanallari',  destination: '/telegram-18-kanallari', permanent: true },
+      { source: '/telegram-18-ifsa-kanallari',    destination: '/telegram-18-kanallari', permanent: true },
+      { source: '/telegram-turk-ifsa-kanallari',  destination: '/telegram-18-kanallari', permanent: true },
+      { source: '/telegram-ifsa',                 destination: '/telegram-18-kanallari', permanent: true },
     ];
   },
 };
