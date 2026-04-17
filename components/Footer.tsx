@@ -11,7 +11,7 @@ export default async function Footer() {
 
                 {/* Sponsor links have been removed due to SEO policy */}
 
-                <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-6">
+                <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-7">
 
                     {/* Brand & Description */}
                     <div className="space-y-4">
@@ -69,6 +69,18 @@ export default async function Footer() {
                             <li><Link href="/18-telegram-kanallari" className="hover:text-red-600 transition-colors">+18 Telegram Kanalları Listesi</Link></li>
                             <li><Link href="/18-telegram" className="hover:text-red-600 transition-colors">+18 Telegram</Link></li>
                             <li><Link href="/telegram-ifsa-kanallari" className="hover:text-red-600 transition-colors">Telegram İfşa Kanalları</Link></li>
+                        </ul>
+                    </div>
+
+                    {/* SEO - Kripto HUB */}
+                    <div>
+                        <h3 className="mb-4 text-sm font-semibold text-gray-900">Kripto Para</h3>
+                        <ul className="space-y-2 text-sm text-gray-600">
+                            <li><Link href="/kripto-para" className="hover:text-orange-600 font-medium transition-colors">Kripto Rehberi & İncelemeleri</Link></li>
+                            <li><Link href="/kripto-telegram-kanallari" className="hover:text-orange-600 transition-colors">Aktif Kripto Toplulukları</Link></li>
+                            <li><Link href="/bitcoin-telegram-kanallari" className="hover:text-orange-600 transition-colors">Güncel Bitcoin Tartışmaları</Link></li>
+                            <li><Link href="/kripto-sinyal-telegram" className="hover:text-orange-600 transition-colors">Analiz ve Al-Sat Sinyalleri</Link></li>
+                            <li><Link href="/borsa-telegram-kanallari" className="hover:text-orange-600 transition-colors">BİST & Hisse Grupları</Link></li>
                         </ul>
                     </div>
 

@@ -19,6 +19,7 @@ import Comments from '@/components/Comments';
 import { Clock, Eye, AlertCircle, TrendingUp, Users } from 'lucide-react';
 import CryptoRankingPolicy from '@/components/CryptoRankingPolicy';
 import CryptoStatBar from '@/components/CryptoStatBar';
+import CryptoFreshnessEngine from '@/components/CryptoFreshnessEngine';
 import { CRYPTO_KEYWORD_PAGES, getCryptoKeywordPage } from '@/lib/crypto-pages';
 
 
@@ -638,13 +639,19 @@ export default async function DynamicPage({
               <div className={`bg-gradient-to-br ${kwCryptoPage.color} rounded-2xl p-7 text-white shadow-xl`}>
                 <div className="text-4xl mb-3">{kwCryptoPage.icon}</div>
                 <h1 className="text-2xl md:text-3xl font-black mb-3">{kwCryptoPage.h1}</h1>
-                <p className="text-white/80 text-base leading-relaxed max-w-2xl">{kwCryptoPage.intro}</p>
-                <div className="mt-5 flex gap-6 text-sm">
-                  <div className="text-center"><div className="text-2xl font-black">{cryptoChannels.length}</div><div className="text-white/70">Aktif Kanal</div></div>
-                  <div className="text-center"><div className="text-2xl font-black">192+</div><div className="text-white/70">Topluluk</div></div>
-                  <div className="text-center"><div className="text-2xl font-black">2026</div><div className="text-white/70">Güncel</div></div>
+                <div className="text-white/80 text-base leading-relaxed max-w-2xl whitespace-pre-line" dangerouslySetInnerHTML={{ __html: kwCryptoPage.intro }} />
+                <div className="mt-5 flex flex-wrap gap-4 md:gap-6 text-sm justify-center md:justify-start">
+                  <div className="text-center"><div className="text-2xl font-black">{cryptoChannels.length}</div><div className="text-white/70 text-xs md:text-sm">Aktif Kanal</div></div>
+                  <div className="text-center"><div className="text-2xl font-black">192+</div><div className="text-white/70 text-xs md:text-sm">Topluluk</div></div>
+                  <div className="text-center"><div className="text-2xl font-black">2026</div><div className="text-white/70 text-xs md:text-sm">Güncel</div></div>
                 </div>
               </div>
+
+              {/* Freshness Engine (Tazelik ve Canlı Veri Göstergesi) */}
+              <CryptoFreshnessEngine 
+                channelCount={cryptoChannels.length} 
+                latestChannelName={cryptoChannels.length > 0 ? cryptoChannels[0]?.name : undefined}
+              />
 
               {/* Canlı İstatistik Bar */}
               <CryptoStatBar
@@ -686,11 +693,29 @@ export default async function DynamicPage({
               {/* Banner */}
               <BannerGrid type="category" categoryId="crypto" maxBanners={2} />
 
-              {/* CTA */}
-              <div className="text-center py-4">
-                <Link href="/kripto-para" className="inline-block bg-orange-500 text-white px-8 py-3 rounded-xl font-bold hover:bg-orange-600 transition shadow-lg shadow-orange-500/20">
-                  Tüm Kripto Kanallarını Gör →
-                </Link>
+              {/* CTA & Internal Linking Loop */}
+              <div className="py-6 border-t border-gray-100">
+                <h3 className="text-xl font-bold text-gray-900 mb-4 items-center gap-2 flex">🔗 Daha Fazla Kripto Keşfet</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+                  {kwCryptoPage.relatedSlugs?.map((relSlug: string) => {
+                    const relPage = CRYPTO_KEYWORD_PAGES[relSlug];
+                    if (!relPage) return null;
+                    return (
+                      <Link key={relSlug} href={`/${relSlug}`} className="group flex items-center justify-between p-4 rounded-xl border border-gray-200 bg-gray-50 hover:bg-orange-50 hover:border-orange-200 transition-colors">
+                        <div className="flex items-center gap-3">
+                          <span className="text-2xl">{relPage.icon}</span>
+                          <span className="font-bold text-gray-800 group-hover:text-orange-700">{relPage.title.split('|')[0].trim()}</span>
+                        </div>
+                        <span className="text-orange-500 font-bold">→</span>
+                      </Link>
+                    )
+                  })}
+                </div>
+                <div className="text-center">
+                  <Link href="/kripto-para" className="inline-block bg-orange-500 text-white px-8 py-3 rounded-xl font-bold hover:bg-orange-600 transition shadow-lg shadow-orange-500/20">
+                    Tüm Kripto Ekosistemine Dön
+                  </Link>
+                </div>
               </div>
 
               {/* FAQ */}

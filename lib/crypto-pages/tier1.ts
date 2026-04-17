@@ -6,19 +6,17 @@ export const tier1Pages: Record<string, CryptoKeywordPage> = {
     tier: 1,
     icon: '₿',
     color: 'from-orange-500 via-amber-500 to-yellow-400',
-    h1: 'Kripto Para Telegram Kanalları (2026) — Türkiye\'nin En Büyük Dizini',
-    title: 'Kripto Para Telegram Kanalları 2026 | 192 Aktif Kanal',
-    description: '192 aktif kripto para Telegram kanalı, 12.5M+ toplam üye. Bitcoin, Ethereum, borsa sinyalleri ve DeFi — Türkiye\'nin #1 kripto Telegram rehberi.',
-    keywords: ['kripto para telegram', 'kripto telegram kanalları', 'kripto para telegram kanalları', 'telegram kripto', 'kripto kanalları'],
-    intro: `Kripto para piyasaları son yıllarda Türkiye'de devasa bir kitleye ulaştı. Binlerce yatırımcı her gün Bitcoin, Ethereum ve altcoin fiyatlarını takip ederken, doğru bilgiye hızlı ulaşmak için Telegram kanallarını tercih ediyor. TelegramKanali.com olarak 192 aktif kripto para Telegram kanalını derleyip güncel tutuyoruz; toplamda 12,5 milyonun üzerinde üyeye sahip bu kanallar, Türkçe konuşan kripto topluluğunun kesişme noktasıdır.
+    h1: 'Kripto Para Ekosistemi Merkezi (2026) — Tüm Kategori ve Kanallar',
+    title: 'Kripto Para Dünyası 2026 | Tüm Kategori ve Kanallar Merkezi',
+    description: 'TelegramKanali.com Kripto Hub sayfası: Borsa, NFT, Sinyal, Airdrop ve Bitcoin dahil 192 aktif kanal dizini. Türkiye\'nin en güvenilir rehberi.',
+    keywords: ['kripto hub', 'kripto para telegram dizini', 'kripto para kanalları ana sayfa', 'telegram kripto kategorileri'],
+    intro: `Kripto para piyasaları son yıllarda Türkiye'de devasa bir kitleye ulaştı. TelegramKanali.com **Kripto Hub** sayfasına hoş geldiniz. Bu sayfa sıradan bir liste değil; Bitcoin, Ethereum, altcoin sinyalleri, airdrop fırsatları ve DeFi haberleri veren tüm uzman kategorilerin ana merkezidir.
+    
+<div class="bg-blue-50 border border-blue-200 p-4 rounded-xl my-4 text-sm text-blue-800">
+  <strong>Hub Yönlendirmesi:</strong> Eğer doğrudan al-sat işlemi yapacağınız sinyal grupları arıyorsanız <a href="/kripto-sinyal-telegram" class="font-bold underline">Kripto Sinyal Kanalları</a> dizinimize gidin. Yalnızca Bitcoin makro analizi için <a href="/bitcoin-telegram-kanallari" class="font-bold underline">Bitcoin Kanalları</a> bölümümüze geçiş yapabilirsiniz.
+</div>
 
-Neden Telegram? Çünkü Telegram; gecikmesiz bildirim, kanal arşivi ve kanal sahibinin tek yönlü yayın yapabilmesi açısından kripto dünyasının vazgeçilmez aracıdır. Twitter/X gürültülüdür, Discord kaotiktir. Telegram ise anında bildirim alan, okunmamış mesajları daha sonra gözden geçirebilen ve anonim kalan bir yapı sunar.
-
-Bu sayfada hangi tür kanalları bulabilirsiniz? Bitcoin fiyat analizinden Ethereum teknik grafiklerine, günlük borsa sinyallerinden ücretsiz airdrop duyurularına, DeFi protokol haberlerinden NFT mint listelerine kadar her konu burada temsil edilmektedir. Kanallar üye sayısı, aktivite skoru ve editör incelemesinden geçirilmiş; aktif olmayan veya yanıltıcı içerik paylaşan kanallar listeden çıkarılmıştır.
-
-Güvenilir kripto Telegram kanalı nasıl seçilir? Önce üye sayısına değil, aktif üye oranına bakın. 50.000 üyeli ama gün içinde 5 mesaj gönderen bir kanal, 5.000 üyeli ama günde 30 analiz paylaşan bir kanaldan çok daha az değerlidir. İkinci kriter şeffaflıktır: kanal sahibi geçmiş tahminlerine belge sunar mı? Gerçekleşmemiş tahminleri de yayınlar mı? Üçüncü kriter ücret politikasıdır: ücretsiz ve ücretli kanalları birbirine karıştırmayan, katmanlı bir yapı sunan kanallar tercih edilmelidir.
-
-2026 yılında kripto piyasaları açısından hangi gelişmeleri takip etmek gerekiyor? Bitcoin halving döngüsü, Ethereum ETF akışları, Solana ekosisteminin büyümesi, Türk lirasının dolar karşısındaki seyri ve BDDK'nın dijital varlık düzenlemeleri başlıca gündem maddelerini oluşturmaktadır. Bu tüm konularda anlık bildirim almak için aşağıdaki kanalları inceleyebilir, ilgi alanınıza göre kategorilere göz atabilirsiniz.`,
+Telegram, gecikmesiz bildirim yapısı ve anonimlik sunmasıyla kripto takibinin bir numaralı aracıdır. Ancak yüzlerce kanal arasında kaybolmak çok kolaydır. Bu hub sayfamız üzerinden, ilgili olduğunuz niş alt kategorilere güvenle ulaşabilirsiniz. Kanallarımız üye sayısı, aktivite skoru ve editörlerimiz tarafından düzenli olarak incelenmektedir. Şeffaflık ve dürüstlük, bu ekosistemin temel ilkeleridir.`,
     faqs: [
       { question: 'En iyi kripto para Telegram kanalları hangileridir?', answer: 'TelegramKanali.com\'daki kripto kanalları üye sayısı, aktivite skoru ve editör değerlendirmesiyle sıralanır. En üst sıradaki kanallar hem büyük üye kitlesine hem de günlük düzenli analiz paylaşımına sahiptir.' },
       { question: 'Ücretsiz kripto sinyal Telegram kanalı var mı?', answer: 'Evet, listemizde ücretsiz sinyal paylaşan onlarca kanal mevcuttur. Ücretsiz kanallar genellikle daha genel analizler sunarken, premium kanallar birebir alım-satım noktaları paylaşır.' },
@@ -35,19 +33,17 @@ Güvenilir kripto Telegram kanalı nasıl seçilir? Önce üye sayısına değil
     tier: 1,
     icon: '📡',
     color: 'from-blue-600 via-indigo-600 to-violet-600',
-    h1: 'Kripto Telegram Kanalları (2026) — Güncel ve Aktif 192 Kanal',
-    title: 'Kripto Telegram Kanalları 2026 | Güncel Liste',
-    description: 'En iyi kripto Telegram kanalları 2026 güncel listesi. Bitcoin, Ethereum, altcoin ve sinyal kanalları — 192 aktif kanal, 12.5M+ üye. Ücretsiz katıl.',
-    keywords: ['kripto telegram kanalları', 'kripto telegram', 'en iyi kripto telegram kanalı', 'telegram kripto kanalları 2026'],
-    intro: `"Kripto Telegram kanalları" araması Türkiye'de her ay yüz binlerce kez yapılıyor. Bunun ardında basit bir gerçek yatıyor: sıradan haber siteleri kripto piyasasını anlık olarak takip edemiyor, sosyal medya ise gürültülü ve filtresiz. Telegram kanalları ise kanal sahibinin biricik yayın yapmasına ve abonelerin anlık bildirim almasına olanak tanıyan yapısıyla kripto takibinin merkezi haline geldi.
+    h1: 'Kripto Telegram Grupları ve Sohbet Kanalları (2026)',
+    title: 'Kripto Telegram Grupları 2026 | Sohbet ve Haber Listesi',
+    description: 'Kripto haber, topluluk sohbeti ve altcoin vizyonları paylaşan en aktif kripto Telegram grupları listesi. 192 kanal arasından en iyilerini keşfedin.',
+    keywords: ['kripto telegram grupları', 'kripto haber telegram', 'kripto para telegram sohbet', 'telegram kripto grupları 2026'],
+    intro: `<div className="bg-red-50 border border-red-200 p-4 rounded-xl mb-4 text-sm text-red-800">
+  <strong>🚨 Dikkat:</strong> Bu sayfa genel kripto gündemi, haberleri ve yatırımcı sohbet alanlarını listeler. Profesyonel spot/futures alım-satım hedefleri arıyorsanız <a href="/kripto-sinyal-telegram" className="font-bold underline">Kripto Sinyal</a> sayfasına geçiniz.
+</div>
 
-TelegramKanali.com, Türkçe konuşan kripto yatırımcıları için olan en kapsamlı kanal dizinini sunmaktadır. 192 aktif kanal, toplamda 12,5 milyonun üzerinde üyeye sahip. Her kanal manuel olarak inceleniyor: üye sayısı, son 30 günlük mesaj sıklığı, içerik kalitesi ve şeffaflık değerlendiriliyor; eşiği geçemeyen kanallar listeden kaldırılıyor.
+"Kripto Telegram kanalları" araması Türkiye'de her ay yüz binlerce kez yapılıyor. Bunun ardında yatrımcıların salt piyasa gelişmelerinden ziyade, topluluk hissini ve anlık tepkileri ölçme arzusu yatıyor. Bu liste, toplulukların serbestçe tartışabildiği "Kripto Grupları" ve gecikmesiz son dakika akışı sunan "Haber Kanalları" etrafında kümelenmiştir.
 
-Bu sayfada hangi kanal türlerini bulacaksınız? Teknik grafik analizi yapan kanallar, makroekonomik yorumlar sunan uzman kanallar, otomatik bot sinyali paylaşan kanallar, borsa-kripto karşılaştırması yapan hibrit kanallar ve airdrop/whitelist duyuruları yapan fırsat kanalları olmak üzere beş ana kategori listemizde temsil edilmektedir.
-
-Kripto Telegram kanallarını kullanırken dikkat edilmesi gereken en önemli nokta finansal danışmanlık ile tanıtım içeriğini birbirinden ayırt edebilmektir. Bir kanalın "şu coini al, %200 yapar" demesi o coini satmak istediğinin işareti olabilir. Editöryal yaklaşımı belli, geçmiş tahminlere referans veren ve kayıp analizini de paylaşan kanallar güvenilirliğin göstergesidir.
-
-2026'da kripto Telegram kanallarında öne çıkan trendler neler? Yapay zeka destekli on-chain analiz araçlarıyla entegre kanallar, gerçek zamanlı likidite haritası paylaşan DeFi kanalları ve Türk lirası bazlı portföy yönetimi öneren kanallar bu yıl en hızlı büyüyen kategoriler arasında yer almaktadır.`,
+TelegramKanali.com üzerinde yer alan bu listeleme, tamamen şeffaflık incelemesinden geçen kanallardan oluşur. Sahte etkileşimi (bot) olan, durmaksızın sponsorlu çöp proje (scam token) yayınlayan hiçbir topluluk bu dizinde barınamaz. Bu sayfada temel analiz paylaşımlarını, altcoin ekosistem haberlerini ve airdrop/whitelist fırsatı sunan güvenli kanalları keşfedebilirsiniz.`,
     faqs: [
       { question: 'Kripto Telegram kanalları ücretsiz mi?', answer: 'Listemizde hem ücretsiz hem ücretli kanallar bulunmaktadır. Ücretsiz kanallar genel piyasa analizleri sunarken ücretli kanallar belirli alım-satım noktaları paylaşır.' },
       { question: 'En aktif kripto Telegram kanalı hangisi?', answer: 'Aktivite gün içi mesaj sıklığı ve üye etkileşimine göre değişir. Listemizin en üstündeki kanallar hem büyük kitleye hem de yüksek aktiviteye sahip olanlardır.' },
@@ -64,19 +60,17 @@ Kripto Telegram kanallarını kullanırken dikkat edilmesi gereken en önemli no
     tier: 1,
     icon: '🪙',
     color: 'from-orange-500 via-yellow-500 to-amber-400',
-    h1: 'Bitcoin Telegram Kanalları (2026) — BTC Sinyal ve Analiz',
-    title: 'Bitcoin Telegram Kanalları 2026 | BTC Sinyal ve Analiz',
-    description: 'En iyi Bitcoin Telegram kanalları 2026. BTC fiyat analizi, günlük sinyal ve teknik grafik paylaşan kanallara ücretsiz katıl. Türkiye\'nin #1 BTC rehberi.',
-    keywords: ['bitcoin telegram kanalları', 'bitcoin telegram', 'btc telegram kanalı', 'bitcoin sinyal telegram', 'bitcoin analiz telegram'],
-    intro: `Bitcoin, 2009'da Satoshi Nakamoto tarafından yaratıldığından bu yana dünya genelinde milyonlarca yatırımcının ilgisini çekti. Türkiye'de de Bitcoin'e olan ilgi, özellikle Türk lirasının değer kaybettiği dönemlerde belirgin biçimde artmaktadır. Kripto para yatırımı yapanların büyük çoğunluğu birikimlerinin bir bölümünü BTC'ye yatırmakta ve fiyat hareketlerini anlık olarak takip etmektedir.
+    h1: 'Bitcoin Telegram Kanalları (2026) — Makro Analiz & Döngü',
+    title: 'Bitcoin Telegram Kanalları 2026 | BTC Makro ve On-Chain',
+    description: 'Sadece btc ağırlıklı makro analiz, on-chain verisi ve dominans takibi yapan en güçlü Bitcoin Telegram grupları ve listeleri.',
+    keywords: ['bitcoin telegram kanalları', 'bitcoin telegram analiz', 'btc on-chain telegram', 'bitcoin dominans telegram'],
+    intro: `<div className="bg-orange-50 border border-orange-200 p-4 rounded-xl mb-4 text-sm text-orange-800">
+  <strong>Hedef Odaklılık:</strong> Bu liste yalnızca BTC hakimiyeti, ETF verileri, Halving döngüsü ve on-chain (balina hareketleri) verilerine odaklanmıştır. Altcoin incelemeleri için <a href="/altcoin-telegram-kanallari" className="font-bold underline">Altcoin Sayfamıza</a> bakabilirsiniz.
+</div>
 
-Bu takibin en pratik yolu ise Bitcoin odaklı Telegram kanallarıdır. TelegramKanali.com, Türkçe dilinde faaliyet gösteren en kaliteli Bitcoin Telegram kanallarını bir araya getirmektedir. Kanallar belirli kriterler çerçevesinde incelenmiştir: günlük en az bir analiz paylaşımı yapılması, geçmiş tahminlerin dokümante edilmesi, toplulukla şeffaf iletişim kurulması bu kriterlerin başında gelmektedir.
+Bitcoin, kripto ekosisteminin amiral gemisidir ve fiyat hareketleri genel piyasanın kaderini belirler. Altcoin yatırımı yapsanız dahi, BTC'nin hareketlerini anlık takip etmek mecburiyetindesiniz. TelegramKanali.com üzerinden derlediğimiz Bitcoin Telegram Kanalları listesi, doğrudan uzun ve orta vadeli yatırımcılara hitap etmektedir.
 
-Bitcoin Telegram kanallarında genellikle hangi içerikler paylaşılır? Teknik analiz grafikleri (destek-direnç seviyeleri, RSI, MACD, Fibonacci), on-chain veriler (büyük cüzdan hareketleri, borsa giriş-çıkış), makro ekonomik yorumlar (FED faiz kararları, enflasyon verileri), halving analizi ve döngüsel tahminler bu kanalların temel içerik kategorilerini oluşturmaktadır.
-
-2026 yılında Bitcoin için önemli gelişmeler neler? 2024 Nisan'ında gerçekleşen halving sonrası yeni ATH süreci devam etmekte; kurumsal yatırımcıların Bitcoin ETF alımları on-chain büyük cüzdan verilerine yansımaktadır. Bu tabloyu anlık izlemek için aşağıdaki Bitcoin Telegram kanallarını takip etmenizi öneririz.
-
-Bitcoin kanalı seçerken dikkat etmeniz gereken nokta şudur: yüksek üye sayısı her zaman kaliteli içerik anlamına gelmez. Aktif analiz paylaşımı, kayıp tahminlerinin de şeffaf biçimde paylaşılması ve kanalın belirli bir borsa veya projeyle ticari ilişkisinin açıklanması güvenilirliğin temel göstergeleridir.`,
+Bu kanallarda neler bulunur? Madenci gelirleri, likidite ısı haritaları (liquidation heatmaps), ETF net giriş/çıkış verileri ve Fibonacci bazlı teknik destek/direnç analizleri. Aktif bir şekilde fiyat analizi yapmayan ve verilerini gizleyen hiçbir kanal listemizde yer tutamaz.`,
     faqs: [
       { question: 'Bitcoin Telegram kanalları neleri kapsar?', answer: 'BTC teknik analiz, fiyat tahmin, on-chain veri, makro yorum, günlük sinyal ve büyük işlem (whale) uyarıları bu kanalların başlıca içeriklerini oluşturur.' },
       { question: 'Ücretsiz Bitcoin sinyal Telegram kanalı var mı?', answer: 'Evet. Listemizde ücretsiz BTC sinyal paylaşan kanallar mevcuttur. Ücretli kanallara geçmeden önce ücretsiz olanları denemenizi öneririz.' },

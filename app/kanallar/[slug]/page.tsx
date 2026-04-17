@@ -4,6 +4,8 @@ import { getChannelBySlug, getChannelsByCategory, getAllChannelSlugs, getCategor
 import { BadgeCheck, Users, ExternalLink, Calendar, Tag, ShieldCheck } from 'lucide-react';
 import ChannelCard from '@/components/ChannelCard';
 import JsonLd, { generateAggregateRatingSchema } from '@/components/JsonLd';
+import CryptoChannelReview from '@/components/CryptoChannelReview';
+import CryptoChannelComparison from '@/components/CryptoChannelComparison';
 import type { Metadata } from 'next';
 
 export async function generateStaticParams() {
@@ -58,6 +60,8 @@ export default async function ChannelPage({ params }: { params: Promise<{ slug: 
         .filter((c) => c.id !== channel.id)
         .slice(0, 3);
 
+    const isCrypto = category?.name?.toLowerCase() === 'kripto para' || channel?.category_id === 'crypto' || channel?.tags?.some((t:string) => t.toLowerCase().includes('kripto') || t.toLowerCase().includes('bitcoin'));
+
     // JSON-LD Schema
     const jsonLd = {
         '@context': 'https://schema.org',
@@ -90,6 +94,21 @@ export default async function ChannelPage({ params }: { params: Promise<{ slug: 
 
             {/* Main Content */}
             <div className="lg:col-span-2 space-y-8">
+
+                {/* Hard Internal Linking (Navigation Loop) */}
+                {isCrypto && (
+                  <div className="bg-gradient-to-r from-orange-50 to-amber-50/50 border border-orange-200 p-4 rounded-xl shadow-sm text-sm">
+                    <span className="font-bold text-orange-800 flex items-center gap-2 mb-2">
+                       <Tag size={16}/> Kripto Silo Yönlendirmesi
+                    </span>
+                    <p className="text-orange-900/80 mb-2">Bu kanal <strong>Kripto Para</strong> dizinimizin bir parçasıdır. Bulunduğunuz kanaldan çıkarak diğer benzer listelere veya ana dizine geçiş yapabilirsiniz:</p>
+                    <div className="flex flex-wrap gap-2">
+                      <Link href="/kripto-para" className="bg-white border border-orange-200 text-orange-700 hover:bg-orange-100 hover:text-orange-900 font-bold px-3 py-1.5 rounded-lg transition-colors text-xs">Tüm Kripto Kanalları</Link>
+                      <Link href="/kripto-telegram-kanallari" className="bg-white border border-orange-200 text-orange-700 hover:bg-orange-100 hover:text-orange-900 font-bold px-3 py-1.5 rounded-lg transition-colors text-xs">Genel Kripto Listesi</Link>
+                      <Link href="/kripto-sinyal-telegram" className="bg-white border border-orange-200 text-orange-700 hover:bg-orange-100 hover:text-orange-900 font-bold px-3 py-1.5 rounded-lg transition-colors text-xs">Sinyal Kanalları</Link>
+                    </div>
+                  </div>
+                )}
 
                 {/* Header Card */}
                 <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8">
@@ -141,6 +160,14 @@ export default async function ChannelPage({ params }: { params: Promise<{ slug: 
                     </div>
                 </div>
 
+                {/* Crypto Score System (Safe Mode) */}
+                {isCrypto && (
+                  <>
+                    <CryptoChannelReview channel={channel} />
+                    <CryptoChannelComparison currentChannel={channel} alternatives={relatedChannels} />
+                  </>
+                )}
+
                 {/* Detailed Description */}
                 <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8">
                     <h2 className="mb-4 text-xl font-bold text-gray-900 border-b border-gray-100 pb-2">
@@ -170,6 +197,18 @@ export default async function ChannelPage({ params }: { params: Promise<{ slug: 
                     </div>
                 </div>
 
+                {/* No Result Gap Filler / User Journey Extension */}
+                {isCrypto && (
+                  <div className="mt-8 bg-blue-50/50 rounded-2xl p-6 text-center border border-blue-100">
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">🤔 Aradığınızı tam olarak bulamadınız mı?</h3>
+                    <p className="text-gray-600 mb-6 max-w-lg mx-auto">
+                      Bu kanal aradığınız kriterlere uymuyorsa, sistemimizde daha iyi analiz edilmiş ve onaylanmış alternatif kripto toplulukları bulunuyor.
+                    </p>
+                    <Link href="/kripto-para" className="inline-block bg-white border border-blue-200 text-blue-700 hover:bg-blue-600 hover:text-white font-bold px-8 py-3 rounded-xl transition-all shadow-sm">
+                      En Popüler Kripto Kanallarını Gör →
+                    </Link>
+                  </div>
+                )}
             </div>
 
             {/* Sidebar */}
