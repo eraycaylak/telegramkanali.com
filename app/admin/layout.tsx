@@ -5,7 +5,7 @@ import Link from 'next/link';
 import {
     LayoutDashboard, FolderTree, FileText, Users, Settings, LogOut,
     Menu, Shield, BarChart, Send, BookOpen, MessageSquare, TrendingUp,
-    Megaphone, ChevronDown, Star, Image, Zap, CreditCard, X
+    Megaphone, ChevronDown, Star, Image, Zap, CreditCard, X, Wallet
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
@@ -48,6 +48,7 @@ const MENU_GROUPS: MenuGroup[] = [
             { name: 'Kampanya Onayları', href: '/admin/campaigns', icon: Shield, perm: 'manage_banners' },
             { name: 'Reklam Paketleri', href: '/admin/ads', icon: CreditCard, perm: 'manage_banners' },
             { name: 'Ödemeler', href: '/admin/deposits', icon: CreditCard, perm: 'manage_users' },
+            { name: '💎 USDT Ödemeleri', href: '/admin/usdt-payments', icon: Wallet, perm: 'manage_banners' },
             { name: 'Marketplace Sohbetleri', href: '/admin/marketplace', icon: MessageSquare, perm: 'manage_banners' },
         ],
     },
