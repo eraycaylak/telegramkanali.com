@@ -2,6 +2,7 @@ import { getCategoryBySlug, getChannelsByCategory, getCategories, getChannelBySl
 import { getPromotedChannels } from '@/app/actions/promoted';
 import { getBanners } from '@/app/actions/banners';
 import ChannelCard from '@/components/ChannelCard';
+import AdultChannelRow from '@/components/AdultChannelRow';
 import ChannelDetail from '@/components/ChannelDetail';
 import BannerGrid from '@/components/BannerGrid';
 import FeaturedAds from '@/components/FeaturedAds';
@@ -389,24 +390,28 @@ export default async function DynamicPage({
                 </div>
               </div>
 
-              {/* First 6 Channels */}
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                {firstBatch18.map((channel: any) => (
-                  <ChannelCard key={channel.id} channel={channel} isAdult={true} />
+              {/* Kanal Listesi — Forum stili, fotoğrafsız */}
+              <div className="bg-white rounded-2xl border border-red-100 shadow-sm overflow-hidden">
+                {/* Tablo başlığı */}
+                <div className="hidden md:grid grid-cols-[28px_32px_36px_1fr_80px_28px_80px] gap-3 px-3 py-2 bg-red-50 border-b border-red-100 text-[10px] font-black uppercase tracking-widest text-red-400">
+                  <span>#</span>
+                  <span>Oy</span>
+                  <span></span>
+                  <span>Kanal</span>
+                  <span className="text-right">Üye</span>
+                  <span></span>
+                  <span></span>
+                </div>
+                {kw18Channels.slice(0, 30).map((channel: any, i: number) => (
+                  <AdultChannelRow key={channel.id} channel={channel} rank={i + 1} />
                 ))}
+                {kw18Channels.length === 0 && (
+                  <div className="py-12 text-center text-gray-400 text-sm">Henüz kanal eklenmemiş.</div>
+                )}
               </div>
 
               {/* Banner */}
               <BannerGrid type="category" categoryId="18" maxBanners={2} />
-
-              {/* Remaining Channels */}
-              {remaining18.length > 0 && (
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                  {remaining18.map((channel: any) => (
-                    <ChannelCard key={channel.id} channel={channel} isAdult={true} />
-                  ))}
-                </div>
-              )}
 
               {/* CTA */}
               <div className="text-center py-4">
@@ -540,9 +545,32 @@ export default async function DynamicPage({
           <div className="grid lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-6">
               {channels.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {channels.map(channel => <ChannelCard key={channel.id} channel={channel} />)}
-                </div>
+                (() => {
+                  const is18Category = category.id === '18' || category.slug === '18';
+                  if (is18Category) {
+                    return (
+                      <div className="bg-white rounded-2xl border border-red-100 shadow-sm overflow-hidden">
+                        <div className="hidden md:grid grid-cols-[28px_32px_36px_1fr_80px_28px_80px] gap-3 px-3 py-2 bg-red-50 border-b border-red-100 text-[10px] font-black uppercase tracking-widest text-red-400">
+                          <span>#</span>
+                          <span>Oy</span>
+                          <span></span>
+                          <span>Kanal</span>
+                          <span className="text-right">Üye</span>
+                          <span></span>
+                          <span></span>
+                        </div>
+                        {channels.map((channel, i) => (
+                          <AdultChannelRow key={channel.id} channel={channel} rank={i + 1 + (page - 1) * LIMIT} />
+                        ))}
+                      </div>
+                    );
+                  }
+                  return (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {channels.map(channel => <ChannelCard key={channel.id} channel={channel} />)}
+                    </div>
+                  );
+                })()
               ) : (
                 <div className="text-center py-20 bg-gray-50 rounded-xl border border-dashed border-gray-300">
                   <div className="text-5xl mb-4">📭</div>
