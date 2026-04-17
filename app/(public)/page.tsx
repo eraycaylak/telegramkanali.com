@@ -6,7 +6,7 @@ import BannerGrid from '@/components/BannerGrid';
 import SearchFilter from '@/components/SearchFilter';
 import PopularTicker from '@/components/PopularTicker';
 import Pagination from '@/components/Pagination';
-import JsonLd, { generateFAQSchema, generateItemListSchema } from '@/components/JsonLd';
+import JsonLd, { generateFAQSchema, generateItemListSchema, generateSiteLinksSearchBoxSchema } from '@/components/JsonLd';
 import FeaturedAds from '@/components/FeaturedAds';
 import PromotedChannels from '@/components/PromotedChannels';
 import SponsoredChannelSlot from '@/components/SponsoredChannelSlot';
@@ -173,6 +173,9 @@ export default async function Home({ searchParams }: HomeProps) {
           search ? `Arama Sonuçları: ${search}` : "En İyi Telegram Kanalları ve Grupları"
         )} />
       )}
+
+      {/* WebSite Search Box Schema */}
+      <JsonLd data={generateSiteLinksSearchBoxSchema('https://telegramkanali.com')} />
 
       {/* Breadcrumb Schema */}
       <JsonLd data={{

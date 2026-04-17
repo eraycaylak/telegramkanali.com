@@ -17,6 +17,9 @@ import { Metadata } from 'next';
 import Pagination from '@/components/Pagination';
 import Comments from '@/components/Comments';
 import { Clock, Eye, AlertCircle, TrendingUp, Users } from 'lucide-react';
+import CryptoRankingPolicy from '@/components/CryptoRankingPolicy';
+import CryptoStatBar from '@/components/CryptoStatBar';
+import { CRYPTO_KEYWORD_PAGES, getCryptoKeywordPage } from '@/lib/crypto-pages';
 
 
 const baseUrl = 'https://telegramkanali.com';
@@ -152,232 +155,73 @@ function getKeyword18PageFromSlug(slug: string): { key: string; page: Keyword18P
   return page ? { key: slug, page } : null;
 }
 
-// ====== 🚀 KRİPTO Ana Keyword Hedef Sayfaları (15 sayfa) ======
-const CRYPTO_KEYWORD_PAGES: Record<string, {
-  h1: string; title: string; description: string; intro: string;
-  icon: string; color: string;
-  keywords: string[];
-  faqs: { question: string; answer: string }[];
-  relatedSlugs?: string[];
-}> = {
-  'kripto-telegram-kanallari': {
-    h1: 'Kripto Telegram Kanalları 2026 — En İyi Liste',
-    title: 'Kripto Telegram Kanalları 2026 | Bitcoin ve Altcoin Sinyal Kanalları',
-    description: 'Kripto telegram kanalları 2026 güncel liste. Bitcoin, Ethereum, Altcoin sinyal ve analiz kanalları. Türkiye\'nin en kapsamlı kripto telegram kanal rehberi.',
-    icon: '₿', color: 'from-orange-500 to-amber-600',
-    keywords: ['kripto telegram kanalları', 'kripto para telegram', 'bitcoin telegram kanalları', 'altcoin telegram'],
-    intro: 'Kripto para yatırımcılarının en çok kullandığı platform Telegram\'dır. Anlık sinyal, piyasa analizi ve coin haberleri için en aktif kripto Telegram kanallarını bu sayfada bulabilirsiniz. 2026 yılına ait güncel ve aktif 192+ kripto Telegram kanalı listesi sizi bekliyor.',
-    faqs: [
-      { question: 'Kripto telegram kanalları nedir?', answer: 'Kripto Telegram kanalları, Bitcoin, Ethereum ve altcoin piyasaları hakkında anlık sinyal, analiz ve haber paylaşılan Telegram topluluklarıdır. Ücretsiz ve ücretli seçenekler mevcuttur.' },
-      { question: 'En iyi kripto telegram kanalları hangileri?', answer: 'Telegramkanali.com\'da listelenen kripto kanalları üye sayısı ve aktivite skoruna göre sıralanmaktadır. En üstteki kanallar genellikle en aktif ve güvenilir kripto Telegram kanallarıdır.' },
-      { question: 'Kripto telegram kanallarına nasıl katılınır?', answer: 'Listemizden ilginizi çeken kanalı seçin ve "Kanala Git" butonuna tıklayın. Telegram uygulaması açılacak ve anında katılabileceksiniz. Tamamen ücretsizdir.' },
-      { question: 'Telegram kripto sinyalleri güvenilir mi?', answer: 'Sinyal kanallarının güvenilirliği kanala göre farklılık gösterir. Büyük üye sayısı ve uzun geçmişe sahip kanallar genellikle daha güvenilirdir. Hiçbir signalin finansal tavsiye olmadığını unutmayın.' },
-      { question: 'Ücretsiz kripto sinyal telegram kanalı var mı?', answer: 'Evet, listemizde yüzlerce ücretsiz kripto sinyal Telegram kanalı bulunmaktadır. "Kanala Git" butonuyla anında ücretsiz erişim sağlayabilirsiniz.' },
-    ],
-    relatedSlugs: ['bitcoin-telegram-kanallari', 'borsa-telegram-kanallari', 'kripto-sinyal-telegram'],
-  },
-  'bitcoin-telegram-kanallari': {
-    h1: 'Bitcoin Telegram Kanalları 2026 — Güncel BTC Analiz Listesi',
-    title: 'Bitcoin Telegram Kanalları 2026 | En İyi BTC Sinyal ve Analiz Kanalları',
-    description: 'Bitcoin telegram kanalları 2026. En iyi BTC analiz, sinyal ve haber telegram kanalları. Güncel bitcoin telegram grupları listesi.',
-    icon: '🪙', color: 'from-orange-600 to-yellow-500',
-    keywords: ['bitcoin telegram kanalları', 'btc telegram', 'bitcoin telegram', 'bitcoin sinyal telegram'],
-    intro: 'Bitcoin (BTC) dünya\'nın en büyük kripto parası olarak Telegram\'da en fazla takipçiye sahip kanalları barındırır. 2026 yılı güncel bitcoin Telegram kanalları listesinde BTC analiz, sinyal ve haber kanallarını bulabilirsiniz.',
-    faqs: [
-      { question: 'Bitcoin telegram kanalları ne işe yarar?', answer: 'Bitcoin Telegram kanalları, BTC fiyat analizi, alım-satım sinyalleri, piyasa haberleri ve yatırım stratejileri paylaşan topluluklardır. Anlık bildirimler sayesinde piyasayı kaçırmadan takip edebilirsiniz.' },
-      { question: 'Bitcoin telegram kanallarına nasıl katılınır?', answer: 'Telegramkanali.com bitcoin kanal listesinden ilginizi çeken kanalı seçin ve "Kanala Git" butonuna tıklayın. Telegram uygulaması açılacak ve doğrudan kanala katılabileceksiniz.' },
-      { question: 'BTC sinyalleri veren ücretsiz telegram kanalı var mı?', answer: 'Evet, listemizde ücretsiz BTC sinyal kanalları mevcuttur. Büyük ve aktif topluluklara katılarak anlık Bitcoin sinyallerine erişebilirsiniz.' },
-      { question: 'Bitcoin 2026 fiyat tahmini kanalları nereden bulunur?', answer: 'telegramkanali.com/bitcoin-telegram-kanallari sayfasındaki kanallar, BTC 2026 fiyat analizleri ve tahminleri sunan topluluklardır.' },
-    ],
-    relatedSlugs: ['kripto-telegram-kanallari', 'ethereum-telegram-kanallari', 'kripto-sinyal-telegram'],
-  },
-  'borsa-telegram-kanallari': {
-    h1: 'Borsa Telegram Kanalları 2026 — BİST ve Forex Analiz',
-    title: 'Borsa Telegram Kanalları 2026 | BİST, Forex ve Hisse Sinyal Grupları',
-    description: 'Borsa telegram kanalları 2026. BİST 100, forex ve hisse senedi analiz telegram grupları. En aktif borsa telegram kanalları listesi.',
-    icon: '📈', color: 'from-emerald-600 to-teal-600',
-    keywords: ['borsa telegram kanalları', 'bist telegram', 'hisse senedi telegram', 'borsa sinyal telegram'],
-    intro: 'Borsa yatırımcıları için Telegram\'daki en büyük analiz ve sinyal kanalları bu sayfada listelenmektedir. BİST 100, forex, hisse senedi ve emtia piyasaları hakkında anlık analiz ve sinyal paylaşan 2026 güncel Telegram kanal listesi.',
-    faqs: [
-      { question: 'Borsa telegram kanalları nelerdir?', answer: 'Borsa Telegram kanalları, BİST 100, forex, hisse senedi ve emtia piyasaları hakkında sinyal, analiz ve haber paylaşan Telegram topluluklarıdır.' },
-      { question: 'Ücretsiz borsa sinyal telegram kanalı var mı?', answer: 'Evet. Telegramkanali.com\'da yüzlerce ücretsiz borsa sinyal kanalı listelenmiştir. Listemizden istediğiniz kanala ücretsiz katılabilirsiniz.' },
-      { question: 'BİST 100 telegram kanalları nereden bulunur?', answer: 'telegramkanali.com/borsa-telegram-kanallari sayfasında BİST 100 hisse analizleri ve sinyalleri paylaşan aktif kanallara ulaşabilirsiniz.' },
-      { question: 'Forex telegram kanalları güvenilir mi?', answer: 'Güvenilirlik kanala göre değişir. Büyük üye tabanı ve uzun geçmişe sahip kanallar tercih edilmelidir. Hiçbir sinyal kesin kâr garantisi vermez.' },
-    ],
-    relatedSlugs: ['kripto-telegram-kanallari', 'bist-telegram-kanallari', 'kripto-sinyal-telegram'],
-  },
-  'ethereum-telegram-kanallari': {
-    h1: 'Ethereum Telegram Kanalları 2026 — ETH Analiz ve Sinyal',
-    title: 'Ethereum Telegram Kanalları 2026 | ETH Sinyal ve Analiz Grupları',
-    description: 'Ethereum telegram kanalları 2026. En iyi ETH analiz ve sinyal telegram grupları. Güncel ethereum telegram kanal listesi.',
-    icon: '⟠', color: 'from-indigo-600 to-purple-600',
-    keywords: ['ethereum telegram kanalları', 'eth telegram', 'ethereum telegram', 'ethereum sinyal'],
-    intro: 'Ethereum (ETH), dünyanın en büyük akıllı kontrat platformudur ve Telegram\'da yoğun bir yatırımcı topluluğuna sahiptir. 2026 yılı güncel Ethereum Telegram kanalları listesinde ETH analiz, DeFi ve sinyal kanallarını bulabilirsiniz.',
-    faqs: [
-      { question: 'Ethereum telegram kanalı ne işe yarar?', answer: 'Ethereum Telegram kanalları ETH fiyat analizi, DeFi fırsatları, NFT haberleri ve Layer 2 gelişmeleri hakkında bilgi paylaşır.' },
-      { question: 'ETH 2026 yükselebilir mi? Hangi kanallar takip edilmeli?', answer: 'ETH fiyat tahminleri için listemizde bulunan Ethereum analiz kanallarını takip edebilirsiniz. Yatırım kararlarınızı birden fazla kaynaktan doğrulayın.' },
-    ],
-    relatedSlugs: ['kripto-telegram-kanallari', 'bitcoin-telegram-kanallari', 'defi-telegram-kanallari'],
-  },
-  'kripto-sinyal-telegram': {
-    h1: 'Kripto Sinyal Telegram 2026 — En İyi Ücretsiz Sinyal Kanalları',
-    title: 'Kripto Sinyal Telegram 2026 | Ücretsiz Bitcoin Altcoin Sinyal Kanalları',
-    description: 'Kripto sinyal telegram 2026. Ücretsiz bitcoin, altcoin ve forex sinyal telegram kanalları. En aktif kripto sinyal grupları listesi.',
-    icon: '📡', color: 'from-violet-600 to-purple-700',
-    keywords: ['kripto sinyal telegram', 'kripto sinyal', 'bitcoin sinyal telegram', 'ücretsiz kripto sinyal'],
-    intro: 'Kripto para piyasasında doğru zamanda doğru pozisyon açmak için anlık sinyaller kritik öneme sahiptir. 2026 yılında en aktif ve güvenilir kripto sinyal Telegram kanallarını bu sayfada bulabilirsiniz. Tüm kanallar üye sayısı ve aktivite skoruna göre sıralanmaktadır.',
-    faqs: [
-      { question: 'Kripto sinyal telegram kanalı nedir?', answer: 'Kripto sinyal Telegram kanalları, deneyimli analistlerin alım (long) veya satım (short) sinyalleri paylaştığı Telegram topluluklarıdır. Sinyaller genellikle giriş fiyatı, hedef ve stop loss içerir.' },
-      { question: 'Ücretsiz kripto sinyal telegram kanalları güvenilir mi?', answer: 'Ücretsiz sinyal kanallarının kalitesi değişkendir. Büyük üye tabanına sahip, geçmiş performansı şeffaf kanalları tercih etmenizi öneririz.' },
-      { question: 'Kripto sinyalleri nasıl kullanılır?', answer: 'Sinyal geldiğinde belirlenen giriş fiyatından pozisyon açılır, hedef fiyata ulaşınca kapatılır veya stop loss tetiklenirse zarar durdurulur. Risk yönetimini daima uygulayın.' },
-    ],
-    relatedSlugs: ['kripto-telegram-kanallari', 'bitcoin-telegram-kanallari', 'borsa-telegram-kanallari'],
-  },
-  'binance-telegram-kanallari': {
-    h1: 'Binance Telegram Kanalları 2026 — BNB ve Futures Analiz',
-    title: 'Binance Telegram Kanalları 2026 | En İyi BNB ve Spot Futures Kanalları',
-    description: 'Binance telegram kanalları 2026. BNB, spot ve futures piyasaları için en iyi telegram analiz grupları. Güncel binance telegram kanal listesi.',
-    icon: '🟡', color: 'from-yellow-500 to-amber-600',
-    keywords: ['binance telegram kanalları', 'bnb telegram', 'binance telegram', 'binance futures telegram'],
-    intro: 'Binance, dünya\'nın en büyük kripto para borsası olarak Telegram\'da güçlü bir topluluğa sahiptir. BNB analizi, spot ve futures işlemleri, Binance haberleri için 2026 güncel Binance Telegram kanalları listesi.',
-    faqs: [
-      { question: 'Binance telegram kanalları ne paylaşır?', answer: 'Binance Telegram kanalları BNB fiyat analizi, spot ve futures işlem sinyalleri, Binance listing haberleri ve kampanya duyuruları paylaşır.' },
-      { question: 'Binance futures telegram kanalları nereden bulunur?', answer: 'telegramkanali.com/binance-telegram-kanallari sayfasında Binance futures ve spot sinyalleri paylaşan kanalların tam listesine ulaşabilirsiniz.' },
-    ],
-    relatedSlugs: ['kripto-telegram-kanallari', 'futures-telegram-kanallari', 'kripto-sinyal-telegram'],
-  },
-  'altcoin-telegram-kanallari': {
-    h1: 'Altcoin Telegram Kanalları 2026 — En İyi Altcoin Sinyal Listesi',
-    title: 'Altcoin Telegram Kanalları 2026 | Yükselen Altcoin Sinyal ve Analiz',
-    description: 'Altcoin telegram kanalları 2026. Yükselen altcoin sinyalleri ve analiz Telegram grupları. En iyi altcoin telegram kanalları listesi.',
-    icon: '🚀', color: 'from-rose-500 to-pink-600',
-    keywords: ['altcoin telegram kanalları', 'altcoin telegram', 'altcoin sinyal', 'altseason telegram'],
-    intro: 'Altcoin piyasaları, doğru zamanlamada inanılmaz getiriler sunabilir. 2026 altcoin sezonunda yüksek potansiyelli altcoin sinyalleri için en aktif Telegram kanallarını bu sayfada bulabilirsiniz.',
-    faqs: [
-      { question: 'Altcoin telegram kanalları ne işe yarar?', answer: 'Altcoin Telegram kanalları potansiyel pump yapabilecek altcoinleri erken tespit etmek için analiz ve sinyal paylaşır. 10x-100x potansiyelli gemiler bu kanallardan duyurulur.' },
-      { question: '2026 altseason geliyor mu?', answer: 'Piyasa analistlerinin beklentileri farklılaşmaktadır. Listemizde yer alan altcoin analiz kanallarını takip ederek güncel değerlendirmeleri öğrenebilirsiniz.' },
-    ],
-    relatedSlugs: ['kripto-telegram-kanallari', 'kripto-sinyal-telegram', 'bitcoin-telegram-kanallari'],
-  },
-  'futures-telegram-kanallari': {
-    h1: 'Futures Telegram Kanalları 2026 — Kripto ve Forex Futures',
-    title: 'Futures Telegram Kanalları 2026 | Kripto Futures Sinyal Grupları',
-    description: 'Futures telegram kanalları 2026. Kripto ve forex futures sinyal telegram grupları. En iyi vadeli işlem telegram kanalları.',
-    icon: '⚡', color: 'from-blue-600 to-cyan-600',
-    keywords: ['futures telegram kanalları', 'kripto futures telegram', 'vadeli işlem telegram', 'futures sinyal'],
-    intro: 'Futures (vadeli işlem) piyasaları hem long hem short pozisyonlarla yüksek kaldıraçlı kazanç imkânı sunar. 2026 güncel kripto futures Telegram kanal listesinde Binance Futures, OKX ve Bybit sinyalleri paylaşan en aktif kanalları bulabilirsiniz.',
-    faqs: [
-      { question: 'Futures telegram kanalı nedir?', answer: 'Futures Telegram kanalları, vadeli işlem (long/short) pozisyonları için sinyal paylaşan topluluklardır. Giriş, hedef ve stop loss bilgileri ile birlikte gelir.' },
-      { question: 'Futures işlemleri riskli mi?', answer: 'Evet, kaldıraçlı futures işlemleri yüksek risk içerir. Sadece kaybetmeyi göze aldığınız sermaye ile işlem yapın ve risk yönetimini daima uygulayın.' },
-    ],
-    relatedSlugs: ['binance-telegram-kanallari', 'kripto-sinyal-telegram', 'kripto-telegram-kanallari'],
-  },
-  'defi-telegram-kanallari': {
-    h1: 'DeFi Telegram Kanalları 2026 — En İyi DeFi Yatırım Rehberi',
-    title: 'DeFi Telegram Kanalları 2026 | Merkeziyetsiz Finans Kanal Listesi',
-    description: 'DeFi telegram kanalları 2026. Merkeziyetsiz finans (DeFi) protokol haberleri ve yield farming fırsatları için en iyi telegram kanalları.',
-    icon: '🔗', color: 'from-purple-600 to-violet-700',
-    keywords: ['defi telegram kanalları', 'defi telegram', 'yield farming telegram', 'web3 telegram kanalları'],
-    intro: 'DeFi (Merkeziyetsiz Finans), geleneksel finans sistemine alternatif sunarak yüksek APY fırsatları barındırır. 2026 güncel DeFi Telegram kanalları listesinde en iyi protokol haberleri, yield farming fırsatları ve likidite madenciliği kanallarını bulabilirsiniz.',
-    faqs: [
-      { question: 'DeFi telegram kanalları ne işe yarar?', answer: 'DeFi Telegram kanalları, yüksek APY fırsatlarını, yeni protokol duyurularını ve yield farming stratejilerini paylaşır. DeFi ekosistemine girişinizi kolaylaştırır.' },
-      { question: 'DeFi yatırımları güvenli mi?', answer: 'DeFi, akıllı sözleşme riskleri barındırır. Denetlenmiş (audited) protokolleri tercih edin ve sermayenizin tamamını tek bir protokole yatırmayın.' },
-    ],
-    relatedSlugs: ['ethereum-telegram-kanallari', 'nft-telegram-kanallari', 'kripto-telegram-kanallari'],
-  },
-  'nft-telegram-kanallari': {
-    h1: 'NFT Telegram Kanalları 2026 — En İyi NFT Sinyal ve Haber Listesi',
-    title: 'NFT Telegram Kanalları 2026 | NFT Sinyal, Haber ve Mint Duyuruları',
-    description: 'NFT telegram kanalları 2026. Güncel NFT mint duyuruları, whitelist fırsatları ve NFT sinyal telegram grupları.',
-    icon: '🎨', color: 'from-fuchsia-600 to-pink-600',
-    keywords: ['nft telegram kanalları', 'nft telegram', 'nft sinyal', 'nft mint telegram'],
-    intro: 'NFT piyasası 2026\'da yeniden canlanmaktadır. Mint fırsatlarını, whitelist duyurularını ve floor price analizlerini kaçırmamak için en aktif NFT Telegram kanallarını bu sayfada bulabilirsiniz.',
-    faqs: [
-      { question: 'NFT telegram kanalları nelerdir?', answer: 'NFT Telegram kanalları, yeni NFT projelerinin mint duyurularını, whitelist fırsatlarını, floor price takibini ve NFT piyasa analizlerini paylaşır.' },
-      { question: 'NFT yatırımları 2026\'da karlı mı?', answer: 'NFT piyasası yüksek risk barındırır. Güçlü topluluk ve kullanım senaryosuna sahip projeleri araştırın. Listemizde yer alan kanallar güncel NFT fırsatlarını paylaşmaktadır.' },
-    ],
-    relatedSlugs: ['ethereum-telegram-kanallari', 'defi-telegram-kanallari', 'kripto-telegram-kanallari'],
-  },
-  'bist-telegram-kanallari': {
-    h1: 'BİST Telegram Kanalları 2026 — Hisse Senedi Analiz ve Sinyal',
-    title: 'BİST Telegram Kanalları 2026 | BİST 100 Hisse Sinyal ve Analiz Grupları',
-    description: 'BİST telegram kanalları 2026. BİST 100 hisse senedi analiz ve sinyal telegram grupları. En aktif Borsa İstanbul telegram kanalları.',
-    icon: '🏦', color: 'from-red-600 to-rose-700',
-    keywords: ['bist telegram kanalları', 'bist 100 telegram', 'hisse senedi telegram', 'borsa istanbul telegram'],
-    intro: 'Borsa İstanbul (BİST) yatırımcıları için en aktif Telegram analiz ve sinyal kanalları bu listede toplanmıştır. BİST 100, BİST 30 ve yükselen hisseler için 2026 güncel telegram kanal rehberi.',
-    faqs: [
-      { question: 'BİST telegram kanalları ne paylaşır?', answer: 'BİST Telegram kanalları, BİST 100 hisse analizleri, teknik grafik yorumları, önerilen hisseler ve piyasa yorumları paylaşır.' },
-      { question: 'BİST 100 sinyalleri ücretsiz mi?', answer: 'Listemizde hem ücretsiz hem ücretli BİST sinyal kanalları yer almaktadır. Ücretsiz kanallara anında katılabilirsiniz.' },
-    ],
-    relatedSlugs: ['borsa-telegram-kanallari', 'kripto-telegram-kanallari', 'kripto-sinyal-telegram'],
-  },
-  'solana-telegram-kanallari': {
-    h1: 'Solana Telegram Kanalları 2026 — SOL Analiz ve Sinyal Listesi',
-    title: 'Solana Telegram Kanalları 2026 | SOL Sinyal ve Ekosistem Haberleri',
-    description: 'Solana telegram kanalları 2026. SOL fiyat analizi, solana ekosistemi ve DeFi haberleri için en iyi telegram kanalları.',
-    icon: '◎', color: 'from-purple-500 to-fuchsia-600',
-    keywords: ['solana telegram kanalları', 'sol telegram', 'solana telegram', 'solana sinyal telegram'],
-    intro: 'Solana (SOL) yüksek hızı ve düşük işlem ücretleriyle 2026\'da en hızlı büyüyen kripto ekosistemlerinden biridir. En aktif Solana Telegram kanallarında SOL analizi, Solana DeFi ve meme coin fırsatlarını takip edin.',
-    faqs: [
-      { question: 'Solana telegram kanalları ne paylaşır?', answer: 'Solana Telegram kanalları SOL fiyat analizi, Solana DeFi protokol fırsatları, meme coin duyuruları ve ekosistem haberlerini paylaşır.' },
-      { question: 'SOL 2026 hedefi nedir? Hangi kanallar takip edilmeli?', answer: 'SOL fiyat tahminleri için listemizde yer alan Solana analiz kanallarını takip edebilirsiniz. Yatırım kararlarını her zaman kendi araştırmanıza dayandırın.' },
-    ],
-    relatedSlugs: ['kripto-telegram-kanallari', 'altcoin-telegram-kanallari', 'defi-telegram-kanallari'],
-  },
-  'usdt-telegram-kanallari': {
-    h1: 'USDT Telegram Kanalları 2026 — Stablecoin ve Arbitraj',
-    title: 'USDT Telegram Kanalları 2026 | Tether Stablecoin ve Arbitraj Grupları',
-    description: 'USDT telegram kanalları 2026. Tether arbitraj, P2P alım satım ve stablecoin yatırım telegram grupları.',
-    icon: '💵', color: 'from-green-600 to-emerald-700',
-    keywords: ['usdt telegram kanalları', 'usdt telegram', 'tether telegram', 'stablecoin telegram'],
-    intro: 'USDT (Tether), kripto para piyasasının en büyük stablecoini olarak P2P işlemler ve arbitraj fırsatları için sıklıkla kullanılır. USDT alım satım, arbitraj ve P2P işlemleri için 2026 en aktif Telegram kanalları listesi.',
-    faqs: [
-      { question: 'USDT telegram kanalları ne işe yarar?', answer: 'USDT Telegram kanalları, Tether P2P alım satım, arbitraj fırsatları, TRC-20/ERC-20 transfer bilgileri ve stablecoin stratejileri paylaşır.' },
-    ],
-    relatedSlugs: ['kripto-telegram-kanallari', 'binance-telegram-kanallari', 'borsa-telegram-kanallari'],
-  },
-  'kripto-para-telegram': {
-    h1: 'Kripto Para Telegram Kanalları 2026 — Eksiksiz Rehber',
-    title: 'Kripto Para Telegram 2026 | En İyi Kripto Para Telegram Kanalları',
-    description: 'Kripto para telegram 2026. Bitcoin, Ethereum, altcoin ve borsa için en iyi kripto para telegram kanalları. Türkiye en kapsamlı kripto telegram rehberi.',
-    icon: '💎', color: 'from-cyan-600 to-blue-700',
-    keywords: ['kripto para telegram', 'kripto para telegram kanalları', 'telegram kripto para', 'kripto telegram'],
-    intro: 'Kripto para yatırımı yapmak isteyenler için Türkiye\'nin en kapsamlı kripto para Telegram kanal rehberi. Bitcoin\'den Ethereum\'a, altcoinlerden borsa analizlerine kadar tüm kripto para konularında aktif kanalları 2026 güncel listemizde bulabilirsiniz.',
-    faqs: [
-      { question: 'Kripto para nedir?', answer: 'Kripto para, şifreleme teknolojisi kullanılarak güvence altına alınan dijital para birimidir. Bitcoin, Ethereum ve binlerce altcoin bu kategoriye girer.' },
-      { question: 'Kripto para yatırımı nasıl yapılır?', answer: 'Kripto para yatırımı için güvenilir bir borsa hesabı açın (Binance, OKX vb.), USDT satın alın ve araştırdığınız kripto paralara yatırım yapın. Listemizde yer alan analiz kanallarını takip edin.' },
-      { question: 'Telegram\'da kripto para kanalları neden bu kadar popüler?', answer: 'Telegram, anlık bildirimler, büyük grup desteği ve bot entegrasyonları sayesinde kripto yatırımcılarının tercih ettiği iletişim platformu haline gelmiştir.' },
-    ],
-    relatedSlugs: ['kripto-telegram-kanallari', 'bitcoin-telegram-kanallari', 'kripto-sinyal-telegram'],
-  },
-  'kripto-para': {
-    h1: 'Kripto Para ve Borsa Telegram Kanalları 2026',
-    title: 'Kripto Para & Borsa Telegram Kanalları 2026 | Bitcoin Analiz Rehberi',
-    description: 'Kripto para ve borsa telegram kanalları 2026. Bitcoin, Ethereum, altcoin ve BİST sinyal kanalları. Türkiye\'nin en büyük kripto telegram dizini — 192+ kanal.',
-    icon: '₿', color: 'from-orange-500 to-amber-600',
-    keywords: ['kripto para telegram', 'kripto para kanalları', 'bitcoin telegram', 'borsa telegram kanalları'],
-    intro: 'Kripto para ve borsa yatırımcılarının Türkiye\'deki en büyük Telegram kanal dizini. Bitcoin, Ethereum, altcoin sinyalleri, BİST analizleri ve DeFi fırsatları için 192+ aktif kanalı tek bir sayfada keşfedin.',
-    faqs: [
-      { question: 'Kripto para telegram kanalları neden önemli?', answer: 'Kripto piyasaları 7/24 aktiftir ve anlık gelişmeleri takip etmek büyük avantaj sağlar. Telegram kanalları bu bilgiyi anında kullanıcılara iletir.' },
-      { question: 'En iyi kripto para telegram kanalları hangileri?', answer: 'Telegramkanali.com\'da üye sayısına göre sıralanan en iyi kripto kanallarını görebilirsiniz. Onlarca binlerce üyesi olan aktif kanallar listenin üstündedir.' },
-      { question: 'Kripto para kanallarına ücretsiz katılabilir miyim?', answer: 'Evet! Listemizde yer alan kripto para Telegram kanallarının büyük çoğunluğu ücretsizdir. "Kanala Git" butonuyla anında katılım sağlayabilirsiniz.' },
-    ],
-    relatedSlugs: ['kripto-telegram-kanallari', 'bitcoin-telegram-kanallari', 'borsa-telegram-kanallari', 'kripto-sinyal-telegram'],
-  },
-};
+// ====== 🚀 KRİPTO Landing Pages — lib/crypto-pages (30 sayfa modüler) ======
+// CRYPTO_KEYWORD_PAGES ve getCryptoKeywordPage lib/crypto-pages/index.ts'ten import edildi.
 
-type CryptoKeywordPageType = typeof CRYPTO_KEYWORD_PAGES[string];
+type CryptoKeywordPageType = (typeof CRYPTO_KEYWORD_PAGES)[string];
 
 function getCryptoKeywordPageFromSlug(slug: string): { key: string; page: CryptoKeywordPageType } | null {
-  const page = CRYPTO_KEYWORD_PAGES[slug];
+  const page = getCryptoKeywordPage(slug);
   return page ? { key: slug, page } : null;
 }
+
+
+
 
 function getCityFromSlug(slug: string): { key: string; city: typeof CITIES[string] } | null {
   if (!slug.endsWith('-telegram-gruplari')) return null;
   const key = slug.replace('-telegram-gruplari', '');
   const city = CITIES[key];
   return city ? { key, city } : null;
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+
+  const cryptoPage = getCryptoKeywordPage(slug);
+  if (cryptoPage) {
+    return {
+      title: cryptoPage.title,
+      description: cryptoPage.description,
+      keywords: cryptoPage.keywords.join(', '),
+      alternates: { canonical: `${baseUrl}/${slug}` },
+      openGraph: {
+        title: cryptoPage.title,
+        description: cryptoPage.description,
+        type: 'website',
+      },
+    };
+  }
+
+  const cityMatch = getCityFromSlug(slug);
+  if (cityMatch) {
+    return {
+      title: `${cityMatch.city.name} Telegram Grupları ve Kanalları 2026`,
+      description: cityMatch.city.description,
+      alternates: { canonical: `${baseUrl}/${slug}` },
+    };
+  }
+
+  const kw18Match = KEYWORD_18_PAGES[slug];
+  if (kw18Match) {
+    return {
+      title: kw18Match.title,
+      description: kw18Match.description,
+      keywords: kw18Match.keywords.join(', '),
+      alternates: { canonical: `${baseUrl}/${slug}` },
+    };
+  }
+
+  const category = await getCategoryBySlug(slug);
+  if (category) {
+    return {
+      title: category.seo_title || `${category.name} Telegram Kanalları 2026`,
+      description: category.seo_description || `En güncel ve aktif ${category.name} Telegram kanalları.`,
+      alternates: { canonical: `${baseUrl}/${slug}` },
+    };
+  }
+
+  return { title: 'Telegram Kanalları' };
 }
 
 
@@ -757,6 +601,15 @@ export default async function DynamicPage({
     const cryptoCollection = generateCollectionPageSchema(
       kwCryptoPage.title, kwCryptoPage.description, `${baseUrl}/${kwCryptoKey}`, cryptoChannels.length, baseUrl
     );
+    const cryptoDatasetSchema = {
+      '@context': 'https://schema.org',
+      '@type': 'Dataset',
+      name: kwCryptoPage.h1,
+      description: kwCryptoPage.description,
+      keywords: kwCryptoPage.keywords,
+      url: `${baseUrl}/${kwCryptoKey}`,
+      dateModified: cryptoChannels.length > 0 ? new Date().toISOString().split('T')[0] : '2026-04-17',
+    };
 
     const relatedPages = (kwCryptoPage.relatedSlugs || []).map(s => CRYPTO_KEYWORD_PAGES[s]).filter(Boolean);
 
@@ -766,6 +619,7 @@ export default async function DynamicPage({
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(cryptoBreadcrumb) }} />
         <JsonLd data={cryptoItemList} />
         <JsonLd data={cryptoCollection} />
+        <JsonLd data={cryptoDatasetSchema} />
         <Header />
         <main className="container mx-auto px-4 py-6 max-w-7xl">
           {/* Breadcrumb */}
@@ -791,6 +645,12 @@ export default async function DynamicPage({
                   <div className="text-center"><div className="text-2xl font-black">2026</div><div className="text-white/70">Güncel</div></div>
                 </div>
               </div>
+
+              {/* Canlı İstatistik Bar */}
+              <CryptoStatBar
+                channelCount={cryptoChannels.length}
+                totalMembers={cryptoChannels.reduce((s: number, c: any) => s + (c.member_count || 0), 0)}
+              />
 
               {/* Kanal Listesi */}
               <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
@@ -819,6 +679,9 @@ export default async function DynamicPage({
                   </div>
                 ))}
               </div>
+
+              {/* E-E-A-T Sıralama Politikası */}
+              <CryptoRankingPolicy />
 
               {/* Banner */}
               <BannerGrid type="category" categoryId="crypto" maxBanners={2} />

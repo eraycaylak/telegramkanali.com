@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { getChannelBySlug, getChannelsByCategory, getAllChannelSlugs, getCategories } from '@/lib/data';
 import { BadgeCheck, Users, ExternalLink, Calendar, Tag, ShieldCheck } from 'lucide-react';
 import ChannelCard from '@/components/ChannelCard';
+import JsonLd, { generateAggregateRatingSchema } from '@/components/JsonLd';
 import type { Metadata } from 'next';
 
 export async function generateStaticParams() {
@@ -85,6 +86,7 @@ export default async function ChannelPage({ params }: { params: Promise<{ slug: 
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
             />
+            <JsonLd data={generateAggregateRatingSchema(channel, 'https://telegramkanali.com')} />
 
             {/* Main Content */}
             <div className="lg:col-span-2 space-y-8">
