@@ -57,7 +57,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.85,
     }));
 
-
     // Filter out invalid slugs
     const isValidSlug = (slug: string) => {
         if (!slug) return false;
@@ -88,8 +87,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         };
     });
 
-    // English channel URLs — REMOVED: /en/ pages now have noindex to save crawl budget
-
     const validCategories = categories.filter(cat => isValidSlug(cat.slug));
 
     // Turkish category URLs
@@ -99,8 +96,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         changeFrequency: 'daily' as const,
         priority: 0.9,
     }));
-
-    // English category URLs — REMOVED: /en/ pages now have noindex to save crawl budget
 
     const seoPageUrls = seoPages.map((page) => ({
         url: `${baseUrl}/rehber/${page.slug}`,
@@ -117,13 +112,42 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.7,
     }));
 
-    // +18 Ana Keyword Hedef Sayfaları (telegram +18 kanalları, +18 telegram kanalları, +18 telegram)
+    // ====================================================
+    // 🚀 KRİPTO Ana Keyword Hedef Sayfaları — MAX ÖNCELİK
+    // ====================================================
+    const cryptoKeywordPages = [
+        // Tier 1: En yüksek hacim — priority 0.98
+        { slug: 'kripto-telegram-kanallari',     p: 0.98 },  // kripto telegram kanalları
+        { slug: 'bitcoin-telegram-kanallari',     p: 0.98 },  // bitcoin telegram kanalları
+        { slug: 'borsa-telegram-kanallari',       p: 0.98 },  // borsa telegram kanalları
+        { slug: 'kripto-sinyal-telegram',         p: 0.98 },  // kripto sinyal telegram
+        { slug: 'kripto-para-telegram',           p: 0.98 },  // kripto para telegram
+        { slug: 'kripto-para',                    p: 0.98 },  // ana kripto hub sayfası
+
+        // Tier 2: Yüksek hacim — priority 0.96
+        { slug: 'ethereum-telegram-kanallari',    p: 0.96 },  // ethereum telegram
+        { slug: 'binance-telegram-kanallari',     p: 0.96 },  // binance telegram
+        { slug: 'altcoin-telegram-kanallari',     p: 0.96 },  // altcoin telegram
+        { slug: 'futures-telegram-kanallari',     p: 0.96 },  // futures telegram
+        { slug: 'bist-telegram-kanallari',        p: 0.96 },  // bist telegram
+        { slug: 'solana-telegram-kanallari',      p: 0.96 },  // solana telegram
+        { slug: 'usdt-telegram-kanallari',        p: 0.96 },  // usdt telegram
+        { slug: 'defi-telegram-kanallari',        p: 0.95 },  // defi telegram
+        { slug: 'nft-telegram-kanallari',         p: 0.95 },  // nft telegram
+    ].map(({ slug, p }) => ({
+        url: `${baseUrl}/${slug}`,
+        lastModified: new Date(),
+        changeFrequency: 'daily' as const,
+        priority: p,
+    }));
+
+    // +18 Ana Keyword Hedef Sayfaları
     const keyword18Pages = [
-        'telegram-18-kanallari',      // → "telegram +18 kanalları" (ANA HEDEF)
-        '18-telegram-kanallari',       // → "+18 telegram kanalları" (ANA HEDEF)
-        '18-telegram',                 // → "+18 telegram" (ANA HEDEF)
-        'turk-18-telegram-kanallari',  // → "türk +18 telegram kanalları"
-        'ucretsiz-18-telegram-kanallari', // → "ücretsiz +18 telegram"
+        'telegram-18-kanallari',
+        '18-telegram-kanallari',
+        '18-telegram',
+        'turk-18-telegram-kanallari',
+        'ucretsiz-18-telegram-kanallari',
     ].map(slug => ({
         url: `${baseUrl}/${slug}`,
         lastModified: new Date(),
@@ -148,6 +172,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     return [
         ...staticPages,
         ...cityPages,
+        ...cryptoKeywordPages,   // 🚀 KRİPTO — EN ÖNCE (crawl önceliği için)
         ...keyword18Pages,
         ...ifsaPages,
         ...marketplaceUrls,

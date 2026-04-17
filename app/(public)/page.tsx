@@ -321,6 +321,63 @@ export default async function Home({ searchParams }: HomeProps) {
         )}
       </section>
 
+      {/* 🚀 KRİPTO HUB SECTION — SEO Internal Linking */}
+      {!search && !categoryId && page === 1 && (
+        <section className="py-2">
+          <div className="bg-gradient-to-br from-orange-500 via-amber-500 to-yellow-500 rounded-2xl p-6 md:p-8 text-white shadow-xl shadow-orange-500/20 relative overflow-hidden">
+            {/* Dekoratif arka plan */}
+            <div className="absolute top-0 right-0 w-48 h-48 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/4" />
+            <div className="absolute bottom-0 left-24 w-32 h-32 bg-white/5 rounded-full translate-y-1/2" />
+
+            <div className="relative z-10">
+              <div className="flex items-center gap-3 mb-4">
+                <span className="text-4xl">₿</span>
+                <div>
+                  <h2 className="text-xl md:text-2xl font-black">Kripto Para &amp; Borsa Telegram Kanalları</h2>
+                  <p className="text-orange-100 text-sm">192+ aktif kripto, borsa ve bitcoin sinyal kanalı</p>
+                </div>
+              </div>
+
+              {/* Kripto keyword linkleri — iç linkler için kritik */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 mb-5">
+                {[
+                  { href: '/kripto-telegram-kanallari', label: '₿ Kripto Kanallar' },
+                  { href: '/bitcoin-telegram-kanallari', label: '🪙 Bitcoin' },
+                  { href: '/borsa-telegram-kanallari', label: '📈 Borsa' },
+                  { href: '/ethereum-telegram-kanallari', label: '⟠ Ethereum' },
+                  { href: '/kripto-sinyal-telegram', label: '📡 Sinyaller' },
+                  { href: '/binance-telegram-kanallari', label: '🟡 Binance' },
+                  { href: '/altcoin-telegram-kanallari', label: '🚀 Altcoin' },
+                  { href: '/futures-telegram-kanallari', label: '⚡ Futures' },
+                  { href: '/bist-telegram-kanallari', label: '🏦 BİST 100' },
+                  { href: '/defi-telegram-kanallari', label: '🔗 DeFi' },
+                  { href: '/nft-telegram-kanallari', label: '🎨 NFT' },
+                  { href: '/solana-telegram-kanallari', label: '◎ Solana' },
+                  { href: '/usdt-telegram-kanallari', label: '💵 USDT' },
+                  { href: '/bist-telegram-kanallari', label: '📊 Hisse' },
+                  { href: '/kripto-para', label: '💎 Tüm Kripto' },
+                ].map(item => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="text-xs font-bold text-center bg-white/15 hover:bg-white/25 backdrop-blur-sm px-2 py-2 rounded-xl transition border border-white/20 truncate"
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
+
+              <Link
+                href="/kripto-para"
+                className="inline-flex items-center gap-2 bg-white text-orange-600 font-black px-6 py-2.5 rounded-xl hover:bg-orange-50 transition text-sm shadow-lg"
+              >
+                Tüm Kripto Kanallarını Gör →
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* SEO Content Section — Below Channels */}
       <section className="grid gap-12 lg:grid-cols-3 pt-12 border-t border-gray-100 mt-12">
         <div className="lg:col-span-2 space-y-8 text-gray-700 leading-relaxed">
