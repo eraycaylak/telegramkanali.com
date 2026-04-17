@@ -113,11 +113,21 @@ export default function HeaderClient({ categories, logo, user: initialUser, rece
 
                     {/* Desktop: Empty space or menu for flex balance if needed, but we'll let logo sit left on Desktop */}
                     
-                    {/* Logo: Centered on Mobile, Left on Desktop */}
+                    {/* Logo + Başsağlığı Bandı */}
                     <div className="flex-1 flex justify-center md:flex-none md:justify-start">
-                        <Link href="/" className="scale-90 md:scale-100 origin-center block">
-                            {logo}
-                        </Link>
+                        <div className="flex items-center gap-2 md:gap-3">
+                            <Link href="/" className="scale-90 md:scale-100 origin-center block flex-shrink-0">
+                                {logo}
+                            </Link>
+                            {/* Başsağlığı Bandı */}
+                            <div className="flex items-center gap-1.5 bg-black/25 border border-white/20 rounded-lg px-2 py-1 md:px-3 md:py-1.5 backdrop-blur-sm">
+                                <img src="/bassagligi.svg" alt="Başsağlığı" className="w-5 h-5 md:w-6 md:h-6 flex-shrink-0" />
+                                <div className="flex flex-col leading-tight">
+                                    <span className="text-white font-black text-[9px] md:text-[11px] uppercase tracking-wide">Tüm Türkiye'ye</span>
+                                    <span className="text-white/90 text-[8px] md:text-[10px] font-medium">Başsağlığı &amp; Geçmiş Olsun</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     {/* Right: Actions (Mobile & Desktop) */}
