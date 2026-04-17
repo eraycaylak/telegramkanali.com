@@ -93,7 +93,7 @@ export default async function ChannelPage({ params }: { params: Promise<{ slug: 
             <JsonLd data={generateAggregateRatingSchema(channel, 'https://telegramkanali.com')} />
 
             {/* Main Content */}
-            <div className="lg:col-span-2 space-y-8">
+            <div className="lg:col-span-2 space-y-8 min-w-0 overflow-hidden break-words">
 
                 {/* Hard Internal Linking (Navigation Loop) */}
                 {isCrypto && (

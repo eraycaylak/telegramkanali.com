@@ -634,12 +634,12 @@ export default async function DynamicPage({
 
           <div className="grid lg:grid-cols-[1fr_300px] gap-8">
             {/* Main */}
-            <div className="space-y-6">
+            <div className="space-y-6 min-w-0 overflow-hidden">
               {/* Hero */}
               <div className={`bg-gradient-to-br ${kwCryptoPage.color} rounded-2xl p-7 text-white shadow-xl`}>
                 <div className="text-4xl mb-3">{kwCryptoPage.icon}</div>
                 <h1 className="text-2xl md:text-3xl font-black mb-3">{kwCryptoPage.h1}</h1>
-                <div className="text-white/80 text-base leading-relaxed max-w-2xl whitespace-pre-line" dangerouslySetInnerHTML={{ __html: kwCryptoPage.intro }} />
+                <div className="text-white/80 text-base leading-relaxed max-w-2xl break-words whitespace-pre-line" dangerouslySetInnerHTML={{ __html: kwCryptoPage.intro }} />
                 <div className="mt-5 flex flex-wrap gap-4 md:gap-6 text-sm justify-center md:justify-start">
                   <div className="text-center"><div className="text-2xl font-black">{cryptoChannels.length}</div><div className="text-white/70 text-xs md:text-sm">Aktif Kanal</div></div>
                   <div className="text-center"><div className="text-2xl font-black">192+</div><div className="text-white/70 text-xs md:text-sm">Topluluk</div></div>
@@ -838,7 +838,7 @@ export default async function DynamicPage({
           </div>
 
           <div className="grid lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2 space-y-6">
+            <div className="lg:col-span-2 space-y-6 min-w-0 overflow-hidden">
               {channels.length > 0 ? (
                 (() => {
                   const is18Category = category.id === '18' || category.slug === '18';
