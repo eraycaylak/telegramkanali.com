@@ -40,8 +40,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.85,
     }));
 
-    // 2. Dynamic Data from database
-    const { data: channels } = await getChannels(1, 2000);
+    // 2. Dynamic Data from database — limit kaldırıldı, tüm kanallar
+    const { data: channels } = await getChannels(1, 10000);
     const categories = await getCategories();
     const seoPages = await getSeoPages();
 
@@ -71,31 +71,36 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     const validChannels = channels.filter(c => {
         if (!isValidSlug(c.slug)) return false;
-        if (!c.description || c.description.trim().length < 20) return false;
+        // Kalite filtresi: açıklama en az 50 karakter olmalı (thin content sinyali verme)
+        if (!c.description || c.description.trim().length < 50) return false;
         return true;
     });
 
-    // Turkish channel URLs (dynamic priority based on score)
+    // Üye sayısına göre dinamik priority — daha iyi crawl budget kullanımı
     const channelsUrls = validChannels.map((channel) => {
+        const memberCount = (channel as any).member_count || 0;
         const score = (channel as any).score || 0;
-        const priority = score >= 100 ? 0.8 : score >= 50 ? 0.7 : 0.6;
+        let priority = 0.5;
+        if (memberCount > 50000 || score >= 100) priority = 0.9;
+        else if (memberCount > 10000 || score >= 50) priority = 0.75;
+        else if (memberCount > 1000) priority = 0.65;
         const lastMod = (channel as any).updated_at || channel.created_at;
         return {
-            url: `${baseUrl}/${channel.slug}`,
+            url: `${baseUrl}/kanallar/${channel.slug}`,
             lastModified: new Date(lastMod ?? Date.now()),
-            changeFrequency: score >= 50 ? 'daily' as const : 'weekly' as const,
+            changeFrequency: priority >= 0.75 ? 'daily' as const : 'weekly' as const,
             priority,
         };
     });
 
     const validCategories = categories.filter(cat => isValidSlug(cat.slug));
 
-    // Turkish category URLs
+    // Kategoriler — en yüksek öncelik (crawl budget'ın en verimli kısmı)
     const categoriesUrls = validCategories.map((category) => ({
         url: `${baseUrl}/${category.slug}`,
         lastModified: new Date(),
         changeFrequency: 'daily' as const,
-        priority: 0.9,
+        priority: 1.0,
     }));
 
     const seoPageUrls = seoPages.map((page) => ({
