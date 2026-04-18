@@ -25,6 +25,13 @@ function isBadBot(ua: string): boolean {
 export default async function handler(request: Request, context: Context) {
     const ua = request.headers.get('user-agent') || ''
 
+    // 0. Meşru arama motoru botları → hiçbir engel yok, doğrudan geç
+    //    Googlebot, Bingbot vb. bloklanırsa site indekslenemiyor!
+    const GOOD_BOTS = /Googlebot|Google-InspectionTool|Bingbot|Slurp|DuckDuckBot|Baiduspider|YandexBot|facebookexternalhit|Twitterbot|LinkedInBot/i
+    if (GOOD_BOTS.test(ua)) {
+        return context.next()
+    }
+
     // 1. Kötü bot UA → anında 403
     if (isBadBot(ua) || ua.length < 10) {
         return new Response('Forbidden', {

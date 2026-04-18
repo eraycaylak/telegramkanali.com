@@ -71,7 +71,14 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
   const userAgent = request.headers.get('user-agent') || ''
 
-  // 1. Kötü botları anında engelle — DB çağrısı yok, bandwidth sıfır
+  // 1. Meşru arama motoru botları → her zaman geçir
+  //    Bu kontrol olmadan Googlebot engellenebilir ve indeksleme durabilir!
+  const GOOD_BOTS = /Googlebot|Google-InspectionTool|Bingbot|Slurp|DuckDuckBot|Baiduspider|YandexBot/i
+  if (GOOD_BOTS.test(userAgent)) {
+    return NextResponse.next()
+  }
+
+  // 2. Kötü botları anında engelle — DB çağrısı yok, bandwidth sıfır
   if (isBadBot(userAgent)) {
     return new NextResponse('Forbidden', {
       status: 403,
@@ -79,7 +86,7 @@ export async function middleware(request: NextRequest) {
     })
   }
 
-  // 2. Boş User-Agent = ham tarayıcı/scanner → engelle
+  // 3. Boş User-Agent = ham tarayıcı/scanner → engelle
   if (userAgent.length < 10) {
     return new NextResponse('Forbidden', {
       status: 403,
