@@ -610,6 +610,12 @@ export default async function DynamicPage({
       keywords: kwCryptoPage.keywords,
       url: `${baseUrl}/${kwCryptoKey}`,
       dateModified: cryptoChannels.length > 0 ? new Date().toISOString().split('T')[0] : '2026-04-17',
+      creator: {
+        '@type': 'Organization',
+        name: 'Telegram Kanalları',
+        url: baseUrl,
+      },
+      license: 'https://creativecommons.org/licenses/by/4.0/',
     };
 
     const relatedPages = (kwCryptoPage.relatedSlugs || []).map(s => CRYPTO_KEYWORD_PAGES[s]).filter(Boolean);
