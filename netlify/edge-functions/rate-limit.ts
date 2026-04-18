@@ -5,7 +5,7 @@ import type { Config, Context } from '@netlify/edge-functions'
 // Aynı IP aynı edge node'a geldiğinde yakalanır (bots genelde aynı lokasyondan gelir).
 const rateMap = new Map<string, { count: number; resetAt: number }>()
 
-const LIMIT = 120        // 1 dakikada max istek sayısı per IP
+const LIMIT = 200       // 1 dakikada max istek sayısı per IP (Next.js prefetch dahil)
 const WINDOW = 60_000    // 1 dakika (ms)
 
 // ─── Bilinen Kötü Bot User-Agent'ları ────────────────────────────────────────
@@ -24,9 +24,10 @@ function isBadBot(ua: string): boolean {
 
 export default async function handler(request: Request, context: Context) {
     const ua = request.headers.get('user-agent') || ''
+    const url = new URL(request.url)
+    const path = url.pathname
 
-    // 0. Meşru arama motoru botları → hiçbir engel yok, doğrudan geç
-    //    Googlebot, Bingbot vb. bloklanırsa site indekslenemiyor!
+    // 0. Meşru arama motoru botları → hiçbir engel yok
     const GOOD_BOTS = /Googlebot|Google-InspectionTool|Bingbot|Slurp|DuckDuckBot|Baiduspider|YandexBot|facebookexternalhit|Twitterbot|LinkedInBot/i
     if (GOOD_BOTS.test(ua)) {
         return context.next()
@@ -40,7 +41,14 @@ export default async function handler(request: Request, context: Context) {
         })
     }
 
-    // 2. Rate limiting per IP
+    // 2. /api/ ve /admin/ rotaları rate limit dışı
+    //    Bu rotalar kendi sayfalarımızdan çağrılıyor (analytics, track vb.)
+    //    ve otomatik olarak sıkça tetikleniyor
+    if (path.startsWith('/api/') || path.startsWith('/admin/')) {
+        return context.next()
+    }
+
+    // 3. Rate limiting per IP — limit artırıldı (Next.js prefetch + analytics istekleri sayılıyor)
     const ip = context.ip
         || request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
         || 'unknown'
@@ -65,7 +73,7 @@ export default async function handler(request: Request, context: Context) {
         }
     }
 
-    // 3. Bellek temizliği (10K IP geçince eski kayıtları sil)
+    // 4. Bellek temizliği
     if (rateMap.size > 10_000) {
         for (const [key, val] of rateMap) {
             if (now > val.resetAt) rateMap.delete(key)

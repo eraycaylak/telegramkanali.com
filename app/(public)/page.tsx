@@ -14,8 +14,8 @@ import { Channel, Category } from '@/lib/types';
 import { Suspense } from 'react';
 import { Metadata } from 'next';
 
-// No caching - fresh data on every request for randomized channel order
-export const revalidate = 0;
+// 5 dakika cache — her request'te DB sorgusu yapmak Netlify function invocation tüketiyor
+export const revalidate = 300;
 
 
 const faqs = [

@@ -53,8 +53,7 @@ function buildChannelTitle(name: string): string {
   return `${result || name.slice(0, 50)}… | Telegram`;
 }
 
-export const revalidate = 0;
-export const dynamic = 'force-dynamic';
+export const revalidate = 3600; // 1 saat cache — her isteğe DB sorgusu atmak Netlify invocation tüketir
 
 // ====== Şehir Bazlı Programatik SEO Verileri ======
 const CITIES: Record<string, { name: string; description: string }> = {
