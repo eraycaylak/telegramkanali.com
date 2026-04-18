@@ -6,7 +6,8 @@ import {
 } from 'lucide-react';
 import type { Metadata } from 'next';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 300; // 5 dakika cache — force-dynamic gereksiz, ilanlar sk değişmiyor
+
 
 export const metadata: Metadata = {
     title: 'Telegram Kanal Al-Sat Marketplace — Escrow Güvenceli | TelegramKanali.com',

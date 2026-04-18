@@ -14,7 +14,6 @@ import { Metadata } from 'next';
 const baseUrl = 'https://telegramkanali.com';
 
 export const revalidate = 60;
-export const dynamic = 'force-dynamic';
 
 const faqsEn = [
     {

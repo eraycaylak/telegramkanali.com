@@ -5,9 +5,8 @@ import { Flame, Clock, Tag, ArrowLeft } from 'lucide-react';
 import { Metadata, ResolvingMetadata } from 'next';
 import JsonLd, { generateBreadcrumbSchema } from '@/components/JsonLd';
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
-export const fetchCache = 'force-no-store';
+export const revalidate = 3600; // 1 saat cache — içerik nadiren değişiyor
+
 
 const baseUrl = 'https://telegramkanali.com';
 

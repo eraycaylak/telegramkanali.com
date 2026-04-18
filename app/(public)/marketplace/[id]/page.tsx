@@ -11,7 +11,8 @@ import {
 import type { Metadata } from 'next';
 import ListingContactForm from './ListingContactForm';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 600; // 10 dakika — ilan verisi nadir değişiyor
+
 
 interface Props { params: Promise<{ id: string }>; }
 
