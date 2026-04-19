@@ -5,7 +5,7 @@ import Link from 'next/link';
 import {
     LayoutDashboard, FolderTree, FileText, Users, Settings, LogOut,
     Menu, Shield, BarChart, Send, BookOpen, MessageSquare, TrendingUp,
-    Megaphone, ChevronDown, Star, Image, Zap, CreditCard, X, Wallet
+    Megaphone, ChevronDown, Star, Image, Zap, CreditCard, X, Wallet, LifeBuoy
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
@@ -68,6 +68,7 @@ const MENU_GROUPS: MenuGroup[] = [
             { name: 'Analitik', href: '/admin/analytics', icon: BarChart, perm: 'view_analytics' },
             { name: 'Ziyaretçi Profilleri', href: '/admin/visitors', icon: Users, perm: 'view_analytics' },
             { name: 'Kullanıcılar', href: '/admin/users', icon: Users, perm: 'manage_users' },
+            { name: '🎫 Destek Talepleri', href: '/admin/destek', icon: LifeBuoy, perm: 'manage_users' },
         ],
     },
     {

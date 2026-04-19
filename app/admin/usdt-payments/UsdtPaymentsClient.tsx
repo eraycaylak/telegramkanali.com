@@ -35,6 +35,7 @@ const PKG_EMOJI: Record<string, string> = { neon: '⚡', prime: '👑', apex: '�
 export default function UsdtPaymentsClient() {
     const [payments, setPayments] = useState<Payment[]>([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('pending');
     const [rejectId, setRejectId] = useState<string | null>(null);
     const [rejectNote, setRejectNote] = useState('');
@@ -46,9 +47,16 @@ export default function UsdtPaymentsClient() {
 
     const load = async () => {
         setLoading(true);
-        const data = await getUsdtPayments(filter === 'all' ? undefined : filter);
-        setPayments(data as Payment[]);
-        setLoading(false);
+        setError(null);
+        try {
+            const data = await getUsdtPayments(filter === 'all' ? undefined : filter);
+            setPayments(data as Payment[]);
+        } catch (err) {
+            console.error('[USDT] Load error:', err);
+            setError('Veriler yüklenemedi. Lütfen sayfayı yenileyin.');
+        } finally {
+            setLoading(false);
+        }
     };
 
     useEffect(() => { load(); }, [filter]);
@@ -138,6 +146,11 @@ export default function UsdtPaymentsClient() {
             {/* Liste */}
             {loading ? (
                 <div className="text-center py-16 text-gray-400">Yükleniyor...</div>
+            ) : error ? (
+                <div className="text-center py-16 bg-red-50 rounded-2xl border border-red-200">
+                    <p className="text-red-600 font-bold mb-2">⚠️ {error}</p>
+                    <button onClick={load} className="text-sm text-red-500 underline">Tekrar Dene</button>
+                </div>
             ) : payments.length === 0 ? (
                 <div className="text-center py-16 text-gray-400 bg-white rounded-2xl border border-gray-200">
                     <p className="text-lg font-bold mb-1">Başvuru bulunamadı</p>
