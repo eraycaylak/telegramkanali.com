@@ -30,7 +30,7 @@ export default async function handler(request: Request, context: Context) {
     // 0. Meşru arama motoru botları → hiçbir engel yok
     const GOOD_BOTS = /Googlebot|Google-InspectionTool|Bingbot|Slurp|DuckDuckBot|Baiduspider|YandexBot|facebookexternalhit|Twitterbot|LinkedInBot/i
     if (GOOD_BOTS.test(ua)) {
-        return context.next()
+        return; // implicitly passes through request to the next handler
     }
 
     // 1. Kötü bot UA → anında 403
@@ -45,12 +45,11 @@ export default async function handler(request: Request, context: Context) {
     //    Bu rotalar kendi sayfalarımızdan çağrılıyor (analytics, track vb.)
     //    ve otomatik olarak sıkça tetikleniyor
     if (path.startsWith('/api/') || path.startsWith('/admin/')) {
-        return context.next()
+        return; // pass through
     }
 
     // 3. Rate limiting per IP — limit artırıldı (Next.js prefetch + analytics istekleri sayılıyor)
-    const ip = context.ip
-        || request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
         || 'unknown'
 
     const now = Date.now()
@@ -80,7 +79,7 @@ export default async function handler(request: Request, context: Context) {
         }
     }
 
-    return context.next()
+    // If we return undefined (no return value), Netlify automatically continues the request chain
 }
 
 export const config: Config = {
