@@ -2,7 +2,7 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 // ─── Kötü Bot / Scraper User-Agent Listesi ────────────────────────────────────
-// Bu botlar bandwidth ve function invocation tüketiyor, hiçbir değer üretmiyor
+// Cloudflare Bot Fight Mode birinci katman, bu ikinci katman (defense in depth)
 const BAD_BOT_PATTERNS: RegExp[] = [
   // AI eğitim botları
   /GPTBot/i,
@@ -66,49 +66,19 @@ function isBadBot(userAgent: string): boolean {
   return false
 }
 
-// ─── In-Memory Rate Limiter ───────────────────────────────────────────────────
-// Next.js middleware instance başına bellekte tutulur.
-const rateMap = new Map<string, { count: number; resetAt: number }>()
-const RATE_LIMIT = 200     // 1 dakikada max istek sayısı per IP
-const RATE_WINDOW = 60_000 // 1 dakika (ms)
-
-function checkRateLimit(ip: string): boolean {
-  const now = Date.now()
-  const record = rateMap.get(ip)
-
-  if (!record || now > record.resetAt) {
-    rateMap.set(ip, { count: 1, resetAt: now + RATE_WINDOW })
-    return false // not limited
-  }
-
-  record.count++
-  if (record.count > RATE_LIMIT) {
-    return true // rate limited
-  }
-
-  // Bellek temizliği
-  if (rateMap.size > 10_000) {
-    for (const [key, val] of rateMap) {
-      if (now > val.resetAt) rateMap.delete(key)
-    }
-  }
-
-  return false
-}
-
 // ─── Ana Middleware ───────────────────────────────────────────────────────────
+// Rate limiting & DDoS koruması artık Cloudflare tarafından yapılıyor
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
   const userAgent = request.headers.get('user-agent') || ''
 
   // 1. Meşru arama motoru botları → her zaman geçir
-  //    Bu kontrol olmadan Googlebot engellenebilir ve indeksleme durabilir!
   const GOOD_BOTS = /Googlebot|Google-InspectionTool|Bingbot|Slurp|DuckDuckBot|Baiduspider|YandexBot/i
   if (GOOD_BOTS.test(userAgent)) {
     return NextResponse.next()
   }
 
-  // 2. Kötü botları anında engelle — DB çağrısı yok, bandwidth sıfır
+  // 2. Kötü botları engelle (Cloudflare'i bypass ederse ikinci katman)
   if (isBadBot(userAgent)) {
     return new NextResponse('Forbidden', {
       status: 403,
@@ -116,7 +86,7 @@ export async function middleware(request: NextRequest) {
     })
   }
 
-  // 3. Boş User-Agent = ham tarayıcı/scanner → engelle
+  // 3. Boş User-Agent = tarayıcı/scanner → engelle
   if (userAgent.length < 10) {
     return new NextResponse('Forbidden', {
       status: 403,
@@ -124,24 +94,7 @@ export async function middleware(request: NextRequest) {
     })
   }
 
-  // 4. Rate Limiting per IP
-  const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
-    || request.headers.get('x-real-ip')
-    || 'unknown'
-
-  if (checkRateLimit(ip)) {
-    return new NextResponse('Too Many Requests', {
-      status: 429,
-      headers: {
-        'Retry-After': '60',
-        'Content-Type': 'text/plain',
-        'X-RateLimit-Limit': String(RATE_LIMIT),
-        'X-RateLimit-Remaining': '0',
-      },
-    })
-  }
-
-  // 5. Supabase auth — sadece korumalı rotalar için çalışır
+  // 4. Supabase auth — sadece korumalı rotalar için çalışır
   const isProtectedRoute =
     pathname.startsWith('/dashboard') ||
     pathname.startsWith('/admin') ||
@@ -205,4 +158,3 @@ export const config = {
     '/((?!_next/static|_next/image|favicon\\.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js|woff|woff2|ttf)).*)',
   ],
 }
-
