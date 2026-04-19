@@ -66,6 +66,36 @@ function isBadBot(userAgent: string): boolean {
   return false
 }
 
+// ─── In-Memory Rate Limiter ───────────────────────────────────────────────────
+// Next.js middleware instance başına bellekte tutulur.
+const rateMap = new Map<string, { count: number; resetAt: number }>()
+const RATE_LIMIT = 200     // 1 dakikada max istek sayısı per IP
+const RATE_WINDOW = 60_000 // 1 dakika (ms)
+
+function checkRateLimit(ip: string): boolean {
+  const now = Date.now()
+  const record = rateMap.get(ip)
+
+  if (!record || now > record.resetAt) {
+    rateMap.set(ip, { count: 1, resetAt: now + RATE_WINDOW })
+    return false // not limited
+  }
+
+  record.count++
+  if (record.count > RATE_LIMIT) {
+    return true // rate limited
+  }
+
+  // Bellek temizliği
+  if (rateMap.size > 10_000) {
+    for (const [key, val] of rateMap) {
+      if (now > val.resetAt) rateMap.delete(key)
+    }
+  }
+
+  return false
+}
+
 // ─── Ana Middleware ───────────────────────────────────────────────────────────
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
@@ -94,7 +124,24 @@ export async function middleware(request: NextRequest) {
     })
   }
 
-  // 3. Supabase auth — sadece korumalı rotalar için çalışır
+  // 4. Rate Limiting per IP
+  const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+    || request.headers.get('x-real-ip')
+    || 'unknown'
+
+  if (checkRateLimit(ip)) {
+    return new NextResponse('Too Many Requests', {
+      status: 429,
+      headers: {
+        'Retry-After': '60',
+        'Content-Type': 'text/plain',
+        'X-RateLimit-Limit': String(RATE_LIMIT),
+        'X-RateLimit-Remaining': '0',
+      },
+    })
+  }
+
+  // 5. Supabase auth — sadece korumalı rotalar için çalışır
   const isProtectedRoute =
     pathname.startsWith('/dashboard') ||
     pathname.startsWith('/admin') ||
@@ -158,3 +205,4 @@ export const config = {
     '/((?!_next/static|_next/image|favicon\\.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js|woff|woff2|ttf)).*)',
   ],
 }
+

@@ -2,11 +2,6 @@
   command = "npm run build"
   publish = ".next"
 
-# ─── Edge Functions ───────────────────────────────────────────────────────────
-[[edge_functions]]
-  path = "/*"
-  function = "rate-limit"
-
 [build.environment]
   NODE_VERSION = "20"
 
