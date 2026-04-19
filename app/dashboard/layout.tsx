@@ -16,6 +16,7 @@ import {
     ChevronRight,
     Phone,
     DollarSign,
+    LifeBuoy,
 } from 'lucide-react';
 import { useState } from 'react';
 import { signOut } from '@/app/actions/auth';
@@ -33,6 +34,7 @@ const menuItems = [
     { name: 'Mesajlarım', href: '/dashboard/mesajlar', icon: MessageCircle, desc: 'Alım-satım sohbetleri' },
     { name: 'Bot Ayarları', href: '/dashboard/bot', icon: Settings, desc: 'Telegram bot entegrasyonu' },
     { name: 'İstatistikler', href: '/dashboard/stats', icon: PieChart, desc: 'Kanal analizleri' },
+    { name: 'Destek', href: '/dashboard/destek', icon: LifeBuoy, desc: 'Yardım ve destek talepleri' },
 ];
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
