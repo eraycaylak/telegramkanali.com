@@ -61,7 +61,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Filter out invalid slugs
     const isValidSlug = (slug: string) => {
         if (!slug) return false;
-        if (slug.length < 3) return false;
+        // Kategori slug'ları (ör. "18") 2 karakter olabilir — bunları dışlama
+        if (slug.length < 2) return false;
         if (slug.startsWith('-') || slug.endsWith('-')) return false;
         if (slug.includes('--')) return false;
         if (slug.startsWith('telegram-contact-')) return false;
@@ -142,26 +143,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.95,
     }));
 
-    // İfşa programatik SEO sayfaları
-    const ifsaPages = [
-        'telegram-ifsa-kanallari',
-        'telegram-unlu-ifsa-kanallari',
-        'telegram-18-ifsa-kanallari',
-        'telegram-turk-ifsa-kanallari',
-        'telegram-ifsa',
-    ].map(slug => ({
-        url: `${baseUrl}/${slug}`,
-        lastModified: new Date(),
-        changeFrequency: 'daily' as const,
-        priority: 0.9,
-    }));
+    // İfşa sayfaları next.config.ts'de 301 redirect ile /telegram-18-kanallari'ya
+    // yönlendirildiği için sitemap'e dahil edilMEMELİ (crawl budget israfını önle)
+    // Kaldırıldı: 2026-04-21
 
     return [
         ...staticPages,
         ...cityPages,
         ...cryptoKeywordPages,   // 🚀 KRİPTO — EN ÖNCE (crawl önceliği için)
         ...keyword18Pages,
-        ...ifsaPages,
         ...marketplaceUrls,
         ...categoriesUrls,
         ...seoPageUrls,
