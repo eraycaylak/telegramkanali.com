@@ -469,6 +469,7 @@ export default async function DynamicPage({
                     <div className="text-2xl font-black">2026</div>
                     <div className="text-red-200">Güncel</div>
                   </div>
+                </div>
                 <div className="mt-5 pt-4 border-t border-red-600/40 flex items-center gap-2 text-xs text-red-200">
                   <span className="shrink-0 font-black text-white bg-red-500/30 px-2 py-0.5 rounded">⚠ SIFIR TOLERANS</span>
                   <span>Çocuk istismarı, gizli çekim/ifşa ve yasadışı içerik barındıran kanallar derhal kaldırılır.</span>
