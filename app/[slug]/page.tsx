@@ -860,16 +860,14 @@ export default async function DynamicPage({
               <div className="text-center"><div className="text-3xl font-black">✓</div><div className="text-blue-200">Onaylı</div></div>
               <div className="text-center"><div className="text-3xl font-black">2026</div><div className="text-blue-200">Güncel</div></div>
             </div>
+            {(category.id === '18' || category.slug === '18') && (
+              <div className="mt-5 pt-4 border-t border-blue-500/40 flex items-center justify-center gap-2 text-xs text-blue-200">
+                <span className="shrink-0 font-black text-white bg-red-500/30 px-2 py-0.5 rounded">⚠ SIFIR TOLERANS</span>
+                <span>Çocuk istismarı, gizli çekim/ifşa ve yasadışı içerik barındıran kanallar derhal kaldırılır.</span>
+                <Link href="/iletisim" className="shrink-0 text-white underline hover:text-blue-100 font-bold">Şikayet Et</Link>
+              </div>
+            )}
           </div>
-
-          {/* +18 Kategori: Uyarı — Kompakt Bant */}
-          {(category.id === '18' || category.slug === '18') && (
-            <div className="bg-gray-900 rounded-xl px-4 py-3 flex items-center gap-2 text-xs text-gray-400">
-              <span className="shrink-0 font-black text-white bg-red-500/30 px-2 py-0.5 rounded">⚠ SIFIR TOLERANS</span>
-              <span>Çocuk istismarı, gizli çekim/ifşa ve yasadışı içerik barındıran kanallar derhal kaldırılır.</span>
-              <Link href="/iletisim" className="shrink-0 text-red-400 hover:text-red-300 underline font-bold">Şikayet Et</Link>
-            </div>
-          )}
 
           <div className="grid lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-6 min-w-0 overflow-hidden">
