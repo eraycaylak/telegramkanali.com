@@ -472,6 +472,33 @@ export default async function DynamicPage({
                 </div>
               </div>
 
+              {/* Yasal Uyarı & Sıfır Tolerans Politikası */}
+              <div className="bg-gray-900 border border-gray-700 rounded-2xl p-5 shadow-sm">
+                <div className="flex items-start gap-3">
+                  <div className="text-2xl shrink-0 mt-0.5">⚖️</div>
+                  <div className="text-sm text-gray-300 leading-relaxed space-y-2">
+                    <h3 className="text-white font-bold text-base">Sıfır Tolerans Politikası</h3>
+                    <p>
+                      Telegramkanali.com, 5651 sayılı kanun kapsamında <strong className="text-white">&quot;Yer Sağlayıcı&quot;</strong> olarak hizmet vermektedir.
+                      Platformumuzda listelenen tüm kanallar kullanıcı önerileriyle eklenmekte olup, içerikler kanal yöneticilerinin sorumluluğundadır.
+                    </p>
+                    <p className="text-red-400 font-semibold">
+                      Aşağıdaki türde içerik barındıran kanallar, şikayet üzerine veya tarafımızca tespit edildiği anda derhal ve kalıcı olarak kaldırılır:
+                    </p>
+                    <ul className="space-y-1 text-gray-400 ml-1">
+                      <li className="flex items-start gap-2">🚫 <span>Çocuk istismarına yönelik her türlü materyal (TCK m.226/3)</span></li>
+                      <li className="flex items-start gap-2">🚫 <span>Gerçek kişilerin rızası dışında çekilmiş veya paylaşılmış görüntüler (gizli çekim, ifşa vb.) (TCK m.134)</span></li>
+                      <li className="flex items-start gap-2">🚫 <span>Yasadışı materyaller ve yasa dışı faaliyetleri teşvik eden içerikler</span></li>
+                    </ul>
+                    <p className="text-gray-500 text-xs pt-1">
+                      Bu tür içeriklere kesinlikle ve kesinlikle müsamaha gösterilmez. Şikayet ve bildirimlerinizi{' '}
+                      <Link href="/iletisim" className="text-red-400 hover:text-red-300 underline">iletişim sayfamız</Link>{' '}
+                      üzerinden veya <span className="text-white">telegramkanaliiletisim@outlook.com</span> adresine e-posta göndererek iletebilirsiniz.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
               {/* Kanal Listesi — Forum stili, fotoğrafsız */}
               <div className="bg-white rounded-2xl border border-red-100 shadow-sm overflow-hidden">
                 {/* Tablo başlığı */}
@@ -857,6 +884,35 @@ export default async function DynamicPage({
               <div className="text-center"><div className="text-3xl font-black">2026</div><div className="text-blue-200">Güncel</div></div>
             </div>
           </div>
+
+          {/* +18 Kategori: Yasal Uyarı & Sıfır Tolerans Politikası */}
+          {(category.id === '18' || category.slug === '18') && (
+            <div className="bg-gray-900 border border-gray-700 rounded-2xl p-5 shadow-sm">
+              <div className="flex items-start gap-3">
+                <div className="text-2xl shrink-0 mt-0.5">⚖️</div>
+                <div className="text-sm text-gray-300 leading-relaxed space-y-2">
+                  <h3 className="text-white font-bold text-base">Sıfır Tolerans Politikası</h3>
+                  <p>
+                    Telegramkanali.com, 5651 sayılı kanun kapsamında <strong className="text-white">&quot;Yer Sağlayıcı&quot;</strong> olarak hizmet vermektedir.
+                    Platformumuzda listelenen tüm kanallar kullanıcı önerileriyle eklenmekte olup, içerikler kanal yöneticilerinin sorumluluğundadır.
+                  </p>
+                  <p className="text-red-400 font-semibold">
+                    Aşağıdaki türde içerik barındıran kanallar, şikayet üzerine veya tarafımızca tespit edildiği anda derhal ve kalıcı olarak kaldırılır:
+                  </p>
+                  <ul className="space-y-1 text-gray-400 ml-1">
+                    <li className="flex items-start gap-2">🚫 <span>Çocuk istismarına yönelik her türlü materyal (TCK m.226/3)</span></li>
+                    <li className="flex items-start gap-2">🚫 <span>Gerçek kişilerin rızası dışında çekilmiş veya paylaşılmış görüntüler (gizli çekim, ifşa vb.) (TCK m.134)</span></li>
+                    <li className="flex items-start gap-2">🚫 <span>Yasadışı materyaller ve yasa dışı faaliyetleri teşvik eden içerikler</span></li>
+                  </ul>
+                  <p className="text-gray-500 text-xs pt-1">
+                    Bu tür içeriklere kesinlikle ve kesinlikle müsamaha gösterilmez. Şikayet ve bildirimlerinizi{' '}
+                    <Link href="/iletisim" className="text-red-400 hover:text-red-300 underline">iletişim sayfamız</Link>{' '}
+                    üzerinden veya <span className="text-white">telegramkanaliiletisim@outlook.com</span> adresine e-posta göndererek iletebilirsiniz.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="grid lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-6 min-w-0 overflow-hidden">
