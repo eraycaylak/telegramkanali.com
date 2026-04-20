@@ -452,28 +452,28 @@ export default async function DynamicPage({
             {/* Main Content */}
             <div className="space-y-6">
               {/* H1 Hero */}
-              <div className="bg-gradient-to-br from-red-700 to-red-900 rounded-2xl p-7 text-white shadow-xl">
+              <div className="bg-gradient-to-br from-blue-600 to-blue-800 rounded-2xl p-7 text-white shadow-xl">
                 <div className="text-4xl mb-3">🔞</div>
                 <h1 className="text-2xl md:text-3xl font-black mb-3">{kw18Page.h1}</h1>
-                <p className="text-red-100 text-base leading-relaxed max-w-2xl">{kw18Page.intro}</p>
+                <p className="text-blue-100 text-base leading-relaxed max-w-2xl">{kw18Page.intro}</p>
                 <div className="mt-5 flex gap-6 text-sm">
                   <div className="text-center">
                     <div className="text-2xl font-black">{kw18Channels.length}</div>
-                    <div className="text-red-200">Aktif Kanal</div>
+                    <div className="text-blue-200">Aktif Kanal</div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-black">✓</div>
-                    <div className="text-red-200">Doğrulandı</div>
+                    <div className="text-blue-200">Doğrulandı</div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-black">2026</div>
-                    <div className="text-red-200">Güncel</div>
+                    <div className="text-blue-200">Güncel</div>
                   </div>
                 </div>
-                <div className="mt-5 pt-4 border-t border-red-600/40 flex items-center gap-2 text-xs text-red-200">
+                <div className="mt-5 pt-4 border-t border-blue-500/40 flex items-center gap-2 text-xs text-blue-200">
                   <span className="shrink-0 font-black text-white bg-red-500/30 px-2 py-0.5 rounded">⚠ SIFIR TOLERANS</span>
                   <span>Çocuk istismarı, gizli çekim/ifşa ve yasadışı içerik barındıran kanallar derhal kaldırılır.</span>
-                  <Link href="/iletisim" className="shrink-0 text-white underline hover:text-red-100 font-bold">Şikayet Et</Link>
+                  <Link href="/iletisim" className="shrink-0 text-white underline hover:text-blue-100 font-bold">Şikayet Et</Link>
                 </div>
               </div>
 
