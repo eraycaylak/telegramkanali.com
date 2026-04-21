@@ -148,7 +148,9 @@ export default function DashboardClient() {
         if (confirm('Bu kanalı silmek istediğinize emin misiniz?')) {
             const res = await deleteChannel(id);
             if (res.success) {
-                fetchData();
+                // Optimistic: remove from local state
+                setChannels(prev => prev.filter(c => c.id !== id));
+                setTotalChannelCount(prev => prev - 1);
             } else {
                 alert('Hata: ' + res.error);
             }
@@ -214,13 +216,36 @@ export default function DashboardClient() {
         if (res.success) {
             alert(editingId ? 'Kanal güncellendi!' : 'Kanal eklendi!');
             setIsModalOpen(false);
+            
+            if (editingId) {
+                // Optimistic: update the edited channel in local state
+                const cat = categories.find(c => c.id === formData.category_id);
+                setChannels(prev => prev.map(c => c.id === editingId ? {
+                    ...c,
+                    name: formData.name,
+                    description: formData.description,
+                    join_link: formData.join_link,
+                    category_id: formData.category_id,
+                    categoryName: cat?.name || c.categoryName,
+                    image: formData.image,
+                    score: formData.score,
+                    owner_id: formData.owner_id,
+                    city: formData.city,
+                    ad_start_date: formData.ad_start_date || null,
+                    ad_end_date: formData.ad_end_date || null,
+                    ad_type: formData.ad_type,
+                    ad_notes: formData.ad_notes,
+                } as Channel : c));
+            } else {
+                // New channel added — refetch to get the new ID and full data
+                fetchData(true);
+            }
+            
             setFormData({
                 name: '', description: '', join_link: '', category_id: '', image: '', score: 0, owner_id: '', city: '',
                 ad_start_date: '', ad_end_date: '', ad_type: '', ad_notes: ''
             });
             setEditingId(null);
-            // Preserve allLoaded state — don't reset to 200 channels after edit
-            fetchData(true);
         } else {
             alert('Hata: ' + res.error);
         }
@@ -257,16 +282,20 @@ export default function DashboardClient() {
     const handleApprove = async (id: string) => {
         if (confirm('Bu kanalı onaylamak istiyor musunuz?')) {
             const res = await approveChannel(id);
-            if (res.success) fetchData();
-            else alert(res.error);
+            if (res.success) {
+                // Optimistic: update status locally
+                setChannels(prev => prev.map(c => c.id === id ? { ...c, status: 'approved' } as Channel : c));
+            } else alert(res.error);
         }
     };
 
     const handleReject = async (id: string) => {
         if (confirm('Bu kanalı reddetmek istiyor musunuz?')) {
             const res = await rejectChannel(id);
-            if (res.success) fetchData();
-            else alert(res.error);
+            if (res.success) {
+                // Optimistic: update status locally
+                setChannels(prev => prev.map(c => c.id === id ? { ...c, status: 'rejected' } as Channel : c));
+            } else alert(res.error);
         }
     };
 
@@ -612,8 +641,11 @@ export default function DashboardClient() {
                                                         setSyncingIds(prev => { const next = new Set(prev); next.delete(channel.id); return next; });
                                                         if (res.error) alert(res.error);
                                                         else {
-                                                            alert('Kanal güncellendi!');
-                                                            fetchData(true);
+                                                            // Optimistic: fetch only the updated channel
+                                                            const { data: updated } = await supabase.from('channels').select('*, categories(name)').eq('id', channel.id).single();
+                                                            if (updated) {
+                                                                setChannels(prev => prev.map(c => c.id === channel.id ? { ...updated, categoryName: updated.categories?.name } as Channel : c));
+                                                            }
                                                         }
                                                     }}
                                                     disabled={syncingIds.has(channel.id)}
@@ -712,7 +744,13 @@ export default function DashboardClient() {
                                                     const res = await syncChannelFromTelegram(channel.id);
                                                     setSyncingIds(prev => { const next = new Set(prev); next.delete(channel.id); return next; });
                                                     if (res.error) alert(res.error);
-                                                    else fetchData(true);
+                                                    else {
+                                                        // Optimistic: fetch only the updated channel
+                                                        const { data: updated } = await supabase.from('channels').select('*, categories(name)').eq('id', channel.id).single();
+                                                        if (updated) {
+                                                            setChannels(prev => prev.map(c => c.id === channel.id ? { ...updated, categoryName: updated.categories?.name } as Channel : c));
+                                                        }
+                                                    }
                                                 }}
                                                 disabled={syncingIds.has(channel.id)}
                                                 className="p-2.5 text-green-600 bg-green-50 rounded-xl transition disabled:opacity-50"
