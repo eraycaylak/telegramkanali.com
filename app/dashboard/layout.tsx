@@ -5,45 +5,62 @@ import { usePathname } from 'next/navigation';
 import {
     LayoutDashboard,
     Tv,
-    Settings,
-    PieChart,
+    TrendingUp,
+    Tag,
+    BarChart2,
     LogOut,
     Menu,
     X,
-    TrendingUp,
     MessageCircle,
-    Zap,
     ChevronRight,
-    Phone,
-    DollarSign,
     PlusCircle,
+    Zap,
 } from 'lucide-react';
 import { useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 
 interface DashboardLayoutProps {
     children: React.ReactNode;
-    balance?: number;
 }
 
-const menuItems = [
-    { name: 'Genel Bakış', href: '/dashboard', icon: LayoutDashboard, desc: 'Özet ve istatistikler' },
-    { name: 'Kanallarım', href: '/dashboard/channels', icon: Tv, desc: 'Kanal yönetimi' },
-    { name: 'Kanal Ekle', href: '/dashboard/kanal-ekle', icon: PlusCircle, desc: 'Yeni kanal başvurusu' },
-    { name: 'Reklamlarım', href: '/dashboard/ads', icon: TrendingUp, desc: 'Kampanya yönetimi' },
-    { name: 'Kanalımı Sat', href: '/dashboard/kanal-sat', icon: DollarSign, desc: 'Kanal alım-satım ilanları' },
-    { name: 'Mesajlarım', href: '/dashboard/mesajlar', icon: MessageCircle, desc: 'Alım-satım sohbetleri' },
-    { name: 'Bot Ayarları', href: '/dashboard/bot', icon: Settings, desc: 'Telegram bot entegrasyonu' },
-    { name: 'İstatistikler', href: '/dashboard/stats', icon: PieChart, desc: 'Kanal analizleri' },
+const NAV_ITEMS = [
+    {
+        group: 'ANA',
+        items: [
+            { name: 'Genel Bakış', href: '/dashboard', icon: LayoutDashboard },
+        ],
+    },
+    {
+        group: 'KANALLAR',
+        items: [
+            { name: 'Kanallarım', href: '/dashboard/channels', icon: Tv },
+            { name: 'Kanal Ekle', href: '/dashboard/kanal-ekle', icon: PlusCircle },
+        ],
+    },
+    {
+        group: 'REKLAMLAR',
+        items: [
+            { name: 'Reklamlarım', href: '/dashboard/ads', icon: TrendingUp },
+        ],
+    },
+    {
+        group: 'MARKETPLACE',
+        items: [
+            { name: 'İlanlarım', href: '/dashboard/kanal-sat', icon: Tag },
+        ],
+    },
+    {
+        group: 'ANALİTİK',
+        items: [
+            { name: 'İstatistikler', href: '/dashboard/stats', icon: BarChart2 },
+        ],
+    },
 ];
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
     const pathname = usePathname();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
     const [isLoggingOut, setIsLoggingOut] = useState(false);
-
-    const currentPage = menuItems.find(i => i.href === pathname);
 
     const handleLogout = async () => {
         setIsLoggingOut(true);
@@ -51,169 +68,186 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         window.location.href = '/';
     };
 
-    return (
-        <div className="min-h-screen bg-slate-950 flex">
-            {/* Mobile Toggle */}
-            <button
-                className="lg:hidden fixed bottom-6 right-6 z-50 bg-violet-600 text-white p-4 rounded-full shadow-2xl shadow-violet-900/50 border border-violet-500/30"
-                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            >
-                {isSidebarOpen ? <X size={22} /> : <Menu size={22} />}
-            </button>
+    const currentItem = NAV_ITEMS.flatMap(g => g.items).find(i =>
+        i.href === pathname || (i.href !== '/dashboard' && pathname.startsWith(i.href))
+    );
 
-            {/* Overlay */}
+    return (
+        <div
+            className="min-h-screen flex"
+            style={{ background: '#F1F5F9', fontFamily: "'Inter', 'system-ui', sans-serif" }}
+        >
+            {/* ── Mobile Overlay ── */}
             {isSidebarOpen && (
                 <div
-                    className="lg:hidden fixed inset-0 bg-black/60 z-30 backdrop-blur-sm"
+                    className="lg:hidden fixed inset-0 z-30 bg-black/50 backdrop-blur-sm"
                     onClick={() => setIsSidebarOpen(false)}
                 />
             )}
 
-            {/* Sidebar */}
-            <aside className={`
-                fixed inset-y-0 left-0 z-40 w-72 bg-slate-900 border-r border-slate-800/60 
-                transform transition-transform duration-300 ease-in-out 
-                lg:translate-x-0 lg:static lg:inset-0 flex flex-col
-                ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-            `}>
+            {/* ── Sidebar ── */}
+            <aside
+                className={`
+                    fixed inset-y-0 left-0 z-40 w-64 flex flex-col
+                    transform transition-transform duration-300 ease-in-out
+                    lg:translate-x-0 lg:static lg:inset-0
+                    ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+                `}
+                style={{ background: '#0F172A' }}
+            >
                 {/* Logo */}
-                <div className="p-6 border-b border-slate-800/60">
-                    <Link href="/" className="flex items-center gap-3 group">
-                        <div className="w-9 h-9 bg-gradient-to-br from-violet-600 to-purple-700 rounded-xl flex items-center justify-center text-white font-black shadow-lg shadow-violet-900/40">
-                            T
-                        </div>
-                        <div>
-                            <div className="font-black text-white text-sm tracking-tight">Telegram Kanalları</div>
-                            <div className="text-[10px] text-slate-400 font-medium">Reklam Paneli</div>
-                        </div>
-                    </Link>
+                <div className="flex items-center gap-3 px-5 h-16 border-b" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
+                    <div
+                        className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-black text-sm shadow-lg flex-shrink-0"
+                        style={{ background: 'linear-gradient(135deg, #2563EB, #1D4ED8)' }}
+                    >
+                        T
+                    </div>
+                    <div>
+                        <div className="text-white font-bold text-sm leading-tight">TelegramKanali</div>
+                        <div className="text-xs" style={{ color: '#64748B' }}>Reklam Paneli</div>
+                    </div>
+                    <button
+                        className="ml-auto lg:hidden text-slate-400 hover:text-white transition-colors"
+                        onClick={() => setIsSidebarOpen(false)}
+                    >
+                        <X size={18} />
+                    </button>
                 </div>
 
                 {/* Nav */}
-                <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-                    {menuItems.map((item) => {
-                        const active = pathname === item.href;
-                        return (
-                            <Link
-                                key={item.href}
-                                href={item.href}
-                                onClick={() => setIsSidebarOpen(false)}
-                                className={`
-                                    relative flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all group
-                                    ${active
-                                        ? 'bg-violet-600 text-white shadow-lg shadow-violet-900/40'
-                                        : 'text-slate-400 hover:bg-slate-800 hover:text-white'
-                                    }
-                                `}
+                <nav className="flex-1 px-3 py-4 overflow-y-auto space-y-5">
+                    {NAV_ITEMS.map(group => (
+                        <div key={group.group}>
+                            <div
+                                className="px-3 mb-1 text-[10px] font-bold tracking-widest uppercase"
+                                style={{ color: '#334155' }}
                             >
-                                <item.icon size={18} className={active ? 'text-white' : 'text-slate-500 group-hover:text-violet-400 transition-colors'} />
-                                <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-2">
-                                        <span>{item.name}</span>
-                                    </div>
-                                    {!active && (
-                                        <div className="text-[10px] text-slate-500 font-normal truncate mt-0.5 group-hover:text-slate-400 transition-colors">
-                                            {item.desc}
-                                        </div>
-                                    )}
-                                </div>
-                                {active && <ChevronRight size={14} className="text-white/60 shrink-0" />}
-                            </Link>
-                        );
-                    })}
-
-                    {/* Reklam Ver CTA */}
-                    <div className="pt-4 mt-4 border-t border-slate-800/60">
-                        <Link
-                            href="/reklam"
-                            className="flex items-center gap-3 px-4 py-3 rounded-xl bg-gradient-to-r from-violet-600/20 to-purple-600/20 border border-violet-500/20 text-violet-300 hover:border-violet-500/40 hover:text-violet-200 transition-all group"
-                        >
-                            <Zap size={18} className="text-violet-400" />
-                            <div className="flex-1 min-w-0">
-                                <div className="text-sm font-bold">Reklam Ver</div>
-                                <div className="text-[10px] text-violet-400/70 font-normal">290K+ aylık görüntülenme</div>
+                                {group.group}
                             </div>
-                            <ChevronRight size={14} className="text-violet-400/50 group-hover:text-violet-400 transition-colors" />
-                        </Link>
-                    </div>
+                            {group.items.map(item => {
+                                const active = item.href === '/dashboard'
+                                    ? pathname === '/dashboard'
+                                    : pathname === item.href || pathname.startsWith(item.href + '/');
+                                return (
+                                    <Link
+                                        key={item.href}
+                                        href={item.href}
+                                        onClick={() => setIsSidebarOpen(false)}
+                                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all mb-0.5"
+                                        style={active
+                                            ? { background: '#2563EB', color: '#FFFFFF' }
+                                            : { color: '#94A3B8' }
+                                        }
+                                        onMouseEnter={e => {
+                                            if (!active) (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.05)';
+                                        }}
+                                        onMouseLeave={e => {
+                                            if (!active) (e.currentTarget as HTMLElement).style.background = 'transparent';
+                                        }}
+                                    >
+                                        <item.icon size={17} />
+                                        <span>{item.name}</span>
+                                        {active && <ChevronRight size={14} className="ml-auto opacity-60" />}
+                                    </Link>
+                                );
+                            })}
+                        </div>
+                    ))}
                 </nav>
 
-                {/* İletişim & Çıkış */}
-                <div className="p-4 border-t border-slate-800/60 space-y-2">
-                    {/* Destek Butonu */}
+                {/* Bottom */}
+                <div className="px-3 py-4 space-y-1 border-t" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
+                    {/* Reklam Ver */}
+                    <Link
+                        href="/reklam"
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all mb-2"
+                        style={{ background: 'rgba(37,99,235,0.15)', color: '#93C5FD', border: '1px solid rgba(37,99,235,0.25)' }}
+                    >
+                        <Zap size={16} />
+                        <div className="flex-1 min-w-0">
+                            <div className="text-xs font-bold">Reklam Ver</div>
+                            <div className="text-[10px]" style={{ color: '#60A5FA', opacity: 0.7 }}>290K+ görüntülenme</div>
+                        </div>
+                    </Link>
+
+                    {/* Destek */}
                     <a
                         href="https://t.me/comtelegramkanali"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-3 px-4 py-3 rounded-xl bg-sky-500/10 border border-sky-500/20 text-sky-400 hover:bg-sky-500/20 hover:border-sky-500/30 transition-all w-full"
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all"
+                        style={{ color: '#64748B' }}
+                        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#94A3B8'; (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.04)'; }}
+                        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = '#64748B'; (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
                     >
-                        <Phone size={16} className="text-sky-400" />
-                        <div className="flex-1 min-w-0">
-                            <div className="text-xs font-bold">Destek & İletişim</div>
-                            <div className="text-[10px] text-sky-400/70">@comtelegramkanali · 7/24</div>
-                        </div>
-                        <MessageCircle size={14} className="text-sky-400/60" />
+                        <MessageCircle size={16} />
+                        <span>Destek</span>
                     </a>
 
+                    {/* Çıkış */}
                     <button
                         onClick={handleLogout}
                         disabled={isLoggingOut}
-                        className="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-sm font-semibold text-slate-500 hover:bg-red-900/20 hover:text-red-400 transition-all disabled:opacity-50"
+                        className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all disabled:opacity-50"
+                        style={{ color: '#64748B' }}
+                        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#F87171'; (e.currentTarget as HTMLElement).style.background = 'rgba(239,68,68,0.08)'; }}
+                        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = '#64748B'; (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
                     >
-                        <LogOut size={18} className={isLoggingOut ? 'animate-spin' : ''} />
-                        {isLoggingOut ? 'Çıkış yapılıyor...' : 'Çıkış Yap'}
+                        <LogOut size={16} className={isLoggingOut ? 'animate-spin' : ''} />
+                        <span>{isLoggingOut ? 'Çıkış yapılıyor...' : 'Çıkış Yap'}</span>
                     </button>
                 </div>
             </aside>
 
-            {/* Main */}
-            <main className="flex-1 flex flex-col min-w-0 overflow-hidden bg-slate-950">
-                {/* Top Header */}
-                <header className="h-16 bg-slate-900/80 border-b border-slate-800/60 backdrop-blur-sm flex items-center justify-between px-4 md:px-8 shrink-0 sticky top-0 z-20">
+            {/* ── Main Area ── */}
+            <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+
+                {/* Top Bar */}
+                <header
+                    className="h-16 flex items-center justify-between px-4 md:px-6 sticky top-0 z-20 border-b"
+                    style={{ background: '#FFFFFF', borderColor: '#E2E8F0' }}
+                >
                     <div className="flex items-center gap-3">
                         <button
-                            className="lg:hidden p-2 text-slate-400 hover:text-white transition-colors"
+                            className="lg:hidden p-2 rounded-lg transition-colors"
+                            style={{ color: '#64748B' }}
                             onClick={() => setIsSidebarOpen(true)}
                         >
                             <Menu size={20} />
                         </button>
                         <div>
-                            <h1 className="text-sm font-bold text-white">
-                                {currentPage?.name || 'Dashboard'}
+                            <h1 className="text-sm font-semibold" style={{ color: '#0F172A' }}>
+                                {currentItem?.name || 'Dashboard'}
                             </h1>
-                            {currentPage?.desc && (
-                                <p className="text-[11px] text-slate-500 hidden sm:block">{currentPage.desc}</p>
-                            )}
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-2 md:gap-3">
-                        {/* Quick Support */}
-                        <a
-                            href="https://t.me/comtelegramkanali"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="hidden md:flex items-center gap-2 text-xs font-bold text-sky-400 bg-sky-400/10 px-3 py-2 rounded-lg border border-sky-400/20 hover:bg-sky-400/20 transition-all"
-                        >
-                            <MessageCircle size={14} />
-                            Destek
-                        </a>
-
+                    <div className="flex items-center gap-2">
                         <Link
                             href="/dashboard/kanal-ekle"
-                            className="flex items-center gap-1.5 text-xs font-bold text-white bg-violet-600 px-3 py-2 rounded-lg hover:bg-violet-700 transition-all shadow-lg shadow-violet-900/30"
+                            className="hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold text-white transition-all shadow-sm"
+                            style={{ background: '#2563EB' }}
+                        >
+                            <PlusCircle size={14} />
+                            Kanal Ekle
+                        </Link>
+                        <Link
+                            href="/dashboard/ads"
+                            className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition-all border"
+                            style={{ color: '#2563EB', borderColor: '#BFDBFE', background: '#EFF6FF' }}
                         >
                             <Zap size={14} />
-                            <span className="hidden sm:inline">Kanal Ekle</span>
+                            <span className="hidden sm:inline">Reklam Oluştur</span>
                         </Link>
                     </div>
                 </header>
 
                 {/* Content */}
-                <div className="flex-1 overflow-y-auto p-4 md:p-8">
+                <main className="flex-1 overflow-y-auto p-4 md:p-6">
                     {children}
-                </div>
-            </main>
+                </main>
+            </div>
         </div>
     );
 }

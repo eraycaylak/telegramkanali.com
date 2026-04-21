@@ -1,96 +1,133 @@
 'use client';
 
-import {
-    Tv, ExternalLink, Settings, PlusCircle,
-    RefreshCw, Clock, CheckCircle2, AlertCircle
-} from 'lucide-react';
 import Link from 'next/link';
+import { Tv, Users, PlusCircle, CheckCircle2, Clock, XCircle, ExternalLink } from 'lucide-react';
 
-export default function MyChannelsClient({ channels }: { channels: any[] }) {
-    const getStatusBadge = (status: string) => {
-        switch (status) {
-            case 'approved': return <span className="flex items-center gap-1.5 px-3 py-1 bg-green-50 text-green-600 rounded-full text-[10px] font-bold uppercase"><CheckCircle2 size={12} /> Onaylı</span>;
-            case 'rejected': return <span className="flex items-center gap-1.5 px-3 py-1 bg-red-50 text-red-600 rounded-full text-[10px] font-bold uppercase"><AlertCircle size={12} /> Reddedildi</span>;
-            default: return <span className="flex items-center gap-1.5 px-3 py-1 bg-orange-50 text-orange-600 rounded-full text-[10px] font-bold uppercase"><Clock size={12} /> Bekliyor</span>;
-        }
-    };
+type Channel = {
+    id: string;
+    name: string;
+    slug: string;
+    description?: string;
+    member_count?: number;
+    status: 'pending' | 'approved' | 'rejected';
+    join_link?: string;
+    created_at: string;
+};
+
+const STATUS: Record<string, { label: string; color: string; bg: string; icon: any }> = {
+    approved: { label: 'Yayında', color: '#059669', bg: '#ECFDF5', icon: CheckCircle2 },
+    pending:  { label: 'Onay Bekliyor', color: '#D97706', bg: '#FFFBEB', icon: Clock },
+    rejected: { label: 'Reddedildi', color: '#DC2626', bg: '#FEF2F2', icon: XCircle },
+};
+
+const CARD = { background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '16px', padding: '20px' };
+
+export default function MyChannelsClient({ channels }: { channels: Channel[] }) {
+    if (channels.length === 0) {
+        return (
+            <div className="max-w-2xl mx-auto text-center" style={{ ...CARD, padding: '64px 32px' }}>
+                <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5" style={{ background: '#EFF6FF' }}>
+                    <Tv size={28} style={{ color: '#2563EB' }} />
+                </div>
+                <h3 className="text-lg font-bold mb-2" style={{ color: '#0F172A' }}>Henüz kanalınız yok</h3>
+                <p className="text-sm mb-6" style={{ color: '#64748B' }}>
+                    Telegram kanalınızı ekleyin ve 290K+ aylık ziyaretçiye ulaşın.
+                </p>
+                <Link
+                    href="/dashboard/kanal-ekle"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white transition-all shadow-sm"
+                    style={{ background: '#2563EB' }}
+                >
+                    <PlusCircle size={16} /> İlk Kanalımı Ekle
+                </Link>
+            </div>
+        );
+    }
 
     return (
-        <div className="space-y-8">
+        <div className="space-y-4 max-w-4xl">
+            {/* Header */}
             <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold text-gray-900">Kanallarım ({channels.length})</h2>
-                <Link href="/dashboard/kanal-ekle" className="bg-blue-600 text-white px-5 py-2.5 rounded-xl font-bold hover:bg-blue-700 transition flex items-center gap-2 text-sm shadow-lg shadow-blue-100">
-                    <PlusCircle size={18} /> Yeni Kanal Ekle
+                <div>
+                    <h2 className="text-lg font-bold" style={{ color: '#0F172A' }}>Kanallarım</h2>
+                    <p className="text-sm mt-0.5" style={{ color: '#64748B' }}>{channels.length} kanal kayıtlı</p>
+                </div>
+                <Link
+                    href="/dashboard/kanal-ekle"
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white shadow-sm transition-all"
+                    style={{ background: '#2563EB' }}
+                >
+                    <PlusCircle size={15} /> Kanal Ekle
                 </Link>
             </div>
 
-            {channels.length === 0 ? (
-                <div className="bg-white border-2 border-dashed border-gray-200 rounded-3xl p-16 text-center">
-                    <div className="bg-gray-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 text-gray-300">
-                        <Tv size={40} />
-                    </div>
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">Henüz kanalınız yok</h3>
-                    <p className="text-gray-500 mb-8 max-w-sm mx-auto">Sisteme kanalınızı ekleyerek analizlerini takip etmeye başlayın.</p>
-                    <Link href="/dashboard/kanal-ekle" className="inline-block bg-blue-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-blue-700 transition">
-                        Kanalımı Ekle
-                    </Link>
-                </div>
-            ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {channels.map((channel) => (
-                        <div key={channel.id} className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm relative overflow-hidden group">
-                            <div className="flex items-start gap-4">
-                                <div className="relative">
-                                    {channel.image ? (
-                                        <img src={channel.image} alt="" className="w-16 h-16 rounded-2xl object-cover border border-gray-100" />
-                                    ) : (
-                                        <div className="w-16 h-16 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-400 font-bold border border-gray-100">
-                                            {channel.name.charAt(0)}
-                                        </div>
-                                    )}
-                                    {channel.bot_enabled && (
-                                        <div className="absolute -bottom-1 -right-1 bg-blue-600 text-white p-1 rounded-lg shadow-lg border-2 border-white" title="Bot Aktif">
-                                            <RefreshCw size={10} />
-                                        </div>
-                                    )}
+            {/* Channel List */}
+            <div className="space-y-3">
+                {channels.map(ch => {
+                    const st = STATUS[ch.status] || STATUS.pending;
+                    const StIcon = st.icon;
+                    return (
+                        <div key={ch.id} style={CARD} className="flex items-center gap-4">
+                            {/* Avatar */}
+                            <div
+                                className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 font-bold text-lg"
+                                style={{ background: '#EFF6FF', color: '#2563EB' }}
+                            >
+                                {ch.name.charAt(0).toUpperCase()}
+                            </div>
+
+                            {/* Info */}
+                            <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                    <h3 className="font-semibold text-sm truncate" style={{ color: '#0F172A' }}>{ch.name}</h3>
+                                    <span
+                                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold"
+                                        style={{ background: st.bg, color: st.color }}
+                                    >
+                                        <StIcon size={11} />
+                                        {st.label}
+                                    </span>
                                 </div>
-                                <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-2 mb-1">
-                                        <h3 className="font-bold text-gray-900 truncate">{channel.name}</h3>
-                                        {getStatusBadge(channel.status)}
-                                    </div>
-                                    <p className="text-gray-500 text-[13px] line-clamp-1 mb-3">@{channel.join_link?.split('/').pop()}</p>
-                                    <div className="flex items-center gap-6">
-                                        <div className="flex flex-col">
-                                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">ÜYELER</span>
-                                            <span className="text-sm font-extrabold text-gray-900">{(channel.member_count || 0).toLocaleString()}</span>
-                                        </div>
-                                        <div className="flex flex-col">
-                                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">BOT DURUMU</span>
-                                            <span className={`text-sm font-extrabold ${channel.bot_enabled ? 'text-blue-600' : 'text-gray-400'}`}>
-                                                {channel.bot_enabled ? 'Aktif' : 'Devre Dışı'}
-                                            </span>
-                                        </div>
-                                    </div>
+                                <div className="flex items-center gap-4 mt-1">
+                                    {ch.member_count != null && (
+                                        <span className="flex items-center gap-1 text-xs" style={{ color: '#64748B' }}>
+                                            <Users size={12} /> {ch.member_count.toLocaleString('tr-TR')} üye
+                                        </span>
+                                    )}
+                                    <span className="text-xs" style={{ color: '#94A3B8' }}>
+                                        {new Date(ch.created_at).toLocaleDateString('tr-TR')}
+                                    </span>
                                 </div>
                             </div>
-                            <div className="mt-6 pt-6 border-t border-gray-50 flex items-center justify-between">
-                                <Link href={`/${channel.slug}`} target="_blank" className="text-xs font-bold text-gray-400 hover:text-blue-600 flex items-center gap-1 transition">
-                                    Sitede Gör <ExternalLink size={12} />
-                                </Link>
-                                <div className="flex items-center gap-2">
-                                    <Link href={`/dashboard/bot?channel=${channel.id}`} className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition">
-                                        <Settings size={18} />
+
+                            {/* Actions */}
+                            <div className="flex items-center gap-2 shrink-0">
+                                {ch.status === 'approved' && ch.slug && (
+                                    <Link
+                                        href={`/${ch.slug}`}
+                                        target="_blank"
+                                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+                                        style={{ color: '#2563EB', background: '#EFF6FF', border: '1px solid #BFDBFE' }}
+                                    >
+                                        <ExternalLink size={12} /> Görüntüle
                                     </Link>
-                                    <Link href={`/dashboard/stats?channel=${channel.id}`} className="bg-gray-50 text-gray-600 px-4 py-2 rounded-xl text-xs font-bold hover:bg-gray-100 transition">
-                                        Analizler
-                                    </Link>
-                                </div>
+                                )}
+                                {ch.join_link && (
+                                    <a
+                                        href={ch.join_link.startsWith('http') ? ch.join_link : `https://t.me/${ch.join_link.replace('@', '')}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+                                        style={{ color: '#64748B', background: '#F8FAFC', border: '1px solid #E2E8F0' }}
+                                    >
+                                        Telegram
+                                    </a>
+                                )}
                             </div>
                         </div>
-                    ))}
-                </div>
-            )}
+                    );
+                })}
+            </div>
         </div>
     );
 }

@@ -1,42 +1,19 @@
-// Server Component — tüm veriler sunucu tarafında çekiliyor, RLS sorun yok
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
+import { getServerUser } from '@/lib/auth-server';
 import { getAdminClient } from '@/lib/supabaseAdmin';
 import DashboardOverviewClient from './DashboardOverviewClient';
 
 export default async function DashboardOverview() {
-    const cookieStore = await cookies();
-    const supabase = createServerClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        {
-            cookies: {
-                get(name: string) {
-                    return cookieStore.get(name)?.value;
-                },
-            },
-        }
-    );
-
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await getServerUser();
     if (!user) redirect('/login');
 
-    const adminClient = getAdminClient();
+    const db = getAdminClient();
 
-    // Paralel veri çekimi
-    const [profileRes, channelsRes, activeCampaignsRes, pendingCampaignsRes, totalViewsRes] = await Promise.all([
-        adminClient.from('profiles').select('token_balance').eq('id', user.id).single(),
-        adminClient.from('channels').select('member_count').eq('owner_id', user.id),
-        adminClient.from('ad_campaigns')
-            .select('*', { count: 'exact', head: true })
-            .eq('user_id', user.id).eq('status', 'active'),
-        adminClient.from('ad_campaigns')
-            .select('*', { count: 'exact', head: true })
-            .eq('user_id', user.id).eq('status', 'pending'),
-        adminClient.from('ad_campaigns')
-            .select('current_views')
-            .eq('user_id', user.id),
+    const [channelsRes, activeAdsRes, pendingAdsRes, totalViewsRes] = await Promise.all([
+        db.from('channels').select('member_count').eq('owner_id', user.id),
+        db.from('ad_campaigns').select('*', { count: 'exact', head: true }).eq('user_id', user.id).eq('status', 'active'),
+        db.from('ad_campaigns').select('*', { count: 'exact', head: true }).eq('user_id', user.id).eq('status', 'pending'),
+        db.from('ad_campaigns').select('current_views').eq('user_id', user.id),
     ]);
 
     const channelCount = channelsRes.data?.length || 0;
@@ -45,11 +22,11 @@ export default async function DashboardOverview() {
 
     return (
         <DashboardOverviewClient
+            userName={user.email?.split('@')[0] || 'Kullanıcı'}
             channels={channelCount}
-            balance={profileRes.data?.token_balance || 0}
             totalMembers={totalMembers}
-            activeAds={activeCampaignsRes.count || 0}
-            pendingAds={pendingCampaignsRes.count || 0}
+            activeAds={activeAdsRes.count || 0}
+            pendingAds={pendingAdsRes.count || 0}
             totalViews={totalViews}
         />
     );
