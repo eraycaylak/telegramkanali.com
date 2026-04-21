@@ -172,10 +172,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     </Link>
 
                     {/* Destek */}
-                    <a
-                        href="https://t.me/comtelegramkanali"
-                        target="_blank"
-                        rel="noopener noreferrer"
+                    <Link
+                        href="/dashboard/kanal-ekle"
+                        onClick={() => setIsSidebarOpen(false)}
                         className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all"
                         style={{ color: '#64748B' }}
                         onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#94A3B8'; (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.04)'; }}
@@ -183,7 +182,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     >
                         <MessageCircle size={16} />
                         <span>Destek</span>
-                    </a>
+                    </Link>
 
                     {/* Çıkış */}
                     <button
@@ -233,7 +232,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                             Kanal Ekle
                         </Link>
                         <Link
-                            href="/dashboard/ads"
+                            href="/dashboard/kanal-ekle"
                             className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition-all border"
                             style={{ color: '#2563EB', borderColor: '#BFDBFE', background: '#EFF6FF' }}
                         >

@@ -1,344 +1,194 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { getUserCampaigns, getAdPricing, createAdCampaign, toggleCampaignStatus, deleteAdCampaign } from '@/app/actions/tokens';
-import { getMyChannels } from '@/app/actions/channels';
+import { getUserCampaigns, toggleCampaignStatus, deleteAdCampaign } from '@/app/actions/tokens';
+import Link from 'next/link';
 import {
-    TrendingUp,
-    Eye,
-    CheckCircle2,
-    Clock,
-    PauseCircle,
-    XCircle,
-    PlusCircle,
-    Zap,
-    Image as ImageIcon,
-    Film,
-    Trash2
+    TrendingUp, Eye, CheckCircle2, Clock,
+    PauseCircle, XCircle, PlusCircle, Zap, Trash2
 } from 'lucide-react';
 
-const AD_TYPE_LABELS: Record<string, { label: string; icon: any; color: string; bg: string }> = {
-    featured: { label: 'Öne Çıkarma', icon: Zap, color: 'text-purple-600', bg: 'bg-purple-50' },
-    banner: { label: 'Banner', icon: ImageIcon, color: 'text-blue-600', bg: 'bg-blue-50' },
-    story: { label: 'Hikaye', icon: Film, color: 'text-orange-600', bg: 'bg-orange-50' },
+const STATUS_LABELS: Record<string, { label: string; icon: any; color: string; bg: string }> = {
+    pending:   { label: 'Beklemede',    icon: Clock,         color: '#92400E', bg: '#FFFBEB' },
+    active:    { label: 'Aktif',        icon: TrendingUp,    color: '#065F46', bg: '#ECFDF5' },
+    completed: { label: 'Tamamlandı',  icon: CheckCircle2,  color: '#1E40AF', bg: '#EFF6FF' },
+    paused:    { label: 'Duraklatıldı', icon: PauseCircle,  color: '#92400E', bg: '#FFFBEB' },
+    cancelled: { label: 'İptal',       icon: XCircle,       color: '#991B1B', bg: '#FEF2F2' },
 };
 
-const STATUS_LABELS: Record<string, { label: string; icon: any; color: string }> = {
-    pending: { label: 'Beklemede', icon: Clock, color: 'text-gray-600' },
-    active: { label: 'Aktif', icon: TrendingUp, color: 'text-green-600' },
-    completed: { label: 'Tamamlandı', icon: CheckCircle2, color: 'text-blue-600' },
-    paused: { label: 'Duraklatıldı', icon: PauseCircle, color: 'text-yellow-600' },
-    cancelled: { label: 'İptal Edildi', icon: XCircle, color: 'text-red-600' },
-};
+const CARD = { background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '16px', padding: '20px' };
 
 export default function AdsPage() {
     const [campaigns, setCampaigns] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
-    const [showNewAd, setShowNewAd] = useState(false);
-    const [channels, setChannels] = useState<any[]>([]);
-    const [selectedChannel, setSelectedChannel] = useState('');
-    const [selectedAdType, setSelectedAdType] = useState<'featured' | 'banner' | 'story'>('featured');
-    const [pricing, setPricing] = useState<any[]>([]);
-    const [selectedPricing, setSelectedPricing] = useState('');
-    const [creating, setCreating] = useState(false);
-    const [message, setMessage] = useState('');
     const [togglingId, setTogglingId] = useState<string | null>(null);
+    const [message, setMessage] = useState('');
 
-    useEffect(() => {
-        loadData();
-    }, []);
-
-    useEffect(() => {
-        loadPricing();
-    }, [selectedAdType]);
+    useEffect(() => { loadData(); }, []);
 
     async function loadData() {
         try {
-            const [campaignsData, channelsResult] = await Promise.all([
-                getUserCampaigns(),
-                getMyChannels(),
-            ]);
-            setCampaigns(campaignsData);
-            setChannels(channelsResult.channels || []);
-        } catch (error) {
-            console.error('Error loading ads data:', error);
+            const data = await getUserCampaigns();
+            setCampaigns(data);
+        } catch (e) {
+            console.error(e);
         } finally {
             setLoading(false);
         }
     }
 
-    async function loadPricing() {
-        const data = await getAdPricing(selectedAdType);
-        setPricing(data);
-        setSelectedPricing('');
-    }
-
-    async function handleCreateCampaign() {
-        if (!selectedChannel || !selectedPricing) {
-            setMessage('Lütfen kanal ve paket seçin.');
-            return;
-        }
-
-        setCreating(true);
-        setMessage('');
-
-        const result = await createAdCampaign({
-            channelId: selectedChannel,
-            adType: selectedAdType,
-            pricingId: selectedPricing,
-        });
-
-        if (result.error) {
-            setMessage(result.error);
-        } else {
-            setMessage('Reklam kampanyası başarıyla oluşturuldu! 🎉');
-            setShowNewAd(false);
-            setSelectedChannel('');
-            setSelectedPricing('');
-            loadData();
-        }
-
-        setCreating(false);
-    }
-
-    async function handleToggleStatus(campaignId: string) {
-        setTogglingId(campaignId);
-        const result = await toggleCampaignStatus(campaignId);
-        if (result.error) {
-            setMessage(result.error);
-        } else {
-            setMessage('Kampanya durumu güncellendi.');
-            loadData();
-        }
+    async function handleToggle(id: string) {
+        setTogglingId(id);
+        const r = await toggleCampaignStatus(id);
+        if (r.error) setMessage(r.error);
+        else { setMessage('Kampanya durumu güncellendi.'); loadData(); }
         setTogglingId(null);
     }
 
-    async function handleDeleteCampaign(campaignId: string) {
-        if (!window.confirm('Bu kampanyayı silmek istediğinize emin misiniz? Beklemede olan kampanyaların jetonları iade edilir.')) return;
-
-        setTogglingId(campaignId);
-        const result = await deleteAdCampaign(campaignId);
-        if (result.error) {
-            setMessage(result.error);
-        } else {
-            setMessage('Kampanya silindi ve varsa jeton iadesi yapıldı.');
-            loadData();
-        }
+    async function handleDelete(id: string) {
+        if (!window.confirm('Bu kampanyayı silmek istediğinize emin misiniz?')) return;
+        setTogglingId(id);
+        const r = await deleteAdCampaign(id);
+        if (r.error) setMessage(r.error);
+        else { setMessage('Kampanya silindi.'); loadData(); }
         setTogglingId(null);
     }
 
     if (loading) {
         return (
-            <div className="space-y-6 animate-pulse">
-                {[1, 2, 3].map(i => <div key={i} className="h-24 bg-gray-100 rounded-2xl"></div>)}
+            <div className="space-y-3 max-w-4xl">
+                {[1, 2, 3].map(i => <div key={i} className="h-24 rounded-2xl animate-pulse" style={{ background: '#F1F5F9' }} />)}
             </div>
         );
     }
 
     return (
-        <div className="space-y-8">
+        <div className="space-y-5 max-w-4xl">
+
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h2 className="text-2xl font-bold text-gray-900">Reklamlarım</h2>
-                    <p className="text-gray-500 text-sm mt-1">Gösterim bazlı reklam kampanyalarınızı yönetin</p>
+                    <h2 className="text-lg font-bold" style={{ color: '#0F172A' }}>Reklamlarım</h2>
+                    <p className="text-sm mt-0.5" style={{ color: '#64748B' }}>Mevcut reklam kampanyalarınız</p>
                 </div>
-                <button
-                    onClick={() => setShowNewAd(!showNewAd)}
-                    className="bg-purple-600 text-white px-5 py-2.5 rounded-xl font-bold hover:bg-purple-700 transition flex items-center gap-2 text-sm shadow-lg shadow-purple-100"
+                <Link
+                    href="/dashboard/kanal-ekle"
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white shadow-sm"
+                    style={{ background: '#2563EB' }}
                 >
-                    <PlusCircle size={18} /> Yeni Reklam
-                </button>
+                    <PlusCircle size={15} /> Yeni Reklam
+                </Link>
             </div>
 
             {/* Message */}
             {message && (
-                <div className={`p-4 rounded-xl text-sm font-medium ${message.includes('başarıyla') ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
+                <div
+                    className="p-3 rounded-xl text-sm font-medium"
+                    style={message.includes('silindi') || message.includes('güncellendi')
+                        ? { background: '#ECFDF5', color: '#065F46', border: '1px solid #BBF7D0' }
+                        : { background: '#FEF2F2', color: '#991B1B', border: '1px solid #FECACA' }
+                    }
+                >
                     {message}
                 </div>
             )}
 
-            {/* New Ad Form */}
-            {showNewAd && (
-                <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-6">
-                    <h3 className="text-lg font-bold text-gray-900">Yeni Reklam Kampanyası</h3>
-
-                    {channels.length === 0 ? (
-                        <div className="text-center py-8">
-                            <p className="text-gray-500">Önce bir kanal eklemeniz gerekiyor.</p>
-                        </div>
-                    ) : (
-                        <>
-                            {/* Channel Selection */}
-                            <div>
-                                <label className="block text-sm font-bold text-gray-700 mb-2">Kanal Seçin</label>
-                                <select
-                                    value={selectedChannel}
-                                    onChange={e => setSelectedChannel(e.target.value)}
-                                    className="w-full border border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-purple-500 outline-none"
-                                >
-                                    <option value="">Seçiniz...</option>
-                                    {channels.map((ch: any) => (
-                                        <option key={ch.id} value={ch.id}>{ch.name}</option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            {/* Ad Type Selection */}
-                            <div>
-                                <label className="block text-sm font-bold text-gray-700 mb-2">Reklam Türü</label>
-                                <div className="grid grid-cols-3 gap-3">
-                                    {(['featured', 'banner', 'story'] as const).map(type => {
-                                        const info = AD_TYPE_LABELS[type];
-                                        const Icon = info.icon;
-                                        return (
-                                            <button
-                                                key={type}
-                                                onClick={() => setSelectedAdType(type)}
-                                                className={`p-4 rounded-xl border-2 transition text-center ${selectedAdType === type ? 'border-purple-600 bg-purple-50' : 'border-gray-200 hover:border-purple-300'}`}
-                                            >
-                                                <Icon size={24} className={`mx-auto mb-2 ${info.color}`} />
-                                                <span className="text-sm font-bold text-gray-900">{info.label}</span>
-                                            </button>
-                                        );
-                                    })}
-                                </div>
-                            </div>
-
-                            {/* Pricing Selection */}
-                            <div>
-                                <label className="block text-sm font-bold text-gray-700 mb-2">Gösterim Paketi</label>
-                                <div className="space-y-2 max-h-60 overflow-y-auto">
-                                    {pricing.map((p: any) => (
-                                        <button
-                                            key={p.id}
-                                            onClick={() => setSelectedPricing(p.id)}
-                                            className={`w-full flex items-center justify-between p-4 rounded-xl border-2 transition text-left ${selectedPricing === p.id ? 'border-purple-600 bg-purple-50' : 'border-gray-200 hover:border-purple-300'}`}
-                                        >
-                                            <div>
-                                                <span className="font-bold text-gray-900">{p.label}</span>
-                                                {p.note && <span className="text-xs text-gray-500 block mt-0.5">({p.note})</span>}
-                                            </div>
-                                            <div className="text-right">
-                                                <span className="font-bold text-purple-600">💰 {p.tokens_required.toLocaleString()}</span>
-                                                <span className="text-xs text-gray-500 block">{p.price_tl.toLocaleString()} TL</span>
-                                            </div>
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-
-                            {/* Submit */}
-                            <button
-                                onClick={handleCreateCampaign}
-                                disabled={creating || !selectedChannel || !selectedPricing}
-                                className="w-full bg-purple-600 text-white py-3 rounded-xl font-bold hover:bg-purple-700 transition disabled:opacity-50"
-                            >
-                                {creating ? 'Oluşturuluyor...' : 'Kampanyayı Başlat'}
-                            </button>
-                        </>
-                    )}
-                </div>
-            )}
-
-            {/* Active Campaigns */}
+            {/* Empty */}
             {campaigns.length === 0 ? (
-                <div className="bg-white border-2 border-dashed border-gray-200 rounded-3xl p-16 text-center">
-                    <div className="bg-purple-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 text-purple-400">
-                        <TrendingUp size={40} />
+                <div className="text-center py-16 rounded-2xl" style={CARD}>
+                    <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{ background: '#EFF6FF' }}>
+                        <TrendingUp size={24} style={{ color: '#2563EB' }} />
                     </div>
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">Henüz reklam kampanyanız yok</h3>
-                    <p className="text-gray-500 mb-6 max-w-sm mx-auto">Jeton satın alarak kanallarınız için gösterim bazlı reklam kampanyaları oluşturun.</p>
+                    <h3 className="font-bold mb-2" style={{ color: '#0F172A' }}>Henüz reklam kampanyanız yok</h3>
+                    <p className="text-sm mb-5 max-w-xs mx-auto" style={{ color: '#64748B' }}>
+                        Kanalınızı tanıtmak için USDT ile reklam paketi satın alın.
+                    </p>
+                    <Link
+                        href="/dashboard/kanal-ekle"
+                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white shadow-sm"
+                        style={{ background: '#2563EB' }}
+                    >
+                        <Zap size={15} /> Reklam Satın Al
+                    </Link>
                 </div>
             ) : (
-                <div className="space-y-4">
-                    {campaigns.map((campaign: any) => {
-                        const adInfo = AD_TYPE_LABELS[campaign.ad_type] || AD_TYPE_LABELS.featured;
-                        const statusInfo = STATUS_LABELS[campaign.status] || STATUS_LABELS.active;
-                        const AdIcon = adInfo.icon;
-                        const StatusIcon = statusInfo.icon;
-                        const progress = campaign.total_views > 0
-                            ? Math.min(100, (campaign.current_views / campaign.total_views) * 100)
-                            : 0;
+                <div className="space-y-3">
+                    {campaigns.map((c: any) => {
+                        const st = STATUS_LABELS[c.status] || STATUS_LABELS.pending;
+                        const StIcon = st.icon;
+                        const progress = c.total_views > 0 ? Math.min(100, (c.current_views / c.total_views) * 100) : 0;
 
                         return (
-                            <div key={campaign.id} className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-                                <div className="flex items-start justify-between mb-4">
-                                    <div className="flex items-center gap-3">
-                                        <div className={`p-2.5 rounded-xl ${adInfo.bg}`}>
-                                            <AdIcon size={20} className={adInfo.color} />
-                                        </div>
-                                        <div>
-                                            <h4 className="font-bold text-gray-900">
-                                                {campaign.channels?.name || 'Kanal'}
-                                            </h4>
-                                            <span className="text-xs text-gray-500">{adInfo.label} Reklam</span>
+                            <div key={c.id} style={CARD}>
+                                <div className="flex items-start justify-between mb-3">
+                                    <div>
+                                        <h4 className="font-semibold text-sm" style={{ color: '#0F172A' }}>
+                                            {c.channels?.name || 'Kanal'}
+                                        </h4>
+                                        <div className="flex items-center gap-2 mt-1">
+                                            <span
+                                                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold"
+                                                style={{ background: st.bg, color: st.color }}
+                                            >
+                                                <StIcon size={11} /> {st.label}
+                                            </span>
+                                            <span className="text-xs" style={{ color: '#94A3B8' }}>
+                                                {new Date(c.created_at).toLocaleDateString('tr-TR')}
+                                            </span>
                                         </div>
                                     </div>
-                                    <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${statusInfo.color}`}>
-                                        <StatusIcon size={14} />
-                                        {statusInfo.label}
+
+                                    {/* Actions */}
+                                    <div className="flex items-center gap-2">
+                                        {(c.status === 'active' || c.status === 'paused') && (
+                                            <button
+                                                onClick={() => handleToggle(c.id)}
+                                                disabled={togglingId === c.id}
+                                                className="px-3 py-1.5 text-xs font-semibold rounded-lg border transition-colors disabled:opacity-50"
+                                                style={{ color: '#475569', borderColor: '#E2E8F0', background: '#F8FAFC' }}
+                                            >
+                                                {c.status === 'active'
+                                                    ? <><PauseCircle size={13} className="inline mr-1" />Duraklat</>
+                                                    : <><TrendingUp size={13} className="inline mr-1" />Devam Et</>
+                                                }
+                                            </button>
+                                        )}
+                                        {(c.status === 'pending' || c.status === 'cancelled') && (
+                                            <button
+                                                onClick={() => handleDelete(c.id)}
+                                                disabled={togglingId === c.id}
+                                                className="px-3 py-1.5 text-xs font-semibold rounded-lg border transition-colors disabled:opacity-50"
+                                                style={{ color: '#DC2626', borderColor: '#FECACA', background: '#FEF2F2' }}
+                                            >
+                                                <Trash2 size={13} className="inline mr-1" />Sil
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
 
-                                {/* Progress Bar */}
-                                <div className="mb-3">
-                                    <div className="flex items-center justify-between text-xs font-bold mb-1.5">
-                                        <span className="text-gray-500">Gösterim İlerlemesi</span>
-                                        <span className="text-gray-900">
-                                            {campaign.current_views.toLocaleString()} / {campaign.total_views.toLocaleString()}
+                                {/* Progress */}
+                                <div>
+                                    <div className="flex justify-between text-xs mb-1.5">
+                                        <span style={{ color: '#64748B' }}>Gösterim İlerlemesi</span>
+                                        <span className="font-semibold" style={{ color: '#0F172A' }}>
+                                            {c.current_views.toLocaleString('tr-TR')} / {c.total_views.toLocaleString('tr-TR')}
                                         </span>
                                     </div>
-                                    <div className="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden">
+                                    <div className="h-2 rounded-full overflow-hidden" style={{ background: '#F1F5F9' }}>
                                         <div
-                                            className={`h-full rounded-full transition-all duration-500 ${campaign.status === 'completed' ? 'bg-green-500' : 'bg-purple-500'}`}
-                                            style={{ width: `${progress}%` }}
+                                            className="h-full rounded-full transition-all"
+                                            style={{
+                                                width: `${progress}%`,
+                                                background: c.status === 'completed' ? '#10B981' : '#2563EB'
+                                            }}
                                         />
                                     </div>
                                 </div>
 
-                                <div className="flex items-center justify-between text-xs mt-4 pt-4 border-t border-gray-100">
-                                    <div className="flex items-center gap-4 flex-wrap">
-                                        <div className="flex items-center gap-1 text-gray-500">
-                                            <Eye size={14} />
-                                            <span>{campaign.current_views.toLocaleString()} gösterim</span>
-                                        </div>
-                                        <div className="flex items-center gap-1 text-gray-500">
-                                            <span>💰 {campaign.tokens_spent} jeton</span>
-                                        </div>
-                                        <div className="text-gray-400">
-                                            {new Date(campaign.created_at).toLocaleDateString('tr-TR')}
-                                        </div>
-                                    </div>
-
-                                    {(campaign.status === 'active' || campaign.status === 'paused') && (
-                                        <button
-                                            onClick={() => handleToggleStatus(campaign.id)}
-                                            disabled={togglingId === campaign.id}
-                                            className="px-3 py-1.5 text-xs font-bold rounded-lg border transition-colors flex items-center gap-1.5 disabled:opacity-50 border-gray-200 hover:bg-gray-50 text-gray-700"
-                                        >
-                                            {campaign.status === 'active' ? (
-                                                <><PauseCircle size={14} /> Duraklat</>
-                                            ) : (
-                                                <><TrendingUp size={14} /> Devam Et</>
-                                            )}
-                                        </button>
-                                    )}
-
-                                    {/* Delete Button for pending or cancelled campaigns */}
-                                    {(campaign.status === 'pending' || campaign.status === 'cancelled') && (
-                                        <button
-                                            onClick={() => handleDeleteCampaign(campaign.id)}
-                                            disabled={togglingId === campaign.id}
-                                            className="px-3 py-1.5 text-xs font-bold rounded-lg border transition-colors flex items-center gap-1.5 disabled:opacity-50 border-red-200 hover:bg-red-50 text-red-600 ml-auto"
-                                            title="Kampanyayı Sil"
-                                        >
-                                            <Trash2 size={14} /> Sil
-                                        </button>
-                                    )}
-                                    {campaign.status === 'pending' && (
-                                        <span className="text-xs text-gray-500 italic ml-2">Onay bekliyor...</span>
-                                    )}
+                                <div className="flex items-center gap-4 mt-3 pt-3" style={{ borderTop: '1px solid #F1F5F9' }}>
+                                    <span className="flex items-center gap-1 text-xs" style={{ color: '#64748B' }}>
+                                        <Eye size={12} /> {c.current_views.toLocaleString('tr-TR')} gösterim
+                                    </span>
                                 </div>
                             </div>
                         );
