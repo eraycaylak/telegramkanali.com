@@ -8,7 +8,6 @@ import { Category, Channel } from '@/lib/types';
 import { supabase } from '@/lib/supabaseClient';
 import { User } from '@supabase/supabase-js';
 import { LogIn, LayoutDashboard, LogOut, User as UserIcon } from 'lucide-react';
-import { signOut } from '@/app/actions/auth';
 import VisitorCounter from './VisitorCounter';
 import LanguageSwitcher from './LanguageSwitcher';
 
@@ -28,6 +27,7 @@ export default function HeaderClient({ categories, logo, user: initialUser, rece
     const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
     const [user, setUser] = useState<User | null>(initialUser || null);
     const [loading, setLoading] = useState(false);
+    const [isLoggingOut, setIsLoggingOut] = useState(false);
     const notificationsRef = useRef<HTMLDivElement>(null);
 
     // Close dropdowns when clicking outside
@@ -54,6 +54,12 @@ export default function HeaderClient({ categories, logo, user: initialUser, rece
 
         return () => subscription.unsubscribe();
     }, []);
+
+    const handleLogout = async () => {
+        setIsLoggingOut(true);
+        await supabase.auth.signOut();
+        window.location.href = '/';
+    };
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
@@ -234,8 +240,8 @@ export default function HeaderClient({ categories, logo, user: initialUser, rece
                                         <Link href="/dashboard" className="flex items-center gap-2 bg-[#c4151c] border border-red-700/50 hover:bg-[#a31117] rounded-full px-5 py-2 transition text-white shadow font-bold text-sm">
                                             <LayoutDashboard size={16} /> PANEL
                                         </Link>
-                                        <button onClick={() => signOut()} aria-label="Çıkış Yap" className="bg-[#c4151c] border border-red-700/50 p-2 rounded-full text-white hover:bg-[#a31117] transition" title="Çıkış Yap">
-                                            <LogOut size={18} />
+                                        <button onClick={handleLogout} disabled={isLoggingOut} aria-label="Çıkış Yap" className="bg-[#c4151c] border border-red-700/50 p-2 rounded-full text-white hover:bg-[#a31117] transition disabled:opacity-50" title="Çıkış Yap">
+                                            <LogOut size={18} className={isLoggingOut ? 'animate-spin' : ''} />
                                         </button>
                                     </>
                                 ) : (
@@ -342,8 +348,8 @@ export default function HeaderClient({ categories, logo, user: initialUser, rece
                                     <Link href="/dashboard" onClick={() => setMenuOpen(false)} className="py-2 px-3 bg-blue-600 rounded-lg text-sm font-semibold flex items-center justify-center gap-2">
                                         <LayoutDashboard size={18} /> DASHBOARD
                                     </Link>
-                                    <button onClick={() => { signOut(); setMenuOpen(false); }} className="py-2 px-3 bg-gray-700 rounded-lg text-sm font-semibold flex items-center justify-center gap-2">
-                                        <LogOut size={18} /> ÇIKIŞ YAP
+                                    <button onClick={() => { handleLogout(); setMenuOpen(false); }} disabled={isLoggingOut} className="py-2 px-3 bg-gray-700 rounded-lg text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-50">
+                                        <LogOut size={18} className={isLoggingOut ? 'animate-spin' : ''} /> {isLoggingOut ? 'ÇIKIŞ...' : 'ÇIKIŞ YAP'}
                                     </button>
                                 </>
                             ) : (

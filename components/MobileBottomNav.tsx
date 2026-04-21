@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { Home, Search, Flame, PlusCircle, Menu, X } from 'lucide-react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useTransition } from 'react';
 import { Category } from '@/lib/types';
 
 interface MobileBottomNavProps {
@@ -18,6 +18,7 @@ export default function MobileBottomNav({ categories }: MobileBottomNavProps) {
     const [showDrawer, setShowDrawer] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const searchInputRef = useRef<HTMLInputElement>(null);
+    const [isPending, startTransition] = useTransition();
 
     // Close drawer on route change
     useEffect(() => {
@@ -45,7 +46,9 @@ export default function MobileBottomNav({ categories }: MobileBottomNavProps) {
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
         if (searchTerm.trim()) {
-            router.push(`/?q=${encodeURIComponent(searchTerm.trim())}`);
+            startTransition(() => {
+                router.push(`/?q=${encodeURIComponent(searchTerm.trim())}`);
+            });
             setShowSearch(false);
             setSearchTerm('');
         }
@@ -75,15 +78,17 @@ export default function MobileBottomNav({ categories }: MobileBottomNavProps) {
                                 if (item.action) {
                                     item.action();
                                 } else {
-                                    router.push(item.href);
+                                    startTransition(() => {
+                                        router.push(item.href);
+                                    });
                                 }
                             }}
                             className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all active:scale-90 ${item.active
                                 ? 'text-blue-600'
-                                : 'text-gray-900 hover:text-black'
+                                : isPending ? 'text-gray-400' : 'text-gray-900 hover:text-black'
                                 }`}
                         >
-                            <Icon size={22} strokeWidth={item.active ? 2.5 : 1.8} />
+                            <Icon size={22} strokeWidth={item.active ? 2.5 : 1.8} className={isPending && !item.action ? 'animate-pulse' : ''} />
                             <span className={`text-[10px] ${item.active ? 'font-bold' : 'font-medium'}`}>{item.label}</span>
                             {item.active && <div className="w-1 h-1 bg-blue-600 rounded-full" />}
                         </button>

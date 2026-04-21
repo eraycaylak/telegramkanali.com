@@ -112,7 +112,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             finally { setIsLoading(false); }
         };
         checkAuth();
-    }, [pathname, router, isLoginPage]);
+        
+        // Listen for auth state changes (logout, session expiry) instead of re-checking on each route
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+            if (event === 'SIGNED_OUT') {
+                setIsAuthenticated(false);
+                router.replace('/admin');
+            }
+        });
+        return () => subscription.unsubscribe();
+    }, [router, isLoginPage]);
 
     useEffect(() => { setIsMobileMenuOpen(false); }, [pathname]);
 
@@ -174,8 +183,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         );
     }
 
-    // ─── Sidebar Nav Content ──────────────────────────────
-    const SidebarNav = ({ compact = false }: { compact?: boolean }) => (
+    // ─── Sidebar Nav Content (memoized to prevent re-renders) ──────────
+    const renderSidebarNav = (compact = false) => (
         <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
             {MENU_GROUPS.map(group => {
                 if (!canSeeGroup(group)) return null;
@@ -252,7 +261,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     </button>
                 </div>
 
-                {isSidebarOpen ? <SidebarNav /> : <SidebarNav compact />}
+                {isSidebarOpen ? renderSidebarNav() : renderSidebarNav(true)}
 
                 {/* Footer */}
                 <div className="p-3 border-t border-gray-100 shrink-0">

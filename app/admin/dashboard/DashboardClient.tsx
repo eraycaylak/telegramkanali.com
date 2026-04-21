@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus, Trash2, Edit, Search, LogOut, ExternalLink, RefreshCw, BarChart3, Bot, Users as UsersIcon, CheckCircle2, AlertCircle, Zap } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
@@ -12,7 +12,6 @@ export default function DashboardClient() {
     const [channels, setChannels] = useState<Channel[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
     const [profiles, setProfiles] = useState<any[]>([]);
-    const [categoryCounts, setCategoryCounts] = useState<Record<string, number>>({});
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('all');
     const [viewStatus, setViewStatus] = useState<'approved' | 'pending' | 'rejected' | 'bot'>('approved');
@@ -21,7 +20,6 @@ export default function DashboardClient() {
     const [allLoaded, setAllLoaded] = useState(false);
     const [loadingMore, setLoadingMore] = useState(false);
     const [profilesLoaded, setProfilesLoaded] = useState(false);
-    const [liveVisitors, setLiveVisitors] = useState(0);
 
     // Modal State
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -41,7 +39,8 @@ export default function DashboardClient() {
     });
     const [editingId, setEditingId] = useState<string | null>(null);
     const [scraping, setScraping] = useState(false);
-    const [syncing, setSyncing] = useState(false);
+    const [syncingIds, setSyncingIds] = useState<Set<string>>(new Set());
+    const [syncingAll, setSyncingAll] = useState(false);
     const [lastEditedId, setLastEditedId] = useState<string | null>(null);
     const [followerModalOpen, setFollowerModalOpen] = useState(false);
     const [selectedChannelForFollowers, setSelectedChannelForFollowers] = useState<Channel | null>(null);
@@ -50,47 +49,47 @@ export default function DashboardClient() {
 
     useEffect(() => {
         fetchData();
+    }, []);
 
-        // 🟢 Live Visitor Tracking Subscription
-        const channel = supabase.channel('site_presence');
-        channel
-            .on('presence', { event: 'sync' }, () => {
-                const state = channel.presenceState();
-                const count = Object.keys(state).length;
-                setLiveVisitors(count);
-            })
-            .subscribe();
-
-        return () => {
-            supabase.removeChannel(channel);
-        };
-    }, [router]);
-
-    async function fetchData() {
+    async function fetchData(preserveAll = false) {
         setLoading(true);
         try {
-            // Fetch channels (first 200) and categories in PARALLEL — not sequential
-            const [channelRes, catRes] = await Promise.all([
-                supabase
-                    .from('channels')
-                    .select('*, categories(name)', { count: 'exact' })
-                    .order('created_at', { ascending: false })
-                    .range(0, 199),
-                supabase.from('categories').select('*').order('name'),
-            ]);
-
-            const fetchedChannels = (channelRes.data || []).map((d: any) => ({ ...d, categoryName: d.categories?.name })) as Channel[];
-            setChannels(fetchedChannels);
-            setTotalChannelCount(channelRes.count || 0);
-            setAllLoaded((channelRes.count || 0) <= 200);
-
-            if (catRes.data) {
-                setCategories(catRes.data as Category[]);
-                const counts: Record<string, number> = {};
-                fetchedChannels.forEach((ch: any) => {
-                    if (ch.category_id) counts[ch.category_id] = (counts[ch.category_id] || 0) + 1;
-                });
-                setCategoryCounts(counts);
+            if (preserveAll && allLoaded) {
+                // All channels are loaded — refetch ALL to stay in sync
+                let all: any[] = [];
+                let from = 0;
+                const batchSize = 1000;
+                const catRes = await supabase.from('categories').select('*').order('name');
+                while (true) {
+                    const { data: batch, error } = await supabase
+                        .from('channels')
+                        .select('*, categories(name)')
+                        .order('created_at', { ascending: false })
+                        .range(from, from + batchSize - 1);
+                    if (error || !batch || batch.length === 0) break;
+                    all = [...all, ...batch.map((d: any) => ({ ...d, categoryName: d.categories?.name }))];
+                    if (batch.length < batchSize) break;
+                    from += batchSize;
+                }
+                setChannels(all as Channel[]);
+                setTotalChannelCount(all.length);
+                setAllLoaded(true);
+                if (catRes.data) setCategories(catRes.data as Category[]);
+            } else {
+                // Normal: fetch first 200
+                const [channelRes, catRes] = await Promise.all([
+                    supabase
+                        .from('channels')
+                        .select('*, categories(name)', { count: 'exact' })
+                        .order('created_at', { ascending: false })
+                        .range(0, 199),
+                    supabase.from('categories').select('*').order('name'),
+                ]);
+                const fetchedChannels = (channelRes.data || []).map((d: any) => ({ ...d, categoryName: d.categories?.name })) as Channel[];
+                setChannels(fetchedChannels);
+                setTotalChannelCount(channelRes.count || 0);
+                setAllLoaded((channelRes.count || 0) <= 200);
+                if (catRes.data) setCategories(catRes.data as Category[]);
             }
         } catch (error) {
             console.error('Admin dashboard data fetch error:', error);
@@ -118,11 +117,6 @@ export default function DashboardClient() {
             }
             setChannels(allChannels as Channel[]);
             setAllLoaded(true);
-            const counts: Record<string, number> = {};
-            allChannels.forEach((ch: any) => {
-                if (ch.category_id) counts[ch.category_id] = (counts[ch.category_id] || 0) + 1;
-            });
-            setCategoryCounts(counts);
         } catch (error) {
             console.error('loadMore error:', error);
         } finally {
@@ -225,30 +219,40 @@ export default function DashboardClient() {
                 ad_start_date: '', ad_end_date: '', ad_type: '', ad_notes: ''
             });
             setEditingId(null);
-            fetchData();
+            // Preserve allLoaded state — don't reset to 200 channels after edit
+            fetchData(true);
         } else {
             alert('Hata: ' + res.error);
         }
     };
 
+    // Memoized category counts
+    const categoryCounts = useMemo(() => {
+        const counts: Record<string, number> = {};
+        channels.forEach((ch: any) => {
+            if (ch.category_id) counts[ch.category_id] = (counts[ch.category_id] || 0) + 1;
+        });
+        return counts;
+    }, [channels]);
+
     // Filter Logic
-    const filteredChannels = channels.filter((c: any) => {
+    const filteredChannels = useMemo(() => channels.filter((c: any) => {
         const matchesSearch = c.name.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesCategory = selectedCategory === 'all' || c.category_id === selectedCategory;
         if (viewStatus === 'bot') return matchesSearch && matchesCategory && c.bot_enabled;
         const matchesStatus = c.status === viewStatus || (viewStatus === 'approved' && !c.status);
         return matchesSearch && matchesCategory && matchesStatus;
-    });
+    }), [channels, searchTerm, selectedCategory, viewStatus]);
     
     // Ads Expiring Soon Logic
-    const expiringChannels = channels.filter(c => {
+    const expiringChannels = useMemo(() => channels.filter(c => {
         if (!c.ad_end_date) return false;
         const endDate = new Date(c.ad_end_date);
         const now = new Date();
         const diffTime = endDate.getTime() - now.getTime();
         const diffDays = diffTime / (1000 * 60 * 60 * 24);
-        return diffDays > -1 && diffDays <= 2; // Expiring in next 48 hours or recently expired
-    });
+        return diffDays > -1 && diffDays <= 2;
+    }), [channels]);
 
     const handleApprove = async (id: string) => {
         if (confirm('Bu kanalı onaylamak istiyor musunuz?')) {
@@ -324,8 +328,8 @@ export default function DashboardClient() {
                             <Zap size={24} className="text-yellow-300 drop-shadow-md" />
                         </div>
                         <div className="relative z-10">
-                            <div className="text-sm text-indigo-100 font-medium">Sitede Canlı İzleyici</div>
-                            <div className="text-3xl font-black">{liveVisitors}</div>
+                            <div className="text-sm text-indigo-100 font-medium">Kategori Sayısı</div>
+                            <div className="text-3xl font-black">{categories.length}</div>
                         </div>
                         <div className="absolute -right-4 -bottom-4 opacity-20 transform group-hover:scale-110 transition-transform duration-500">
                             <Zap size={100} />
@@ -436,20 +440,20 @@ export default function DashboardClient() {
                         <div className="flex items-center gap-2 w-full xl:w-auto">
                             <button
                                 onClick={async () => {
-                                    setSyncing(true);
+                                    setSyncingAll(true);
                                     const res = await syncAllChannelsFromTelegram();
-                                    setSyncing(false);
+                                    setSyncingAll(false);
                                     if (res.error) alert(res.error);
                                     else {
                                         alert('Tüm kanallar senkronize edildi!');
-                                        fetchData();
+                                        fetchData(true);
                                     }
                                 }}
-                                disabled={syncing}
+                                disabled={syncingAll}
                                 className="flex-1 xl:flex-none flex items-center justify-center gap-2 bg-green-600 text-white px-4 py-2.5 rounded-xl text-sm font-bold hover:bg-green-700 transition shadow-lg shadow-green-100 disabled:opacity-50"
                             >
-                                <RefreshCw size={16} className={syncing ? 'animate-spin' : ''} />
-                                {syncing ? 'Yükleniyor...' : 'Sync'}
+                                <RefreshCw size={16} className={syncingAll ? 'animate-spin' : ''} />
+                                {syncingAll ? 'Yükleniyor...' : 'Sync'}
                             </button>
                             <button
                                 onClick={async () => { await ensureProfilesLoaded(); setIsModalOpen(true); }}
@@ -603,20 +607,20 @@ export default function DashboardClient() {
                                                 </button>
                                                 <button
                                                     onClick={async () => {
-                                                        setSyncing(true);
+                                                        setSyncingIds(prev => new Set([...prev, channel.id]));
                                                         const res = await syncChannelFromTelegram(channel.id);
-                                                        setSyncing(false);
+                                                        setSyncingIds(prev => { const next = new Set(prev); next.delete(channel.id); return next; });
                                                         if (res.error) alert(res.error);
                                                         else {
                                                             alert('Kanal güncellendi!');
-                                                            fetchData();
+                                                            fetchData(true);
                                                         }
                                                     }}
-                                                    disabled={syncing}
+                                                    disabled={syncingIds.has(channel.id)}
                                                     className="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition disabled:opacity-50"
                                                     title="Telegram'dan Güncelle"
                                                 >
-                                                    <RefreshCw size={18} className={syncing ? 'animate-spin' : ''} />
+                                                    <RefreshCw size={18} className={syncingIds.has(channel.id) ? 'animate-spin' : ''} />
                                                 </button>
                                                 <button
                                                     onClick={() => handleEdit(channel)}
@@ -704,15 +708,16 @@ export default function DashboardClient() {
                                             </button>
                                             <button
                                                 onClick={async () => {
-                                                    setSyncing(true);
+                                                    setSyncingIds(prev => new Set([...prev, channel.id]));
                                                     const res = await syncChannelFromTelegram(channel.id);
-                                                    setSyncing(false);
+                                                    setSyncingIds(prev => { const next = new Set(prev); next.delete(channel.id); return next; });
                                                     if (res.error) alert(res.error);
-                                                    else fetchData();
+                                                    else fetchData(true);
                                                 }}
-                                                className="p-2.5 text-green-600 bg-green-50 rounded-xl transition"
+                                                disabled={syncingIds.has(channel.id)}
+                                                className="p-2.5 text-green-600 bg-green-50 rounded-xl transition disabled:opacity-50"
                                             >
-                                                <RefreshCw size={18} className={syncing ? 'animate-spin' : ''} />
+                                                <RefreshCw size={18} className={syncingIds.has(channel.id) ? 'animate-spin' : ''} />
                                             </button>
                                         </div>
                                         <div className="flex items-center gap-2">

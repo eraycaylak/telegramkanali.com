@@ -1,12 +1,17 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import { usePathname } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
 
 export default function LivePresenceTracker() {
     const hasJoined = useRef(false);
+    const pathname = usePathname();
 
     useEffect(() => {
+        // Skip presence tracking on admin and dashboard routes
+        if (pathname.startsWith('/admin') || pathname.startsWith('/dashboard')) return;
+        
         if (hasJoined.current) return;
         hasJoined.current = true;
 
@@ -34,7 +39,8 @@ export default function LivePresenceTracker() {
             hasJoined.current = false;
             supabase.removeChannel(channel);
         };
-    }, []);
+    }, [pathname]);
 
     return null; // Arayüzü olmayan bileşen, her sayfada arkaplanda çalışacak.
 }
+

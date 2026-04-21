@@ -19,7 +19,7 @@ import {
     LifeBuoy,
 } from 'lucide-react';
 import { useState } from 'react';
-import { signOut } from '@/app/actions/auth';
+import { supabase } from '@/lib/supabaseClient';
 
 interface DashboardLayoutProps {
     children: React.ReactNode;
@@ -41,7 +41,15 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     const pathname = usePathname();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+    const [isLoggingOut, setIsLoggingOut] = useState(false);
+
     const currentPage = menuItems.find(i => i.href === pathname);
+
+    const handleLogout = async () => {
+        setIsLoggingOut(true);
+        await supabase.auth.signOut();
+        window.location.href = '/';
+    };
 
     return (
         <div className="min-h-screen bg-slate-950 flex">
@@ -148,11 +156,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     </a>
 
                     <button
-                        onClick={() => signOut()}
-                        className="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-sm font-semibold text-slate-500 hover:bg-red-900/20 hover:text-red-400 transition-all"
+                        onClick={handleLogout}
+                        disabled={isLoggingOut}
+                        className="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-sm font-semibold text-slate-500 hover:bg-red-900/20 hover:text-red-400 transition-all disabled:opacity-50"
                     >
-                        <LogOut size={18} />
-                        Çıkış Yap
+                        <LogOut size={18} className={isLoggingOut ? 'animate-spin' : ''} />
+                        {isLoggingOut ? 'Çıkış yapılıyor...' : 'Çıkış Yap'}
                     </button>
                 </div>
             </aside>

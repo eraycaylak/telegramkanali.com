@@ -14,8 +14,11 @@ interface ChannelCardProps {
     isAdult?: boolean;  // +18 blur overlay etkinleştir
 }
 
-// Generate a simple browser fingerprint
+// Generate a simple browser fingerprint — SINGLETON cached at module level
+let _cachedFingerprint: string | null = null;
 function generateFingerprint(): string {
+    if (_cachedFingerprint) return _cachedFingerprint;
+    
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     if (ctx) {
@@ -40,7 +43,8 @@ function generateFingerprint(): string {
         hash = ((hash << 5) - hash) + char;
         hash = hash & hash;
     }
-    return Math.abs(hash).toString(36);
+    _cachedFingerprint = Math.abs(hash).toString(36);
+    return _cachedFingerprint;
 }
 
 export default function ChannelCard({ channel, compact = false, miniCompact = false, priority = false, isAdult = false }: ChannelCardProps) {
@@ -48,16 +52,12 @@ export default function ChannelCard({ channel, compact = false, miniCompact = fa
     const [score, setScore] = useState(channel.score || 0);
     const [userVote, setUserVote] = useState<number | null>(null);
     const [loading, setLoading] = useState(false);
-    const [fingerprint, setFingerprint] = useState<string>('');
     const [hasVoted, setHasVoted] = useState(false);
     const [imageError, setImageError] = useState(false);
     // +18 blur: localStorage'dan daha önce onaydı mı kontrol et
     const [adultRevealed, setAdultRevealed] = useState(false);
 
     useEffect(() => {
-        const fp = generateFingerprint();
-        setFingerprint(fp);
-
         const votedChannels = JSON.parse(localStorage.getItem('votedChannels') || '{}');
         if (votedChannels[channel.id]) {
             setHasVoted(true);
@@ -84,7 +84,7 @@ export default function ChannelCard({ channel, compact = false, miniCompact = fa
             setUserVote(type);
 
             const { voteChannel } = await import('@/app/actions/vote');
-            const res = await voteChannel(channel.id, type, fingerprint);
+            const res = await voteChannel(channel.id, type, generateFingerprint());
 
             if (res.error) {
                 setScore(oldScore);

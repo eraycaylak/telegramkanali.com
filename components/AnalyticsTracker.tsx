@@ -195,8 +195,8 @@ export default function AnalyticsTracker() {
     // Main tracking
     useEffect(() => {
         const track = async () => {
-            // Skip admin and API routes
-            if (pathname.startsWith('/admin') || pathname.startsWith('/api')) return;
+            // Skip admin, dashboard, and API routes
+            if (pathname.startsWith('/admin') || pathname.startsWith('/api') || pathname.startsWith('/dashboard')) return;
 
             // ─── BOT FILTERING ─────────────────────────────────────────
             if (isBot()) return;
@@ -242,7 +242,7 @@ export default function AnalyticsTracker() {
                     setCookie('tk_int', list.slice(-20).join(','), 30);
                 }
 
-                // 5. Collect extended data
+                // 5. Collect extended data (non-blocking, delayed)
                 const geo = await getGeoInfo();
                 const browser = getBrowser();
                 const os = getOS();
@@ -268,30 +268,23 @@ export default function AnalyticsTracker() {
 
             } else {
                 // === COOKIELESS MODE (no consent) ===
-                // Use fingerprint + date combo for daily unique check
-                // This is privacy-friendly — no personal data stored client-side
                 const today = new Date().toISOString().split('T')[0];
                 const dailyKey = `tk_fp_${today}`;
 
-                // Check if this fingerprint was already seen today (sessionStorage)
                 const seenToday = sessionStorage.getItem(dailyKey);
                 if (!seenToday) {
                     isNewVisitor = true;
                     sessionStorage.setItem(dailyKey, '1');
                 }
 
-                // Also prevent double-counting same page in same session
                 const pageKey = `tk_p_${pathname}`;
                 if (sessionStorage.getItem(pageKey)) {
-                    // Same page already tracked in this session — count view but NOT as new visitor
                     isNewVisitor = false;
                 }
                 sessionStorage.setItem(pageKey, '1');
             }
 
             // ─── SERVER-SIDE DEDUP TRACKING ────────────────────────────
-            // Send to server-side dedup endpoint instead of direct RPC
-            // Server will use fingerprint+IP+date to deduplicate
             try {
                 await fetch('/api/track', {
                     method: 'POST',
@@ -308,7 +301,9 @@ export default function AnalyticsTracker() {
             }
         };
 
-        track();
+        // Delay analytics on initial load to not block rendering
+        const timer = setTimeout(track, 1500);
+        return () => clearTimeout(timer);
     }, [pathname, searchParams]);
 
     return null;

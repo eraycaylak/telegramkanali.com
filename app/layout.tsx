@@ -7,6 +7,7 @@ import CookieConsent from "@/components/CookieConsent";
 import LivePresenceTracker from "@/components/LivePresenceTracker";
 
 import JsonLd, { generateWebsiteSchema, generateOrganizationSchema } from "@/components/JsonLd";
+import NavigationProgress from "@/components/NavigationProgress";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -131,6 +132,10 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col bg-white text-gray-900 overflow-x-hidden w-full max-w-[100vw]`}
       >
+        {/* Navigation Progress Bar */}
+        <Suspense fallback={null}>
+          <NavigationProgress />
+        </Suspense>
         {/* Google Analytics */}
         <GoogleAnalytics gaId="G-N9BJQBE7BB" />
         <Suspense fallback={null}>
