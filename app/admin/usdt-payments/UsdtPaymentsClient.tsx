@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { getUsdtPayments, approveUsdtPayment, rejectUsdtPayment } from '@/app/actions/usdt';
+import { approveUsdtPayment, rejectUsdtPayment } from '@/app/actions/usdt';
 import { CheckCircle2, XCircle, Clock, Copy, Check, ExternalLink, RefreshCw } from 'lucide-react';
 
 type Payment = {
@@ -49,8 +49,13 @@ export default function UsdtPaymentsClient() {
         setLoading(true);
         setError(null);
         try {
-            const data = await getUsdtPayments(filter === 'all' ? undefined : filter);
-            setPayments(data as Payment[]);
+            const statusParam = filter === 'all' ? 'all' : filter;
+            const res = await fetch(`/api/admin/usdt-payments?status=${statusParam}`, { cache: 'no-store' });
+            const json = await res.json();
+            if (json.error) {
+                console.warn('[USDT] API warning:', json.error);
+            }
+            setPayments((json.data || []) as Payment[]);
         } catch (err) {
             console.error('[USDT] Load error:', err);
             setError('Veriler yüklenemedi. Lütfen sayfayı yenileyin.');
