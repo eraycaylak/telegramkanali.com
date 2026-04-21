@@ -4,7 +4,8 @@ import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Category } from '@/lib/types';
 import { submitChannel } from '@/app/actions/submit';
-import { createUsdtPayment, USDT_PACKAGES } from '@/app/actions/usdt';
+import { createUsdtPayment } from '@/app/actions/usdt';
+import { USDT_PACKAGES } from '@/lib/usdt-packages';
 import { Send, CheckCircle2, AlertCircle, MessageCircle, Zap, Crown, Triangle, Copy, Check } from 'lucide-react';
 import LegalTermsModal from '@/components/LegalTermsModal';
 

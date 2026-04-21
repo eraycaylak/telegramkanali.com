@@ -2,41 +2,9 @@
 
 import { getAdminClient } from '@/lib/supabaseAdmin';
 import { revalidatePath } from 'next/cache';
+import { USDT_PACKAGES } from '@/lib/usdt-packages';
 
-// ──────────────────────────────────────────────────────────────────────────────
-// Paket Tanımları
-// ──────────────────────────────────────────────────────────────────────────────
-export const USDT_PACKAGES = {
-    neon: {
-        id: 'neon',
-        name: 'NEON',
-        tagline: 'Kategori Banner',
-        amount_usdt: 15,
-        total_views: 10000,
-        description: 'Kanalınız hedef kategoride üst banner alanında gösterilir.',
-        emoji: '⚡',
-    },
-    prime: {
-        id: 'prime',
-        name: 'PRIME',
-        tagline: 'Kategori 1. Sıra',
-        amount_usdt: 9,
-        total_views: 5000,
-        description: 'Kanalınız seçilen kategorinin kanal listesinin 1. pozisyonuna pin\'lenir.',
-        emoji: '👑',
-    },
-    apex: {
-        id: 'apex',
-        name: 'APEX',
-        tagline: 'Anasayfa Banner',
-        amount_usdt: 39,
-        total_views: 50000,
-        description: 'Siteye giren her ziyaretçinin ilk gördüğü anasayfa banner alanı.',
-        emoji: '🔱',
-    },
-} as const;
 
-// ──────────────────────────────────────────────────────────────────────────────
 // Yeni USDT Ödeme Başvurusu Oluştur (Public — giriş gerekmez)
 // ──────────────────────────────────────────────────────────────────────────────
 export async function createUsdtPayment(formData: FormData) {

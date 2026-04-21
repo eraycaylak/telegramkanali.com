@@ -1,18 +1,76 @@
 'use server';
 
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { headers } from 'next/headers';
 import { slugify } from '@/lib/utils';
 import { getAdminClient } from '@/lib/supabaseAdmin';
+import { createClient } from '@supabase/supabase-js';
 
 // ──────────────────────────────────────────────────────────────────────────────
-// Kanal Başvurusu (kimlik doğrulaması gerektirir)
+// Otantikasyon için JWT'den user alır (cookies() sorununu bypass eder)
+// ──────────────────────────────────────────────────────────────────────────────
+async function getAuthUser() {
+    try {
+        const headersList = await headers();
+        // Authorization: Bearer <token> header'ından al
+        const authHeader = headersList.get('authorization') || headersList.get('Authorization');
+        const cookieHeader = headersList.get('cookie') || '';
+
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+        const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+
+        // Cookie'den sb- token'ı parse et
+        const cookieMap: Record<string, string> = {};
+        cookieHeader.split(';').forEach(c => {
+            const [k, ...v] = c.trim().split('=');
+            if (k) cookieMap[k.trim()] = v.join('=');
+        });
+
+        // Supabase auth token keys
+        const tokenKey = Object.keys(cookieMap).find(k =>
+            k.startsWith('sb-') && k.endsWith('-auth-token')
+        );
+
+        let accessToken: string | null = null;
+
+        if (tokenKey && cookieMap[tokenKey]) {
+            try {
+                const decoded = decodeURIComponent(cookieMap[tokenKey]);
+                // base64url veya JSON olabilir
+                let parsed: any;
+                if (decoded.startsWith('base64-')) {
+                    parsed = JSON.parse(Buffer.from(decoded.slice(7), 'base64').toString());
+                } else {
+                    parsed = JSON.parse(decoded);
+                }
+                accessToken = parsed?.access_token || parsed?.[0]?.access_token || null;
+            } catch {}
+        }
+
+        if (!accessToken && authHeader?.startsWith('Bearer ')) {
+            accessToken = authHeader.slice(7);
+        }
+
+        if (!accessToken) return null;
+
+        const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+            auth: { persistSession: false, autoRefreshToken: false },
+            global: { headers: { Authorization: `Bearer ${accessToken}` } }
+        });
+
+        const { data: { user } } = await supabase.auth.getUser(accessToken);
+        return user;
+    } catch (err) {
+        console.error('[Auth] getAuthUser error:', err);
+        return null;
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Kanal Başvurusu
 // ──────────────────────────────────────────────────────────────────────────────
 export async function submitChannel(formData: FormData) {
     const contact_type = (formData.get('contact_type') as string) || 'kanal_ekle';
 
-    // Soru / öneri / diğer akışı — kanal tablosuna değil, usdt_payments'a yazılır gibi ayrı bir kayıt
-    // Ama şimdilik bunları usdt gerek olmadan basit bir şekilde handle edelim
     if (contact_type === 'soru_oneri' || contact_type === 'diger') {
         return await submitContactMessage(formData, contact_type);
     }
@@ -25,7 +83,6 @@ export async function submitChannel(formData: FormData) {
     const email_contact = formData.get('email_contact') as string;
     const contact_info = `Telegram: @${telegram_contact} | E-posta: ${email_contact}`;
 
-    // Legal check
     const terms_accepted = formData.get('terms_accepted') === 'true';
     const privacy_accepted = formData.get('privacy_accepted') === 'true';
 
@@ -34,95 +91,74 @@ export async function submitChannel(formData: FormData) {
     }
 
     if (!terms_accepted || !privacy_accepted) {
-        return { error: 'İşleme devam edebilmek için Kullanım Şartları ve Gizlilik Politikası\'nı onaylamalısınız.' };
+        return { error: "İşleme devam edebilmek için Kullanım Şartları ve Gizlilik Politikası'nı onaylamalısınız." };
     }
 
-    // Server-side Supabase client
-    const cookieStore = await cookies();
-    const supabase = createServerClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        {
-            cookies: {
-                get(name: string) {
-                    return cookieStore.get(name)?.value;
-                },
-            },
-        }
-    );
-
-    // Get authenticated user
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-    if (!user || authError) {
+    // Auth kontrolü
+    const user = await getAuthUser();
+    if (!user) {
         return { error: 'Oturum açmanız gerekiyor. Lütfen giriş yapın.' };
     }
 
-    // Duplicate check
-    const { data: existing } = await supabase
-        .from('channels')
-        .select('id')
-        .eq('join_link', join_link)
-        .single();
-
-    if (existing) {
-        return { error: 'Bu kanal zaten sistemde mevcut!' };
-    }
-
-    // Generate unique slug
-    const baseSlug = slugify(name) || 'channel';
-    const slug = `${baseSlug}-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-    const botToken = 'TK_' + Math.random().toString(36).substring(2, 10).toUpperCase();
-
-    const channelData = {
-        name,
-        description,
-        join_link,
-        category_id,
-        contact_info,
-        slug,
-        owner_id: user.id,
-        status: 'pending',
-        bot_token: botToken,
-    };
-
-    let insertError;
-    if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
-        const adminClient = getAdminClient();
-        const { error } = await adminClient.from('channels').insert(channelData);
-        insertError = error;
-    } else {
-        const { error } = await supabase.from('channels').insert(channelData);
-        insertError = error;
-    }
-
-    if (insertError) {
-        console.error('Submission error:', insertError);
-        return { error: 'Başvuru sırasında bir hata oluştu. Lütfen tekrar deneyin.' };
-    }
-
-    // Admin bildirimi
     try {
-        const botTok = process.env.TELEGRAM_BOT_TOKEN;
-        const adminId = process.env.TELEGRAM_ADMIN_ID;
-        if (botTok && adminId) {
-            await fetch(`https://api.telegram.org/bot${botTok}/sendMessage`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    chat_id: adminId,
-                    text: `📡 *Yeni Kanal Başvurusu!*\n\n📺 Kanal: ${name}\n🔗 Link: ${join_link}\n👤 Telegram: @${telegram_contact}\n\n👉 https://telegramkanali.com/admin/dashboard`,
-                    parse_mode: 'Markdown',
-                }),
-            });
-        }
-    } catch {}
+        const adminClient = getAdminClient();
 
-    return { success: true };
+        // Duplicate check
+        const { data: existing } = await adminClient
+            .from('channels')
+            .select('id')
+            .eq('join_link', join_link)
+            .maybeSingle();
+
+        if (existing) {
+            return { error: 'Bu kanal zaten sistemde mevcut!' };
+        }
+
+        const baseSlug = slugify(name) || 'channel';
+        const slug = `${baseSlug}-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+
+        const { error: insertError } = await adminClient.from('channels').insert({
+            name,
+            description,
+            join_link,
+            category_id,
+            contact_info,
+            slug,
+            owner_id: user.id,
+            status: 'pending',
+        });
+
+        if (insertError) {
+            console.error('Submission error:', insertError);
+            return { error: 'Başvuru sırasında bir hata oluştu. Lütfen tekrar deneyin.' };
+        }
+
+        // Admin bildirimi
+        try {
+            const botTok = process.env.TELEGRAM_BOT_TOKEN;
+            const adminId = process.env.TELEGRAM_ADMIN_ID;
+            if (botTok && adminId) {
+                await fetch(`https://api.telegram.org/bot${botTok}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        chat_id: adminId,
+                        text: `📡 *Yeni Kanal Başvurusu!*\n\n📺 Kanal: ${name}\n🔗 Link: ${join_link}\n👤 Telegram: @${telegram_contact}\n\n👉 https://telegramkanali.com/admin/dashboard`,
+                        parse_mode: 'Markdown',
+                    }),
+                });
+            }
+        } catch {}
+
+        return { success: true };
+    } catch (err) {
+        console.error('submitChannel critical error:', err);
+        return { error: 'Sunucu hatası oluştu. Lütfen tekrar deneyin.' };
+    }
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
-// İletişim mesajları (soru/öneri/diğer) — usdt_payments tablosunu rehber olarak
+// İletişim mesajları (soru/öneri/diğer)
 // ──────────────────────────────────────────────────────────────────────────────
 async function submitContactMessage(formData: FormData, contact_type: string) {
     const contact_telegram = formData.get('contact_telegram') as string;
@@ -132,7 +168,6 @@ async function submitContactMessage(formData: FormData, contact_type: string) {
         return { error: 'Telegram kullanıcı adı ve mesajınızı doldurun.' };
     }
 
-    // Admin'e bildirim gönder
     try {
         const botToken = process.env.TELEGRAM_BOT_TOKEN;
         const adminId = process.env.TELEGRAM_ADMIN_ID;
