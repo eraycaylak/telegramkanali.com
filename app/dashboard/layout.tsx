@@ -16,7 +16,7 @@ import {
     ChevronRight,
     Phone,
     DollarSign,
-    LifeBuoy,
+    PlusCircle,
 } from 'lucide-react';
 import { useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
@@ -29,12 +29,12 @@ interface DashboardLayoutProps {
 const menuItems = [
     { name: 'Genel Bakış', href: '/dashboard', icon: LayoutDashboard, desc: 'Özet ve istatistikler' },
     { name: 'Kanallarım', href: '/dashboard/channels', icon: Tv, desc: 'Kanal yönetimi' },
+    { name: 'Kanal Ekle', href: '/dashboard/kanal-ekle', icon: PlusCircle, desc: 'Yeni kanal başvurusu' },
     { name: 'Reklamlarım', href: '/dashboard/ads', icon: TrendingUp, desc: 'Kampanya yönetimi' },
     { name: 'Kanalımı Sat', href: '/dashboard/kanal-sat', icon: DollarSign, desc: 'Kanal alım-satım ilanları' },
     { name: 'Mesajlarım', href: '/dashboard/mesajlar', icon: MessageCircle, desc: 'Alım-satım sohbetleri' },
     { name: 'Bot Ayarları', href: '/dashboard/bot', icon: Settings, desc: 'Telegram bot entegrasyonu' },
     { name: 'İstatistikler', href: '/dashboard/stats', icon: PieChart, desc: 'Kanal analizleri' },
-    { name: 'Destek', href: '/dashboard/destek', icon: LifeBuoy, desc: 'Yardım ve destek talepleri' },
 ];
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
