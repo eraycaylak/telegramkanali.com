@@ -5,7 +5,7 @@ const TOKEN = process.env.ESCROW_BOT_TOKEN!;
 const API = `https://api.telegram.org/bot${TOKEN}`;
 
 export const ADMIN_ID = parseInt(process.env.TELEGRAM_ADMIN_CHAT_ID || '1248286205', 10);
-export const USDT_ADDRESS = process.env.USDT_TRC20_ADDRESS || 'USDT_ADRESINIZI_BURAYA_GIRIN';
+export const USDT_ADDRESS = process.env.USDT_TRC20_ADDRESS || 'TKsknVNnQuQDsL8RYuL5tXSbaRxTURT4eg';
 export const BOT_USERNAME = process.env.TELEGRAM_BOT_USERNAME || '';
 
 // ─── Temel mesaj gönderme ────────────────────────────────────────────────────

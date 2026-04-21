@@ -2,8 +2,6 @@
 
 import { getAdminClient } from '@/lib/supabaseAdmin';
 import { revalidatePath } from 'next/cache';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Paket Tanımları
@@ -122,22 +120,27 @@ export async function createUsdtPayment(formData: FormData) {
 // Admin — Tüm Ödemeleri Listele
 // ──────────────────────────────────────────────────────────────────────────────
 export async function getUsdtPayments(statusFilter?: 'pending' | 'approved' | 'rejected') {
-    const db = getAdminClient();
-    let query = db
-        .from('usdt_payments')
-        .select('*')
-        .order('created_at', { ascending: false });
+    try {
+        const db = getAdminClient();
+        let query = db
+            .from('usdt_payments')
+            .select('*')
+            .order('created_at', { ascending: false });
 
-    if (statusFilter) {
-        query = query.eq('status', statusFilter);
-    }
+        if (statusFilter) {
+            query = query.eq('status', statusFilter);
+        }
 
-    const { data, error } = await query;
-    if (error) {
-        console.error('[USDT] Fetch error:', error);
+        const { data, error } = await query;
+        if (error) {
+            console.error('[USDT] Fetch error:', error);
+            return [];
+        }
+        return data || [];
+    } catch (err) {
+        console.error('[USDT] Critical fetch error:', err);
         return [];
     }
-    return data || [];
 }
 
 // ──────────────────────────────────────────────────────────────────────────────

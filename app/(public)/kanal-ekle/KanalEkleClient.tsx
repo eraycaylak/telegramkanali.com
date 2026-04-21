@@ -19,7 +19,7 @@ const CONTACT_TYPES = [
     { value: 'diger', label: '📋 Diğer', desc: 'Başka bir konuda iletişime geçmek istiyorum.' },
 ];
 
-const USDT_ADDRESS = process.env.NEXT_PUBLIC_USDT_ADDRESS || 'TRJ1q4N6eCt5q3oDmfSEfFHr7E6kBJ13pL';
+const USDT_ADDRESS = process.env.NEXT_PUBLIC_USDT_ADDRESS || 'TKsknVNnQuQDsL8RYuL5tXSbaRxTURT4eg';
 
 function KanalEkleClientInner({ categories }: Props) {
     const searchParams = useSearchParams();
