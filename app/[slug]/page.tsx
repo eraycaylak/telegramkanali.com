@@ -827,13 +827,19 @@ export default async function DynamicPage({
   // ====== KATEGORİ SAYFASI RENDER ======
   const category = await getCategoryBySlug(slug);
   if (category) {
-    const [channelsData, categories, banners] = await Promise.all([
+    const [channelsData, categories, banners, popularInCategory] = await Promise.all([
       getChannels(page, LIMIT, undefined, category.id),
       getCategories(),
       getBanners(),
+      getChannelsByCategory(category.slug || category.id),
     ]);
     const { data: channels, count: totalCount } = channelsData;
     const totalPages = Math.ceil((totalCount || 0) / LIMIT);
+    
+    // Top channels by member count for "Çok Tıklananlar" section
+    const topChannels = [...popularInCategory]
+      .sort((a: any, b: any) => (b.member_count || 0) - (a.member_count || 0))
+      .slice(0, 5);
 
     return (
       <>
@@ -924,6 +930,28 @@ export default async function DynamicPage({
 
             {/* Sidebar */}
             <div className="space-y-6">
+              {/* 🔥 Çok Tıklananlar */}
+              {topChannels.length > 0 && (
+                <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+                  <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">🔥 En Popüler {category.name} Kanalları</h3>
+                  <div className="space-y-3">
+                    {topChannels.map((ch: any, i: number) => (
+                      <Link key={ch.id} href={`/${ch.slug}`} className="flex items-center gap-3 group">
+                        <span className="w-6 h-6 rounded-full bg-gradient-to-br from-red-500 to-orange-500 text-white text-[10px] font-black flex items-center justify-center shrink-0">{i + 1}</span>
+                        <div className="min-w-0 flex-1">
+                          <div className="text-sm font-bold text-gray-900 group-hover:text-blue-600 transition truncate">{ch.name}</div>
+                          <div className="text-[10px] text-gray-400">{ch.member_count ? new Intl.NumberFormat('tr-TR').format(ch.member_count) + ' üye' : 'Aktif'}</div>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Promoted Ads */}
+              <FeaturedAds adType="banner" maxAds={1} />
+
+              {/* Kategoriler */}
               <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
                 <h3 className="font-bold text-gray-900 mb-4">📂 Tüm Kategoriler</h3>
                 <div className="flex flex-wrap gap-2">
