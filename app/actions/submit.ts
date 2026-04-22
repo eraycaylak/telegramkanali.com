@@ -158,32 +158,89 @@ export async function submitChannel(formData: FormData) {
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
-// İletişim mesajları (soru/öneri/diğer)
+// İletişim mesajları (soru/öneri/diğer) — DB'ye yazar + Telegram'a bildirim
 // ──────────────────────────────────────────────────────────────────────────────
 async function submitContactMessage(formData: FormData, contact_type: string) {
-    const contact_telegram = formData.get('contact_telegram') as string;
-    const notes = (formData.get('notes') as string) || '';
+    const contact_telegram = (formData.get('contact_telegram') as string || '').replace('@', '').trim();
+    const contact_name     = (formData.get('contact_name') as string || '').trim();
+    const notes            = (formData.get('notes') as string || '').trim();
 
     if (!contact_telegram || !notes) {
         return { error: 'Telegram kullanıcı adı ve mesajınızı doldurun.' };
     }
 
+    // Kullanıcı oturumu varsa user_id bağla, yoksa null bırak (anonim)
+    const user = await getAuthUser();
+
+    // Kategori eşleme
+    const categoryMap: Record<string, string> = {
+        soru_oneri: 'genel',
+        diger: 'genel',
+    };
+
     try {
-        const botToken = process.env.TELEGRAM_BOT_TOKEN;
-        const adminId = process.env.TELEGRAM_ADMIN_ID;
-        if (botToken && adminId) {
-            const typeLabel = contact_type === 'soru_oneri' ? '💬 Soru/Öneri' : '📋 Diğer';
-            await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    chat_id: adminId,
-                    text: `${typeLabel}\n\n👤 Telegram: @${contact_telegram.replace('@', '')}\n\n📝 Mesaj:\n${notes}`,
-                    parse_mode: 'Markdown',
-                }),
+        const adminClient = getAdminClient();
+
+        // 1) support_tickets'a yaz
+        const subject = contact_type === 'soru_oneri'
+            ? `Soru/Öneri — @${contact_telegram}`
+            : `Diğer İletişim — @${contact_telegram}`;
+
+        const { data: ticket, error: ticketError } = await adminClient
+            .from('support_tickets')
+            .insert({
+                user_id: user?.id ?? null,
+                subject,
+                category: categoryMap[contact_type] ?? 'genel',
+                status: 'open',
+                priority: 'normal',
+                contact_telegram,
+                contact_name: contact_name || null,
+            })
+            .select('id')
+            .single();
+
+        if (ticketError || !ticket) {
+            console.error('[submitContactMessage] ticket insert error:', ticketError);
+            // DB hatası olsa da başarılı dön, Telegram yedek
+        } else {
+            // 2) İlk mesajı support_messages'a yaz
+            const messageContent = [
+                contact_name ? `Ad: ${contact_name}` : '',
+                `Telegram: @${contact_telegram}`,
+                '',
+                notes,
+            ].filter(Boolean).join('\n');
+
+            await adminClient.from('support_messages').insert({
+                ticket_id: ticket.id,
+                sender_id: user?.id ?? null,
+                content: messageContent,
+                is_admin: false,
             });
         }
-    } catch {}
 
-    return { success: true };
+        // 3) Telegram bot bildirimi (opsiyonel)
+        try {
+            const botToken = process.env.TELEGRAM_BOT_TOKEN;
+            const adminTgId = process.env.TELEGRAM_ADMIN_ID;
+            if (botToken && adminTgId) {
+                const typeLabel = contact_type === 'soru_oneri' ? '💬 Soru/Öneri' : '📋 Diğer';
+                await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        chat_id: adminTgId,
+                        text: `${typeLabel}\n\n👤 Telegram: @${contact_telegram}\n📝 Mesaj:\n${notes}\n\n👉 https://telegramkanali.com/admin/destek`,
+                        parse_mode: 'Markdown',
+                    }),
+                });
+            }
+        } catch {}
+
+        return { success: true };
+    } catch (err) {
+        console.error('[submitContactMessage] critical error:', err);
+        return { error: 'Sunucu hatası oluştu. Lütfen tekrar deneyin.' };
+    }
 }

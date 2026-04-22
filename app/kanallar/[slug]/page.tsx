@@ -80,7 +80,7 @@ export default async function ChannelPage({ params }: { params: Promise<{ slug: 
     const updatedDate = new Date((channel as any)?.updated_at || channel?.created_at || Date.now())
         .toLocaleDateString('tr-TR', { year: 'numeric', month: 'long', day: 'numeric' });
 
-    // ─── Dinamik FAQ ────────────────────────────────────────────────────────────
+    // ─── Dinamik FAQ (yalnızca UI render için — schema /[slug] rotasında) ─────
     const faqs = [
         {
             question: `${channel.name} Telegram kanalı güvenli mi?`,
@@ -100,15 +100,9 @@ export default async function ChannelPage({ params }: { params: Promise<{ slug: 
         },
     ];
 
-    const faqSchema = {
-        '@context': 'https://schema.org',
-        '@type': 'FAQPage',
-        mainEntity: faqs.map(faq => ({
-            '@type': 'Question',
-            name: faq.question,
-            acceptedAnswer: { '@type': 'Answer', text: faq.answer },
-        })),
-    };
+    // NOT: FAQPage schema YALNIZCA /${slug} rotasında render edilir.
+    // Bu rotada (/kanallar/${slug}) FAQPage schema üretilmez;
+    // aynı sayfada birden fazla FAQPage bloğu Google'da duplikasyon hatasına yol açar.
 
     const jsonLd = {
         '@context': 'https://schema.org',
@@ -125,7 +119,7 @@ export default async function ChannelPage({ params }: { params: Promise<{ slug: 
     return (
         <div className="grid gap-8 lg:grid-cols-3">
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
+            {/* FAQPage schema bu rotada kasıtlı olarak çıkarıldı — /[slug] rotasında mevcut */}
             <JsonLd data={generateAggregateRatingSchema(channel, baseUrl)} />
 
             {/* Main Content */}

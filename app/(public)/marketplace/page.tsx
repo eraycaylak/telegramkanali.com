@@ -15,17 +15,20 @@ export const metadata: Metadata = {
     alternates: { canonical: 'https://telegramkanali.com/marketplace' },
 };
 
-const jsonLd = {
+const webPageJsonLd = {
     '@context': 'https://schema.org',
-    '@graph': [
-        { '@type': 'WebPage', name: 'Telegram Kanal Alım Satım Marketplace', url: 'https://telegramkanali.com/marketplace', inLanguage: 'tr' },
-        {
-            '@type': 'FAQPage',
-            mainEntity: [
-                { '@type': 'Question', name: 'Telegram kanal alım satımında escrow ne demek?', acceptedAnswer: { '@type': 'Answer', text: 'Alıcının ödeme yapıp fonların platformda tutulduğu, kanal transferi sonrası satıcıya aktarıldığı güvenlik sistemidir.' } },
-                { '@type': 'Question', name: 'Telegram kanal satış komisyonu ne kadar?', acceptedAnswer: { '@type': 'Answer', text: '%5 sabit platform komisyonu.' } },
-            ],
-        },
+    '@type': 'WebPage',
+    name: 'Telegram Kanal Alım Satım Marketplace',
+    url: 'https://telegramkanali.com/marketplace',
+    inLanguage: 'tr',
+};
+
+const faqJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: [
+        { '@type': 'Question', name: 'Telegram kanal alım satımında escrow ne demek?', acceptedAnswer: { '@type': 'Answer', text: 'Alıcının ödeme yapıp fonların platformda tutulduğu, kanal transferi sonrası satıcıya aktarıldığı güvenlik sistemidir.' } },
+        { '@type': 'Question', name: 'Telegram kanal satış komisyonu ne kadar?', acceptedAnswer: { '@type': 'Answer', text: '%5 sabit platform komisyonu.' } },
     ],
 };
 
@@ -224,7 +227,8 @@ export default async function MarketplacePage() {
                 }
             `}</style>
 
-            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webPageJsonLd) }} />
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
             <HoverStyles />
 
             <div className="mp-outer">

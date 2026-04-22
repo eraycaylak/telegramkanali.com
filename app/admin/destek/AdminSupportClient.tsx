@@ -17,6 +17,8 @@ type Ticket = {
     priority: string;
     created_at: string;
     updated_at: string;
+    contact_telegram?: string | null;
+    contact_name?: string | null;
     profiles?: { email: string; full_name: string | null };
 };
 
@@ -208,9 +210,14 @@ export default function AdminSupportClient() {
                                                 {ticket.subject}
                                             </td>
                                             <td className="px-5 py-3.5 text-gray-500 hidden sm:table-cell">
-                                                <div className="text-xs">{ticket.profiles?.email || '—'}</div>
-                                                {ticket.profiles?.full_name && (
-                                                    <div className="text-xs text-gray-400">{ticket.profiles.full_name}</div>
+                                                {ticket.contact_telegram
+                                                    ? <div className="text-xs font-mono">@{ticket.contact_telegram}</div>
+                                                    : ticket.profiles?.email
+                                                        ? <div className="text-xs">{ticket.profiles.email}</div>
+                                                        : <div className="text-xs text-gray-300">—</div>
+                                                }
+                                                {ticket.contact_name && (
+                                                    <div className="text-xs text-gray-400">{ticket.contact_name}</div>
                                                 )}
                                             </td>
                                             <td className="px-5 py-3.5 text-gray-500 hidden md:table-cell text-xs">
@@ -255,7 +262,15 @@ export default function AdminSupportClient() {
                             <span className={`inline-block px-2.5 py-0.5 rounded-full border font-semibold ${status.color}`}>{status.label}</span>
                             <span>{CATEGORIES[selectedTicket.category] || selectedTicket.category}</span>
                             <span>·</span>
-                            <span>{selectedTicket.profiles?.email || 'Bilinmiyor'}</span>
+                            <span className="font-mono">
+                                {selectedTicket.contact_telegram
+                                    ? `@${selectedTicket.contact_telegram}`
+                                    : selectedTicket.profiles?.email || 'Bilinmiyor'
+                                }
+                            </span>
+                            {selectedTicket.contact_name && (
+                                <span className="text-gray-400">({selectedTicket.contact_name})</span>
+                            )}
                         </div>
                     </div>
                     {/* Durum Değiştir */}
