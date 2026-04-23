@@ -1,17 +1,11 @@
 'use client';
 
-import { useState, useEffect, useRef, useTransition } from 'react';
-import { createClient } from '@supabase/supabase-js';
-import { createSupportTicket, sendUserMessage } from '@/app/actions/destek';
+import { useState, useEffect, useRef } from 'react';
+import { supabase } from '@/lib/supabaseClient';
 import {
     LifeBuoy, Plus, ChevronLeft, Send, Loader2,
-    CheckCircle2, Clock, AlertCircle, XCircle, RefreshCw,
+    CheckCircle2, Clock, XCircle, RefreshCw, AlertCircle,
 } from 'lucide-react';
-
-const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
 
 type Ticket = {
     id: string;
@@ -29,21 +23,21 @@ type Message = {
     created_at: string;
 };
 
-const STATUS_CONFIG: Record<string, { label: string; color: string; icon: React.ElementType }> = {
-    open:        { label: 'Açık',      color: 'bg-yellow-100 text-yellow-700 border-yellow-200', icon: Clock },
-    in_progress: { label: 'İşleniyor', color: 'bg-blue-100 text-blue-700 border-blue-200',       icon: Loader2 },
-    resolved:    { label: 'Çözüldü',   color: 'bg-green-100 text-green-700 border-green-200',    icon: CheckCircle2 },
-    closed:      { label: 'Kapalı',    color: 'bg-gray-100 text-gray-500 border-gray-200',       icon: XCircle },
+const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
+    open:        { label: 'Açık',      color: 'bg-yellow-100 text-yellow-700 border-yellow-200' },
+    in_progress: { label: 'İşleniyor', color: 'bg-blue-100   text-blue-700   border-blue-200'   },
+    resolved:    { label: 'Çözüldü',   color: 'bg-green-100  text-green-700  border-green-200'  },
+    closed:      { label: 'Kapalı',    color: 'bg-gray-100   text-gray-500   border-gray-200'   },
 };
 
 const CATEGORIES = [
-    { value: 'genel',    label: '💬 Genel Soru' },
-    { value: 'teknik',   label: '🔧 Teknik Sorun' },
-    { value: 'reklam',   label: '📢 Reklam' },
-    { value: 'kanal',    label: '📺 Kanal İşlemi' },
-    { value: 'odeme',    label: '💳 Ödeme' },
-    { value: 'sikayet',  label: '⚠️ Şikâyet' },
-    { value: 'oneri',    label: '💡 Öneri' },
+    { value: 'genel',   label: '💬 Genel Soru'    },
+    { value: 'teknik',  label: '🔧 Teknik Sorun'  },
+    { value: 'reklam',  label: '📢 Reklam'         },
+    { value: 'kanal',   label: '📺 Kanal İşlemi'   },
+    { value: 'odeme',   label: '💳 Ödeme'           },
+    { value: 'sikayet', label: '⚠️ Şikâyet'        },
+    { value: 'oneri',   label: '💡 Öneri'           },
 ];
 
 function timeAgo(d: string) {
@@ -57,30 +51,73 @@ function timeAgo(d: string) {
 }
 
 // ── Yeni Ticket Formu ────────────────────────────────────────────────────────
-function NewTicketForm({ onSuccess }: { onSuccess: () => void }) {
-    const [isPending, startTransition] = useTransition();
-    const [error, setError] = useState('');
+function NewTicketForm({ userId, defaultCategory, onSuccess, onCancel }: {
+    userId: string;
+    defaultCategory?: string;
+    onSuccess: () => void;
+    onCancel: () => void;
+}) {
+    const [loading, setLoading] = useState(false);
+    const [error, setError]     = useState('');
     const formRef = useRef<HTMLFormElement>(null);
 
-    function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
         setError('');
-        const fd = new FormData(e.currentTarget);
-        startTransition(async () => {
-            const res = await createSupportTicket(fd);
-            if (res.error) { setError(res.error); return; }
-            formRef.current?.reset();
-            onSuccess();
-        });
+        setLoading(true);
+
+        const fd       = new FormData(e.currentTarget);
+        const subject  = (fd.get('subject')  as string || '').trim();
+        const category = (fd.get('category') as string || 'genel').trim();
+        const message  = (fd.get('message')  as string || '').trim();
+
+        if (!subject || !message) {
+            setError('Konu ve mesaj zorunludur.');
+            setLoading(false);
+            return;
+        }
+
+        // 1) Ticket oluştur
+        const { data: ticket, error: ticketErr } = await supabase
+            .from('support_tickets')
+            .insert({ user_id: userId, subject, category, status: 'open', priority: 'normal' })
+            .select('id')
+            .single();
+
+        if (ticketErr || !ticket) {
+            console.error('[createTicket]', ticketErr);
+            setError('Ticket oluşturulamadı: ' + (ticketErr?.message || 'Bilinmeyen hata'));
+            setLoading(false);
+            return;
+        }
+
+        // 2) İlk mesajı ekle
+        const { error: msgErr } = await supabase
+            .from('support_messages')
+            .insert({ ticket_id: ticket.id, sender_id: userId, content: message, is_admin: false });
+
+        if (msgErr) {
+            console.error('[createTicket] msg', msgErr);
+            // Ticket oluştu, mesaj gitmedi — yine de devam et
+        }
+
+        setLoading(false);
+        formRef.current?.reset();
+        onSuccess();
     }
 
     return (
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
-            <h2 className="text-lg font-black text-gray-900 mb-5 flex items-center gap-2">
-                <Plus size={20} className="text-blue-600" /> Yeni Destek Talebi
-            </h2>
+            <div className="flex items-center justify-between mb-5">
+                <h2 className="text-lg font-black text-gray-900 flex items-center gap-2">
+                    <Plus size={20} className="text-blue-600" /> Yeni Destek Talebi
+                </h2>
+                <button onClick={onCancel} className="text-sm text-gray-400 hover:text-gray-700 transition">
+                    İptal
+                </button>
+            </div>
+
             <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
-                {/* Konu */}
                 <div>
                     <label className="block text-sm font-bold text-gray-700 mb-1.5">Konu *</label>
                     <input
@@ -90,20 +127,16 @@ function NewTicketForm({ onSuccess }: { onSuccess: () => void }) {
                     />
                 </div>
 
-                {/* Kategori */}
                 <div>
                     <label className="block text-sm font-bold text-gray-700 mb-1.5">Kategori</label>
                     <select
-                        name="category" defaultValue="genel"
+                        name="category" defaultValue={defaultCategory || 'genel'}
                         className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
-                        {CATEGORIES.map(c => (
-                            <option key={c.value} value={c.value}>{c.label}</option>
-                        ))}
+                        {CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
                     </select>
                 </div>
 
-                {/* Mesaj */}
                 <div>
                     <label className="block text-sm font-bold text-gray-700 mb-1.5">Mesajınız *</label>
                     <textarea
@@ -120,11 +153,11 @@ function NewTicketForm({ onSuccess }: { onSuccess: () => void }) {
                 )}
 
                 <button
-                    type="submit" disabled={isPending}
+                    type="submit" disabled={loading}
                     className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition flex items-center justify-center gap-2 disabled:opacity-60"
                 >
-                    {isPending ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
-                    {isPending ? 'Gönderiliyor...' : 'Talep Oluştur'}
+                    {loading ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
+                    {loading ? 'Gönderiliyor...' : 'Talep Oluştur'}
                 </button>
             </form>
         </div>
@@ -132,60 +165,74 @@ function NewTicketForm({ onSuccess }: { onSuccess: () => void }) {
 }
 
 // ── Ticket Detay (sohbet) ────────────────────────────────────────────────────
-function TicketDetail({ ticket, userId, onBack }: { ticket: Ticket; userId: string; onBack: () => void }) {
+function TicketDetail({ ticket, userId, onBack }: {
+    ticket: Ticket;
+    userId: string;
+    onBack: () => void;
+}) {
     const [messages, setMessages] = useState<Message[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [isPending, startTransition] = useTransition();
-    const [replyError, setReplyError] = useState('');
-    const formRef = useRef<HTMLFormElement>(null);
+    const [loadingMsgs, setLoadingMsgs] = useState(true);
+    const [sending, setSending]         = useState(false);
+    const [replyError, setReplyError]   = useState('');
+    const formRef  = useRef<HTMLFormElement>(null);
     const bottomRef = useRef<HTMLDivElement>(null);
 
     async function loadMessages() {
-        setLoading(true);
+        setLoadingMsgs(true);
         const { data } = await supabase
             .from('support_messages')
             .select('id, content, is_admin, created_at')
             .eq('ticket_id', ticket.id)
             .order('created_at', { ascending: true });
         setMessages(data || []);
-        setLoading(false);
+        setLoadingMsgs(false);
     }
 
     useEffect(() => { loadMessages(); }, [ticket.id]);
-    useEffect(() => {
-        bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [messages]);
+    useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
 
-    function handleReply(e: React.FormEvent<HTMLFormElement>) {
+    async function handleReply(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
         setReplyError('');
-        const fd = new FormData(e.currentTarget);
-        fd.set('ticket_id', ticket.id);
-        startTransition(async () => {
-            const res = await sendUserMessage(fd);
-            if (res.error) { setReplyError(res.error); return; }
-            formRef.current?.reset();
-            await loadMessages();
-        });
+        const fd      = new FormData(e.currentTarget);
+        const content = (fd.get('content') as string || '').trim();
+        if (!content) return;
+
+        setSending(true);
+        const { error } = await supabase
+            .from('support_messages')
+            .insert({ ticket_id: ticket.id, sender_id: userId, content, is_admin: false });
+
+        if (error) {
+            setReplyError('Mesaj gönderilemedi: ' + error.message);
+            setSending(false);
+            return;
+        }
+
+        await supabase
+            .from('support_tickets')
+            .update({ status: 'open', updated_at: new Date().toISOString() })
+            .eq('id', ticket.id);
+
+        formRef.current?.reset();
+        setSending(false);
+        await loadMessages();
     }
 
     const statusConf = STATUS_CONFIG[ticket.status] || STATUS_CONFIG.open;
-    const catLabel = CATEGORIES.find(c => c.value === ticket.category)?.label || ticket.category;
-    const isClosed = ticket.status === 'closed';
+    const catLabel   = CATEGORIES.find(c => c.value === ticket.category)?.label || ticket.category;
+    const isClosed   = ticket.status === 'closed';
 
     return (
         <div className="space-y-4">
-            {/* Geri + Başlık */}
-            <div className="flex items-center gap-3">
-                <button
-                    onClick={onBack}
-                    className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 transition"
-                >
-                    <ChevronLeft size={16} /> Tüm Talepler
-                </button>
-            </div>
+            <button
+                onClick={onBack}
+                className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 transition"
+            >
+                <ChevronLeft size={16} /> Tüm Talepler
+            </button>
 
-            {/* Ticket Bilgisi */}
+            {/* Ticket başlığı */}
             <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
                 <div className="flex items-start justify-between gap-4 flex-wrap">
                     <div>
@@ -199,44 +246,38 @@ function TicketDetail({ ticket, userId, onBack }: { ticket: Ticket; userId: stri
                             <span className="text-xs text-gray-400">{timeAgo(ticket.created_at)}</span>
                         </div>
                     </div>
-                    <button
-                        onClick={loadMessages}
-                        className="p-2 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition"
-                        title="Yenile"
-                    >
+                    <button onClick={loadMessages} className="p-2 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition" title="Yenile">
                         <RefreshCw size={15} />
                     </button>
                 </div>
             </div>
 
             {/* Mesajlar */}
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 min-h-[300px] max-h-[480px] overflow-y-auto space-y-3">
-                {loading ? (
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 min-h-[280px] max-h-[460px] overflow-y-auto space-y-3">
+                {loadingMsgs ? (
                     <div className="flex items-center justify-center py-16">
                         <Loader2 className="animate-spin text-blue-500" size={24} />
                     </div>
                 ) : messages.length === 0 ? (
                     <p className="text-sm text-gray-400 text-center py-16">Henüz mesaj yok.</p>
-                ) : (
-                    messages.map(msg => (
-                        <div key={msg.id} className={`flex ${msg.is_admin ? 'justify-start' : 'justify-end'}`}>
-                            <div className={`max-w-[80%] rounded-2xl px-4 py-3 ${
-                                msg.is_admin
-                                    ? 'bg-gray-100 text-gray-900 rounded-tl-md'
-                                    : 'bg-blue-600 text-white rounded-tr-md'
-                            }`}>
-                                <p className={`text-[11px] font-bold mb-1 ${msg.is_admin ? 'text-gray-500' : 'text-blue-200'}`}>
-                                    {msg.is_admin ? '🛡️ Destek Ekibi' : '👤 Siz'} · {timeAgo(msg.created_at)}
-                                </p>
-                                <p className="text-sm whitespace-pre-wrap leading-relaxed">{msg.content}</p>
-                            </div>
+                ) : messages.map(msg => (
+                    <div key={msg.id} className={`flex ${msg.is_admin ? 'justify-start' : 'justify-end'}`}>
+                        <div className={`max-w-[80%] rounded-2xl px-4 py-3 ${
+                            msg.is_admin
+                                ? 'bg-gray-100 text-gray-900 rounded-tl-md'
+                                : 'bg-blue-600 text-white rounded-tr-md'
+                        }`}>
+                            <p className={`text-[11px] font-bold mb-1 ${msg.is_admin ? 'text-gray-500' : 'text-blue-200'}`}>
+                                {msg.is_admin ? '🛡️ Destek Ekibi' : '👤 Siz'} · {timeAgo(msg.created_at)}
+                            </p>
+                            <p className="text-sm whitespace-pre-wrap leading-relaxed">{msg.content}</p>
                         </div>
-                    ))
-                )}
+                    </div>
+                ))}
                 <div ref={bottomRef} />
             </div>
 
-            {/* Yanıt Formu */}
+            {/* Yanıt kutusu */}
             {!isClosed ? (
                 <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-4">
                     <form ref={formRef} onSubmit={handleReply} className="flex gap-3">
@@ -246,11 +287,11 @@ function TicketDetail({ ticket, userId, onBack }: { ticket: Ticket; userId: stri
                             className="flex-1 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                         />
                         <button
-                            type="submit" disabled={isPending}
+                            type="submit" disabled={sending}
                             className="bg-blue-600 hover:bg-blue-700 text-white px-5 rounded-xl transition disabled:opacity-50 flex flex-col items-center justify-center gap-1.5 font-bold text-xs"
                         >
-                            {isPending ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
-                            {!isPending && <span>Gönder</span>}
+                            {sending ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
+                            {!sending && <span>Gönder</span>}
                         </button>
                     </form>
                     {replyError && (
@@ -261,7 +302,7 @@ function TicketDetail({ ticket, userId, onBack }: { ticket: Ticket; userId: stri
                 </div>
             ) : (
                 <div className="bg-gray-50 border border-gray-200 rounded-2xl p-4 text-center text-sm text-gray-500">
-                    Bu destek talebi kapatılmış. Yeni bir soru için yeni talep oluşturun.
+                    Bu talep kapatılmış. Yeni bir soru için yeni talep oluşturun.
                 </div>
             )}
         </div>
@@ -291,7 +332,7 @@ function TicketList({ tickets, loading, onSelect, onNew, onRefresh }: {
                     <LifeBuoy size={20} className="text-blue-600" /> Destek Taleplerim
                 </h2>
                 <div className="flex gap-2">
-                    <button onClick={onRefresh} className="p-2 text-gray-400 hover:bg-gray-100 rounded-lg transition">
+                    <button onClick={onRefresh} className="p-2 text-gray-400 hover:bg-gray-100 rounded-lg transition" title="Yenile">
                         <RefreshCw size={15} />
                     </button>
                     <button
@@ -323,31 +364,27 @@ function TicketList({ tickets, loading, onSelect, onNew, onRefresh }: {
                                 <th className="px-5 py-3 text-left">Konu</th>
                                 <th className="px-5 py-3 text-left hidden sm:table-cell">Kategori</th>
                                 <th className="px-5 py-3 text-left">Durum</th>
-                                <th className="px-5 py-3 text-left hidden sm:table-cell">Son Güncelleme</th>
+                                <th className="px-5 py-3 text-left hidden sm:table-cell">Güncelleme</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
                             {tickets.map(ticket => {
                                 const conf = STATUS_CONFIG[ticket.status] || STATUS_CONFIG.open;
-                                const cat = CATEGORIES.find(c => c.value === ticket.category)?.label || ticket.category;
+                                const cat  = CATEGORIES.find(c => c.value === ticket.category)?.label || ticket.category;
                                 return (
                                     <tr
                                         key={ticket.id}
                                         onClick={() => onSelect(ticket)}
                                         className="hover:bg-blue-50 cursor-pointer transition-colors"
                                     >
-                                        <td className="px-5 py-4 font-semibold text-gray-900 max-w-[200px] truncate">
-                                            {ticket.subject}
-                                        </td>
+                                        <td className="px-5 py-4 font-semibold text-gray-900 max-w-[200px] truncate">{ticket.subject}</td>
                                         <td className="px-5 py-4 text-gray-500 text-xs hidden sm:table-cell">{cat}</td>
                                         <td className="px-5 py-4">
                                             <span className={`text-xs font-bold px-2.5 py-1 rounded-full border ${conf.color}`}>
                                                 {conf.label}
                                             </span>
                                         </td>
-                                        <td className="px-5 py-4 text-xs text-gray-400 hidden sm:table-cell">
-                                            {timeAgo(ticket.updated_at)}
-                                        </td>
+                                        <td className="px-5 py-4 text-xs text-gray-400 hidden sm:table-cell">{timeAgo(ticket.updated_at)}</td>
                                     </tr>
                                 );
                             })}
@@ -359,30 +396,37 @@ function TicketList({ tickets, loading, onSelect, onNew, onRefresh }: {
     );
 }
 
-// ── Ana Bileşen ──────────────────────────────────────────────────────────────
-export default function DestekClient({ userId }: { userId: string }) {
-    const [view, setView] = useState<'list' | 'new' | 'detail'>('list');
-    const [tickets, setTickets] = useState<Ticket[]>([]);
-    const [loading, setLoading] = useState(true);
+// ── Ana bileşen ──────────────────────────────────────────────────────────────
+export default function DestekClient({ userId, defaultCategory }: {
+    userId: string;
+    defaultCategory?: string;
+}) {
+    const [view, setView]                   = useState<'list' | 'new' | 'detail'>('list');
+    const [tickets, setTickets]             = useState<Ticket[]>([]);
+    const [loading, setLoading]             = useState(true);
     const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
 
     async function loadTickets() {
         setLoading(true);
-        const { data } = await supabase
+        const { data, error } = await supabase
             .from('support_tickets')
             .select('id, subject, category, status, created_at, updated_at')
             .eq('user_id', userId)
             .order('updated_at', { ascending: false });
+        if (error) console.error('[loadTickets]', error);
         setTickets(data || []);
         setLoading(false);
     }
 
-    useEffect(() => { loadTickets(); }, []);
+    useEffect(() => { loadTickets(); }, [userId]);
 
     if (view === 'new') {
         return (
             <NewTicketForm
+                userId={userId}
+                defaultCategory={defaultCategory}
                 onSuccess={() => { loadTickets(); setView('list'); }}
+                onCancel={() => setView('list')}
             />
         );
     }
@@ -401,7 +445,7 @@ export default function DestekClient({ userId }: { userId: string }) {
         <TicketList
             tickets={tickets}
             loading={loading}
-            onSelect={(t) => { setSelectedTicket(t); setView('detail'); }}
+            onSelect={t => { setSelectedTicket(t); setView('detail'); }}
             onNew={() => setView('new')}
             onRefresh={loadTickets}
         />

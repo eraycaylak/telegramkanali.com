@@ -473,7 +473,7 @@ export default async function DynamicPage({
                 <div className="mt-5 pt-4 border-t border-indigo-700/40 flex items-center gap-2 text-xs text-indigo-300">
                   <span className="shrink-0 font-black text-white bg-red-500/30 px-2 py-0.5 rounded">⚠ SIFIR TOLERANS</span>
                   <span>Çocuk istismarı, gizli çekim/ifşa ve yasadışı içerik barındıran kanallar derhal kaldırılır.</span>
-                  <Link href="/iletisim" className="shrink-0 text-white underline hover:text-indigo-200 font-bold">Şikayet Et</Link>
+                  <Link href="/dashboard/destek?kategori=sikayet" className="shrink-0 text-white underline hover:text-indigo-200 font-bold">Şikayet Et</Link>
                 </div>
               </div>
 
@@ -871,7 +871,7 @@ export default async function DynamicPage({
               <div className="mt-5 pt-4 border-t border-blue-500/40 flex items-center justify-center gap-2 text-xs text-blue-200">
                 <span className="shrink-0 font-black text-white bg-red-500/30 px-2 py-0.5 rounded">⚠ SIFIR TOLERANS</span>
                 <span>Çocuk istismarı, gizli çekim/ifşa ve yasadışı içerik barındıran kanallar derhal kaldırılır.</span>
-                <Link href="/iletisim" className="shrink-0 text-white underline hover:text-blue-100 font-bold">Şikayet Et</Link>
+                <Link href="/dashboard/destek?kategori=sikayet" className="shrink-0 text-white underline hover:text-blue-100 font-bold">Şikayet Et</Link>
               </div>
             )}
           </div>

@@ -227,14 +227,13 @@ export default function ChannelCard({ channel, compact = false, miniCompact = fa
                 >
                     <ThumbsDown size={14} className={userVote === -1 ? 'fill-current' : ''} />
                 </button>
-                <a
-                    href={`https://t.me/sibelliee?text=Şikayet: ${channel.name}`}
-                    target="_blank"
+                <Link
+                    href="/dashboard/destek?kategori=sikayet"
                     title="Şikayet Et"
                     className="p-1 mt-2 text-gray-400 hover:text-red-500 transition"
                 >
                     <AlertTriangle size={16} />
-                </a>
+                </Link>
             </div>
 
             {/* Mobile View / Main Content Container */}

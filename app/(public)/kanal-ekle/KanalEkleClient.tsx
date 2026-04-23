@@ -1,12 +1,13 @@
 'use client';
 
 import { useState, useEffect, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { Category } from '@/lib/types';
 import { submitChannel } from '@/app/actions/submit';
 import { createUsdtPayment } from '@/app/actions/usdt';
 import { USDT_PACKAGES } from '@/lib/usdt-packages';
-import { Send, CheckCircle2, AlertCircle, MessageCircle, Zap, Crown, Triangle, Copy, Check } from 'lucide-react';
+import { Send, CheckCircle2, AlertCircle, MessageCircle, Zap, Crown, Triangle, Copy, Check, ExternalLink } from 'lucide-react';
 import LegalTermsModal from '@/components/LegalTermsModal';
 
 interface Props {
@@ -14,10 +15,8 @@ interface Props {
 }
 
 const CONTACT_TYPES = [
-    { value: 'kanal_ekle', label: '📡 Kanal / Grup Ekle', desc: 'Telegram kanalımı veya grubumu dizine eklemek istiyorum.' },
-    { value: 'reklam_talebi', label: '📢 Reklam Satın Al', desc: 'Kanalımı öne çıkarmak için reklam paketi almak istiyorum.' },
-    { value: 'soru_oneri', label: '💬 Soru / Öneri', desc: 'Platforma dair sorum veya önerim var.' },
-    { value: 'diger', label: '📋 Diğer', desc: 'Başka bir konuda iletişime geçmek istiyorum.' },
+    { value: 'kanal_ekle',    label: '📡 Kanal / Grup Ekle', desc: 'Telegram kanalımı veya grubumu dizine eklemek istiyorum.' },
+    { value: 'reklam_talebi', label: '📢 Reklam Satın Al',   desc: 'Kanalımı öne çıkarmak için reklam paketi almak istiyorum.' },
 ];
 
 const USDT_ADDRESS = process.env.NEXT_PUBLIC_USDT_ADDRESS || 'TKsknVNnQuQDsL8RYuL5tXSbaRxTURT4eg';
@@ -124,6 +123,21 @@ function KanalEkleClientInner({ categories }: Props) {
                         </button>
                     ))}
                 </div>
+            </div>
+
+            {/* Destek linki */}
+            <div className="mb-8">
+                <Link
+                    href="/dashboard/destek"
+                    className="flex items-center gap-3 p-4 rounded-xl border-2 border-dashed border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all text-gray-600 hover:text-blue-700"
+                >
+                    <MessageCircle size={20} className="shrink-0" />
+                    <div className="flex-1">
+                        <div className="font-bold text-sm">💬 Soru / Öneri / Destek</div>
+                        <div className="text-xs text-gray-400 mt-0.5">Destek talebi oluşturmak için tıklayın</div>
+                    </div>
+                    <ExternalLink size={14} className="shrink-0 opacity-50" />
+                </Link>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">

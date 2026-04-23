@@ -6,9 +6,16 @@ export const metadata = {
     title: 'Destek Talepleri | Dashboard',
 };
 
-export default async function DestekPage() {
+interface Props {
+    searchParams: Promise<{ kategori?: string }>;
+}
+
+export default async function DestekPage({ searchParams }: Props) {
     const user = await getServerUser();
     if (!user) redirect('/login');
+
+    const params = await searchParams;
+    const defaultCategory = params.kategori || undefined;
 
     return (
         <div className="max-w-3xl">
@@ -18,7 +25,7 @@ export default async function DestekPage() {
                     Sorularınız veya sorunlarınız için destek talebi oluşturun. Ekibimiz en kısa sürede yanıtlar.
                 </p>
             </div>
-            <DestekClient userId={user.id} />
+            <DestekClient userId={user.id} defaultCategory={defaultCategory} />
         </div>
     );
 }

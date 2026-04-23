@@ -306,14 +306,13 @@ export default function ChannelDetail({ channel }: ChannelDetailProps) {
                         <div className="absolute -top-10 -right-10 w-32 h-32 bg-yellow-200 rounded-full opacity-50 blur-2xl"></div>
                     </div>
 
-                    <a
-                        href={`https://t.me/sibelliee?text=Merhaba, şu kanalı şikayet etmek istiyorum: ${channel.name}`}
-                        target="_blank"
+                    <Link
+                        href={`/dashboard/destek?kategori=sikayet`}
                         className="w-full flex items-center justify-center gap-2 p-4 border-2 border-red-100 rounded-xl hover:bg-red-50 hover:border-red-200 transition text-red-600 font-bold bg-white mb-4"
                     >
                         <AlertTriangle size={20} />
                         Kanalı Şikayet Et / Kaldır
-                    </a>
+                    </Link>
 
                     <button
                         onClick={handleShare}
