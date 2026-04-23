@@ -17,7 +17,7 @@ import {
     Zap,
     LifeBuoy,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 
 interface DashboardLayoutProps {
@@ -68,6 +68,42 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     const pathname = usePathname();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isLoggingOut, setIsLoggingOut] = useState(false);
+    const [unreadSupportCount, setUnreadSupportCount] = useState(0);
+
+    // ── Okunmamış destek yanıtları ──
+    useEffect(() => {
+        let cancelled = false;
+        async function checkUnread() {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user || cancelled) return;
+            const lastVisit = localStorage.getItem('destek_last_visit') || '1970-01-01T00:00:00Z';
+            // Bu kullanıcının ticket'larına gelen admin mesajlarını say
+            const { data: tickets } = await supabase
+                .from('support_tickets')
+                .select('id')
+                .eq('user_id', user.id);
+            if (!tickets || tickets.length === 0 || cancelled) return;
+            const ticketIds = tickets.map(t => t.id);
+            const { count } = await supabase
+                .from('support_messages')
+                .select('id', { count: 'exact', head: true })
+                .in('ticket_id', ticketIds)
+                .eq('is_admin', true)
+                .gt('created_at', lastVisit);
+            if (!cancelled) setUnreadSupportCount(count || 0);
+        }
+        checkUnread();
+        const interval = setInterval(checkUnread, 30_000);
+        return () => { cancelled = true; clearInterval(interval); };
+    }, []);
+
+    // Destek sayfasına girince okundu say
+    useEffect(() => {
+        if (pathname === '/dashboard/destek' || pathname.startsWith('/dashboard/destek')) {
+            localStorage.setItem('destek_last_visit', new Date().toISOString());
+            setUnreadSupportCount(0);
+        }
+    }, [pathname]);
 
     const handleLogout = async () => {
         setIsLoggingOut(true);
@@ -154,7 +190,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                                         }}
                                     >
                                         <item.icon size={17} />
-                                        <span>{item.name}</span>
+                                        <span className="flex-1">{item.name}</span>
+                                        {item.href === '/dashboard/destek' && unreadSupportCount > 0 && (
+                                            <span className="bg-red-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded-full min-w-[18px] text-center leading-tight">
+                                                {unreadSupportCount > 9 ? '9+' : unreadSupportCount}
+                                            </span>
+                                        )}
                                         {active && <ChevronRight size={14} className="ml-auto opacity-60" />}
                                     </Link>
                                 );

@@ -89,6 +89,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     const [isLoading, setIsLoading] = useState(true);
     const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [openTicketCount, setOpenTicketCount] = useState(0);
 
     // Reklam grubu varsayılan olarak açık başlasın (reklam sayfasındaysak)
     const isInAdGroup = MENU_GROUPS.find(g => g.label === 'Reklamlar')?.items.some(i => pathname.startsWith(i.href));
@@ -133,6 +134,21 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             }
         });
     }, [pathname]);
+
+    // ─── Yeni destek talepleri sayısı ────────────────────────────────────
+    useEffect(() => {
+        if (isLoginPage) return;
+        async function fetchOpenTickets() {
+            const { count } = await supabase
+                .from('support_tickets')
+                .select('id', { count: 'exact', head: true })
+                .eq('status', 'open');
+            setOpenTicketCount(count || 0);
+        }
+        fetchOpenTickets();
+        const interval = setInterval(fetchOpenTickets, 30_000);
+        return () => clearInterval(interval);
+    }, [isLoginPage]);
 
     function toggleGroup(label: string) {
         setOpenGroups(prev => {
@@ -232,7 +248,20 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                                                 }`}
                                         >
                                             <Icon size={16} className={isActive ? 'text-white' : 'text-gray-400'} />
-                                            {!compact && <span>{item.name}</span>}
+                                            {!compact && (
+                                                <span className="flex-1">{item.name}</span>
+                                            )}
+                                            {/* Destek talebi badge */}
+                                            {!compact && item.href === '/admin/destek' && openTicketCount > 0 && (
+                                                <span className="ml-auto bg-red-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded-full min-w-[18px] text-center leading-tight">
+                                                    {openTicketCount > 99 ? '99+' : openTicketCount}
+                                                </span>
+                                            )}
+                                            {compact && item.href === '/admin/destek' && openTicketCount > 0 && (
+                                                <span className="absolute top-0.5 right-0.5 bg-red-500 text-white text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center">
+                                                    {openTicketCount > 9 ? '9+' : openTicketCount}
+                                                </span>
+                                            )}
                                         </Link>
                                     );
                                 })}
@@ -290,8 +319,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <div className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ${isSidebarOpen ? 'md:ml-64' : 'md:ml-16'}`}>
 
                 {/* Header */}
-                <header className="h-16 bg-white/90 backdrop-blur-md border-b border-gray-100 sticky top-0 z-30 px-4 md:px-6 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
+                <header className="h-16 bg-white/90 backdrop-blur-md border-b border-gray-100 sticky top-0 z-30 px-4 md:px-6 flex items-center gap-3">
+                    {/* Sol: menü + sayfa adı */}
+                    <div className="flex items-center gap-3 flex-1">
                         <button className="md:hidden p-2 text-gray-500" onClick={() => setIsMobileMenuOpen(true)}>
                             <Menu size={20} />
                         </button>
@@ -303,6 +333,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                         </div>
                     </div>
 
+                    {/* Orta: Yeni destek talebi uyarısı */}
+                    {openTicketCount > 0 && (
+                        <a
+                            href="/admin/destek"
+                            className="hidden sm:flex items-center gap-2 bg-orange-50 border border-orange-200 text-orange-700 text-xs font-bold px-3 py-1.5 rounded-xl hover:bg-orange-100 transition animate-pulse"
+                        >
+                            <LifeBuoy size={14} />
+                            {openTicketCount} yeni destek talebi
+                        </a>
+                    )}
+
+                    {/* Sağ: kullanıcı */}
                     <div className="flex items-center gap-3">
                         <div className="text-right hidden sm:block">
                             <p className="text-sm font-bold text-gray-900">{userProfile?.full_name || 'Kullanıcı'}</p>
@@ -363,7 +405,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                                                             }`}
                                                     >
                                                         <Icon size={16} />
-                                                        {item.name}
+                                                        <span className="flex-1">{item.name}</span>
+                                                        {item.href === '/admin/destek' && openTicketCount > 0 && (
+                                                            <span className="bg-red-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded-full min-w-[18px] text-center leading-tight">
+                                                                {openTicketCount > 99 ? '99+' : openTicketCount}
+                                                            </span>
+                                                        )}
                                                     </Link>
                                                 );
                                             })}
