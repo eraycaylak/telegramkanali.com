@@ -15,6 +15,7 @@ import {
     ChevronRight,
     PlusCircle,
     Zap,
+    LifeBuoy,
 } from 'lucide-react';
 import { useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
@@ -53,6 +54,12 @@ const NAV_ITEMS = [
         group: 'ANALİTİK',
         items: [
             { name: 'İstatistikler', href: '/dashboard/stats', icon: BarChart2 },
+        ],
+    },
+    {
+        group: 'DESTEK',
+        items: [
+            { name: 'Destek Talepleri', href: '/dashboard/destek', icon: LifeBuoy },
         ],
     },
 ];
@@ -173,14 +180,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
                     {/* Destek */}
                     <Link
-                        href="/dashboard/kanal-ekle"
+                        href="/dashboard/destek"
                         onClick={() => setIsSidebarOpen(false)}
                         className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all"
                         style={{ color: '#64748B' }}
                         onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#94A3B8'; (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.04)'; }}
                         onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = '#64748B'; (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
                     >
-                        <MessageCircle size={16} />
+                        <LifeBuoy size={16} />
                         <span>Destek</span>
                     </Link>
 
