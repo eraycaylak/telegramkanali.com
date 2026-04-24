@@ -2,6 +2,7 @@
 
 import { getAdminClient } from '@/lib/supabaseAdmin';
 import { getServerUser } from '@/lib/auth-server';
+import { sendNewTicketNotification, sendTicketReplyNotification } from '@/lib/email-notifications';
 import { revalidatePath } from 'next/cache';
 
 // ─── Ticket Oluştur ──────────────────────────────────────────────────────────
@@ -35,6 +36,11 @@ export async function createSupportTicket(formData: FormData) {
     if (msgErr) {
         console.error('[createSupportTicket] msg insert', msgErr);
     }
+
+    // 📧 Admin'e yeni ticket bildirimi (arka planda)
+    sendNewTicketNotification(ticket.id, subject, category, user.id).catch(err => {
+        console.error('[createSupportTicket] Email notification failed:', err);
+    });
 
     revalidatePath('/dashboard/destek');
     return { success: true, ticketId: ticket.id };
@@ -74,6 +80,12 @@ export async function sendUserMessage(formData: FormData) {
         .update({ status: 'open', updated_at: new Date().toISOString() })
         .eq('id', ticketId);
 
+    // 📧 Admin'e mesaj bildirimi (arka planda)
+    sendTicketReplyNotification(ticketId, content, false).catch(err => {
+        console.error('[sendUserMessage] Email notification failed:', err);
+    });
+
     revalidatePath('/dashboard/destek');
     return { success: true };
 }
+

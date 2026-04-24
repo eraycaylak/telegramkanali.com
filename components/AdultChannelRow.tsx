@@ -27,17 +27,17 @@ export default function AdultChannelRow({ channel, rank }: AdultChannelRowProps)
     };
 
     return (
-        <div className="group relative flex items-center gap-3 border-b border-gray-100 px-3 py-3 hover:bg-red-50/40 transition-colors">
+        <div className="group relative flex items-center gap-2 md:gap-3 border-b border-gray-100 px-2 md:px-3 py-3 hover:bg-red-50/40 transition-colors min-w-0">
 
             {/* Sıra numarası */}
             {rank !== undefined && (
-                <span className="w-7 shrink-0 text-center text-xs font-black text-gray-300 tabular-nums">
+                <span className="w-5 md:w-7 shrink-0 text-center text-[10px] md:text-xs font-black text-gray-300 tabular-nums">
                     {rank}
                 </span>
             )}
 
             {/* Oy */}
-            <div className="flex flex-col items-center gap-0.5 shrink-0 w-8">
+            <div className="hidden md:flex flex-col items-center gap-0.5 shrink-0 w-8">
                 <button
                     onClick={(e) => handleVote(1, e)}
                     title="Beğen"

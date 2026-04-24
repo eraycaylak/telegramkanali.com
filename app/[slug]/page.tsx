@@ -438,7 +438,7 @@ export default async function DynamicPage({
         <JsonLd data={kw18CollectionSchema} />
         <JsonLd data={kw18ItemListSchema} />
         <Header />
-        <main className="container mx-auto px-4 py-6 max-w-7xl">
+        <main className="container mx-auto px-4 py-6 max-w-7xl overflow-hidden">
           {/* Breadcrumb */}
           <nav className="text-sm text-gray-500 mb-4 flex gap-2 flex-wrap" aria-label="Breadcrumb">
             <Link href="/" className="hover:text-blue-600">Anasayfa</Link>
@@ -448,15 +448,15 @@ export default async function DynamicPage({
             <span className="text-gray-900 font-medium">{kw18Page.h1}</span>
           </nav>
 
-          <div className="grid lg:grid-cols-[1fr_300px] gap-8">
+          <div className="grid lg:grid-cols-[1fr_300px] gap-8 min-w-0">
             {/* Main Content */}
-            <div className="space-y-6">
+            <div className="space-y-6 min-w-0 overflow-hidden">
               {/* H1 Hero */}
               <div className="bg-gradient-to-br from-indigo-900 to-slate-950 rounded-2xl p-7 text-white shadow-xl">
                 <div className="text-4xl mb-3">🔞</div>
                 <h1 className="text-2xl md:text-3xl font-black mb-3">{kw18Page.h1}</h1>
                 <p className="text-indigo-200 text-base leading-relaxed max-w-2xl">{kw18Page.intro}</p>
-                <div className="mt-5 flex gap-6 text-sm">
+                <div className="mt-5 flex flex-wrap gap-4 md:gap-6 text-sm justify-center md:justify-start">
                   <div className="text-center">
                     <div className="text-2xl font-black">{kw18Channels.length}</div>
                     <div className="text-indigo-300">Aktif Kanal</div>
@@ -478,7 +478,7 @@ export default async function DynamicPage({
               </div>
 
               {/* Kanal Listesi — Forum stili, fotoğrafsız */}
-              <div className="bg-white rounded-2xl border border-red-100 shadow-sm overflow-hidden">
+              <div className="bg-white rounded-2xl border border-red-100 shadow-sm overflow-x-auto">
                 {/* Tablo başlığı */}
                 <div className="hidden md:grid grid-cols-[28px_32px_36px_1fr_80px_28px_80px] gap-3 px-3 py-2 bg-red-50 border-b border-red-100 text-[10px] font-black uppercase tracking-widest text-red-400">
                   <span>#</span>
@@ -544,7 +544,7 @@ export default async function DynamicPage({
             </div>
 
             {/* Sidebar */}
-            <div className="space-y-6">
+            <div className="space-y-6 min-w-0 overflow-hidden">
               {/* İlgili +18 Sayfaları */}
               <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
                 <h3 className="font-bold text-gray-900 mb-4">🔥 İlgili +18 Sayfaları</h3>
@@ -648,7 +648,7 @@ export default async function DynamicPage({
         <JsonLd data={cryptoCollection} />
         <JsonLd data={cryptoDatasetSchema} />
         <Header />
-        <main className="container mx-auto px-4 py-6 max-w-7xl">
+        <main className="container mx-auto px-4 py-6 max-w-7xl overflow-hidden">
           {/* Breadcrumb */}
           <nav className="text-sm text-gray-500 mb-4 flex gap-2 flex-wrap" aria-label="Breadcrumb">
             <Link href="/" className="hover:text-blue-600">Anasayfa</Link>
@@ -658,7 +658,7 @@ export default async function DynamicPage({
             <span className="text-gray-900 font-medium">{kwCryptoPage.h1}</span>
           </nav>
 
-          <div className="grid lg:grid-cols-[1fr_300px] gap-8">
+          <div className="grid lg:grid-cols-[1fr_300px] gap-8 min-w-0">
             {/* Main */}
             <div className="space-y-6 min-w-0 overflow-hidden">
               {/* Hero */}
@@ -862,13 +862,13 @@ export default async function DynamicPage({
             <p className="text-blue-100 text-lg max-w-2xl mx-auto">
               {category.name} kategorisindeki en güncel ve aktif Telegram kanalları. {totalCount} kanal listeleniyor.
             </p>
-            <div className="mt-6 flex justify-center gap-6 text-sm">
+            <div className="mt-6 flex flex-wrap justify-center gap-4 md:gap-6 text-sm">
               <div className="text-center"><div className="text-3xl font-black">{totalCount}</div><div className="text-blue-200">Kanal</div></div>
               <div className="text-center"><div className="text-3xl font-black">✓</div><div className="text-blue-200">Onaylı</div></div>
               <div className="text-center"><div className="text-3xl font-black">2026</div><div className="text-blue-200">Güncel</div></div>
             </div>
             {(category.id === '18' || category.slug === '18') && (
-              <div className="mt-5 pt-4 border-t border-blue-500/40 flex items-center justify-center gap-2 text-xs text-blue-200">
+              <div className="mt-5 pt-4 border-t border-blue-500/40 flex items-center justify-center gap-2 text-xs text-blue-200 flex-wrap">
                 <span className="shrink-0 font-black text-white bg-red-500/30 px-2 py-0.5 rounded">⚠ SIFIR TOLERANS</span>
                 <span>Çocuk istismarı, gizli çekim/ifşa ve yasadışı içerik barındıran kanallar derhal kaldırılır.</span>
                 <Link href="/dashboard/destek?kategori=sikayet" className="shrink-0 text-white underline hover:text-blue-100 font-bold">Şikayet Et</Link>
@@ -883,7 +883,7 @@ export default async function DynamicPage({
                   const is18Category = category.id === '18' || category.slug === '18';
                   if (is18Category) {
                     return (
-                      <div className="bg-white rounded-2xl border border-red-100 shadow-sm overflow-hidden">
+                      <div className="bg-white rounded-2xl border border-red-100 shadow-sm overflow-x-auto">
                         <div className="hidden md:grid grid-cols-[28px_32px_36px_1fr_80px_28px_80px] gap-3 px-3 py-2 bg-red-50 border-b border-red-100 text-[10px] font-black uppercase tracking-widest text-red-400">
                           <span>#</span>
                           <span>Oy</span>
