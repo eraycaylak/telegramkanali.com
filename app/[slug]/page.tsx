@@ -438,7 +438,7 @@ export default async function DynamicPage({
         <JsonLd data={kw18CollectionSchema} />
         <JsonLd data={kw18ItemListSchema} />
         <Header />
-        <main className="container mx-auto px-4 py-6 max-w-7xl overflow-hidden">
+        <main className="container mx-auto px-4 py-6 max-w-7xl overflow-x-hidden">
           {/* Breadcrumb */}
           <nav className="text-sm text-gray-500 mb-4 flex gap-2 flex-wrap" aria-label="Breadcrumb">
             <Link href="/" className="hover:text-blue-600">Anasayfa</Link>
@@ -450,7 +450,7 @@ export default async function DynamicPage({
 
           <div className="grid lg:grid-cols-[1fr_300px] gap-8 min-w-0">
             {/* Main Content */}
-            <div className="space-y-6 min-w-0 overflow-hidden">
+            <div className="space-y-6 min-w-0 overflow-x-hidden">
               {/* H1 Hero */}
               <div className="bg-gradient-to-br from-indigo-900 to-slate-950 rounded-2xl p-7 text-white shadow-xl">
                 <div className="text-4xl mb-3">🔞</div>
@@ -544,7 +544,7 @@ export default async function DynamicPage({
             </div>
 
             {/* Sidebar */}
-            <div className="space-y-6 min-w-0 overflow-hidden">
+            <div className="space-y-6 min-w-0 overflow-x-hidden">
               {/* İlgili +18 Sayfaları */}
               <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
                 <h3 className="font-bold text-gray-900 mb-4">🔥 İlgili +18 Sayfaları</h3>
@@ -648,7 +648,7 @@ export default async function DynamicPage({
         <JsonLd data={cryptoCollection} />
         <JsonLd data={cryptoDatasetSchema} />
         <Header />
-        <main className="container mx-auto px-4 py-6 max-w-7xl overflow-hidden">
+        <main className="container mx-auto px-4 py-6 max-w-7xl overflow-x-hidden">
           {/* Breadcrumb */}
           <nav className="text-sm text-gray-500 mb-4 flex gap-2 flex-wrap" aria-label="Breadcrumb">
             <Link href="/" className="hover:text-blue-600">Anasayfa</Link>
@@ -660,7 +660,7 @@ export default async function DynamicPage({
 
           <div className="grid lg:grid-cols-[1fr_300px] gap-8 min-w-0">
             {/* Main */}
-            <div className="space-y-6 min-w-0 overflow-hidden">
+            <div className="space-y-6 min-w-0 overflow-x-hidden">
               {/* Hero */}
               <div className={`bg-gradient-to-br ${kwCryptoPage.color} rounded-2xl p-7 text-white shadow-xl`}>
                 <div className="text-4xl mb-3">{kwCryptoPage.icon}</div>
@@ -877,7 +877,7 @@ export default async function DynamicPage({
           </div>
 
           <div className="grid lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2 space-y-6 min-w-0 overflow-hidden">
+            <div className="lg:col-span-2 space-y-6 min-w-0 overflow-x-hidden">
               {channels.length > 0 ? (
                 (() => {
                   const is18Category = category.id === '18' || category.slug === '18';
@@ -1057,7 +1057,7 @@ export default async function DynamicPage({
         <main className="container mx-auto px-4 py-8 max-w-7xl">
           <div className="grid gap-8 lg:grid-cols-3">
             {/* Main Content */}
-            <div className="lg:col-span-2 space-y-8 min-w-0 overflow-hidden break-words">
+            <div className="lg:col-span-2 space-y-8 min-w-0 overflow-x-hidden break-words">
 
               {/* Kripto Internal Linking */}
               {isCrypto && (

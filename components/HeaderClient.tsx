@@ -106,7 +106,7 @@ export default function HeaderClient({ categories, logo, user: initialUser, rece
             {/* 2. Main Bar - App Style Red Header */}
             {/* Using #E30613 which is exact Hürriyet brand red, avoiding any pink hues */}
             <div className="bg-[#E30613] py-3 md:py-4 relative z-20 shadow-md">
-                <div className="container mx-auto px-3 md:px-6 flex items-center justify-between gap-2 md:gap-4 overflow-hidden">
+                <div className="container mx-auto px-3 md:px-6 flex items-center justify-between gap-2 md:gap-4 overflow-x-hidden">
 
                     {/* Left: Hamburger Menu (Mobile/Tablet) */}
                     <button 
