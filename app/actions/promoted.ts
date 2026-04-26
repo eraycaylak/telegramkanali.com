@@ -19,6 +19,7 @@ export interface PromotedChannel {
         slug: string;
         image: string;
         description: string;
+        seo_description?: string;
         member_count: number;
         category_id: string;
         categories: { name: string; slug: string } | null;
@@ -30,7 +31,7 @@ export async function getPromotedChannels(target?: string): Promise<PromotedChan
         .from('promoted_channels')
         .select(`
             *,
-            channel:channels(id, name, slug, image, description, member_count, category_id, categories(name, slug))
+            channel:channels(id, name, slug, image, description, seo_description, member_count, category_id, categories(name, slug))
         `)
         .eq('active', true)
         .order('display_order', { ascending: true });
@@ -55,7 +56,7 @@ export async function getAllPromotedChannels(): Promise<PromotedChannel[]> {
         .from('promoted_channels')
         .select(`
             *,
-            channel:channels(id, name, slug, image, description, member_count, category_id, categories(name, slug))
+            channel:channels(id, name, slug, image, description, seo_description, member_count, category_id, categories(name, slug))
         `)
         .order('display_order', { ascending: true });
 
