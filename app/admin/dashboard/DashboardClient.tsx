@@ -2,9 +2,9 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, Trash2, Edit, Search, LogOut, ExternalLink, RefreshCw, BarChart3, Bot, Users as UsersIcon, CheckCircle2, AlertCircle, Zap } from 'lucide-react';
+import { Plus, Trash2, Edit, Search, LogOut, ExternalLink, RefreshCw, BarChart3, Bot, Users as UsersIcon, CheckCircle2, AlertCircle, Zap, Power, EyeOff } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
-import { deleteChannel, addChannel, updateChannel, scrapeTelegramInfo, syncAllChannelsFromTelegram, approveChannel, rejectChannel, syncChannelFromTelegram, getChannelFollowers } from '@/app/actions/admin';
+import { deleteChannel, addChannel, updateChannel, scrapeTelegramInfo, syncAllChannelsFromTelegram, approveChannel, rejectChannel, syncChannelFromTelegram, getChannelFollowers, adminToggleChannelStatus } from '@/app/actions/admin';
 import { Channel, Category } from '@/lib/types';
 
 export default function DashboardClient() {
@@ -14,7 +14,7 @@ export default function DashboardClient() {
     const [profiles, setProfiles] = useState<any[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('all');
-    const [viewStatus, setViewStatus] = useState<'approved' | 'pending' | 'rejected' | 'bot'>('approved');
+    const [viewStatus, setViewStatus] = useState<'approved' | 'pending' | 'rejected' | 'inactive' | 'bot'>('approved');
     const [loading, setLoading] = useState(true);
     const [totalChannelCount, setTotalChannelCount] = useState(0);
     const [allLoaded, setAllLoaded] = useState(false);
@@ -459,6 +459,12 @@ export default function DashboardClient() {
                                 <Trash2 size={14} /> Reddedilenler
                             </button>
                             <button
+                                onClick={() => setViewStatus('inactive')}
+                                className={`flex-1 sm:flex-none px-4 py-2 rounded-lg text-sm font-bold transition flex items-center justify-center gap-2 ${viewStatus === 'inactive' ? 'bg-white text-gray-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                            >
+                                <EyeOff size={14} /> Pasifler {channels.filter(c => c.status === 'inactive').length > 0 && <span className="bg-gray-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold">{channels.filter(c => c.status === 'inactive').length}</span>}
+                            </button>
+                            <button
                                 onClick={() => setViewStatus('bot')}
                                 className={`flex-1 sm:flex-none px-4 py-2 rounded-lg text-sm font-bold transition flex items-center justify-center gap-2 ${viewStatus === 'bot' ? 'bg-white text-green-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
                             >
@@ -627,6 +633,27 @@ export default function DashboardClient() {
                                                         Geri Al
                                                     </button>
                                                 )}
+                                                {/* Aktif/Pasif Toggle */}
+                                                {(channel.status === 'approved' || channel.status === 'inactive') && (
+                                                    <button
+                                                        onClick={async () => {
+                                                            const newSt = channel.status === 'approved' ? 'inactive' : 'approved';
+                                                            const res = await adminToggleChannelStatus(channel.id, newSt as 'approved' | 'inactive');
+                                                            if (res.error) alert(res.error);
+                                                            else {
+                                                                setChannels(prev => prev.map(c => c.id === channel.id ? { ...c, status: newSt } as Channel : c));
+                                                            }
+                                                        }}
+                                                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${channel.status === 'approved'
+                                                            ? 'bg-orange-50 text-orange-600 hover:bg-orange-600 hover:text-white'
+                                                            : 'bg-green-50 text-green-600 hover:bg-green-600 hover:text-white'
+                                                        }`}
+                                                        title={channel.status === 'approved' ? 'Pasife Al' : 'Aktife Al'}
+                                                    >
+                                                        <Power size={13} className="inline mr-1" />
+                                                        {channel.status === 'approved' ? 'Pasife Al' : 'Aktife Al'}
+                                                    </button>
+                                                )}
                                                 <button
                                                     onClick={() => viewFollowers(channel)}
                                                     className="p-2 text-gray-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition"
@@ -720,6 +747,19 @@ export default function DashboardClient() {
                                         <div className="flex flex-col gap-1">
                                             {channel.status === 'pending' && (
                                                 <button onClick={() => handleApprove(channel.id)} className="bg-green-600 text-white px-3 py-1 rounded-lg text-[10px] font-black uppercase">Onayla</button>
+                                            )}
+                                            {(channel.status === 'approved' || channel.status === 'inactive') && (
+                                                <button
+                                                    onClick={async () => {
+                                                        const newSt = channel.status === 'approved' ? 'inactive' : 'approved';
+                                                        const res = await adminToggleChannelStatus(channel.id, newSt as 'approved' | 'inactive');
+                                                        if (res.error) alert(res.error);
+                                                        else setChannels(prev => prev.map(c => c.id === channel.id ? { ...c, status: newSt } as Channel : c));
+                                                    }}
+                                                    className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase ${channel.status === 'approved' ? 'bg-orange-500 text-white' : 'bg-green-500 text-white'}`}
+                                                >
+                                                    {channel.status === 'approved' ? 'Pasife Al' : 'Aktife Al'}
+                                                </button>
                                             )}
                                         </div>
                                     </div>

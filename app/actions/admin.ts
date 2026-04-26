@@ -698,6 +698,26 @@ export async function rejectChannel(id: string, userId?: string) {
     }
 }
 
+export async function adminToggleChannelStatus(id: string, newStatus: 'approved' | 'inactive') {
+    if (!id) return { error: 'ID required' };
+
+    try {
+        const { error } = await adminClient
+            .from('channels')
+            .update({ status: newStatus, updated_at: new Date().toISOString() })
+            .eq('id', id);
+
+        if (error) throw error;
+
+        revalidatePath('/');
+        revalidatePath('/admin/dashboard');
+        return { success: true, newStatus };
+    } catch (error) {
+        console.error('Toggle status error:', error);
+        return { error: 'Durum güncellenemedi' };
+    }
+}
+
 export async function getChannelFollowers(channelId: string) {
     if (!channelId) return { error: 'Channel ID required' };
 
