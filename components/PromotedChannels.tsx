@@ -27,84 +27,79 @@ export default async function PromotedChannels({ categoryId }: PromotedChannelsP
                 <div className="flex-1 h-px bg-gradient-to-r from-orange-200 to-transparent" />
             </div>
 
-            {/* Horizontal Scroll Container */}
-            <div className="relative">
-                <div
-                    className="flex gap-3 overflow-x-auto pb-3 snap-x snap-mandatory -mx-1 px-1"
-                    style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}
-                >
-                    {promotedItems.map((item) => {
-                        const ch = item.channel;
-                        if (!ch) return null;
-                        const categoryName = ch.categories?.name || '';
+            {/* Vertical List Container */}
+            <div className="flex flex-col gap-2">
+                {promotedItems.map((item, index) => {
+                    const ch = item.channel;
+                    if (!ch) return null;
+                    
+                    // İlk öğeyi veya belirli öğeleri daha belirgin yapmak için
+                    const isPremium = index === 0;
 
-                        return (
-                            <Link
-                                key={item.id}
-                                href={`/${ch.slug}`}
-                                className="group flex-shrink-0 snap-start w-[200px] sm:w-[220px]"
-                            >
-                                <div className="relative bg-white border border-gray-100 rounded-2xl p-4 h-full transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/10 hover:-translate-y-1 hover:border-blue-200 overflow-hidden">
-                                    {/* Subtle gradient overlay */}
-                                    <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 via-transparent to-purple-50/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl" />
-
-                                    {/* Content */}
-                                    <div className="relative z-10">
-                                        {/* Avatar */}
-                                        <div className="flex justify-center mb-3">
-                                            <div className="relative">
-                                                {ch.image && ch.image !== '/images/logo.png' ? (
-                                                    <Image
-                                                        src={ch.image}
-                                                        alt={ch.name}
-                                                        width={64}
-                                                        height={64}
-                                                        className="h-16 w-16 rounded-full object-cover border-2 border-white shadow-lg group-hover:scale-110 transition-transform duration-300"
-                                                    />
-                                                ) : (
-                                                    <div className="h-16 w-16 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-2xl border-2 border-white shadow-lg group-hover:scale-110 transition-transform duration-300">
-                                                        {ch.name.charAt(0)}
-                                                    </div>
-                                                )}
-                                                {/* Online indicator */}
-                                                <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 bg-green-500 rounded-full border-2 border-white flex items-center justify-center">
-                                                    <span className="text-[8px] text-white font-bold">✓</span>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {/* Name */}
-                                        <h3 className="font-bold text-gray-900 text-sm text-center truncate group-hover:text-blue-600 transition-colors">
-                                            {ch.name}
-                                        </h3>
-
-                                        {/* Category */}
-                                        <p className="text-[11px] text-gray-400 text-center truncate mt-0.5">
-                                            {categoryName}
-                                        </p>
-
-                                        {/* Member Count */}
-                                        <div className="flex items-center justify-center gap-1 mt-2 text-xs text-gray-500">
-                                            <Users size={12} className="text-blue-400" />
-                                            <span className="font-medium">
-                                                {ch.member_count
-                                                    ? new Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 1 }).format(ch.member_count)
-                                                    : '-'}
-                                            </span>
-                                        </div>
-
-                                        {/* CTA Button */}
-                                        <div className="mt-3">
-                                            <span className="block w-full text-center text-xs font-bold py-2 rounded-xl bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300 shadow-sm">
-                                                İNCELE
-                                            </span>
-                                        </div>
+                    return (
+                        <Link
+                            key={item.id}
+                            href={`/${ch.slug}`}
+                            className={`group flex items-start sm:items-center gap-3 p-3 transition-all duration-300 relative overflow-hidden ${
+                                isPremium 
+                                    ? 'bg-blue-50/50 rounded-xl border border-blue-200 border-dashed hover:bg-blue-50' 
+                                    : 'bg-white rounded-xl border border-gray-100 hover:border-blue-100 hover:shadow-sm'
+                            }`}
+                        >
+                            {/* Avatar */}
+                            <div className="flex-shrink-0 relative">
+                                {ch.image && ch.image !== '/images/logo.png' ? (
+                                    <Image
+                                        src={ch.image}
+                                        alt={ch.name}
+                                        width={48}
+                                        height={48}
+                                        className="h-10 w-10 sm:h-12 sm:w-12 rounded-full object-cover border border-gray-200 group-hover:scale-105 transition-transform"
+                                    />
+                                ) : (
+                                    <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg border border-gray-200 group-hover:scale-105 transition-transform">
+                                        {ch.name.charAt(0)}
                                     </div>
+                                )}
+                                {isPremium && (
+                                    <div className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-400 rounded-full border-2 border-white flex items-center justify-center shadow-sm">
+                                        <span className="text-[8px] text-white font-black">★</span>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Content */}
+                            <div className="flex-1 min-w-0 flex flex-col justify-center">
+                                <div className="flex items-center gap-2">
+                                    <h3 className="font-bold text-gray-900 text-sm truncate group-hover:text-blue-600 transition-colors">
+                                        {ch.name}
+                                    </h3>
+                                    {isPremium && (
+                                        <span className="bg-red-500 text-white text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded shadow-sm">
+                                            VIP
+                                        </span>
+                                    )}
                                 </div>
-                            </Link>
-                        );
-                    })}
-                </div>
+                                <p className="text-[11px] text-gray-500 line-clamp-1 sm:line-clamp-2 mt-0.5 pr-2">
+                                    {ch.description || ch.seo_description || 'Telegram kanalı'}
+                                </p>
+                            </div>
+
+                            {/* CTA & Stats (Hidden on very small screens, visible on sm+) */}
+                            <div className="hidden sm:flex flex-col items-end gap-1 flex-shrink-0">
+                                <div className="flex items-center gap-1 text-[11px] text-gray-400 font-medium">
+                                    <Users size={12} />
+                                    {ch.member_count
+                                        ? new Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 1 }).format(ch.member_count)
+                                        : '-'}
+                                </div>
+                                <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-md group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                                    Göz At
+                                </span>
+                            </div>
+                        </Link>
+                    );
+                })}
             </div>
         </section>
     );
