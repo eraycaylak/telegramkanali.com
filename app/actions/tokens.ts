@@ -538,3 +538,99 @@ export async function getActiveAds(adType: 'featured' | 'banner' | 'story', cate
 
     return filtered;
 }
+
+// ========================
+// TRACK AD CLICK (called from client when ad link is clicked)
+// ========================
+
+export async function trackAdClick(campaignId: string) {
+    if (!campaignId) return;
+
+    try {
+        const { data: campaign } = await adminClient
+            .from('ad_campaigns')
+            .select('id, current_clicks, status')
+            .eq('id', campaignId)
+            .eq('status', 'active')
+            .single();
+
+        if (!campaign) return;
+
+        await adminClient
+            .from('ad_campaigns')
+            .update({
+                current_clicks: campaign.current_clicks + 1,
+                updated_at: new Date().toISOString(),
+            })
+            .eq('id', campaignId);
+    } catch (error) {
+        console.error('[TOKENS] Click tracking error:', error);
+    }
+}
+
+// ========================
+// TRACK AD COMPLAINT (increment complaints counter)
+// ========================
+
+export async function trackAdComplaint(campaignId: string) {
+    if (!campaignId) return;
+
+    try {
+        const { data: campaign } = await adminClient
+            .from('ad_campaigns')
+            .select('id, current_complaints')
+            .eq('id', campaignId)
+            .single();
+
+        if (!campaign) return;
+
+        await adminClient
+            .from('ad_campaigns')
+            .update({
+                current_complaints: campaign.current_complaints + 1,
+                updated_at: new Date().toISOString(),
+            })
+            .eq('id', campaignId);
+    } catch (error) {
+        console.error('[TOKENS] Complaint tracking error:', error);
+    }
+}
+
+// ========================
+// TOGGLE CHANNEL STATUS (active/inactive by owner)
+// ========================
+
+export async function toggleChannelStatus(channelId: string) {
+    const userId = await getAuthUserId();
+    if (!userId) return { error: 'Oturum açmanız gerekiyor.' };
+
+    const { data: channel, error: fetchError } = await adminClient
+        .from('channels')
+        .select('id, owner_id, status')
+        .eq('id', channelId)
+        .single();
+
+    if (fetchError || !channel) {
+        return { error: 'Kanal bulunamadı.' };
+    }
+
+    if (channel.owner_id !== userId) {
+        return { error: 'Bu kanal size ait değil.' };
+    }
+
+    // Toggle between 'approved' (active) and 'inactive'
+    const newStatus = channel.status === 'approved' ? 'inactive' : 'approved';
+
+    const { error: updateError } = await adminClient
+        .from('channels')
+        .update({ status: newStatus, updated_at: new Date().toISOString() })
+        .eq('id', channelId);
+
+    if (updateError) {
+        console.error('[TOKENS] Channel status update error:', updateError);
+        return { error: 'Durum güncellenemedi.' };
+    }
+
+    revalidatePath('/dashboard/channels');
+    return { success: true, newStatus };
+}

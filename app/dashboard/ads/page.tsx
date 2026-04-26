@@ -5,7 +5,8 @@ import { getUserCampaigns, toggleCampaignStatus, deleteAdCampaign } from '@/app/
 import Link from 'next/link';
 import {
     TrendingUp, Eye, CheckCircle2, Clock,
-    PauseCircle, XCircle, PlusCircle, Zap, Trash2
+    PauseCircle, XCircle, PlusCircle, Zap, Trash2,
+    MousePointerClick, Flag, BarChart3
 } from 'lucide-react';
 
 const STATUS_LABELS: Record<string, { label: string; icon: any; color: string; bg: string }> = {
@@ -69,7 +70,7 @@ export default function AdsPage() {
             <div className="flex items-center justify-between">
                 <div>
                     <h2 className="text-lg font-bold" style={{ color: '#0F172A' }}>Reklamlarım</h2>
-                    <p className="text-sm mt-0.5" style={{ color: '#64748B' }}>Mevcut reklam kampanyalarınız</p>
+                    <p className="text-sm mt-0.5" style={{ color: '#64748B' }}>Kampanya performansınızı takip edin</p>
                 </div>
                 <Link
                     href="/dashboard/kanal-ekle"
@@ -101,7 +102,7 @@ export default function AdsPage() {
                     </div>
                     <h3 className="font-bold mb-2" style={{ color: '#0F172A' }}>Henüz reklam kampanyanız yok</h3>
                     <p className="text-sm mb-5 max-w-xs mx-auto" style={{ color: '#64748B' }}>
-                        Kanalınızı tanıtmak için USDT ile reklam paketi satın alın.
+                        Kanalınızı tanıtmak için jeton paketi satın alarak reklam verin.
                     </p>
                     <Link
                         href="/dashboard/kanal-ekle"
@@ -112,15 +113,17 @@ export default function AdsPage() {
                     </Link>
                 </div>
             ) : (
-                <div className="space-y-3">
+                <div className="space-y-4">
                     {campaigns.map((c: any) => {
                         const st = STATUS_LABELS[c.status] || STATUS_LABELS.pending;
                         const StIcon = st.icon;
                         const progress = c.total_views > 0 ? Math.min(100, (c.current_views / c.total_views) * 100) : 0;
+                        const ctr = c.current_views > 0 ? ((c.current_clicks || 0) / c.current_views * 100).toFixed(2) : '0.00';
 
                         return (
                             <div key={c.id} style={CARD}>
-                                <div className="flex items-start justify-between mb-3">
+                                {/* Header Row */}
+                                <div className="flex items-start justify-between mb-4">
                                     <div>
                                         <h4 className="font-semibold text-sm" style={{ color: '#0F172A' }}>
                                             {c.channels?.name || 'Kanal'}
@@ -166,7 +169,48 @@ export default function AdsPage() {
                                     </div>
                                 </div>
 
-                                {/* Progress */}
+                                {/* 3 Stat Cards */}
+                                <div className="grid grid-cols-3 gap-3 mb-4">
+                                    {/* Gösterim */}
+                                    <div className="rounded-xl p-3 text-center" style={{ background: '#F0F9FF', border: '1px solid #BAE6FD' }}>
+                                        <Eye size={18} className="mx-auto mb-1" style={{ color: '#0284C7' }} />
+                                        <div className="text-lg font-black" style={{ color: '#0C4A6E' }}>
+                                            {(c.current_views || 0).toLocaleString('tr-TR')}
+                                        </div>
+                                        <div className="text-[10px] font-semibold" style={{ color: '#0284C7' }}>Gösterim</div>
+                                    </div>
+
+                                    {/* Tıklama */}
+                                    <div className="rounded-xl p-3 text-center" style={{ background: '#F0FDF4', border: '1px solid #BBF7D0' }}>
+                                        <MousePointerClick size={18} className="mx-auto mb-1" style={{ color: '#16A34A' }} />
+                                        <div className="text-lg font-black" style={{ color: '#14532D' }}>
+                                            {(c.current_clicks || 0).toLocaleString('tr-TR')}
+                                        </div>
+                                        <div className="text-[10px] font-semibold" style={{ color: '#16A34A' }}>Tıklama</div>
+                                    </div>
+
+                                    {/* Şikayet */}
+                                    <div className="rounded-xl p-3 text-center" style={{ background: (c.current_complaints || 0) > 0 ? '#FEF2F2' : '#F8FAFC', border: `1px solid ${(c.current_complaints || 0) > 0 ? '#FECACA' : '#E2E8F0'}` }}>
+                                        <Flag size={18} className="mx-auto mb-1" style={{ color: (c.current_complaints || 0) > 0 ? '#DC2626' : '#94A3B8' }} />
+                                        <div className="text-lg font-black" style={{ color: (c.current_complaints || 0) > 0 ? '#991B1B' : '#334155' }}>
+                                            {(c.current_complaints || 0).toLocaleString('tr-TR')}
+                                        </div>
+                                        <div className="text-[10px] font-semibold" style={{ color: (c.current_complaints || 0) > 0 ? '#DC2626' : '#94A3B8' }}>Şikayet</div>
+                                    </div>
+                                </div>
+
+                                {/* CTR Badge */}
+                                <div className="flex items-center gap-2 mb-3">
+                                    <BarChart3 size={13} style={{ color: '#6366F1' }} />
+                                    <span className="text-xs font-bold" style={{ color: '#6366F1' }}>
+                                        CTR: %{ctr}
+                                    </span>
+                                    <span className="text-[10px]" style={{ color: '#94A3B8' }}>
+                                        (Tıklama / Gösterim Oranı)
+                                    </span>
+                                </div>
+
+                                {/* Progress Bar */}
                                 <div>
                                     <div className="flex justify-between text-xs mb-1.5">
                                         <span style={{ color: '#64748B' }}>Gösterim İlerlemesi</span>
@@ -183,12 +227,6 @@ export default function AdsPage() {
                                             }}
                                         />
                                     </div>
-                                </div>
-
-                                <div className="flex items-center gap-4 mt-3 pt-3" style={{ borderTop: '1px solid #F1F5F9' }}>
-                                    <span className="flex items-center gap-1 text-xs" style={{ color: '#64748B' }}>
-                                        <Eye size={12} /> {c.current_views.toLocaleString('tr-TR')} gösterim
-                                    </span>
                                 </div>
                             </div>
                         );

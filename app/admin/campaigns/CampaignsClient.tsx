@@ -12,7 +12,9 @@ import {
     Zap,
     Image as ImageIcon,
     Film,
-    Filter
+    Filter,
+    MousePointerClick,
+    Flag
 } from 'lucide-react';
 
 const AD_TYPE_LABELS: Record<string, { label: string; icon: any; color: string; bg: string }> = {
@@ -107,6 +109,7 @@ export default function CampaignsClient() {
                                 <th className="p-4 border-b">Kullanıcı</th>
                                 <th className="p-4 border-b">Kanal & Tür</th>
                                 <th className="p-4 border-b">Bütçe (Jeton)</th>
+                                <th className="p-4 border-b">İstatistik</th>
                                 <th className="p-4 border-b">Durum</th>
                                 <th className="p-4 border-b">İşlemler</th>
                             </tr>
@@ -114,7 +117,7 @@ export default function CampaignsClient() {
                         <tbody className="divide-y divide-gray-100">
                             {filteredCampaigns.length === 0 ? (
                                 <tr>
-                                    <td colSpan={6} className="p-8 text-center text-gray-500">
+                                    <td colSpan={7} className="p-8 text-center text-gray-500">
                                         Hiç kampanya bulunamadı.
                                     </td>
                                 </tr>
@@ -143,6 +146,21 @@ export default function CampaignsClient() {
                                             <td className="p-4">
                                                 <div className="font-bold text-purple-600">{campaign.tokens_spent} Jeton</div>
                                                 <div className="text-xs text-gray-500">{campaign.current_views} / {campaign.total_views} Gör.</div>
+                                            </td>
+                                            <td className="p-4">
+                                                <div className="flex items-center gap-3 text-xs">
+                                                    <span className="flex items-center gap-1 text-blue-600" title="Tıklama">
+                                                        <MousePointerClick size={13} /> {campaign.current_clicks || 0}
+                                                    </span>
+                                                    <span className={`flex items-center gap-1 ${(campaign.current_complaints || 0) > 0 ? 'text-red-600 font-bold' : 'text-gray-400'}`} title="Şikayet">
+                                                        <Flag size={13} /> {campaign.current_complaints || 0}
+                                                    </span>
+                                                </div>
+                                                {campaign.current_views > 0 && (
+                                                    <div className="text-[10px] text-gray-400 mt-0.5">
+                                                        CTR: %{((campaign.current_clicks || 0) / campaign.current_views * 100).toFixed(1)}
+                                                    </div>
+                                                )}
                                             </td>
                                             <td className="p-4">
                                                 <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold ${statusInfo.bg} ${statusInfo.color}`}>
