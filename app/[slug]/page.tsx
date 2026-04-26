@@ -3,6 +3,7 @@ import { getPromotedChannels } from '@/app/actions/promoted';
 import { getBanners } from '@/app/actions/banners';
 import ChannelCard from '@/components/ChannelCard';
 import AdultChannelRow from '@/components/AdultChannelRow';
+import PromotedChannels from '@/components/PromotedChannels';
 import ChannelDetail from '@/components/ChannelDetail';
 import BannerGrid from '@/components/BannerGrid';
 import FeaturedAds from '@/components/FeaturedAds';
@@ -308,7 +309,8 @@ export default async function DynamicPage({
           </div>
 
           <div className="grid lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2">
+            <div className="lg:col-span-2 space-y-6 min-w-0 overflow-x-hidden">
+              <PromotedChannels categoryId={cityData.name} />
               {channels.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {channels.map(channel => <ChannelCard key={channel.id} channel={channel} />)}
@@ -476,6 +478,9 @@ export default async function DynamicPage({
                   <Link href="/dashboard/destek?kategori=sikayet" className="shrink-0 text-white underline hover:text-indigo-200 font-bold">Şikayet Et</Link>
                 </div>
               </div>
+
+              {/* Reklamlı Kanallar (Çok Tıklananlar) */}
+              <PromotedChannels categoryId="18" variant="adult-table" />
 
               {/* Kanal Listesi — Forum stili, fotoğrafsız */}
               <div className="bg-white rounded-2xl border border-red-100 shadow-sm overflow-x-auto">
@@ -685,6 +690,9 @@ export default async function DynamicPage({
                 totalMembers={cryptoChannels.reduce((s: number, c: any) => s + (c.member_count || 0), 0)}
               />
 
+              {/* Reklamlı Kanallar (Çok Tıklananlar) */}
+              <PromotedChannels categoryId="crypto" variant="crypto-table" />
+
               {/* Kanal Listesi */}
               <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
                 <div className="hidden md:flex items-center gap-3 px-4 py-2.5 bg-gray-50 border-b border-gray-100 text-[10px] font-black uppercase tracking-widest text-gray-400">
@@ -878,6 +886,7 @@ export default async function DynamicPage({
 
           <div className="grid lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-6 min-w-0 overflow-x-hidden">
+              <PromotedChannels categoryId={category.id} variant={(category.id === '18' || category.slug === '18') ? 'adult-table' : 'default'} />
               {channels.length > 0 ? (
                 (() => {
                   const is18Category = category.id === '18' || category.slug === '18';
