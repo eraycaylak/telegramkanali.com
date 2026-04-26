@@ -2,7 +2,7 @@
 
 import { getAdminClient } from '@/lib/supabaseAdmin';
 import { revalidatePath } from 'next/cache';
-import { USDT_PACKAGES } from '@/lib/usdt-packages';
+import { JETON_PACKAGES } from '@/lib/usdt-packages';
 
 
 // Yeni USDT Ödeme Başvurusu Oluştur (Public — giriş gerekmez)
@@ -22,7 +22,7 @@ export async function createUsdtPayment(formData: FormData) {
         return { error: 'Lütfen zorunlu alanları doldurun.' };
     }
 
-    const pkg = USDT_PACKAGES[package_id as keyof typeof USDT_PACKAGES];
+    const pkg = JETON_PACKAGES[package_id as keyof typeof JETON_PACKAGES];
     if (!pkg) {
         return { error: 'Geçersiz paket seçimi.' };
     }
@@ -34,14 +34,14 @@ export async function createUsdtPayment(formData: FormData) {
         contact_telegram: contact_telegram.replace('@', ''),
         contact_email,
         package_id,
-        package_name: pkg.name,
-        amount_usdt: pkg.amount_usdt,
+        package_name: `${pkg.tokens} Jeton`,
+        amount_usdt: pkg.price_tl,
         tx_hash: tx_hash || null,
         channel_name: channel_name || null,
         channel_link: channel_link || null,
         ad_message: ad_message || null,
         notes: notes || null,
-        total_views: pkg.total_views,
+        total_views: pkg.views,
         status: 'pending',
     }).select('id').single();
 
@@ -57,9 +57,9 @@ export async function createUsdtPayment(formData: FormData) {
 
         if (botToken && adminId) {
             const msg =
-                `🔔 *Yeni USDT Reklam Başvurusu!*\n\n` +
-                `📦 Paket: ${pkg.emoji} ${pkg.name} — $${pkg.amount_usdt}\n` +
-                `👁️ Gösterim: ${pkg.total_views.toLocaleString('tr-TR')}\n` +
+                `🔔 *Yeni Jeton Reklam Başvurusu!*\n\n` +
+                `📦 Paket: ${pkg.tokens} Jeton — ${pkg.price_tl} TL\n` +
+                `👁️ Gösterim: ${pkg.views.toLocaleString('tr-TR')}\n` +
                 `👤 Ad: ${contact_name}\n` +
                 `📱 Telegram: @${contact_telegram.replace('@', '')}\n` +
                 (contact_email ? `📧 E-posta: ${contact_email}\n` : '') +
@@ -131,16 +131,11 @@ export async function approveUsdtPayment(paymentId: string, adminNote?: string) 
         return { error: 'Bu ödeme zaten işlenmiş.' };
     }
 
-    const pkg = USDT_PACKAGES[payment.package_id as keyof typeof USDT_PACKAGES];
+    const pkg = JETON_PACKAGES[payment.package_id as keyof typeof JETON_PACKAGES];
     if (!pkg) return { error: 'Geçersiz paket.' };
 
-    // ad_type mapping
-    const adTypeMap: Record<string, string> = {
-        neon: 'banner',
-        prime: 'featured',
-        apex: 'banner',
-    };
-    const adType = adTypeMap[payment.package_id] || 'banner';
+    // Jeton paketleri varsayılan olarak 'featured' tipinde
+    const adType = 'featured';
 
     // Kampanya oluştur (channel_id olmadan — manual placement)
     // Önce sistem/dummy user id bul ya da boş bırak — ad_campaigns user_id zorunlu

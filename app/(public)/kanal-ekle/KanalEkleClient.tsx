@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { Category } from '@/lib/types';
 import { submitChannel } from '@/app/actions/submit';
 import { createUsdtPayment } from '@/app/actions/usdt';
-import { USDT_PACKAGES } from '@/lib/usdt-packages';
+import { JETON_PACKAGES, JetonPackage } from '@/lib/usdt-packages';
 import { Send, CheckCircle2, AlertCircle, MessageCircle, Zap, Crown, Triangle, Copy, Check, ExternalLink } from 'lucide-react';
 import LegalTermsModal from '@/components/LegalTermsModal';
 
@@ -16,20 +16,26 @@ interface Props {
 
 const CONTACT_TYPES = [
     { value: 'kanal_ekle',    label: '📡 Kanal / Grup Ekle', desc: 'Telegram kanalımı veya grubumu dizine eklemek istiyorum.' },
-    { value: 'reklam_talebi', label: '📢 Reklam Satın Al',   desc: 'Kanalımı öne çıkarmak için reklam paketi almak istiyorum.' },
+    { value: 'reklam_talebi', label: '📢 Reklam Satın Al',   desc: 'Kanalımı öne çıkarmak için jeton paketi almak istiyorum.' },
 ];
 
 const USDT_ADDRESS = process.env.NEXT_PUBLIC_USDT_ADDRESS || 'TKsknVNnQuQDsL8RYuL5tXSbaRxTURT4eg';
+
+function formatTL(amount: number): string {
+    return amount.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
 
 function KanalEkleClientInner({ categories }: Props) {
     const searchParams = useSearchParams();
     const typeParam = searchParams.get('type');
     const paketParam = searchParams.get('paket');
 
+    const packages = Object.values(JETON_PACKAGES);
+
     const [contactType, setContactType] = useState(
         typeParam === 'reklam' ? 'reklam_talebi' : 'kanal_ekle'
     );
-    const [selectedPackage, setSelectedPackage] = useState(paketParam || 'neon');
+    const [selectedPackage, setSelectedPackage] = useState(paketParam || 'jeton_50');
     const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
     const [errorMessage, setErrorMessage] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -37,7 +43,7 @@ function KanalEkleClientInner({ categories }: Props) {
 
     useEffect(() => {
         if (typeParam === 'reklam') setContactType('reklam_talebi');
-        if (paketParam && USDT_PACKAGES[paketParam as keyof typeof USDT_PACKAGES]) {
+        if (paketParam && JETON_PACKAGES[paketParam as keyof typeof JETON_PACKAGES]) {
             setSelectedPackage(paketParam);
         }
     }, [typeParam, paketParam]);
@@ -73,7 +79,7 @@ function KanalEkleClientInner({ categories }: Props) {
         setTimeout(() => setCopied(false), 2000);
     };
 
-    const pkg = USDT_PACKAGES[selectedPackage as keyof typeof USDT_PACKAGES];
+    const pkg = JETON_PACKAGES[selectedPackage as keyof typeof JETON_PACKAGES];
 
     if (status === 'success') {
         const isReklam = contactType === 'reklam_talebi';
@@ -145,44 +151,65 @@ function KanalEkleClientInner({ categories }: Props) {
                 {/* ── REKLAM TALEBI AKIŞI ── */}
                 {contactType === 'reklam_talebi' && (
                     <>
-                        {/* Paket Seçimi */}
+                        {/* Açıklama */}
+                        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl p-5 mb-2">
+                            <p className="text-sm text-gray-700 leading-relaxed">
+                                <strong>🎯 Yükleyeceğiniz jetonlarla</strong> kendi topluluğunuzu diğer topluluklardan daha çok insana ulaştırabilirsiniz ve herhangi bir şeyin reklamını verebilirsiniz.
+                            </p>
+                        </div>
+
+                        {/* Plan Seçimi */}
                         <div>
-                            <label className="block text-sm font-bold text-gray-700 mb-3">Reklam Paketi *</label>
-                            <div className="grid gap-3">
-                                {Object.values(USDT_PACKAGES).map((p) => (
+                            <label className="block text-base font-black text-gray-900 mb-4">Plan Seçin</label>
+                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                                {packages.map((p: JetonPackage) => (
                                     <button
                                         key={p.id}
                                         type="button"
                                         onClick={() => setSelectedPackage(p.id)}
-                                        className={`text-left p-4 rounded-xl border-2 transition-all flex items-start gap-4 ${
+                                        className={`text-center p-4 rounded-xl border-2 transition-all ${
                                             selectedPackage === p.id
-                                                ? 'border-emerald-500 bg-emerald-50'
-                                                : 'border-gray-200 hover:border-gray-300'
+                                                ? 'border-blue-500 bg-blue-50 shadow-md shadow-blue-100'
+                                                : 'border-gray-200 hover:border-gray-300 bg-white'
                                         }`}
                                     >
-                                        <span className="text-2xl mt-0.5">{p.emoji}</span>
-                                        <div className="flex-1 min-w-0">
-                                            <div className="flex items-center gap-2 flex-wrap">
-                                                <span className="font-black text-gray-900">{p.name}</span>
-                                                <span className="text-xs text-gray-500">{p.tagline}</span>
-                                                <span className="ml-auto font-black text-emerald-700 text-lg">${p.amount_usdt}</span>
-                                            </div>
-                                            <p className="text-xs text-gray-500 mt-1">{p.description}</p>
-                                            <p className="text-xs text-emerald-700 font-bold mt-1">👁 {p.total_views.toLocaleString('tr-TR')} gösterim</p>
-                                        </div>
+                                        <div className="font-black text-gray-900 text-lg">{p.tokens.toLocaleString('tr-TR')} Jeton</div>
+                                        <div className="text-sm font-bold text-blue-600 mt-1">{formatTL(p.price_tl)} TL</div>
+                                        <div className="text-[10px] text-gray-400 mt-1">{p.label}</div>
                                     </button>
                                 ))}
                             </div>
                         </div>
+
+                        {/* Seçilen Paket Özeti */}
+                        {pkg && (
+                            <div className="bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200 rounded-2xl p-5">
+                                <div className="flex items-center justify-between mb-2">
+                                    <h3 className="font-black text-gray-900">Seçilen Paket</h3>
+                                    <span className="bg-emerald-600 text-white text-xs font-black px-3 py-1 rounded-full">
+                                        {pkg.tokens.toLocaleString('tr-TR')} Jeton
+                                    </span>
+                                </div>
+                                <div className="grid grid-cols-2 gap-3 text-sm">
+                                    <div>
+                                        <span className="text-gray-500">Gösterim:</span>
+                                        <span className="font-bold text-gray-900 ml-1">{pkg.views.toLocaleString('tr-TR')} kişi</span>
+                                    </div>
+                                    <div>
+                                        <span className="text-gray-500">Tutar:</span>
+                                        <span className="font-bold text-emerald-700 ml-1">{formatTL(pkg.price_tl)} TL</span>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
 
                         {/* USDT Ödeme Alanı */}
                         <div className="bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200 rounded-2xl p-5">
                             <div className="flex items-center gap-2 mb-3">
                                 <span className="text-lg">💎</span>
                                 <h3 className="font-black text-gray-900">USDT Ödeme (TRC-20)</h3>
-                                <span className="ml-auto bg-emerald-600 text-white text-xs font-black px-2 py-0.5 rounded-full">${pkg?.amount_usdt} USDT</span>
                             </div>
-                            <p className="text-xs text-gray-600 mb-3">Aşağıdaki adrese tam olarak <strong>${pkg?.amount_usdt} USDT</strong> (TRC-20 / Tron ağı) gönderin, ardından TX hash'ini forma girin.</p>
+                            <p className="text-xs text-gray-600 mb-3">Aşağıdaki adrese ödeme tutarını <strong>USDT</strong> (TRC-20 / Tron ağı) olarak gönderin, ardından TX hash'ini forma girin.</p>
                             <div className="flex items-center gap-2 bg-white border border-emerald-300 rounded-xl p-3">
                                 <code className="text-xs text-gray-800 font-mono break-all flex-1">{USDT_ADDRESS}</code>
                                 <button
