@@ -1,4 +1,5 @@
 import { getCategoryBySlug, getChannelsByCategory, getCategories, getChannelBySlug, getFeaturedChannels, getChannels, getBlogPosts, getRedirect, getChannelsByCity } from '@/lib/data';
+import AdsterraBanner from '@/components/AdsterraBanner';
 import { getPromotedChannels } from '@/app/actions/promoted';
 import { getBanners } from '@/app/actions/banners';
 import ChannelCard from '@/components/ChannelCard';
@@ -928,6 +929,8 @@ export default async function DynamicPage({
                 </div>
               )}
               <BannerGrid type="category" categoryId={category.id} maxBanners={2} banners={banners} />
+              {/* Adsterra Native Banner Ad */}
+              <AdsterraBanner />
               <div className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm">
                 <h2 className="text-2xl font-black text-gray-900 mb-4">{category.name} Telegram Kanalları Hakkında</h2>
                 <p className="text-gray-600 leading-relaxed">
@@ -1252,6 +1255,9 @@ export default async function DynamicPage({
                   ))}
                 </div>
               </section>
+
+              {/* Adsterra Native Banner Ad */}
+              <AdsterraBanner />
 
               {/* Comments */}
               <Comments channelId={channel.id} />

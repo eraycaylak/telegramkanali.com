@@ -5,6 +5,7 @@ import { MessageCircle, ExternalLink, Shield, ArrowRight, AlertTriangle, X } fro
 import Link from 'next/link';
 import { trackChannelClick } from '@/app/actions/analytics';
 import { recordAgeVerification } from '@/app/actions/age-verification';
+import AdsterraBanner from '@/components/AdsterraBanner';
 
 interface CountdownRedirectProps {
     channelId: string;
@@ -296,6 +297,11 @@ export default function CountdownRedirect({
                             <span>telegramkanali.com doğrulaması</span>
                         </div>
                     </div>
+                </div>
+
+                {/* Adsterra Native Banner Ad */}
+                <div className="mt-6">
+                    <AdsterraBanner />
                 </div>
 
                 {/* Bottom info */}
