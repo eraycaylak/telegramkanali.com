@@ -1131,7 +1131,7 @@ export default async function DynamicPage({
                     </div>
                   </div>
                   <a
-                    href={(channel as any)?.join_link || `/go/${channel.id}`}
+                    href={`/go/${channel.id}`}
                     target="_blank"
                     rel="nofollow noreferrer"
                     className="flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-6 py-3 text-center font-semibold text-white shadow-md transition-all hover:bg-blue-700 hover:shadow-lg sm:w-auto"
