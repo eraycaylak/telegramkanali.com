@@ -2,6 +2,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import CategoryStrip from "@/components/CategoryStrip";
+import AdsterraBanner from "@/components/AdsterraBanner";
 import { getCategories } from "@/lib/data";
 import { Suspense } from "react";
 
@@ -22,6 +23,10 @@ export default async function PublicLayout({
             <main className="flex-1 container mx-auto px-3 md:px-6 py-4 md:py-8 pb-4">
                 {children}
             </main>
+            {/* Adsterra Native Banner Ad */}
+            <Suspense fallback={null}>
+                <AdsterraBanner />
+            </Suspense>
             <Footer />
             {/* Mobile bottom navigation - fixed to bottom */}
             <Suspense fallback={null}>
